@@ -27,7 +27,7 @@ gem 'iri', '0.6.0'
 gem 'loog', '0.3.1'
 gem 'minitest', '5.18.1', require: false
 gem 'minitest-reporters', '1.6.0', require: false
-gem 'rack', '2.2.4'
+gem 'rack', '2.2.8'
 gem 'rack-test', '2.1.0'
 gem 'rake', '13.0.6', require: false
 gem 'rubocop', '1.54.1', require: false
