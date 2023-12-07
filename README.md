@@ -7,8 +7,6 @@
 [![rake](https://github.com/zerocracy/baza/actions/workflows/rake.yml/badge.svg)](https://github.com/zerocracy/baza/actions/workflows/rake.yml)
 [![PDD status](http://www.0pdd.com/svg?name=zerocracy/baza)](http://www.0pdd.com/p?name=zerocracy/baza)
 [![Test Coverage](https://img.shields.io/codecov/c/github/zerocracy/baza.svg)](https://codecov.io/github/zerocracy/baza?branch=master)
-[![Maintainability](https://api.codeclimate.com/v1/badges/51006993d98c150f21fc/maintainability)](https://codeclimate.com/github/zerocracy/baza/maintainability)
-[![Hits-of-Code](https://hitsofcode.com/github/zerocracy/baza)](https://hitsofcode.com/view/github/zerocracy/baza)
 
 This is the place where all robots meet.
 
