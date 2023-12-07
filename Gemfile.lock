@@ -51,7 +51,7 @@ GEM
     language_server-protocol (3.17.0.3)
     loog (0.3.1)
     minitest (5.18.1)
-    minitest-reporters (1.6.0)
+    minitest-reporters (1.6.1)
       ansi
       builder
       minitest (>= 5.0)
@@ -61,6 +61,8 @@ GEM
     mustermann (3.0.0)
       ruby2_keywords (~> 0.0.1)
     nokogiri (1.15.5-arm64-darwin)
+      racc (~> 1.4)
+    nokogiri (1.15.5-x86_64-linux)
       racc (~> 1.4)
     parallel (1.23.0)
     parser (3.2.2.4)
@@ -149,13 +151,14 @@ GEM
 
 PLATFORMS
   arm64-darwin-22
+  x86_64-linux
 
 DEPENDENCIES
   haml (= 5.0.4)
   iri (= 0.6.0)
   loog (= 0.3.1)
   minitest (= 5.18.1)
-  minitest-reporters (= 1.6.0)
+  minitest-reporters (= 1.6.1)
   rack (= 2.2.4)
   rack-test (= 2.1.0)
   rake (= 13.0.6)
