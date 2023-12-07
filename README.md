@@ -25,20 +25,3 @@ $ bundle exec rake
 ```
 
 If it's clean and you don't see any error messages, submit your pull request.
-
-To run a single unit test you should first do this:
-
-```bash
-$ bundle exec rake run
-```
-
-And then, in another terminal (for example):
-
-```bash
-$ ruby test/test_baza.rb -n test_renders_pages
-```
-
-If you want to test it in your browser, open `http://localhost:9292`. If you
-want to login as a test user, just open this: `http://localhost:9292?glogin=test`.
-
-Should work.
