@@ -21,5 +21,5 @@
       = '2009' + '&ndash;' + Time.now.strftime('%Y')
       %a{href: 'https://www.zerocracy.com'} Zerocracy
     %p
-      %span{title: 'Heroku release version and currently deployed version'}
-        = "#{ENV['HEROKU_RELEASE_VERSION']}/#{Baza::VERSION}"
+      %span{title: 'Currently deployed version'}
+        = "#{Baza::VERSION}"
