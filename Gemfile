@@ -30,7 +30,7 @@ gem 'minitest-reporters', '1.6.0', require: false
 gem 'rack', '2.2.8'
 gem 'rack-test', '2.1.0'
 gem 'rake', '13.0.6', require: false
-gem 'rubocop', '1.54.1', require: false
+gem 'rubocop', '1.58.0', require: false
 gem 'rubocop-rspec', '2.22.0', require: false
 gem 'sass', '3.7.4'
 gem 'simplecov', '0.22.0'
