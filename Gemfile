@@ -23,7 +23,7 @@ source 'https://rubygems.org'
 ruby '~>3.2'
 
 gem 'haml', '5.2.2'
-gem 'iri', '0.6.0'
+gem 'iri', '0.7.0'
 gem 'loog', '0.3.1'
 gem 'minitest', '5.18.1', require: false
 gem 'minitest-reporters', '1.6.0', require: false
