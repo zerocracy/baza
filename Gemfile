@@ -24,7 +24,7 @@ ruby '~>3.2'
 
 gem 'haml', '5.2.2'
 gem 'iri', '0.7.0'
-gem 'loog', '0.3.1'
+gem 'loog', '0.5.1'
 gem 'minitest', '5.20.0', require: false
 gem 'rack', '2.2.8'
 gem 'rack-test', '2.1.0'

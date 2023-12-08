@@ -47,7 +47,7 @@ GEM
     iri (0.7.0)
     json (2.7.1)
     language_server-protocol (3.17.0.3)
-    loog (0.3.1)
+    loog (0.5.1)
     minitest (5.20.0)
     multi_json (1.15.0)
     multipart-post (2.3.0)
@@ -149,7 +149,7 @@ PLATFORMS
 DEPENDENCIES
   haml (= 5.2.2)
   iri (= 0.7.0)
-  loog (= 0.3.1)
+  loog (= 0.5.1)
   minitest (= 5.20.0)
   rack (= 2.2.8)
   rack-test (= 2.1.0)
