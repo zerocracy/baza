@@ -30,7 +30,6 @@ require 'iri'
 require_relative 'version'
 
 configure do
-  Haml::Options.defaults[:format] = :xhtml
   config = {
     's3' => {
       'key' => '?',
@@ -46,7 +45,16 @@ configure do
       'secret' => '?'
     }
   }
-  config = YAML.safe_load(File.open(File.join(File.dirname(__FILE__), 'config.yml'))) unless ENV['RACK_ENV'] == 'test'
+  unless ENV['RACK_ENV'] == 'test'
+    f = File.join(File.dirname(__FILE__), 'config.yml')
+    unless File.exist?(f)
+      raise [
+        "The config file #{f} is absent, can't start the app. ",
+        "If you are running in a staging/testing mode, set RACK_ENV envirornemt variable to 'test'"
+      ].join
+    end
+    config = YAML.safe_load(File.open(f))
+  end
   set :bind, '0.0.0.0'
   set :server, :thin
   set :show_exceptions, false

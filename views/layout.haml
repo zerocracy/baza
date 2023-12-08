@@ -1,11 +1,12 @@
 !!! 5
 %html
   %head
-    %title= title
+    %title
+      = title
     %meta{charset:'UTF-8'}
     %meta{name: 'viewport', content: 'width=device-width, initial-scale=1.0'}
-    %meta{name: 'keywords', content: 'Zerocracy, Zerocrat, AI for PM'}
-    %meta{name: 'description', content: 'A project manager that never sleeps'}
+    %meta{name: 'keywords', content: 'Zerocracy, Zerocrat, AI, Project Management, Management Robotization'}
+    %meta{name: 'description', content: 'Zerocrat: A Project Manager that Never Sleeps'}
     %link{href: 'https://cdn.jsdelivr.net/gh/yegor256/tacit@gh-pages/tacit-css.min.css', rel: 'stylesheet'}
     %link{rel: 'shortcut icon', href: iri.cut('/logo.svg')}
     :css
@@ -15,7 +16,7 @@
     %p
       %a{href: iri.cut('/')}
         %img.logo{src: iri.cut('/logo.svg'), alt: 'Logo'}
-    = yield
+    != yield
     %p
       &copy;
       = '2009' + '&ndash;' + Time.now.strftime('%Y')
