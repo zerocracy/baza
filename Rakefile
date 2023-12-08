@@ -24,6 +24,7 @@ require 'rubygems'
 require 'rake'
 require 'rdoc'
 require 'rake/clean'
+require 'yaml'
 
 ENV['RACK_ENV'] = 'test'
 
