@@ -59,7 +59,7 @@ configure do
 end
 
 get '/' do
-  haml :index, layout: :layout, locals: { title: '/' }
+  haml :index, layout: :layout, locals: { title: 'baza' }
 end
 
 get '/robots.txt' do
