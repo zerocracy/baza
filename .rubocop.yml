@@ -11,34 +11,24 @@ Layout/RescueEnsureAlignment:
   Enabled: false
 Metrics/CyclomaticComplexity:
   Max: 25
+Metrics/BlockLength:
+  Max: 50
 Style/MultilineTernaryOperator:
-  Enabled: false
-Metrics/MethodLength:
   Enabled: false
 Layout/MultilineMethodCallIndentation:
   Enabled: false
-Metrics/AbcSize:
-  Enabled: false
-Metrics/BlockLength:
-  Max: 100
-Metrics/ClassLength:
-  Max: 300
 Layout/EndOfLine:
   EnforcedStyle: lf
-Metrics/ParameterLists:
-  Max: 10
 Layout/ParameterAlignment:
   Enabled: false
 Metrics/PerceivedComplexity:
   Max: 25
-Metrics/LineLength:
+Layout/LineLength:
   Max: 120
 Style/MultilineBlockChain:
   Enabled: false
 Layout/MultilineOperationIndentation:
   Enabled: false
-Naming/MethodParameterName:
-  MinNameLength: 1
 Layout/EmptyLineAfterGuardClause:
   Enabled: false
 Style/ClassAndModuleChildren:

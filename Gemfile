@@ -26,7 +26,6 @@ gem 'haml', '5.2.2'
 gem 'iri', '0.6.0'
 gem 'loog', '0.3.1'
 gem 'minitest', '5.18.1', require: false
-gem 'minitest-reporters', '1.6.0', require: false
 gem 'rack', '2.2.8'
 gem 'rack-test', '2.1.0'
 gem 'rake', '13.0.6', require: false
@@ -34,8 +33,8 @@ gem 'rubocop', '1.54.1', require: false
 gem 'rubocop-rspec', '2.22.0', require: false
 gem 'sass', '3.7.4'
 gem 'simplecov', '0.22.0'
-gem 'sinatra', '3.0.6'
-gem 'sinatra-contrib', '3.0.6'
+gem 'sinatra', '3.1.0'
+gem 'sinatra-contrib', '3.1.0'
 gem 'telebot', '0.1.2'
 gem 'thin', '1.8.2'
 gem 'xcop', '0.7.1'
