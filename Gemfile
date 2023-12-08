@@ -30,7 +30,7 @@ gem 'rack', '2.2.8'
 gem 'rack-test', '2.1.0'
 gem 'rake', '13.1.0', require: false
 gem 'rubocop', '1.58.0', require: false
-gem 'rubocop-rspec', '2.22.0', require: false
+gem 'rubocop-rspec', '2.25.0', require: false
 gem 'sass', '3.7.4'
 gem 'simplecov', '0.22.0'
 gem 'sinatra', '3.1.0'
