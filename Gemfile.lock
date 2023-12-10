@@ -40,7 +40,7 @@ GEM
     faraday_middleware (1.2.0)
       faraday (~> 1.0)
     ffi (1.16.3)
-    haml (6.2.4)
+    haml (6.3.0)
       temple (>= 0.8.2)
       thor
       tilt
@@ -149,7 +149,7 @@ PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
-  haml (= 6.2.4)
+  haml (= 6.3.0)
   iri (= 0.7.0)
   loog (= 0.5.1)
   minitest (= 5.20.0)
