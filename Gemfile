@@ -34,7 +34,7 @@ gem 'rubocop-rspec', '2.25.0', require: false
 gem 'sass', '3.7.4'
 gem 'simplecov', '0.22.0'
 gem 'sinatra', '3.1.0'
-gem 'sinatra-contrib', '3.1.0'
+gem 'sinatra-contrib', '4.0.0'
 gem 'telebot', '0.1.2'
 gem 'thin', '1.8.2'
 gem 'xcop', '0.7.1'
