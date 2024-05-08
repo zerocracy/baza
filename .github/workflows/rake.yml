@@ -36,6 +36,11 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
+      - run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-16
+          sudo ln -s /usr/lib/postgresql/16/bin/initdb /bin/initdb
+          sudo ln -s /usr/lib/postgresql/16/bin/postgres /bin/postgres
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
