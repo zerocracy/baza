@@ -71,10 +71,9 @@ configure do
     config = YAML.safe_load(File.open(f))
   end
   set :bind, '0.0.0.0'
-  set :server, :thin
   set :show_exceptions, false
   set :raise_errors, false
-  set :dump_errors, false
+  set :dump_errors, true
   set :config, config
   set :logging, true
   set :log, Loog::REGULAR
@@ -119,16 +118,6 @@ end
 get '/version' do
   content_type 'text/plain'
   Baza::VERSION
-end
-
-get '/svg/{name}' do
-  content_type 'application/xml+svg'
-  File.read("./assets/svg/#{params[:name]}")
-end
-
-get '/png/{name}' do
-  content_type 'image/png'
-  File.read("./assets/png/#{params[:name]}")
 end
 
 not_found do
@@ -178,3 +167,4 @@ end
 
 require_relative 'front/front_misc'
 require_relative 'front/front_login'
+require_relative 'front/front_assets'
