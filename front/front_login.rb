@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Copyright (c) 2009-2024 Yegor Bugayenko
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -17,9 +19,43 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
----
-errors:
-  - yegor256@gmail.com
-tags:
-  - pdd
-  - bug
+
+require_relative '../objects/baza/human'
+
+before '/*' do
+  @locals = {
+    http_start: Time.now,
+    ver: Baza::VERSION,
+    github_login_link: settings.glogin.login_uri,
+    request_ip: request.ip
+  }
+  cookies[:identity] = params[:identity] if params[:identity]
+  if cookies[:identity]
+    begin
+      user = GLogin::Cookie::Closed.new(
+        cookies[:identity],
+        settings.config['github']['encryption_secret']
+      ).to_user
+      identity = user[:login]
+      identity = user[:id] if identity.nil?
+      @locals[:human] = Baza::Human.new(settings.pgsql, identity)
+    rescue GLogin::Codec::DecodingError
+      cookies.delete(:identity)
+    end
+  end
+end
+
+get '/github-callback' do
+  code = params[:code]
+  error(400) if code.nil?
+  json = settings.glogin.user(code)
+  cookies[:identity] = GLogin::Cookie::Open.new(
+    json, settings.config['github']['encryption_secret']
+  ).to_s
+  flash(iri.cut('/'), "@#{json['login']} has been logged in")
+end
+
+get '/logout' do
+  cookies.delete(:identity)
+  flash(iri.cut('/'), 'You have been logged out')
+end

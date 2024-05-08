@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Copyright (c) 2009-2024 Yegor Bugayenko
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -17,9 +19,20 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
----
-errors:
-  - yegor256@gmail.com
-tags:
-  - pdd
-  - bug
+
+# One token.
+# Author:: Yegor Bugayenko (yegor256@gmail.com)
+# Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
+# License:: MIT
+class Baza::Token
+  def initialize(tokens, id)
+    @tokens = tokens
+    @id = id
+  end
+
+  def each
+    @human.psql.select() do |row|
+      yield row
+    end
+  end
+end

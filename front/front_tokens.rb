@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Copyright (c) 2009-2024 Yegor Bugayenko
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -17,9 +19,24 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
----
-errors:
-  - yegor256@gmail.com
-tags:
-  - pdd
-  - bug
+
+get '/tokens' do
+  render(
+    :tokens,
+    :default,
+    title: '/tokens',
+  )
+end
+
+get '/tokens/{id}' do
+  haml :token, layout: :default, locals: { title: "/token/#{id}" }
+end
+
+put '/tokens/add' do
+  # add token
+end
+
+get '/tokens/{id}/delete' do
+  # delete token
+end
+

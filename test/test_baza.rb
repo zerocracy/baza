@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Copyright (c) 2019-2023 Yegor Bugayenko
+# Copyright (c) 2009-2024 Yegor Bugayenko
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the 'Software'), to deal
@@ -23,8 +23,8 @@
 require 'minitest/autorun'
 require 'rack/test'
 require_relative 'test__helper'
-require_relative '../baza'
 require_relative '../objects/baza'
+require_relative '../baza'
 
 module Rack
   module Test
@@ -48,7 +48,7 @@ class Baza::AppTest < Minitest::Test
       '/version',
       '/robots.txt',
       '/',
-      '/logo.svg'
+      '/svg/logo.svg'
     ]
     pages.each do |p|
       get(p)

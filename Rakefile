@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Copyright (c) 2019-2023 Yegor Bugayenko
+# Copyright (c) 2009-2024 Yegor Bugayenko
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the 'Software'), to deal
@@ -31,7 +31,7 @@ ENV['RACK_ENV'] = 'test'
 task default: %i[clean test rubocop xcop copyright]
 
 require 'rake/testtask'
-Rake::TestTask.new(:test) do |test|
+Rake::TestTask.new(test: %i[pgsql liquibase]) do |test|
   Rake::Cleaner.cleanup_files(['coverage'])
   test.libs << 'lib' << 'test'
   test.pattern = 'test/**/test_*.rb'
@@ -45,6 +45,24 @@ RuboCop::RakeTask.new(:rubocop) do |task|
   task.requires << 'rubocop-rspec'
 end
 
+require 'pgtk/pgsql_task'
+Pgtk::PgsqlTask.new(:pgsql) do |t|
+  t.dir = 'target/pgsql'
+  t.fresh_start = true
+  t.user = 'test'
+  t.password = 'test'
+  t.dbname = 'test'
+  t.yaml = 'target/pgsql-config.yml'
+end
+
+require 'pgtk/liquibase_task'
+Pgtk::LiquibaseTask.new(:liquibase) do |t|
+  t.master = 'liquibase/master.xml'
+  t.yaml = ['target/pgsql-config.yml', 'config.yml']
+  t.postgresql_version = '42.7.1'
+  t.liquibase_version = '4.25.1'
+end
+
 require 'xcop/rake_task'
 Xcop::RakeTask.new(:xcop) do |task|
   task.license = 'LICENSE.txt'
@@ -55,6 +73,10 @@ end
 desc 'Check the quality of config file'
 task(:config) do
   YAML.safe_load(File.open('config.yml')).to_yaml
+end
+
+task(run: %i[pgsql liquibase]) do
+  `rerun -b "RACK_ENV=test ruby baza.rb"`
 end
 
 task(:copyright) do

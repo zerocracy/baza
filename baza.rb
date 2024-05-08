@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Copyright (c) 2009-2023 Yegor Bugayenko
+# Copyright (c) 2009-2024 Yegor Bugayenko
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the 'Software'), to deal
@@ -22,27 +22,42 @@
 
 $stdout.sync = true
 
+require 'glogin'
+require 'glogin/codec'
 require 'haml'
-require 'loog'
-require 'sinatra'
-require 'yaml'
 require 'iri'
+require 'loog'
+require 'json'
+require 'cgi'
+require 'pgtk'
+require 'pgtk/pool'
+require 'raven'
+require 'relative_time'
+require 'sinatra'
+require 'sinatra/cookies'
+require 'time'
+require 'yaml'
 require_relative 'version'
+
+unless ENV['RACK_ENV'] == 'test'
+  require 'rack/ssl'
+  use Rack::SSL
+end
 
 configure do
   config = {
-    's3' => {
-      'key' => '?',
-      'secret' => '?',
-      'bucket' => ''
+    'aws' => {
+      'key' => '????',
+      'secret' => '????',
     },
     'telegram' => {
-      'token' => '?',
-      'name' => '?'
+      'token' => '????',
+      'name' => '????'
     },
     'github' => {
-      'id' => '?',
-      'secret' => '?'
+      'client_id' => '????',
+      'client_secret' => '????',
+      'encryption_secret' => '????'
     }
   }
   unless ENV['RACK_ENV'] == 'test'
@@ -64,10 +79,36 @@ configure do
   set :logging, true
   set :log, Loog::REGULAR
   set :server_settings, timeout: 25
+  set :glogin, GLogin::Auth.new(
+    config['github']['client_id'],
+    config['github']['client_secret'],
+    'https://www.zerocracy.com/github-callback'
+  )
+  if File.exist?('target/pgsql-config.yml')
+    set :pgsql, Pgtk::Pool.new(
+      Pgtk::Wire::Yaml.new(File.join(__dir__, 'target/pgsql-config.yml')),
+      log: settings.log
+    )
+  else
+    set :pgsql, Pgtk::Pool.new(
+      Pgtk::Wire::Env.new('DATABASE_URL'),
+      log: settings.log
+    )
+  end
+  settings.pgsql.start(4)
 end
 
 get '/' do
-  haml :index, layout: :layout, locals: { title: 'baza' }
+  flash(iri.cut('/dash')) if @locals[:human]
+  haml :index, layout: :front, locals: merged(title: '/')
+end
+
+get '/dash' do
+  haml :dash, layout: :default, locals: { title: '/dash' }
+end
+
+get '/jobs' do
+  haml :jobs, layout: :default, locals: { title: '/jobs' }
 end
 
 get '/robots.txt' do
@@ -82,13 +123,18 @@ end
 
 get '/svg/{name}' do
   content_type 'application/xml+svg'
-  File.read("./public/svg/#{params[:name]}")
+  File.read("./assets/svg/#{params[:name]}")
+end
+
+get '/png/{name}' do
+  content_type 'image/png'
+  File.read("./assets/png/#{params[:name]}")
 end
 
 not_found do
   status 404
   content_type 'text/html', charset: 'utf-8'
-  haml :not_found, layout: :layout, locals: { title: request.url }
+  haml :not_found, layout: :default, locals: { title: request.url }
 end
 
 error do
@@ -96,7 +142,7 @@ error do
   e = env['sinatra.error']
   haml(
     :error,
-    layout: :layout,
+    layout: :default,
     locals: {
       title: 'error',
       error: "#{e.message}\n\t#{e.backtrace.join("\n\t")}"
@@ -104,6 +150,31 @@ error do
   )
 end
 
+get '/sql' do
+  raise Urror::Nb, 'You are not allowed to see this' unless current_human.admin?
+  query = params[:query] || 'SELECT * FROM human LIMIT 5'
+  start = Time.now
+  result = settings.pgsql.exec(query)
+  haml :sql, layout: :layout, locals: merged(
+    title: '/sql',
+    query: query,
+    result: result,
+    lag: Time.now - start
+  )
+end
+
+def assemble(haml, layout, map)
+  haml(haml, layout: layout, locals: merged(map))
+end
+
+def the_human
+  flash(iri.cut('/'), 'You have to login first') unless @locals[:human]
+  @locals[:human]
+end
+
 def iri
   Iri.new(request.url)
 end
+
+require_relative 'front/front_misc'
+require_relative 'front/front_login'

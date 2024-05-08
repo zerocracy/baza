@@ -1,4 +1,4 @@
-<img src="https://www.zerocracy.com/logo.svg" width="92px" height="92px"/>
+# Baza
 
 [![EO principles respected here](https://www.elegantobjects.org/badge.svg)](https://www.elegantobjects.org)
 [![DevOps By Rultor.com](http://www.rultor.com/b/zerocracy/baza)](http://www.rultor.com/p/zerocracy/baza)
@@ -10,60 +10,83 @@
 
 This is the place where all bots meet.
 
-## Architecture
+## How It Works
 
-There are a few modules:
+GitHub Action plugins (in the order of steps):
 
-  * Farm --- multi-threaded executor of Docker-based bots
-  * Pit --- project management Git (storage of artifacts)
-  * Netbout --- message hub where bots talk to each other
+* `zerocracy/scan-action` — fetch events via GitHub API and put them into the factbase
+* `zerocracy/push-action` — send factbase to Zerocracy
+* `zerocracy/pull-action` — receieve updated factbase from Zerocracy
+* `zerocracy/submit-action` — submit messages to GitHub issues
+* `zerocracy/site-action` — generate static HTML site
 
-A bot can:
+The pipeline must start with a cache retrieval.
 
-  * Suggest an update to XML model (in Xembly)
-  * Suggest a contribution to the reality (in REAC)
-  * Make a contribution to the reality
-  * Update the XML model
-  * Discuss the intent (update and/or contribution)
+### Bots
 
-The following bots are "show makers":
+Basic supervising bots:
 
-  * GitHubMan: loads current data through GitHub API
-  * ScopeMan: forecasts the WBS 
-  * CostMan: estimates cost (hours and money)
-  * TimeMan: estimates time
-  * PeopleMan: suggests 
-  * IntMan: suggests CRs, approves baseline
-  * CommMan: delivers messages to staff
+* Reward for accepted bug report
+* Reward for accepting bug report
+* Reward for merged pull request (per line of code)
+* Reward for reviewed pull request
+* Reward architect for release made
+* Punish architect for ignoring bug reports
+* Punish for long merged pull request
+* Punish for stale pull request
+* Punish architect for lack of fresh releases
+* Punish for rejected bug report
+* Punish for rejected pull request
 
-## Reality Contribution Language (REAC)
+Basic interpreting bots:
 
-Here is a toy example:
+* Events to accepted bug report
+* Events to merged pull request
+* Events to completed code review
+* Events to completed release
 
-```
-ENTER tacit;
-FIND PM;
-TELL "how are you?";
-```
+Basic EVA bots:
 
-Most obivious types of contribution to reality:
+* Scope points for pull requests and bug reports
+* Time points for commits
+* Cost points for hits of code
+* Staff points for active contributions
 
-  * Add a new milestone to the project
-  * Re-assign a few tasks to another milestone
-  * Assign a task to a programmer
-  * Create a new task
-  * Close a task as "completed"
-  * Submit a pull request with a piece of code
-  * Suggest to a PM that a programmer must be kicked out
-  * Kick out a programmer, revoke access to the repo
-  * Submit a comment to a line of code in a pull request
-  * Inform stakeholders about SPI/CPI metrics
-  * Present a new candidate for project baseline
-  * Remind a programmer that a task must be completed faster
-  * Put a label on a few taks
-  * Send a payment to a programmer
+Basic forecasting bots:
 
-## How to contribute
+* Forecast scope points
+* Forecast time points
+* Forecast cost points
+
+Risk bots:
+
+* Identify risks
+* Set probability and impact for risks
+* Suggest plans
+
+### Facts
+
+There are facts in the factbase. Each fact has the following attributes:
+
+* Time: ISO 8601
+* Kind: string
+* Seen-by: list of bot IDs
+* Details: key-value map
+
+Operation on the factbase (it's append-only, can't delete or modify):
+
+* Select where (join by OR/AND):
+  * kind eq ?
+  * seen-by ?
+  * not seen-by ?
+* Insert new fact
+* Attach "seen-by"
+
+### Bots orchestration
+
+When a new factbase arrives, a new AWS lambda is created.
+
+## How to Contribute
 
 Read [these guidelines](https://www.yegor256.com/2014/04/15/github-guidelines.html).
 Make sure your build is green before you contribute

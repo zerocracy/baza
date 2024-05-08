@@ -1,3 +1,5 @@
+<?xml version="1.0"?>
+<!--
 (The MIT License)
 
 Copyright (c) 2009-2024 Yegor Bugayenko
@@ -19,3 +21,26 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+-->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd" logicalFilePath="001-initial-schema.xml">
+  <changeSet id="001" author="yegor256">
+    <sql>
+      CREATE TABLE token (
+        id SERIAL PRIMARY KEY,
+        human VARCHAR(32) NOT NULL,
+        text VARCHAR(64),
+        created TIMESTAMPTZ DEFAULT now() NOT NULL
+      );
+      CREATE INDEX idx_token1 ON token(text);
+      CREATE INDEX idx_token2 ON token(human);
+    </sql>
+    <sql>
+      CREATE TABLE job (
+        id SERIAL PRIMARY KEY,
+        token INT NOT NULL REFERENCES token(id),
+        gas INT NOT NULL,
+        created TIMESTAMPTZ DEFAULT now() NOT NULL
+      );
+    </sql>
+  </changeSet>
+</databaseChangeLog>

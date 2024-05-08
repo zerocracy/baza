@@ -22,19 +22,26 @@
 source 'https://rubygems.org'
 ruby '~>3.2'
 
+gem 'glogin', '0.14.2'
 gem 'haml', '6.3.0'
-gem 'iri', '0.7.0'
+gem 'iri', '0.8.0'
 gem 'loog', '0.5.1'
-gem 'minitest', '5.20.0', require: false
-gem 'rack', '2.2.8'
+gem 'minitest', '5.22.2', require: false
+gem 'pgtk', '0.9.2'
+gem 'rack', '3.0.9'
+gem 'rack-ssl', '1.4.1'
 gem 'rack-test', '2.1.0'
 gem 'rake', '13.1.0', require: false
-gem 'rubocop', '1.58.0', require: false
-gem 'rubocop-rspec', '2.25.0', require: false
+gem 'relative_time', '1.1.0'
+gem 'rerun', '0.14.0', require: false
+gem 'rspec-rails', '6.1.1', require: false
+gem 'rubocop', '1.60.2', require: false
+gem 'rubocop-rspec', '2.26.1', require: false
 gem 'sass', '3.7.4'
+gem 'sentry-raven', '3.1.2'
 gem 'simplecov', '0.22.0'
-gem 'sinatra', '3.1.0'
-gem 'sinatra-contrib', '3.1.0'
-gem 'telebot', '0.1.2'
-gem 'thin', '1.8.2'
+gem 'simplecov-cobertura', '~> 2.1'
+gem 'sinatra', '4.0.0'
+gem 'sinatra-contrib', '4.0.0'
+gem 'sprockets', '4.2.1'
 gem 'xcop', '0.7.1'
