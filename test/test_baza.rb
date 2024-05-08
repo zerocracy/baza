@@ -48,7 +48,9 @@ class Baza::AppTest < Minitest::Test
       '/version',
       '/robots.txt',
       '/',
-      '/svg/logo.svg'
+      '/svg/logo.svg',
+      '/png/logo-white.png',
+      '/css/main.css'
     ]
     pages.each do |p|
       get(p)
@@ -57,7 +59,14 @@ class Baza::AppTest < Minitest::Test
   end
 
   def test_not_found
-    ['/unknown_path', '/js/x/y/z/not-found.js', '/css/a/b/c/not-found.css'].each do |p|
+    pages = [
+      '/unknown_path',
+      '/js/x/y/z/not-found.js',
+      '/svg/not-found.svg',
+      '/png/a/b/cdd/not-found.png',
+      '/css/a/b/c/not-found.css'
+    ]
+    pages.each do |p|
       get(p)
       assert_equal(404, last_response.status, last_response.body)
       assert_equal('text/html;charset=utf-8', last_response.content_type)

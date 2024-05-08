@@ -20,12 +20,26 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+require 'sass'
+
 get '/svg/{name}' do
-  content_type 'application/xml+svg'
-  File.read("./assets/svg/#{params[:name]}")
+  content_type 'image/svg+xml'
+  file = "./assets/svg/#{params[:name]}"
+  error 404 unless File.exist?(file)
+  File.read(file)
 end
 
 get '/png/{name}' do
   content_type 'image/png'
-  File.read("./assets/png/#{params[:name]}")
+  file = "./assets/png/#{params[:name]}"
+  error 404 unless File.exist?(file)
+  File.read(file)
+end
+
+get '/css/*.css' do
+  content_type 'text/css', charset: 'utf-8'
+  file = params[:splat].first
+  template = File.join(File.absolute_path('./assets/sass/'), "#{file}.sass")
+  error 404 unless File.exist?(template)
+  Sass::Engine.new(File.read(template)).render
 end
