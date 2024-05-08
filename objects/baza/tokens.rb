@@ -29,11 +29,10 @@ class Baza::Tokens
     @human = human
   end
 
-  def add(name)
-  end
+  def add(name); end
 
   def each
-    @human.psql.select() do |row|
+    @human.psql.select do |row|
       yield Token.new(self, row['id'].to_i)
     end
   end

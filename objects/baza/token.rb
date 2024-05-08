@@ -30,9 +30,7 @@ class Baza::Token
     @id = id
   end
 
-  def each
-    @human.psql.select() do |row|
-      yield row
-    end
+  def each(&block)
+    @human.psql.select(&block)
   end
 end

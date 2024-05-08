@@ -48,7 +48,7 @@ configure do
   config = {
     'aws' => {
       'key' => '????',
-      'secret' => '????',
+      'secret' => '????'
     },
     'telegram' => {
       'token' => '????',

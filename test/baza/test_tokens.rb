@@ -30,6 +30,5 @@ require_relative '../../objects/baza/tokens'
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
 class Baza::TokensTest < Minitest::Test
-  def test_simple_fetching
-  end
+  def test_simple_fetching; end
 end

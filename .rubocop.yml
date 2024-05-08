@@ -53,3 +53,5 @@ Layout/EmptyLineAfterGuardClause:
   Enabled: false
 Style/ClassAndModuleChildren:
   Enabled: false
+Metrics/BlockLength:
+  Max: 100

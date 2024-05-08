@@ -25,7 +25,7 @@
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
 class Baza::Human
-  def initialize(pgsl, id)
+  def initialize(_pgsl, id)
     @psql = psql
     @id = id
   end

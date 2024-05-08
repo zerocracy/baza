@@ -24,7 +24,7 @@ get '/tokens' do
   render(
     :tokens,
     :default,
-    title: '/tokens',
+    title: '/tokens'
   )
 end
 
@@ -39,4 +39,3 @@ end
 get '/tokens/{id}/delete' do
   # delete token
 end
-
