@@ -30,11 +30,28 @@ require_relative '../../objects/baza/humans'
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
 class Baza::TokensTest < Minitest::Test
-  def test_create_token
+  def test_emptiness_checks
+    human = Baza::Humans.new(test_pgsql).ensure(test_name)
+    tokens = human.tokens
+    assert(tokens.empty?)
+  end
+
+  def test_creates_token
     human = Baza::Humans.new(test_pgsql).ensure(test_name)
     tokens = human.tokens
     name = test_name
     token = tokens.add(name)
     assert_equal(token.name, name)
+    assert(!tokens.empty?)
+  end
+
+  def test_deletes_token
+    human = Baza::Humans.new(test_pgsql).ensure(test_name)
+    tokens = human.tokens
+    name = test_name
+    token = tokens.add(name)
+    assert(!tokens.empty?)
+    tokens.get(token.id).delete
+    assert(tokens.empty?)
   end
 end

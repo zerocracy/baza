@@ -167,4 +167,5 @@ end
 
 require_relative 'front/front_misc'
 require_relative 'front/front_login'
+require_relative 'front/front_tokens'
 require_relative 'front/front_assets'

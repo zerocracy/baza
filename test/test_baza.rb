@@ -61,7 +61,7 @@ class Baza::AppTest < Minitest::Test
   def test_renders_private_pages
     pages = [
       '/dash'
-      # '/tokens',
+      '/tokens'
       # '/jobs'
     ]
     login

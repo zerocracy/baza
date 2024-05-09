@@ -32,6 +32,10 @@ class Baza::Token
     @id = id
   end
 
+  def delete
+    @tokens.pgsql.exec('DELETE FROM token WHERE id = $1', [@id])
+  end
+
   def name
     rows = @tokens.pgsql.exec(
       'SELECT name FROM token WHERE id = $1',
@@ -39,5 +43,14 @@ class Baza::Token
     )
     raise Baza::Urror, "Token ##{@id} not found" if rows.empty?
     rows[0]['name']
+  end
+
+  def text
+    rows = @tokens.pgsql.exec(
+      'SELECT text FROM token WHERE id = $1',
+      [@id]
+    )
+    raise Baza::Urror, "Token ##{@id} not found" if rows.empty?
+    rows[0]['text']
   end
 end

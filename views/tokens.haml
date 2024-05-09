@@ -1,0 +1,29 @@
+%form{method: 'post', action: iri.cut('/tokens/add')}
+  %fieldset
+    %input{ type: 'text', name: 'name', tabindex: 1, placeholder: 'Unique token name', size: 40, maxlength: 64 }
+    %input{ type: 'submit', tabindex: 2, value: 'Add' }
+
+- if tokens.empty?
+  %p
+    No tokens yet.
+- else
+  %p
+    Full list of tokens:
+  %table
+    %thead
+      %tr
+        %th
+          Name
+        %th
+          Token
+        %th
+    %tbody
+    - tokens.each do |t|
+      %tr
+        %td
+          = t.name
+        %td
+          = t.text
+        %td
+          %a{href: iri.cut('/tokens').append(t.id).append('delete')}
+            Delete

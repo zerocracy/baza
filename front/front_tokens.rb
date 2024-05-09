@@ -21,10 +21,11 @@
 # SOFTWARE.
 
 get '/tokens' do
-  render(
+  assemble(
     :tokens,
     :default,
-    title: '/tokens'
+    title: '/tokens',
+    tokens: the_human.tokens
   )
 end
 
@@ -32,10 +33,15 @@ get '/tokens/{id}' do
   haml :token, layout: :default, locals: { title: "/token/#{id}" }
 end
 
-put '/tokens/add' do
-  # add token
+post '/tokens/add' do
+  name = params[:name]
+  token = the_human.tokens.add(name)
+  flash(iri.cut('/tokens'), "New token ##{token.id} added")
 end
 
 get '/tokens/{id}/delete' do
-  # delete token
+  id = params[:id]
+  token = the_human.tokens.get(id)
+  token.delete
+  flash(iri.cut('/tokens'), "Token ##{id} deleted")
 end

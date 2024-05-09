@@ -14,49 +14,26 @@
 #
 # THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFINGEMENT. IN NO EVENT SHALL THE
 # AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require 'securerandom'
-require_relative 'token'
+require 'minitest/autorun'
+require_relative '../test__helper'
+require_relative '../../objects/baza'
+require_relative '../../objects/baza/humans'
 
-# Tokens of a user.
+# Test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class Baza::Tokens
-  def initialize(human)
-    @human = human
-  end
-
-  def pgsql
-    @human.pgsql
-  end
-
-  def add(name)
-    uuid = SecureRandom.uuid
-    rows = @human.pgsql.exec(
-      'INSERT INTO token (human, name, text) VALUES ($1, $2, $3) RETURNING id',
-      [@human.id, name, uuid]
-    )
-    id = rows[0]['id'].to_i
-    Baza::Token.new(self, id)
-  end
-
-  def empty?
-    @human.pgsql.exec('SELECT id FROM token WHERE human = $1', [@human.id]).empty?
-  end
-
-  def each
-    @human.pgsql.exec('SELECT * FROM token WHERE human=$1', [@human.id]).each do |row|
-      yield Baza::Token.new(self, row['id'].to_i)
-    end
-  end
-
-  def get(id)
-    Baza::Token.new(self, id)
+class Baza::TokensTest < Minitest::Test
+  def test_generates_token_text
+    human = Baza::Humans.new(test_pgsql).ensure(test_name)
+    tokens = human.tokens
+    token = tokens.add(test_name)
+    assert_equal(36, token.text.length)
   end
 end

@@ -22,16 +22,22 @@
         %nav
           %ul
             %li
-              %a{href: iri.cut('/')}
+              %a{href: iri.cut('/dash')}
                 %img.logo{src: iri.cut('/svg/logo.svg'), alt: 'Logo'}
             %li
               %span{title: "Current user ##{the_human.id}"}
                 = "@#{the_human.github}"
             %li
+              %a{href: iri.cut('/tokens')}
+                Tokens
+            %li
               %span{title: 'Currently deployed version'}
-                = "#{Baza::VERSION}"
+                = Baza::VERSION
             %li
               %a{href: iri.cut('/logout')}
                 Logout
       %article
+        - if defined?(flash_msg) && !flash_msg.empty?
+          %p{style: 'background-color:' + flash_color + ';color:white;padding:.1em .5em;border-radius:4px;width:100%;'}
+            = flash_msg
         != yield
