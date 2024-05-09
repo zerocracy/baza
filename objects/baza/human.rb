@@ -36,6 +36,10 @@ class Baza::Human
     @id = id
   end
 
+  def admin?
+    id == 1
+  end
+
   def pgsql
     @humans.pgsql
   end

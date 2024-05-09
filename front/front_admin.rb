@@ -21,13 +21,13 @@
 # SOFTWARE.
 
 get '/sql' do
-  raise Urror::Nb, 'You are not allowed to see this' unless current_human.admin?
+  raise Urror::Nb, 'You are not allowed to see this' unless the_human.admin?
   query = params[:query] || 'SELECT * FROM human LIMIT 5'
   start = Time.now
   result = settings.pgsql.exec(query)
   assemble(
     :sql,
-    :layout,
+    :default,
     title: '/sql',
     query: query,
     result: result,
