@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+require_relative '../objects/baza/urror'
+
 get '/sql' do
-  raise Urror::Nb, 'You are not allowed to see this' unless the_human.admin?
+  raise Baza::Urror, 'You are not allowed to see this' unless the_human.admin?
   query = params[:query] || 'SELECT * FROM human LIMIT 5'
   start = Time.now
   result = settings.pgsql.exec(query)
@@ -44,7 +46,7 @@ get '/gift' do
 end
 
 post '/gift' do
-  raise Urror::Nb, 'You are not allowed to see this' unless the_human.admin?
+  raise Baza::Urror, 'You are not allowed to see this' unless the_human.admin?
   human = settings.humans.find(params[:human])
   zents = params[:zents].to_i
   summary = params[:summary]

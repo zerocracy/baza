@@ -98,10 +98,20 @@ class Baza::AppTest < Minitest::Test
     end
   end
 
+  def test_non_admin_pages
+    pages = [
+      '/sql'
+    ]
+    login
+    pages.each do |p|
+      get(p)
+      assert_status(302)
+    end
+  end
+
   def test_renders_admin_pages
     pages = [
       '/sql',
-      '/push',
       '/gift'
     ]
     login('yegor256')
