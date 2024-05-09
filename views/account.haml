@@ -1,6 +1,6 @@
 %p
   Your balance:
-  = account.balance
+  != zents(account.balance)
 
 %p
   Full list of receipts:
@@ -11,8 +11,8 @@
         Id
       %th
         Job
-      %th
-        Zents
+      %th.right
+        USD
       %th
         Summary
       %th
@@ -28,7 +28,7 @@
           %a{href: iri.cut('/jobs').append(j)}
             = j
       %td.right
-        = r.zents
+        != zents(r.zents)
       %td
         = r.summary
       %td
