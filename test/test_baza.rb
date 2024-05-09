@@ -133,7 +133,10 @@ class Baza::AppTest < Minitest::Test
   end
 
   def test_starts_job
-    login
+    uname = test_name
+    login('yegor256')
+    post('/gift', "human=#{uname}&zents=9999&summary=no")
+    login(uname)
     get('/tokens')
     post('/tokens/add', 'name=foo')
     id = last_response.headers['X-Zerocracy-TokenId'].to_i

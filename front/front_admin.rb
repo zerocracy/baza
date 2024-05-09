@@ -52,7 +52,7 @@ end
 
 post '/gift' do
   admin_only
-  human = settings.humans.find(params[:human])
+  human = settings.humans.ensure(params[:human])
   zents = params[:zents].to_i
   summary = params[:summary]
   human.account.add(zents, summary)
