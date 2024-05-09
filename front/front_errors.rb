@@ -24,9 +24,12 @@ require_relative '../objects/baza/urror'
 
 not_found do
   status 404
-  content_type 'text/html', charset: 'utf-8'
-  haml :not_found, locals: merged(
-    title: request.url
+  content_type('text/html', charset: 'utf-8')
+  assemble(
+    :not_found,
+    :front,
+    title: request.url,
+    url: request.url
   )
 end
 
@@ -39,7 +42,7 @@ error do
     Raven.capture_exception(e)
     assemble(
       :error,
-      :default,
+      :front,
       title: '/error',
       error: "#{e.message}\n\t#{e.backtrace.join("\n\t")}"
     )

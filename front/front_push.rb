@@ -14,40 +14,30 @@
 #
 # THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFINGEMENT. IN NO EVENT SHALL THE
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 # AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require 'minitest/autorun'
-require_relative '../test__helper'
-require_relative '../../objects/baza'
-require_relative '../../objects/baza/humans'
+get '/push' do
+  assemble(
+    :push,
+    :default,
+    title: '/push',
+    token: the_human.tokens.size == 1 ? the_human.tokens.to_a[0].text : ''
+  )
+end
 
-# Test.
-# Author:: Yegor Bugayenko (yegor256@gmail.com)
-# Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
-# License:: MIT
-class Baza::JobsTest < Minitest::Test
-  def test_emptiness_checks
-    human = Baza::Humans.new(test_pgsql).ensure(test_name)
-    jobs = human.jobs
-    assert(jobs.empty?)
-  end
-
-  def test_start_and_finish
-    human = Baza::Humans.new(test_pgsql).ensure(test_name)
-    token = human.tokens.add(test_name)
-    job = token.start(test_name)
-    job.finish(test_name, 'stdout', 0, 544)
-    assert(human.jobs.get(job.id).finished?)
-    assert(!human.jobs.empty?)
-    found = 0
-    human.jobs.each do |j|
-      found += 1
-      assert(j.finished?)
-    end
-    assert_equal(1, found)
+post '/push' do
+  token = the_human.tokens.find(params[:token])
+  raise Baza::Urror, 'The token is inactive' unless token.active?
+  Tempfile.open do |f|
+    FileUtils.copy(params[:factbase][:tempfile], f.path)
+    File.delete(params[:factbase][:tempfile])
+    fid = settings.factbases.save(f.path)
+    job = token.start(fid)
+    response.headers['X-Zerocracy-JobId'] = job.id.to_s
+    flash(iri.cut('/jobs'), "New job ##{job.id} started")
   end
 end

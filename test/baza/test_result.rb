@@ -24,30 +24,22 @@ require 'minitest/autorun'
 require_relative '../test__helper'
 require_relative '../../objects/baza'
 require_relative '../../objects/baza/humans'
+require_relative '../../objects/baza/factbases'
 
 # Test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class Baza::JobsTest < Minitest::Test
-  def test_emptiness_checks
-    human = Baza::Humans.new(test_pgsql).ensure(test_name)
-    jobs = human.jobs
-    assert(jobs.empty?)
-  end
-
-  def test_start_and_finish
+class Baza::ResultTest < Minitest::Test
+  def test_keeps_data
     human = Baza::Humans.new(test_pgsql).ensure(test_name)
     token = human.tokens.add(test_name)
     job = token.start(test_name)
-    job.finish(test_name, 'stdout', 0, 544)
-    assert(human.jobs.get(job.id).finished?)
-    assert(!human.jobs.empty?)
-    found = 0
-    human.jobs.each do |j|
-      found += 1
-      assert(j.finished?)
-    end
-    assert_equal(1, found)
+    job.finish(Baza::Factbases.new('', ''), 'Hello, world!', 1, 42)
+    r = job.result
+    assert(r.id > 0)
+    assert_equal('Hello, world!', r.stdout)
+    assert_equal(1, r.exit)
+    assert_equal(42, r.msec)
   end
 end

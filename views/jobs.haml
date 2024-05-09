@@ -1,0 +1,25 @@
+- if jobs.empty?
+  %p
+    No jobs yet.
+- else
+  %p
+    Full list of jobs:
+  %table
+    %thead
+      %tr
+        %th
+          Id
+        %th
+          Started
+        %th
+    %tbody
+    - jobs.each do |j|
+      %tr
+        %td
+          %a{href: iri.cut('/jobs').append(j.id)}
+            = j.id
+        %td
+          = j.created
+        %td
+          - if j.finished?
+            Finished

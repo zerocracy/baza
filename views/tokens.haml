@@ -19,11 +19,14 @@
         %th
     %tbody
     - tokens.each do |t|
-      %tr
+      %tr{class: t.active? ? '' : 'gray'}
         %td
           = t.name
         %td
           = t.text
         %td
-          %a{href: iri.cut('/tokens').append(t.id).append('delete')}
-            Delete
+          - if t.active?
+            %a{href: iri.cut('/tokens').append(t.id).append('deactivate')}
+              Deactivate
+          - else
+            Inactive

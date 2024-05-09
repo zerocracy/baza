@@ -64,8 +64,22 @@ class Baza::Tokens
     end
   end
 
+  def to_a
+    array = []
+    each do |t|
+      array << t
+    end
+    array
+  end
+
   def exists?(name)
     !@human.pgsql.exec('SELECT id FROM token WHERE human = $1 AND name = $2', [@human.id, name]).empty?
+  end
+
+  def find(text)
+    rows = @human.pgsql.exec('SELECT id FROM token WHERE text = $1', [text])
+    raise Baza::Urror, 'Token not found' if rows.empty?
+    Baza::Token.new(self, rows[0]['id'].to_i)
   end
 
   def get(id)

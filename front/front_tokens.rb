@@ -20,6 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+require 'sinatra/json'
+
 get '/tokens' do
   assemble(
     :tokens,
@@ -29,8 +31,10 @@ get '/tokens' do
   )
 end
 
-get '/tokens/{id}' do
-  haml :token, layout: :default, locals: { title: "/token/#{id}" }
+get '/tokens/{id}.json' do
+  id = params[:id]
+  content_type('application/json')
+  json(the_human.tokens.get(id).to_json)
 end
 
 post '/tokens/add' do
@@ -40,9 +44,9 @@ post '/tokens/add' do
   flash(iri.cut('/tokens'), "New token ##{token.id} added")
 end
 
-get '/tokens/{id}/delete' do
+get '/tokens/{id}/deactivate' do
   id = params[:id]
   token = the_human.tokens.get(id)
-  token.delete
-  flash(iri.cut('/tokens'), "Token ##{id} deleted")
+  token.deactivate
+  flash(iri.cut('/tokens'), "Token ##{id} deactivated")
 end

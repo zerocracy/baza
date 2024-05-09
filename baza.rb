@@ -38,6 +38,7 @@ require 'sinatra/cookies'
 require 'time'
 require 'yaml'
 require_relative 'version'
+require_relative 'objects/baza/factbases'
 
 unless ENV['RACK_ENV'] == 'test'
   require 'rack/ssl'
@@ -46,7 +47,7 @@ end
 
 configure do
   config = {
-    'aws' => {
+    's3' => {
       'key' => '????',
       'secret' => '????'
     },
@@ -95,60 +96,23 @@ configure do
     )
   end
   settings.pgsql.start(4)
+  set :factbases, Baza::Factbases.new(config['s3']['key'], config['s3']['secret'])
 end
 
 get '/' do
   flash(iri.cut('/dash')) if @locals[:human]
-  haml :index, layout: :front, locals: merged(title: '/')
-end
-
-get '/dash' do
-  haml :dash, layout: :default, locals: { title: '/dash' }
-end
-
-get '/jobs' do
-  haml :jobs, layout: :default, locals: { title: '/jobs' }
-end
-
-get '/robots.txt' do
-  content_type 'text/plain'
-  "User-agent: *\nDisallow: /"
-end
-
-get '/version' do
-  content_type 'text/plain'
-  Baza::VERSION
-end
-
-not_found do
-  status 404
-  content_type 'text/html', charset: 'utf-8'
-  haml :not_found, layout: :default, locals: { title: request.url }
-end
-
-error do
-  status 503
-  e = env['sinatra.error']
-  haml(
-    :error,
-    layout: :default,
-    locals: {
-      title: 'error',
-      error: "#{e.message}\n\t#{e.backtrace.join("\n\t")}"
-    }
+  assemble(
+    :index,
+    :front,
+    title: '/'
   )
 end
 
-get '/sql' do
-  raise Urror::Nb, 'You are not allowed to see this' unless current_human.admin?
-  query = params[:query] || 'SELECT * FROM human LIMIT 5'
-  start = Time.now
-  result = settings.pgsql.exec(query)
-  haml :sql, layout: :layout, locals: merged(
-    title: '/sql',
-    query: query,
-    result: result,
-    lag: Time.now - start
+get '/dash' do
+  assemble(
+    :dash,
+    :default,
+    title: '/dash'
   )
 end
 
@@ -168,5 +132,8 @@ end
 require_relative 'front/front_misc'
 require_relative 'front/front_errors'
 require_relative 'front/front_login'
+require_relative 'front/front_admin'
 require_relative 'front/front_tokens'
+require_relative 'front/front_jobs'
+require_relative 'front/front_push'
 require_relative 'front/front_assets'

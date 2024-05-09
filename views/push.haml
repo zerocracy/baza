@@ -1,0 +1,9 @@
+%form{method: 'post', action: iri.cut('/push'), enctype: 'multipart/form-data'}
+  %fieldset
+    %label
+      Token:
+    %input{ type: 'text', name: 'token', value: token, tabindex: 1, placeholder: 'Token', size: 40, maxlength: 36 }
+    %label
+      Factbase:
+    %input{ type: 'file', name: 'factbase', tabindex: 2, placeholder: 'Factbase' }
+    %input{ type: 'submit', tabindex: 3, value: 'Start' }

@@ -38,14 +38,23 @@ class Baza::Token
     @tokens.pgsql
   end
 
-  def delete
-    @tokens.pgsql.exec('DELETE FROM token WHERE id = $1', [@id])
+  def deactivate
+    @tokens.pgsql.exec('UPDATE token SET active = false WHERE id = $1', [@id])
   end
 
-  def start
+  def active?
     rows = @tokens.pgsql.exec(
-      'INSERT INTO job (token) VALUES ($1) RETURNING id',
-      [id]
+      'SELECT active FROM token WHERE id = $1',
+      [@id]
+    )
+    raise Baza::Urror, "Token ##{@id} not found" if rows.empty?
+    rows[0]['active'] == 't'
+  end
+
+  def start(factbase)
+    rows = @tokens.pgsql.exec(
+      'INSERT INTO job (token, factbase) VALUES ($1, $2) RETURNING id',
+      [@id, factbase]
     )
     id = rows[0]['id'].to_i
     Baza::Job.new(self, id)
@@ -67,5 +76,13 @@ class Baza::Token
     )
     raise Baza::Urror, "Token ##{@id} not found" if rows.empty?
     rows[0]['text']
+  end
+
+  def to_json
+    {
+      id: @id,
+      name: name,
+      text: text
+    }
   end
 end

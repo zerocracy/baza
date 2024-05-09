@@ -20,6 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+require_relative 'result'
+
 # One job.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
@@ -32,16 +34,40 @@ class Baza::Job
     @id = id
   end
 
-  def finish(stdout, exit, msec)
+  def pgsql
+    @jobs.pgsql
+  end
+
+  def finish(factbase, stdout, exit, msec)
     raise Baza::Urror, 'Exit code must a Number' unless exit.is_a?(Integer)
     raise Baza::Urror, 'Milliseconds must a Number' unless msec.is_a?(Integer)
     @jobs.pgsql.exec(
-      'INSERT INTO log (job, stdout, exit, msec) VALUES ($1, $2, $3, $4)',
-      [@id, stdout, exit, msec]
+      'INSERT INTO result (job, factbase, stdout, exit, msec) VALUES ($1, $2, $3, $4, $5)',
+      [@id, factbase, stdout, exit, msec]
     )
   end
 
+  def created
+    Time.parse(@jobs.pgsql.exec('SELECT created FROM job WHERE id = $1', [@id])[0]['created'])
+  end
+
   def finished?
-    !@jobs.pgsql.exec('SELECT FROM log WHERE job = $1', [@id]).empty?
+    !@jobs.pgsql.exec('SELECT FROM result WHERE job = $1', [@id]).empty?
+  end
+
+  def result
+    rows = @jobs.pgsql.exec(
+      'SELECT * FROM result WHERE job = $1',
+      [@id]
+    )
+    raise Baza::Urror, 'There is no result yet' if rows.empty?
+    Baza::Result.new(self, rows[0]['id'].to_i)
+  end
+
+  def to_json
+    {
+      id: @id,
+      finished: finished?
+    }
   end
 end

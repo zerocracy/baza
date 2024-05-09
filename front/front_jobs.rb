@@ -25,24 +25,16 @@ get '/jobs' do
     :jobs,
     :default,
     title: '/jobs',
-    jobs: the_human.tokens
+    jobs: the_human.jobs
   )
 end
 
-get '/tokens/{id}' do
-  haml :token, layout: :default, locals: { title: "/token/#{id}" }
-end
-
-post '/tokens/add' do
-  name = params[:name]
-  token = the_human.tokens.add(name)
-  response.headers['X-Zerocracy-TokenId'] = token.id.to_s
-  flash(iri.cut('/tokens'), "New token ##{token.id} added")
-end
-
-get '/tokens/{id}/delete' do
-  id = params[:id]
-  token = the_human.tokens.get(id)
-  token.delete
-  flash(iri.cut('/tokens'), "Token ##{id} deleted")
+get '/jobs/{id}' do
+  id = params[:id].to_i
+  assemble(
+    :job,
+    :default,
+    title: "/jobs/#{id}",
+    job: the_human.jobs.get(id)
+  )
 end

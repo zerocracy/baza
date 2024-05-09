@@ -54,20 +54,20 @@ class Baza::AppTest < Minitest::Test
     ]
     pages.each do |p|
       get(p)
-      assert(last_response.ok?, "#{p}: #{last_response.body}")
+      assert_status(200)
     end
   end
 
   def test_renders_private_pages
     pages = [
       '/dash',
-      '/tokens'
-      # '/jobs'
+      '/tokens',
+      '/jobs'
     ]
     login
     pages.each do |p|
       get(p)
-      assert(last_response.ok?, "#{p} (#{last_response.status}): #{last_response.body}")
+      assert_status(200)
     end
   end
 
@@ -81,7 +81,7 @@ class Baza::AppTest < Minitest::Test
     ]
     pages.each do |p|
       get(p)
-      assert_equal(404, last_response.status, "#{p}: #{last_response.body}")
+      assert_status(404)
       assert_equal('text/html;charset=utf-8', last_response.content_type)
     end
   end
@@ -90,13 +90,41 @@ class Baza::AppTest < Minitest::Test
     login
     get('/tokens')
     post('/tokens/add', 'name=foo')
-    assert_equal(302, last_response.status)
+    assert_status(302)
     id = last_response.headers['X-Zerocracy-TokenId'].to_i
-    get("/tokens/#{id}/delete")
-    assert_equal(302, last_response.status)
+    assert(id > 0)
+    get("/tokens/#{id}/deactivate")
+    assert_status(302)
+  end
+
+  def test_starts_job
+    login
+    get('/tokens')
+    post('/tokens/add', 'name=foo')
+    id = last_response.headers['X-Zerocracy-TokenId'].to_i
+    get("/tokens/#{id}.json")
+    token = JSON.parse(last_response.body)['text']
+    get('/push')
+    Tempfile.open do |f|
+      File.write(f.path, 'booom')
+      post(
+        '/push',
+        'token' => token,
+        'factbase' => Rack::Test::UploadedFile.new(f.path, 'application/zip')
+      )
+    end
+    assert_status(302)
+    id = last_response.headers['X-Zerocracy-JobId'].to_i
+    assert(id > 0)
+    get("/jobs/#{id}")
+    assert_status(200)
   end
 
   private
+
+  def assert_status(code)
+    assert_equal(code, last_response.status, "#{last_request.url}:\n#{last_response.body}")
+  end
 
   def login(name = test_name)
     enc = GLogin::Cookie::Open.new(
@@ -106,3 +134,4 @@ class Baza::AppTest < Minitest::Test
     set_cookie("identity=#{enc}")
   end
 end
+#

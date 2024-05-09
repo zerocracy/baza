@@ -45,14 +45,24 @@ class Baza::TokensTest < Minitest::Test
     assert(!tokens.empty?)
   end
 
-  def test_deletes_token
+  def test_deactivates_token
     human = Baza::Humans.new(test_pgsql).ensure(test_name)
     tokens = human.tokens
     name = test_name
     assert_equal(0, tokens.size)
     token = tokens.add(name)
     assert_equal(1, tokens.size)
-    tokens.get(token.id).delete
-    assert_equal(0, tokens.size)
+    assert(token.active?)
+    tokens.get(token.id).deactivate
+    assert_equal(1, tokens.size)
+    assert(!token.active?)
+  end
+
+  def test_finds_token
+    human = Baza::Humans.new(test_pgsql).ensure(test_name)
+    tokens = human.tokens
+    name = test_name
+    token = tokens.add(name)
+    assert_equal(token.id, tokens.find(token.text).id)
   end
 end

@@ -1,0 +1,26 @@
+%p
+  ID:
+  = job.id
+
+%p
+  Created:
+  = job.created
+
+%p
+  Finished:
+  - if job.finished?
+    Yes
+  - else
+    Not yet
+
+- if job.finished?
+  - r = job.result
+  %p
+    Stdout:
+    %pre= r.stdout
+  %p
+    Exit code:
+    = r.exit
+  %p
+    Milliseconds:
+    = r.msec

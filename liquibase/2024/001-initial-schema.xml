@@ -37,6 +37,7 @@ SOFTWARE.
       CREATE TABLE token (
         id SERIAL PRIMARY KEY,
         human INT NOT NULL REFERENCES human(id),
+        active BOOL DEFAULT true NOT NULL,
         name VARCHAR(32) NOT NULL,
         text VARCHAR(64),
         created TIMESTAMPTZ DEFAULT now() NOT NULL,
@@ -49,18 +50,22 @@ SOFTWARE.
       CREATE TABLE job (
         id SERIAL PRIMARY KEY,
         token INT NOT NULL REFERENCES token(id),
-        created TIMESTAMPTZ DEFAULT now() NOT NULL
+        factbase VARCHAR(256) NOT NULL,
+        created TIMESTAMPTZ DEFAULT now() NOT NULL,
+        UNIQUE(factbase)
       );
     </sql>
     <sql>
-      CREATE TABLE log (
+      CREATE TABLE result (
         id SERIAL PRIMARY KEY,
         job INT NOT NULL REFERENCES job(id),
+        factbase VARCHAR(256) NOT NULL,
         stdout TEXT NOT NULL,
         exit INT NOT NULL,
         msec INT NOT NULL,
         created TIMESTAMPTZ DEFAULT now() NOT NULL,
-        UNIQUE(job)
+        UNIQUE(job),
+        UNIQUE(factbase)
       );
     </sql>
     <sql>
