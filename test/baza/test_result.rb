@@ -35,7 +35,10 @@ class Baza::ResultTest < Minitest::Test
     human = Baza::Humans.new(test_pgsql).ensure(test_name)
     token = human.tokens.add(test_name)
     job = token.start(test_name)
-    job.finish(Baza::Factbases.new('', ''), 'Hello, world!', 1, 42)
+    Tempfile.open do |f|
+      File.write(f.path, 'booom')
+      job.finish(Baza::Factbases.new('', '').save(f.path), 'Hello, world!', 1, 42)
+    end
     r = job.result
     assert(r.id.positive?)
     assert_equal('Hello, world!', r.stdout)
