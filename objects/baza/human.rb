@@ -22,6 +22,7 @@
 
 require_relative 'urror'
 require_relative 'tokens'
+require_relative 'jobs'
 
 # Human being.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -41,6 +42,10 @@ class Baza::Human
 
   def tokens
     Baza::Tokens.new(self)
+  end
+
+  def jobs
+    Baza::Jobs.new(self)
   end
 
   def github

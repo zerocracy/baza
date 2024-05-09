@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Copyright (c) 2009-2024 Yegor Bugayenko
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -17,45 +19,38 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
----
-AllCops:
-  Exclude:
-    - 'bin/**/*'
-    - 'assets/**/*'
-  DisplayCopNames: true
-  TargetRubyVersion: 2.6.0
-  NewCops: enable
-  SuggestExtensions: false
 
-Layout/RescueEnsureAlignment:
-  Enabled: false
-Metrics/CyclomaticComplexity:
-  Max: 25
-Metrics/BlockLength:
-  Max: 50
-Style/MultilineTernaryOperator:
-  Enabled: false
-Layout/MultilineMethodCallIndentation:
-  Enabled: false
-Layout/EndOfLine:
-  EnforcedStyle: lf
-Layout/ParameterAlignment:
-  Enabled: false
-Metrics/PerceivedComplexity:
-  Max: 25
-Layout/LineLength:
-  Max: 120
-Style/MultilineBlockChain:
-  Enabled: false
-Layout/MultilineOperationIndentation:
-  Enabled: false
-Layout/EmptyLineAfterGuardClause:
-  Enabled: false
-Style/ClassAndModuleChildren:
-  Enabled: false
-Metrics/BlockLength:
-  Max: 100
-Metrics/MethodLength:
-  Max: 25
-Metrics/AbcSize:
-  Max: 25
+require 'securerandom'
+require_relative 'token'
+
+# Jobs of a human.
+# Author:: Yegor Bugayenko (yegor256@gmail.com)
+# Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
+# License:: MIT
+class Baza::Jobs
+  def initialize(human)
+    @human = human
+  end
+
+  def pgsql
+    @human.pgsql
+  end
+
+  def empty?
+    @human.pgsql.exec(
+      'SELECT job.id FROM job JOIN token ON token.id = job.token WHERE token.human = $1',
+      [@human.id]
+    ).empty?
+  end
+
+  def each
+    sql = 'SELECT job.id FROM job JOIN token ON token.id = job.token WHERE token.human = $1'
+    @human.pgsql.exec(sql, [@human.id]).each do |row|
+      yield Baza::Job.new(self, row['id'].to_i)
+    end
+  end
+
+  def get(id)
+    Baza::Job.new(self, id)
+  end
+end

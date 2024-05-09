@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Copyright (c) 2009-2024 Yegor Bugayenko
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -12,50 +14,40 @@
 #
 # THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFINGEMENT. IN NO EVENT SHALL THE
 # AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
----
-AllCops:
-  Exclude:
-    - 'bin/**/*'
-    - 'assets/**/*'
-  DisplayCopNames: true
-  TargetRubyVersion: 2.6.0
-  NewCops: enable
-  SuggestExtensions: false
 
-Layout/RescueEnsureAlignment:
-  Enabled: false
-Metrics/CyclomaticComplexity:
-  Max: 25
-Metrics/BlockLength:
-  Max: 50
-Style/MultilineTernaryOperator:
-  Enabled: false
-Layout/MultilineMethodCallIndentation:
-  Enabled: false
-Layout/EndOfLine:
-  EnforcedStyle: lf
-Layout/ParameterAlignment:
-  Enabled: false
-Metrics/PerceivedComplexity:
-  Max: 25
-Layout/LineLength:
-  Max: 120
-Style/MultilineBlockChain:
-  Enabled: false
-Layout/MultilineOperationIndentation:
-  Enabled: false
-Layout/EmptyLineAfterGuardClause:
-  Enabled: false
-Style/ClassAndModuleChildren:
-  Enabled: false
-Metrics/BlockLength:
-  Max: 100
-Metrics/MethodLength:
-  Max: 25
-Metrics/AbcSize:
-  Max: 25
+require 'minitest/autorun'
+require_relative '../test__helper'
+require_relative '../../objects/baza'
+require_relative '../../objects/baza/humans'
+
+# Test.
+# Author:: Yegor Bugayenko (yegor256@gmail.com)
+# Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
+# License:: MIT
+class Baza::JobsTest < Minitest::Test
+  def test_emptiness_checks
+    human = Baza::Humans.new(test_pgsql).ensure(test_name)
+    jobs = human.jobs
+    assert(jobs.empty?)
+  end
+
+  def test_start_and_finish
+    human = Baza::Humans.new(test_pgsql).ensure(test_name)
+    token = human.tokens.add(test_name)
+    job = token.start
+    job.finish('stdout', 0, 544)
+    assert(human.jobs.get(job.id).finished?)
+    assert(!human.jobs.empty?)
+    found = 0
+    human.jobs.each do |j|
+      found += 1
+      assert(j.finished?)
+    end
+    assert_equal(1, found)
+  end
+end

@@ -20,6 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+require_relative 'job'
+
 # One token.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
@@ -32,8 +34,21 @@ class Baza::Token
     @id = id
   end
 
+  def pgsql
+    @tokens.pgsql
+  end
+
   def delete
     @tokens.pgsql.exec('DELETE FROM token WHERE id = $1', [@id])
+  end
+
+  def start
+    rows = @tokens.pgsql.exec(
+      'INSERT INTO job (token) VALUES ($1) RETURNING id',
+      [id]
+    )
+    id = rows[0]['id'].to_i
+    Baza::Job.new(self, id)
   end
 
   def name
