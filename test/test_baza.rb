@@ -86,6 +86,16 @@ class Baza::AppTest < Minitest::Test
     end
   end
 
+  def test_creates_and_deletes_token
+    login
+    get('/tokens')
+    post('/tokens/add', 'name=foo')
+    assert_equal(302, last_response.status)
+    id = last_response.headers['X-Zerocracy-TokenId'].to_i
+    get("/tokens/#{id}/delete")
+    assert_equal(302, last_response.status)
+  end
+
   private
 
   def login(name = test_name)

@@ -36,6 +36,7 @@ end
 post '/tokens/add' do
   name = params[:name]
   token = the_human.tokens.add(name)
+  response.headers['X-Zerocracy-TokenId'] = token.id.to_s
   flash(iri.cut('/tokens'), "New token ##{token.id} added")
 end
 
