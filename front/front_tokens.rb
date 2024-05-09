@@ -31,7 +31,7 @@ get '/tokens' do
   )
 end
 
-get /\/tokens\/([0-9]+).json/, :provides => ['json'] do
+get(%r{/tokens/([0-9]+).json}, provides: ['json']) do
   json(the_human.tokens.get(params['captures'].first.to_i).to_json)
 end
 
@@ -42,7 +42,7 @@ post '/tokens/add' do
   flash(iri.cut('/tokens'), "New token ##{token.id} added")
 end
 
-get /\/tokens\/([0-9]+)\/deactivate/ do
+get(%r{/tokens/([0-9]+)/deactivate}) do
   id = params['captures'].first.to_i
   token = the_human.tokens.get(id)
   token.deactivate

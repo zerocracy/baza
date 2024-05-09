@@ -29,7 +29,7 @@ get '/jobs' do
   )
 end
 
-get /\/jobs\/([0-9]+)/ do
+get(%r{/jobs/([0-9]+)}) do
   id = params['captures'].first.to_i
   assemble(
     :job,
