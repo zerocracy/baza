@@ -20,26 +20,29 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require_relative '../version'
-
-get '/robots.txt' do
-  content_type 'text/plain'
-  "User-agent: *\nDisallow: /"
+get '/jobs' do
+  assemble(
+    :jobs,
+    :default,
+    title: '/jobs',
+    jobs: the_human.tokens
+  )
 end
 
-get '/version' do
-  content_type 'text/plain'
-  Baza::VERSION
+get '/tokens/{id}' do
+  haml :token, layout: :default, locals: { title: "/token/#{id}" }
 end
 
-def merged(hash)
-  out = @locals.merge(hash)
-  out[:local_assigns] = out
-  if cookies[:flash_msg]
-    out[:flash_msg] = cookies[:flash_msg]
-    cookies.delete(:flash_msg)
-  end
-  out[:flash_color] = cookies[:flash_color] || 'darkgreen'
-  cookies.delete(:flash_color)
-  out
+post '/tokens/add' do
+  name = params[:name]
+  token = the_human.tokens.add(name)
+  response.headers['X-Zerocracy-TokenId'] = token.id.to_s
+  flash(iri.cut('/tokens'), "New token ##{token.id} added")
+end
+
+get '/tokens/{id}/delete' do
+  id = params[:id]
+  token = the_human.tokens.get(id)
+  token.delete
+  flash(iri.cut('/tokens'), "Token ##{id} deleted")
 end

@@ -37,6 +37,10 @@ class Baza::Tokens
   end
 
   def add(name)
+    raise Baza::Urror, 'Name is too long (>32)' if name.length > 32
+    total = size
+    raise Baza::Urror, "Too many tokens already (#{total})" if total >= 8
+    raise Baza::Urror, 'Token with this name already exists' if exists?(name)
     uuid = SecureRandom.uuid
     rows = @human.pgsql.exec(
       'INSERT INTO token (human, name, text) VALUES ($1, $2, $3) RETURNING id',
@@ -50,10 +54,18 @@ class Baza::Tokens
     @human.pgsql.exec('SELECT id FROM token WHERE human = $1', [@human.id]).empty?
   end
 
+  def size
+    @human.pgsql.exec('SELECT COUNT(id) AS c FROM token WHERE human = $1', [@human.id])[0]['c'].to_i
+  end
+
   def each
     @human.pgsql.exec('SELECT * FROM token WHERE human=$1', [@human.id]).each do |row|
       yield Baza::Token.new(self, row['id'].to_i)
     end
+  end
+
+  def exists?(name)
+    !@human.pgsql.exec('SELECT id FROM token WHERE human = $1 AND name = $2', [@human.id, name]).empty?
   end
 
   def get(id)

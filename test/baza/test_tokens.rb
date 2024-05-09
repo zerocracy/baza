@@ -49,9 +49,10 @@ class Baza::TokensTest < Minitest::Test
     human = Baza::Humans.new(test_pgsql).ensure(test_name)
     tokens = human.tokens
     name = test_name
+    assert_equal(0, tokens.size)
     token = tokens.add(name)
-    assert(!tokens.empty?)
+    assert_equal(1, tokens.size)
     tokens.get(token.id).delete
-    assert(tokens.empty?)
+    assert_equal(0, tokens.size)
   end
 end

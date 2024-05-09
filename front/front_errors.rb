@@ -20,26 +20,36 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require_relative '../version'
+require_relative '../objects/baza/urror'
 
-get '/robots.txt' do
-  content_type 'text/plain'
-  "User-agent: *\nDisallow: /"
+not_found do
+  status 404
+  content_type 'text/html', charset: 'utf-8'
+  haml :not_found, locals: merged(
+    title: request.url
+  )
 end
 
-get '/version' do
-  content_type 'text/plain'
-  Baza::VERSION
-end
-
-def merged(hash)
-  out = @locals.merge(hash)
-  out[:local_assigns] = out
-  if cookies[:flash_msg]
-    out[:flash_msg] = cookies[:flash_msg]
-    cookies.delete(:flash_msg)
+error do
+  status 503
+  e = env['sinatra.error']
+  if e.is_a?(Baza::Urror)
+    flash(@locals[:human] ? iri.cut('/dash') : iri.cut('/'), e.message, color: 'darkred')
+  else
+    Raven.capture_exception(e)
+    assemble(
+      :error,
+      :default,
+      title: '/error',
+      error: "#{e.message}\n\t#{e.backtrace.join("\n\t")}"
+    )
   end
-  out[:flash_color] = cookies[:flash_color] || 'darkgreen'
-  cookies.delete(:flash_color)
-  out
+end
+
+def flash(uri, msg = '', color: 'darkgreen')
+  cookies[:flash_msg] = msg
+  cookies[:flash_color] = color
+  response.headers['X-Zerocracy-Requested'] = request.url
+  response.headers['X-Zerocracy-Flash'] = msg
+  redirect(uri)
 end
