@@ -22,8 +22,12 @@
 
 require_relative '../objects/baza/urror'
 
-get '/sql' do
+def admin_only
   raise Baza::Urror, 'You are not allowed to see this' unless the_human.admin?
+end
+
+get '/sql' do
+  admin_only
   query = params[:query] || 'SELECT * FROM human LIMIT 5'
   start = Time.now
   result = settings.pgsql.exec(query)
@@ -38,6 +42,7 @@ get '/sql' do
 end
 
 get '/gift' do
+  admin_only
   assemble(
     :gift,
     :default,
@@ -46,7 +51,7 @@ get '/gift' do
 end
 
 post '/gift' do
-  raise Baza::Urror, 'You are not allowed to see this' unless the_human.admin?
+  admin_only
   human = settings.humans.find(params[:human])
   zents = params[:zents].to_i
   summary = params[:summary]

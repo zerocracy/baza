@@ -100,7 +100,7 @@ class Baza::AppTest < Minitest::Test
 
   def test_non_admin_pages
     pages = [
-      '/sql'
+      '/sql', '/gift'
     ]
     login
     pages.each do |p|
