@@ -14,40 +14,30 @@
 #
 # THE SOFTWARE IS PROVIDED 'AS IS', WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFINGEMENT. IN NO EVENT SHALL THE
 # AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-get '/sql' do
-  raise Urror::Nb, 'You are not allowed to see this' unless the_human.admin?
-  query = params[:query] || 'SELECT * FROM human LIMIT 5'
-  start = Time.now
-  result = settings.pgsql.exec(query)
-  assemble(
-    :sql,
-    :default,
-    title: '/sql',
-    query: query,
-    result: result,
-    lag: Time.now - start
-  )
-end
+require 'minitest/autorun'
+require_relative '../test__helper'
+require_relative '../../objects/baza'
+require_relative '../../objects/baza/humans'
 
-get '/gift' do
-  assemble(
-    :gift,
-    :default,
-    title: '/gift'
-  )
-end
-
-post '/gift' do
-  raise Urror::Nb, 'You are not allowed to see this' unless the_human.admin?
-  human = settings.humans.find(params[:human])
-  zents = params[:zents].to_i
-  summary = params[:summary]
-  human.account.add(zents, summary)
-  flash(iri.cut('/account'), 'New receipt added')
+# Test.
+# Author:: Yegor Bugayenko (yegor256@gmail.com)
+# Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
+# License:: MIT
+class Baza::AccountTest < Minitest::Test
+  def test_simple_receipt
+    human = Baza::Humans.new(test_pgsql).ensure(test_name)
+    acc = human.account
+    assert_equal(0, acc.balance)
+    acc.add(42, 'nothing')
+    acc.add(-10, 'foo')
+    assert_equal(32, acc.balance)
+    acc.add(-32, 'fun')
+    assert_equal(0, acc.balance)
+  end
 end

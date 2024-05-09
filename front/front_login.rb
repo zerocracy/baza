@@ -20,8 +20,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require_relative '../objects/baza/humans'
-
 before '/*' do
   @locals = {
     http_start: Time.now,
@@ -38,7 +36,7 @@ before '/*' do
       ).to_user
       identity = user[:login]
       identity = user[:id] if identity.nil?
-      @locals[:human] = Baza::Humans.new(settings.pgsql).ensure(identity)
+      @locals[:human] = settings.humans.ensure(identity)
     rescue GLogin::Codec::DecodingError
       cookies.delete(:identity)
     end

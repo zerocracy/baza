@@ -20,34 +20,38 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-get '/sql' do
-  raise Urror::Nb, 'You are not allowed to see this' unless the_human.admin?
-  query = params[:query] || 'SELECT * FROM human LIMIT 5'
-  start = Time.now
-  result = settings.pgsql.exec(query)
-  assemble(
-    :sql,
-    :default,
-    title: '/sql',
-    query: query,
-    result: result,
-    lag: Time.now - start
-  )
-end
+require_relative 'receipt'
 
-get '/gift' do
-  assemble(
-    :gift,
-    :default,
-    title: '/gift'
-  )
-end
+# Account of a human.
+# Author:: Yegor Bugayenko (yegor256@gmail.com)
+# Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
+# License:: MIT
+class Baza::Account
+  def initialize(human)
+    @human = human
+  end
 
-post '/gift' do
-  raise Urror::Nb, 'You are not allowed to see this' unless the_human.admin?
-  human = settings.humans.find(params[:human])
-  zents = params[:zents].to_i
-  summary = params[:summary]
-  human.account.add(zents, summary)
-  flash(iri.cut('/account'), 'New receipt added')
+  def pgsql
+    @human.pgsql
+  end
+
+  def each
+    @human.pgsql.exec('SELECT * FROM receipt WHERE human = $1', [@human.id]).each do |row|
+      yield Baza::Receipt.new(self, row['id'].to_i)
+    end
+  end
+
+  def balance
+    @human.pgsql.exec(
+      'SELECT SUM(zents) FROM receipt WHERE human = $1',
+      [@human.id]
+    )[0]['sum'].to_i
+  end
+
+  def add(zents, summary, job = nil)
+    @human.pgsql.exec(
+      'INSERT INTO receipt (human, zents, summary, job) VALUES ($1, $2, $3, $4) RETURNING id',
+      [@human.id, zents, summary, job]
+    ).empty?
+  end
 end

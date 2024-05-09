@@ -23,6 +23,7 @@
 require_relative 'urror'
 require_relative 'tokens'
 require_relative 'jobs'
+require_relative 'account'
 
 # Human being.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -37,7 +38,7 @@ class Baza::Human
   end
 
   def admin?
-    id == 1
+    github == 'yegor256'
   end
 
   def pgsql
@@ -50,6 +51,10 @@ class Baza::Human
 
   def jobs
     Baza::Jobs.new(self)
+  end
+
+  def account
+    Baza::Account.new(self)
   end
 
   def github

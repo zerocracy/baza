@@ -20,34 +20,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-get '/sql' do
-  raise Urror::Nb, 'You are not allowed to see this' unless the_human.admin?
-  query = params[:query] || 'SELECT * FROM human LIMIT 5'
-  start = Time.now
-  result = settings.pgsql.exec(query)
+get '/account' do
   assemble(
-    :sql,
+    :account,
     :default,
-    title: '/sql',
-    query: query,
-    result: result,
-    lag: Time.now - start
+    title: '/account',
+    account: the_human.account
   )
-end
-
-get '/gift' do
-  assemble(
-    :gift,
-    :default,
-    title: '/gift'
-  )
-end
-
-post '/gift' do
-  raise Urror::Nb, 'You are not allowed to see this' unless the_human.admin?
-  human = settings.humans.find(params[:human])
-  zents = params[:zents].to_i
-  summary = params[:summary]
-  human.account.add(zents, summary)
-  flash(iri.cut('/account'), 'New receipt added')
 end

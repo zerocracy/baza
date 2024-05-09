@@ -62,7 +62,8 @@ class Baza::AppTest < Minitest::Test
     pages = [
       '/dash',
       '/tokens',
-      '/jobs'
+      '/jobs',
+      '/account'
     ]
     login
     pages.each do |p|
@@ -83,6 +84,18 @@ class Baza::AppTest < Minitest::Test
       get(p)
       assert_status(404)
       assert_equal('text/html;charset=utf-8', last_response.content_type)
+    end
+  end
+
+  def test_renders_admin_pages
+    pages = [
+      '/sql',
+      '/gift'
+    ]
+    login('yegor256')
+    pages.each do |p|
+      get(p)
+      assert_status(200)
     end
   end
 

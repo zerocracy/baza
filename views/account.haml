@@ -1,0 +1,35 @@
+%p
+  Your balance:
+  = account.balance
+
+%p
+  Full list of receipts:
+%table
+  %thead
+    %tr
+      %th
+        Id
+      %th
+        Job
+      %th
+        Zents
+      %th
+        Summary
+      %th
+        Created
+  %tbody
+  - account.each do |r|
+    %tr
+      %td
+        = r.id
+      %td
+        - j = r.job_id
+        - unless j.nil?
+          %a{href: iri.cut('/jobs').append(j)}
+            = j
+      %td.right
+        = r.zents
+      %td
+        = r.summary
+      %td
+        = r.created

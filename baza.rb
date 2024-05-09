@@ -39,6 +39,7 @@ require 'time'
 require 'yaml'
 require_relative 'version'
 require_relative 'objects/baza/factbases'
+require_relative 'objects/baza/humans'
 
 unless ENV['RACK_ENV'] == 'test'
   require 'rack/ssl'
@@ -97,6 +98,7 @@ configure do
   end
   settings.pgsql.start(4)
   set :factbases, Baza::Factbases.new(config['s3']['key'], config['s3']['secret'])
+  set :humans, Baza::Humans.new(settings.pgsql)
 end
 
 get '/' do
@@ -135,5 +137,6 @@ require_relative 'front/front_login'
 require_relative 'front/front_admin'
 require_relative 'front/front_tokens'
 require_relative 'front/front_jobs'
+require_relative 'front/front_account'
 require_relative 'front/front_push'
 require_relative 'front/front_assets'

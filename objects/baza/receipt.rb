@@ -20,34 +20,46 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-get '/sql' do
-  raise Urror::Nb, 'You are not allowed to see this' unless the_human.admin?
-  query = params[:query] || 'SELECT * FROM human LIMIT 5'
-  start = Time.now
-  result = settings.pgsql.exec(query)
-  assemble(
-    :sql,
-    :default,
-    title: '/sql',
-    query: query,
-    result: result,
-    lag: Time.now - start
-  )
-end
+# Account of a human.
+# Author:: Yegor Bugayenko (yegor256@gmail.com)
+# Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
+# License:: MIT
+class Baza::Receipt
+  attr_reader :id
 
-get '/gift' do
-  assemble(
-    :gift,
-    :default,
-    title: '/gift'
-  )
-end
+  def initialize(account, id)
+    @account = account
+    @id = id
+  end
 
-post '/gift' do
-  raise Urror::Nb, 'You are not allowed to see this' unless the_human.admin?
-  human = settings.humans.find(params[:human])
-  zents = params[:zents].to_i
-  summary = params[:summary]
-  human.account.add(zents, summary)
-  flash(iri.cut('/account'), 'New receipt added')
+  def job_id
+    id = @account.pgsql.exec(
+      'SELECT job FROM receipt WHERE id = $1',
+      [@id]
+    )[0]['job']
+    return nil if id.nil?
+    id.to_i
+  end
+
+  def zents
+    @account.pgsql.exec(
+      'SELECT zents FROM receipt WHERE id = $1',
+      [@id]
+    )[0]['zents'].to_i
+  end
+
+  def summary
+    @account.pgsql.exec(
+      'SELECT summary FROM receipt WHERE id = $1',
+      [@id]
+    )[0]['summary']
+  end
+
+  def created
+    time = @account.pgsql.exec(
+      'SELECT created FROM receipt WHERE id = $1',
+      [@id]
+    )[0]['created']
+    Time.parse(time)
+  end
 end
