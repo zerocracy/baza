@@ -20,42 +20,42 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require_relative '../objects/baza/humans'
+require_relative 'human'
+require_relative 'urror'
 
-before '/*' do
-  @locals = {
-    http_start: Time.now,
-    ver: Baza::VERSION,
-    github_login_link: settings.glogin.login_uri,
-    request_ip: request.ip
-  }
-  cookies[:identity] = params[:identity] if params[:identity]
-  if cookies[:identity]
-    begin
-      user = GLogin::Cookie::Closed.new(
-        cookies[:identity],
-        settings.config['github']['encryption_secret']
-      ).to_user
-      identity = user[:login]
-      identity = user[:id] if identity.nil?
-      @locals[:human] = Baza::Humans.new(settings.pgsql).ensure(identity)
-    rescue GLogin::Codec::DecodingError
-      cookies.delete(:identity)
-    end
+# All humans.
+# Author:: Yegor Bugayenko (yegor256@gmail.com)
+# Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
+# License:: MIT
+class Baza::Humans
+  attr_reader :pgsql
+
+  def initialize(pgsql)
+    @pgsql = pgsql
   end
-end
 
-get '/github-callback' do
-  code = params[:code]
-  error(400) if code.nil?
-  json = settings.glogin.user(code)
-  cookies[:identity] = GLogin::Cookie::Open.new(
-    json, settings.config['github']['encryption_secret']
-  ).to_s
-  flash(iri.cut('/'), "@#{json['login']} has been logged in")
-end
+  def exists?(login)
+    !@pgsql.exec('SELECT id FROM human WHERE github = $1', [login]).empty?
+  end
 
-get '/logout' do
-  cookies.delete(:identity)
-  flash(iri.cut('/'), 'You have been logged out')
+  def find(login)
+    rows = @pgsql.exec(
+      'SELECT id FROM human WHERE github = $1',
+      [login]
+    )
+    raise Baza::Urror.new("Human @#{login} not found") if rows.empty?
+    Baza::Human.new(self, rows[0]['id'].to_i)
+  end
+
+  # Make sure this human exists (create if it doesn't) and return it.
+  def ensure(login)
+    raise Baza::Urror.new('GitHub login is empty') if login.empty?
+    raise Baza::Urror.new("GitHub login too long: \"@#{login}\"") if login.length > 64
+    rows = @pgsql.exec(
+      'INSERT INTO human (github) VALUES ($1) ON CONFLICT DO NOTHING RETURNING id',
+      [login]
+    )
+    return find(login) if rows.empty?
+    Baza::Human.new(self, rows[0]['id'].to_i)
+  end
 end

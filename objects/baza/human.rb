@@ -20,17 +20,34 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+require_relative 'urror'
+
 # Human being.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
 class Baza::Human
-  def initialize(_pgsl, id)
-    @psql = psql
+  attr_reader :id
+
+  def initialize(humans, id)
+    @humans = humans
     @id = id
   end
 
+  def pgsql
+    @humans.pgsql
+  end
+
   def tokens
-    Tokens.new(self)
+    Baza::Tokens.new(self)
+  end
+
+  def github
+    rows = @humans.pgsql.exec(
+      'SELECT github FROM human WHERE id = $1',
+      [@id]
+    )
+    raise Baza::Urror.new("Human ##{@id} not found") if rows.empty?
+    rows[0]['github']
   end
 end

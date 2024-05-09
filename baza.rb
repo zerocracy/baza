@@ -57,7 +57,7 @@ configure do
     'github' => {
       'client_id' => '????',
       'client_secret' => '????',
-      'encryption_secret' => '????'
+      'encryption_secret' => ''
     }
   }
   unless ENV['RACK_ENV'] == 'test'

@@ -43,7 +43,7 @@ class Baza::AppTest < Minitest::Test
     Sinatra::Application
   end
 
-  def test_renders_pages
+  def test_renders_public_pages
     pages = [
       '/version',
       '/robots.txt',
@@ -54,7 +54,20 @@ class Baza::AppTest < Minitest::Test
     ]
     pages.each do |p|
       get(p)
-      assert(last_response.ok?, last_response.body)
+      assert(last_response.ok?, "#{p}: #{last_response.body}")
+    end
+  end
+
+  def test_renders_private_pages
+    pages = [
+      '/dash'
+      # '/tokens',
+      # '/jobs'
+    ]
+    login
+    pages.each do |p|
+      get(p)
+      assert(last_response.ok?, "#{p} (#{last_response.status}): #{last_response.body}")
     end
   end
 
@@ -68,8 +81,18 @@ class Baza::AppTest < Minitest::Test
     ]
     pages.each do |p|
       get(p)
-      assert_equal(404, last_response.status, last_response.body)
+      assert_equal(404, last_response.status, "#{p}: #{last_response.body}")
       assert_equal('text/html;charset=utf-8', last_response.content_type)
     end
+  end
+
+  private
+
+  def login(name = test_name)
+    enc = GLogin::Cookie::Open.new(
+      { 'id' => name, 'login' => name },
+      ''
+    ).to_s
+    set_cookie("identity=#{enc}")
   end
 end

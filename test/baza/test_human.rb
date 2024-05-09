@@ -20,33 +20,20 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-ENV['RACK_ENV'] = 'test'
-
-require 'simplecov'
-SimpleCov.start
-
-require 'simplecov-cobertura'
-SimpleCov.formatter = SimpleCov::Formatter::CoberturaFormatter
-
-require 'yaml'
 require 'minitest/autorun'
-require 'pgtk/pool'
-require 'loog'
-require 'securerandom'
+require_relative '../test__helper'
+require_relative '../../objects/baza'
+require_relative '../../objects/baza/humans'
 
-module Minitest
-  class Test
-    def test_pgsql
-      # rubocop:disable Style/ClassVars
-      @@test_pgsql ||= Pgtk::Pool.new(
-        Pgtk::Wire::Yaml.new(File.join(__dir__, '../target/pgsql-config.yml')),
-        log: Loog::VERBOSE
-      ).start
-      # rubocop:enable Style/ClassVars
-    end
-
-    def test_name
-      "jeff#{SecureRandom.hex(8)}"
-    end
+# Test.
+# Author:: Yegor Bugayenko (yegor256@gmail.com)
+# Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
+# License:: MIT
+class Baza::HumanTest < Minitest::Test
+  def test_login_checking
+    humans = Baza::Humans.new(test_pgsql)
+    login = test_name
+    human = humans.ensure(login)
+    assert_equal(human.github, login)
   end
 end

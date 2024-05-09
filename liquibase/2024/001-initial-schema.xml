@@ -25,20 +25,51 @@ SOFTWARE.
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd" logicalFilePath="001-initial-schema.xml">
   <changeSet id="001" author="yegor256">
     <sql>
+      CREATE TABLE human (
+        id SERIAL PRIMARY KEY,
+        github VARCHAR(64) NOT NULL,
+        created TIMESTAMPTZ DEFAULT now() NOT NULL,
+        UNIQUE(github)
+      );
+      CREATE INDEX idx_human1 ON human(github);
+    </sql>
+    <sql>
       CREATE TABLE token (
         id SERIAL PRIMARY KEY,
-        human VARCHAR(32) NOT NULL,
+        human INT NOT NULL REFERENCES human(id),
+        name VARCHAR(32) NOT NULL,
         text VARCHAR(64),
-        created TIMESTAMPTZ DEFAULT now() NOT NULL
+        created TIMESTAMPTZ DEFAULT now() NOT NULL,
+        UNIQUE(human, name)
       );
       CREATE INDEX idx_token1 ON token(text);
-      CREATE INDEX idx_token2 ON token(human);
+      CREATE INDEX idx_token2 ON token(human, name);
     </sql>
     <sql>
       CREATE TABLE job (
         id SERIAL PRIMARY KEY,
         token INT NOT NULL REFERENCES token(id),
-        gas INT NOT NULL,
+        created TIMESTAMPTZ DEFAULT now() NOT NULL
+      );
+    </sql>
+    <sql>
+      CREATE TABLE log (
+        id SERIAL PRIMARY KEY,
+        job INT NOT NULL REFERENCES job(id),
+        stdout TEXT NOT NULL,
+        exit INT NOT NULL,
+        msec INT NOT NULL,
+        created TIMESTAMPTZ DEFAULT now() NOT NULL,
+        UNIQUE(job)
+      );
+    </sql>
+    <sql>
+      CREATE TABLE receipt (
+        id SERIAL PRIMARY KEY,
+        human INT NOT NULL REFERENCES human(id),
+        job INT REFERENCES job(id),
+        zents INT NOT NULL,
+        summary VARCHAR(1024) NOT NULL,
         created TIMESTAMPTZ DEFAULT now() NOT NULL
       );
     </sql>

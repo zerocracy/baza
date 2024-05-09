@@ -10,22 +10,28 @@
     %link{href: iri.cut('/css/main.css'), rel: 'stylesheet'}
     %link{rel: 'shortcut icon', href: iri.cut('/svg/logo.svg')}
     :css
-      section { width: 100%; }
+      * { font-family: monospace; font-size: 20px; }
+      section { width: 100%; margin: 0; }
       article { border: none; }
+      article, header { padding: 0; }
+      header nav ul { text-align: left; }
       .logo { width: 64px; height: 64px; }
   %body
     %section
       %header
-        %p
-          %a{href: iri.cut('/')}
-            %img.logo{src: iri.cut('/svg/logo.svg'), alt: 'Logo'}
+        %nav
+          %ul
+            %li
+              %a{href: iri.cut('/')}
+                %img.logo{src: iri.cut('/svg/logo.svg'), alt: 'Logo'}
+            %li
+              %span{title: "Current user ##{the_human.id}"}
+                = "@#{the_human.github}"
+            %li
+              %span{title: 'Currently deployed version'}
+                = "#{Baza::VERSION}"
+            %li
+              %a{href: iri.cut('/logout')}
+                Logout
       %article
         != yield
-      %footer
-        %p
-          &copy;
-          = '2009' + '&ndash;' + Time.now.strftime('%Y')
-          %a{href: 'https://www.zerocracy.com'} Zerocracy
-        %p
-          %span{title: 'Currently deployed version'}
-            = "#{Baza::VERSION}"

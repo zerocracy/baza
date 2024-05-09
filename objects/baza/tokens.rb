@@ -20,6 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+require 'securerandom'
+
 # Tokens of a user.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
@@ -29,10 +31,18 @@ class Baza::Tokens
     @human = human
   end
 
-  def add(name); end
+  def add(name)
+    uuid = SecureRandom.uuid
+    rows = @human.pgsql.exec(
+      'INSERT INTO token (human, text) VALUES ($1, $2) RETURNING id',
+      [@human.id, uuid]
+    )
+    id = rows[0]['id'].to_i
+    Token.new(self, id)
+  end
 
   def each
-    @human.psql.select do |row|
+    @human.pgsql.exec('SELECT * FROM token WHERE human=$1', [@human.id]).each do |row|
       yield Token.new(self, row['id'].to_i)
     end
   end
