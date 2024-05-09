@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 require_relative 'urror'
+require_relative 'tokens'
 
 # Human being.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -47,7 +48,7 @@ class Baza::Human
       'SELECT github FROM human WHERE id = $1',
       [@id]
     )
-    raise Baza::Urror.new("Human ##{@id} not found") if rows.empty?
+    raise Baza::Urror, "Human ##{@id} not found" if rows.empty?
     rows[0]['github']
   end
 end

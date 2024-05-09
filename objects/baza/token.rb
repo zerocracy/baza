@@ -25,12 +25,19 @@
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
 class Baza::Token
+  attr_reader :id
+
   def initialize(tokens, id)
     @tokens = tokens
     @id = id
   end
 
-  def each(&block)
-    @human.psql.select(&block)
+  def name
+    rows = @tokens.pgsql.exec(
+      'SELECT name FROM token WHERE id = $1',
+      [@id]
+    )
+    raise Baza::Urror, "Token ##{@id} not found" if rows.empty?
+    rows[0]['name']
   end
 end

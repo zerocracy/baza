@@ -23,12 +23,18 @@
 require 'minitest/autorun'
 require_relative '../test__helper'
 require_relative '../../objects/baza'
-require_relative '../../objects/baza/tokens'
+require_relative '../../objects/baza/humans'
 
 # Test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
 class Baza::TokensTest < Minitest::Test
-  def test_simple_fetching; end
+  def test_create_token
+    human = Baza::Humans.new(test_pgsql).ensure(test_name)
+    tokens = human.tokens
+    name = test_name
+    token = tokens.add(name)
+    assert_equal(token.name, name)
+  end
 end

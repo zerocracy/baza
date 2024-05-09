@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 require 'securerandom'
+require_relative 'token'
 
 # Tokens of a user.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -31,19 +32,23 @@ class Baza::Tokens
     @human = human
   end
 
+  def pgsql
+    @human.pgsql
+  end
+
   def add(name)
     uuid = SecureRandom.uuid
     rows = @human.pgsql.exec(
-      'INSERT INTO token (human, text) VALUES ($1, $2) RETURNING id',
-      [@human.id, uuid]
+      'INSERT INTO token (human, name, text) VALUES ($1, $2, $3) RETURNING id',
+      [@human.id, name, uuid]
     )
     id = rows[0]['id'].to_i
-    Token.new(self, id)
+    Baza::Token.new(self, id)
   end
 
   def each
     @human.pgsql.exec('SELECT * FROM token WHERE human=$1', [@human.id]).each do |row|
-      yield Token.new(self, row['id'].to_i)
+      yield Baza::Token.new(self, row['id'].to_i)
     end
   end
 end

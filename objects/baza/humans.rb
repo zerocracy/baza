@@ -43,14 +43,14 @@ class Baza::Humans
       'SELECT id FROM human WHERE github = $1',
       [login]
     )
-    raise Baza::Urror.new("Human @#{login} not found") if rows.empty?
+    raise Baza::Urror, "Human @#{login} not found" if rows.empty?
     Baza::Human.new(self, rows[0]['id'].to_i)
   end
 
   # Make sure this human exists (create if it doesn't) and return it.
   def ensure(login)
-    raise Baza::Urror.new('GitHub login is empty') if login.empty?
-    raise Baza::Urror.new("GitHub login too long: \"@#{login}\"") if login.length > 64
+    raise Baza::Urror, 'GitHub login is empty' if login.empty?
+    raise Baza::Urror, "GitHub login too long: \"@#{login}\"" if login.length > 64
     rows = @pgsql.exec(
       'INSERT INTO human (github) VALUES ($1) ON CONFLICT DO NOTHING RETURNING id',
       [login]
