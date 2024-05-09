@@ -92,7 +92,7 @@ class Baza::AppTest < Minitest::Test
     post('/tokens/add', 'name=foo')
     assert_status(302)
     id = last_response.headers['X-Zerocracy-TokenId'].to_i
-    assert(id > 0)
+    assert(id.positive?)
     get("/tokens/#{id}/deactivate")
     assert_status(302)
   end
@@ -115,7 +115,7 @@ class Baza::AppTest < Minitest::Test
     end
     assert_status(302)
     id = last_response.headers['X-Zerocracy-JobId'].to_i
-    assert(id > 0)
+    assert(id.positive?)
     get("/jobs/#{id}")
     assert_status(200)
   end
@@ -134,4 +134,3 @@ class Baza::AppTest < Minitest::Test
     set_cookie("identity=#{enc}")
   end
 end
-#

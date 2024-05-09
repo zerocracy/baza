@@ -48,7 +48,7 @@ class Baza::Result
     @job.pgsql.exec('SELECT msec FROM result WHERE id = $1', [@id])[0]['msec'].to_i
   end
 
-  def to_json
+  def to_json(*_args)
     {
       id: @id,
       stdout: stdout

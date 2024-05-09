@@ -78,7 +78,7 @@ class Baza::Token
     rows[0]['text']
   end
 
-  def to_json
+  def to_json(*_args)
     {
       id: @id,
       name: name,

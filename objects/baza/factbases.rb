@@ -37,7 +37,7 @@ class Baza::Factbases
     SecureRandom.uuid
   end
 
-  def load(id, file)
+  def load(_id, file)
     File.write(file, 'boom!')
   end
 end

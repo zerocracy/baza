@@ -34,4 +34,3 @@ get '/sql' do
     lag: Time.now - start
   )
 end
-

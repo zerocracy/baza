@@ -37,7 +37,7 @@ class Baza::ResultTest < Minitest::Test
     job = token.start(test_name)
     job.finish(Baza::Factbases.new('', ''), 'Hello, world!', 1, 42)
     r = job.result
-    assert(r.id > 0)
+    assert(r.id.positive?)
     assert_equal('Hello, world!', r.stdout)
     assert_equal(1, r.exit)
     assert_equal(42, r.msec)

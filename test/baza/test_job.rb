@@ -35,7 +35,7 @@ class Baza::JobTest < Minitest::Test
     token = human.tokens.add(test_name)
     id = token.start(test_name).id
     job = human.jobs.get(id)
-    assert(job.id > 0)
+    assert(job.id.positive?)
     assert_equal(id, job.id)
     assert(!job.finished?)
     assert(!job.created.nil?)

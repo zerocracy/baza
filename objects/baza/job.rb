@@ -64,7 +64,7 @@ class Baza::Job
     Baza::Result.new(self, rows[0]['id'].to_i)
   end
 
-  def to_json
+  def to_json(*_args)
     {
       id: @id,
       finished: finished?
