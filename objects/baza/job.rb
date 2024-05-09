@@ -48,7 +48,9 @@ class Baza::Job
   end
 
   def created
-    Time.parse(@jobs.pgsql.exec('SELECT created FROM job WHERE id = $1', [@id])[0]['created'])
+    rows = @jobs.pgsql.exec('SELECT created FROM job WHERE id = $1', [@id])
+    raise Baza::Urror, "There is no job ##{@id}" if rows.empty?
+    Time.parse(rows[0]['created'])
   end
 
   def finished?

@@ -83,6 +83,8 @@ class Baza::Tokens
   end
 
   def get(id)
+    rows = @human.pgsql.exec('SELECT id FROM token WHERE id = $1', [id])
+    raise Baza::Urror, "Token ##{id} not found" if rows.empty?
     Baza::Token.new(self, id)
   end
 end
