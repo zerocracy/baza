@@ -33,6 +33,8 @@ Metrics/CyclomaticComplexity:
   Max: 25
 Metrics/BlockLength:
   Max: 50
+Metrics/ClassLength:
+  Max: 200
 Style/MultilineTernaryOperator:
   Enabled: false
 Layout/MultilineMethodCallIndentation:
