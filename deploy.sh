@@ -5,7 +5,7 @@ cd $(dirname $0)
 bundle update
 # rake
 sed -i -s 's|Gemfile.lock||g' .gitignore
-cp /code/home/assets/baza/config.yml .
+cp /code/home/assets/zerocracy/baza.yml config.yml
 git add config.yml
 git add Gemfile.lock
 git add .gitignore
