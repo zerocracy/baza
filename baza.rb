@@ -65,10 +65,10 @@ configure do
   unless ENV['RACK_ENV'] == 'test'
     f = File.join(File.dirname(__FILE__), 'config.yml')
     unless File.exist?(f)
-      raise [
-        "The config file #{f} is absent, can't start the app. ",
-        "If you are running in a staging/testing mode, set RACK_ENV envirornemt variable to 'test'"
-      ].join
+      raise \
+        "The config file #{f} is absent, can't start the app. " \
+        'If you are running in a staging/testing mode, set RACK_ENV ' \
+        "envirornemt variable to 'test'"
     end
     config = YAML.safe_load(File.open(f))
   end
