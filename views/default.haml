@@ -12,8 +12,9 @@
     :css
       section { width: 100%; margin: 0; }
       article { border: none; }
-      article, header { padding: 0; }
-      header nav ul { text-align: left; }
+      article, header, footer { padding: 0; }
+      header nav ul, footer nav ul { text-align: left; }
+      footer { padding-top: 2em; font-size: 0.9em; color: gray; }
       .logo { width: 64px; height: 64px; }
   %body
     %section
@@ -46,9 +47,6 @@
                 %a{href: iri.cut('/gift')}
                   Gift
             %li
-              %span{title: 'Currently deployed version'}
-                = Baza::VERSION
-            %li
               %a{href: iri.cut('/logout')}
                 Logout
       %article
@@ -56,3 +54,10 @@
           %p{style: 'background-color:' + flash_color + ';color:white;padding:.1em .5em;border-radius:4px;width:100%;'}
             = flash_msg
         != yield
+      %footer
+        %nav
+          %ul
+            %li
+              %span{title: 'Currently deployed version'}
+                = Baza::VERSION
+
