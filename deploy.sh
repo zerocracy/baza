@@ -34,4 +34,5 @@ git add .gitignore
 git commit -m 'config.yml for heroku'
 trap 'git reset HEAD~1 && rm config.yml && git checkout -- .gitignore' EXIT
 git push heroku master -f
+rm -f target/pgsql-config.yml
 bundle exec rake liquibase
