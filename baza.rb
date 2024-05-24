@@ -57,8 +57,8 @@ configure do
       'name' => '????'
     },
     'github' => {
-      'client_id' => '????',
-      'client_secret' => '????',
+      'id' => '????',
+      'secret' => '????',
       'encryption_secret' => ''
     }
   }
@@ -81,8 +81,8 @@ configure do
   set :log, Loog::REGULAR
   set :server_settings, timeout: 25
   set :glogin, GLogin::Auth.new(
-    config['github']['client_id'],
-    config['github']['client_secret'],
+    config['github']['id'],
+    config['github']['secret'],
     'https://www.zerocracy.com/github-callback'
   )
   if File.exist?('target/pgsql-config.yml')
