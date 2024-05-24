@@ -123,8 +123,8 @@ def assemble(haml, layout, map)
 end
 
 def the_human
-  flash(iri.cut('/'), 'You have to login first') unless @locals[:human]
-  @locals[:human]
+  flash(iri.cut('/'), 'You have to login first') unless @locals[:identity]
+  @locals[:human] = settings.humans.ensure(@locals[:identity])
 end
 
 def iri
