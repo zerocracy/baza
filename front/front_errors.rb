@@ -29,8 +29,7 @@ not_found do
   content_type('text/html', charset: 'utf-8')
   assemble(
     :not_found,
-    :front,
-    title: request.url,
+    :empty,
     url: request.url
   )
 end
@@ -44,8 +43,7 @@ error do
     Raven.capture_exception(e)
     assemble(
       :error,
-      :front,
-      title: '/error',
+      :empty,
       error: "#{e.message}\n\t#{e.backtrace.join("\n\t")}"
     )
   end
