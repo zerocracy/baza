@@ -47,7 +47,11 @@ release:
     mkdir ~/.ssh
     mv ../id_rsa ../id_rsa.pub ~/.ssh
     chmod -R 600 ~/.ssh/*
-    echo -e "Host *\n  StrictHostKeyChecking no\n  UserKnownHostsFile=/dev/null" > ~/.ssh/config
+    cat <<EOF
+    Host *
+      StrictHostKeyChecking no
+      UserKnownHostsFile=/dev/null
+    EOF > ~/.ssh/config
     sed -i "s/0\.0\.0/${tag}/g" ./version.rb
     git add ./version.rb
     git commit -m 'build number set'
@@ -60,7 +64,9 @@ release:
     rm -f target/pgsql-config.yml
     bundle exec rake liquibase
     rm -rf config.yml
-    curl -f --connect-timeout 15 --retry 5 --retry-delay 30 https://www.zerocracy.com > /dev/null
+    curl -f --connect-timeout 15 \
+      --retry 5 --retry-delay 30 \
+      https://www.zerocracy.com > /dev/null
 merge:
   script: |-
     bundle exec rake
