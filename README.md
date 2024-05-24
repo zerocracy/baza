@@ -14,7 +14,7 @@ This is the place where all bots meet.
 
 GitHub Action plugins (in the order of steps):
 
-* `zerocracy/scan-action` — fetch events via GitHub API and put them into the factbase
+* `zerocracy/judges-action` — fetch events via GitHub API and put them into the factbase
 * `zerocracy/push-action` — send factbase to Zerocracy
 * `zerocracy/pull-action` — receieve updated factbase from Zerocracy
 * `zerocracy/submit-action` — submit messages to GitHub issues

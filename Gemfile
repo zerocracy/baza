@@ -22,6 +22,7 @@
 source 'https://rubygems.org'
 ruby '~>3.2'
 
+gem 'factbase', '0.0.30'
 gem 'glogin', '0.14.2'
 gem 'haml', '6.3.0'
 gem 'iri', '0.8.0'
