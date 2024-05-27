@@ -34,7 +34,7 @@
           - else
             No
         %td
-          - unless j.finished?
+          - if j.finished?
             = "Exit:#{j.result.exit}"
             = '|'
             %a{href: iri.cut('/stdout').append("#{j.id}.txt")}
