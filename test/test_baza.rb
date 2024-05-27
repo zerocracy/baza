@@ -178,6 +178,8 @@ class Baza::AppTest < Minitest::Test
     fb.query('(always)').delete!
     fb.import(last_response.body)
     assert(fb.query('(exists foo)').each.to_a[0].foo.start_with?('booom'))
+    get("/stdout/#{jid}.txt")
+    assert_status(200)
   end
 
   private

@@ -14,6 +14,9 @@
         %th
           Started
         %th
+          Finished?
+        %th
+          Result
     %tbody
     - jobs.each do |j|
       %tr
@@ -27,4 +30,15 @@
           = j.created
         %td
           - if j.finished?
-            Finished
+            Yes
+          - else
+            No
+        %td
+          - unless j.finished?
+            = "Exit:#{j.result.exit}"
+            = '|'
+            %a{href: iri.cut('/stdout').append("#{j.id}.txt")}
+              Stdout
+            = '|'
+            %a{href: iri.cut('/pull').append("#{j.id}.fb")}
+              = "#{j.name}.fb"
