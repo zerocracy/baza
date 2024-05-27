@@ -38,8 +38,8 @@ GEM
     aws-sdk-kms (1.82.0)
       aws-sdk-core (~> 3, >= 3.193.0)
       aws-sigv4 (~> 1.1)
-    aws-sdk-s3 (1.143.0)
-      aws-sdk-core (~> 3, >= 3.191.0)
+    aws-sdk-s3 (1.151.0)
+      aws-sdk-core (~> 3, >= 3.194.0)
       aws-sdk-kms (~> 1)
       aws-sigv4 (~> 1.8)
     aws-sigv4 (1.8.0)
@@ -259,7 +259,7 @@ PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
-  aws-sdk-s3 (= 1.143.0)
+  aws-sdk-s3 (= 1.151.0)
   backtrace (= 0.4.0)
   factbase (= 0.0.38)
   glogin (= 0.14.2)
