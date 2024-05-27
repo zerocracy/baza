@@ -23,6 +23,7 @@
 # SOFTWARE.
 
 require 'securerandom'
+require 'veil'
 require_relative 'token'
 
 # Tokens of a user.
@@ -62,7 +63,12 @@ class Baza::Tokens
 
   def each
     @human.pgsql.exec('SELECT * FROM token WHERE human=$1', [@human.id]).each do |row|
-      yield Baza::Token.new(self, row['id'].to_i)
+      yield Veil.new(
+        Baza::Token.new(self, row['id'].to_i),
+        active: row['active'] == 't',
+        name: row['name'],
+        text: row['text']
+      )
     end
   end
 
