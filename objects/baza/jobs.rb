@@ -22,6 +22,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+require 'veil'
 require_relative 'token'
 
 # Jobs of a human.
@@ -45,9 +46,19 @@ class Baza::Jobs
   end
 
   def each
-    sql = 'SELECT job.id FROM job JOIN token ON token.id = job.token WHERE token.human = $1'
+    sql =
+      'SELECT job.*, result.id AS r FROM job ' \
+      'JOIN token ON token.id = job.token ' \
+      'LEFT JOIN result ON result.job = job.id ' \
+      'WHERE token.human = $1'
     @human.pgsql.exec(sql, [@human.id]).each do |row|
-      yield Baza::Job.new(self, row['id'].to_i)
+      yield Veil.new(
+        Baza::Job.new(self, row['id'].to_i),
+        created: Time.parse(row['created']),
+        name: row['name'],
+        fb: row['factbase'],
+        finished?: !row['r'].nil?
+      )
     end
   end
 
