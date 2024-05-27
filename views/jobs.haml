@@ -27,7 +27,7 @@
           %code
             = j.name
         %td
-          = j.created
+          = j.created.utc.iso8601
         %td
           - if j.finished?
             Yes
@@ -36,9 +36,8 @@
         %td
           - if j.finished?
             = "Exit:#{j.result.exit}"
-            = '|'
-            %a{href: iri.cut('/stdout').append("#{j.id}.txt")}
-              Stdout
-            = '|'
+            = ' | '
+            %a{href: iri.cut('/stdout').append("#{j.id}.txt")}> stdout
+            = ' | '
             %a{href: iri.cut('/pull').append("#{j.id}.fb")}
               = "#{j.name}.fb"
