@@ -24,6 +24,7 @@
 
 require 'minitest/autorun'
 require 'rack/test'
+require 'factbase'
 require_relative 'test__helper'
 require_relative '../objects/baza'
 require_relative '../baza'
@@ -146,8 +147,10 @@ class Baza::AppTest < Minitest::Test
     token = JSON.parse(last_response.body)['text']
     get('/push')
     name = test_name
+    fb = Factbase.new
+    fb.insert.foo = 'booom \x01\x02\x03'
     Tempfile.open do |f|
-      File.binwrite(f.path, 'booom \x01\x02\x03')
+      File.binwrite(f.path, fb.export)
       post(
         '/push',
         'token' => token,
@@ -169,9 +172,12 @@ class Baza::AppTest < Minitest::Test
       break if last_response.status == 200
       sleep 0.1
       cycles += 1
-      break if cycles > 100
+      break if cycles > 10
     end
     assert_status(200)
+    fb.query('(always)').delete!
+    fb.import(last_response.body)
+    assert(fb.query('(exists foo)').each.to_a[0].foo.start_with?('booom'))
   end
 
   private

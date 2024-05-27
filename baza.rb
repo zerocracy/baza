@@ -52,8 +52,10 @@ end
 configure do
   config = {
     's3' => {
-      'key' => '????',
-      'secret' => '????'
+      'key' => '',
+      'secret' => '',
+      'region' => '',
+      'bucket' => ''
     },
     'telegram' => {
       'token' => '????',
@@ -100,7 +102,12 @@ configure do
     )
   end
   settings.pgsql.start(4)
-  set :fbs, Baza::Factbases.new(config['s3']['key'], config['s3']['secret'])
+  set :fbs, Baza::Factbases.new(
+    config['s3']['key'],
+    config['s3']['secret'],
+    config['s3']['region'],
+    config['s3']['bucket']
+  )
   set :humans, Baza::Humans.new(settings.pgsql)
   set :pipeline, Baza::Pipeline.new(settings.fbs, settings.loog)
   settings.pipeline.update(settings.humans)

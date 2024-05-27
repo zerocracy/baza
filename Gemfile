@@ -25,6 +25,8 @@
 source 'https://rubygems.org'
 ruby '~>3.2'
 
+gem 'aws-sdk-s3', '1.143.0'
+gem 'backtrace', '0.4.0'
 gem 'factbase', '0.0.38'
 gem 'glogin', '0.14.2'
 gem 'haml', '6.3.0'

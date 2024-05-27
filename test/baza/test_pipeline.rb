@@ -35,15 +35,22 @@ require_relative '../../objects/baza/pipeline'
 class Baza::PipelineTest < Minitest::Test
   def test_simple_processing
     humans = Baza::Humans.new(test_pgsql)
-    pipeline = Baza::Pipeline.new(Baza::Factbases.new('', ''), Loog::NULL)
+    fbs = Baza::Factbases.new('', '')
+    pipeline = Baza::Pipeline.new(fbs, Loog::NULL)
     pipeline.start
     human = humans.ensure(test_name)
     token = human.tokens.add(test_name)
-    job = token.start(test_name, test_name)
+    uuid = Tempfile.open do |f|
+      File.write(f, 'hello')
+      uuid = fbs.save(f.path)
+    end
+    job = token.start(test_name, uuid)
     assert(!human.jobs.get(job.id).finished?)
     pipeline.update(humans)
     pipeline.wait do
-      assert(human.jobs.get(job.id).finished?)
+      j = human.jobs.get(job.id)
+      assert(j.finished?)
+      assert(!j.result.empty?)
     end
     pipeline.stop
   end

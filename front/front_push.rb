@@ -55,6 +55,7 @@ end
 get(%r{/pull/([0-9]+).fb}) do
   r = the_human.jobs.get(params['captures'].first.to_i).result
   raise Baza::Urror, 'The result is broken' unless r.exit.zero?
+  raise Baza::Urror, 'The result is empty' if r.empty?
   Tempfile.open do |f|
     settings.fbs.load(r.fb, f.path)
     content_type('application/octet-stream')

@@ -23,23 +23,70 @@
 # SOFTWARE.
 
 require 'securerandom'
+require 'fileutils'
+require 'time'
+require 'aws-sdk-s3'
 
 # All factbases.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
 class Baza::Factbases
-  def initialize(key, secret)
+  def initialize(key, secret, region = 'us-east-1', bucket = 'baza.zerocracy.com')
     @key = key
     @secret = secret
+    @region = region
+    @bucket = bucket
   end
 
+  # Save the content of this file into the cloud and return a unique ID
+  # of the cloud BLOB just created.
   def save(file)
-    File.binread(file)
-    SecureRandom.uuid
+    uuid = "#{Time.now.strftime('%Y-%m-%d')}-#{SecureRandom.uuid}"
+    if @key.empty?
+      File.binwrite(fake(uuid), File.binread(file))
+    else
+      aws.put_object(
+        body: file,
+        bucket: @bucket,
+        key: oname(uuid)
+      )
+    end
+    uuid
   end
 
-  def load(_id, file)
-    File.binwrite(file, 'boom!')
+  # Read a BLOB from the cloud, identified by the +uuid+, and save it
+  # to the file provided. Fail if there is not such BLOB.
+  def load(uuid, file)
+    raise 'UUID can\'t be nil' if uuid.nil?
+    raise 'UUID can\'t be empty' if uuid.empty?
+    if @key.empty?
+      File.binwrite(file, File.binread(fake(uuid)))
+    else
+      aws.get_object(
+        response_target: file,
+        bucket: @bucket,
+        key: oname(uuid)
+      )
+    end
+  end
+
+  private
+
+  def aws
+    Aws::S3::Client.new(
+      region: @region,
+      credentials: Aws::Credentials(@key, @secret)
+    )
+  end
+
+  def fake(uuid)
+    f = File.join('target/fbs', uuid)
+    FileUtils.mkdir_p(File.dirname(f))
+    f
+  end
+
+  def oname(uuid)
+    uuid.split('-').join('/')
   end
 end

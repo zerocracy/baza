@@ -23,6 +23,7 @@
 # SOFTWARE.
 
 require 'loog'
+require 'backtrace'
 require_relative 'humans'
 require_relative 'urror'
 
@@ -55,6 +56,8 @@ class Baza::Pipeline
           job.finish(uuid, stdout.to_s, code, ((Time.now - start) * 1000).to_i)
           @loog.info("Job #{job.id} finished, exit=#{code}!")
         end
+      rescue StandardError => e
+        @loog.error(Backtrace.new(e))
       end
     end
     @loog.info('Pipeline started')
@@ -83,10 +86,14 @@ class Baza::Pipeline
     @loog.info("Job #{job.id} added to the jobs")
   end
 
-  def wait
+  # Wait for the pipeline to get empty. This is mostly used for unit
+  # testing. The +max+ argument is the number of seconds to wait maximum.
+  def wait(max = 2)
+    start = Time.now
     loop do
       break if @jobs.empty?
       sleep 0.01
+      raise 'The pipeline is still busy' if Time.now - start > max
     end
     yield
   end
