@@ -22,6 +22,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+require 'veil'
 require_relative 'receipt'
 
 # Account of a human.
@@ -39,7 +40,13 @@ class Baza::Account
 
   def each
     @human.pgsql.exec('SELECT * FROM receipt WHERE human = $1', [@human.id]).each do |row|
-      yield Baza::Receipt.new(self, row['id'].to_i)
+      yield Veil.new(
+        Baza::Receipt.new(self, row['id'].to_i),
+        job_id: row['job'].to_i,
+        zents: row['zents'].to_i,
+        summary: row['summary'],
+        created: Time.parse(row['created'])
+      )
     end
   end
 
