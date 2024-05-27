@@ -35,11 +35,11 @@ class Baza::Factbases
   end
 
   def save(file)
-    File.read(file)
+    File.binread(file)
     SecureRandom.uuid
   end
 
   def load(_id, file)
-    File.write(file, 'boom!')
+    File.binwrite(file, 'boom!')
   end
 end

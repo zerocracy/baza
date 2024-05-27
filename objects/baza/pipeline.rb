@@ -33,9 +33,10 @@ require_relative 'urror'
 class Baza::Pipeline
   attr_reader :pgsql
 
-  def initialize(loog)
+  def initialize(fbs, loog)
     @loog = loog
     @jobs = Queue.new
+    @fbs = fbs
   end
 
   def start
@@ -43,8 +44,17 @@ class Baza::Pipeline
       loop do
         job = @jobs.pop
         @loog.info("Job #{job.id} taken from the queue, started...")
-        job.finish("s3://#{job.id}", 'stdout', 0, 42)
-        @loog.info("Job #{job.id} finished!")
+        Dir.mktmpdir do |dir|
+          input = File.join(dir, 'input.fb')
+          @fbs.load(job.fb, input)
+          output = File.join(dir, 'output.fb')
+          start = Time.now
+          stdout = Loog::Buffer.new
+          code = run(input, output, stdout)
+          uuid = code.zero? ? @fbs.save(output) : nil
+          job.finish(uuid, stdout.to_s, code, ((Time.now - start) * 1000).to_i)
+          @loog.info("Job #{job.id} finished, exit=#{code}!")
+        end
       end
     end
     @loog.info('Pipeline started')
@@ -79,5 +89,13 @@ class Baza::Pipeline
       sleep 0.01
     end
     yield
+  end
+
+  private
+
+  def run(input, output, buf)
+    FileUtils.cp(input, output)
+    buf.info('Simply copied input FB into output FB')
+    0
   end
 end

@@ -35,7 +35,7 @@ require_relative '../../objects/baza/pipeline'
 class Baza::PipelineTest < Minitest::Test
   def test_simple_processing
     humans = Baza::Humans.new(test_pgsql)
-    pipeline = Baza::Pipeline.new(Loog::NULL)
+    pipeline = Baza::Pipeline.new(Baza::Factbases.new('', ''), Loog::NULL)
     pipeline.start
     human = humans.ensure(test_name)
     token = human.tokens.add(test_name)

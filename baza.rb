@@ -100,9 +100,9 @@ configure do
     )
   end
   settings.pgsql.start(4)
-  set :factbases, Baza::Factbases.new(config['s3']['key'], config['s3']['secret'])
+  set :fbs, Baza::Factbases.new(config['s3']['key'], config['s3']['secret'])
   set :humans, Baza::Humans.new(settings.pgsql)
-  set :pipeline, Baza::Pipeline.new(settings.loog)
+  set :pipeline, Baza::Pipeline.new(settings.fbs, settings.loog)
   settings.pipeline.update(settings.humans)
   settings.pipeline.start
 end
