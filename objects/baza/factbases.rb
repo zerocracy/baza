@@ -26,17 +26,20 @@ require 'securerandom'
 require 'fileutils'
 require 'time'
 require 'aws-sdk-s3'
+require 'aws-sdk-core'
+require 'loog'
 
 # All factbases.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
 class Baza::Factbases
-  def initialize(key, secret, region = 'us-east-1', bucket = 'baza.zerocracy.com')
+  def initialize(key, secret, region = 'us-east-1', bucket = 'baza.zerocracy.com', loog: Loog::NULL)
     @key = key
     @secret = secret
     @region = region
     @bucket = bucket
+    @loog = loog
   end
 
   # Save the content of this file into the cloud and return a unique ID
@@ -46,11 +49,15 @@ class Baza::Factbases
     if @key.empty?
       File.binwrite(fake(uuid), File.binread(file))
     else
-      aws.put_object(
-        body: file,
-        bucket: @bucket,
-        key: oname(uuid)
-      )
+      key = oname(uuid)
+      File.open(file, 'rb') do |f|
+        aws.put_object(
+          body: f,
+          bucket: @bucket,
+          key: key
+        )
+      end
+      @loog.info("Saved to S3: #{key} (#{File.size(file)} bytes)")
     end
     uuid
   end
@@ -63,11 +70,13 @@ class Baza::Factbases
     if @key.empty?
       File.binwrite(file, File.binread(fake(uuid)))
     else
+      key = oname(uuid)
       aws.get_object(
         response_target: file,
         bucket: @bucket,
-        key: oname(uuid)
+        key: key
       )
+      @loog.info("Loaded from S3: #{key} (#{File.size(file)} bytes)")
     end
   end
 
@@ -76,7 +85,7 @@ class Baza::Factbases
   def aws
     Aws::S3::Client.new(
       region: @region,
-      credentials: Aws::Credentials(@key, @secret)
+      credentials: Aws::Credentials.new(@key, @secret)
     )
   end
 

@@ -106,7 +106,8 @@ configure do
     config['s3']['key'],
     config['s3']['secret'],
     config['s3']['region'],
-    config['s3']['bucket']
+    config['s3']['bucket'],
+    loog: settings.loog
   )
   set :humans, Baza::Humans.new(settings.pgsql)
   set :pipeline, Baza::Pipeline.new(settings.fbs, settings.loog)

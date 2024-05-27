@@ -22,33 +22,39 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-source 'https://rubygems.org'
-ruby '~>3.2'
+require 'minitest/autorun'
+require 'loog'
+require_relative '../test__helper'
+require_relative '../../objects/baza'
+require_relative '../../objects/baza/factbases'
 
-gem 'aws-sdk-core', '3.196.1'
-gem 'aws-sdk-s3', '1.151.0'
-gem 'backtrace', '0.4.0'
-gem 'factbase', '0.0.38'
-gem 'glogin', '0.14.2'
-gem 'haml', '6.3.0'
-gem 'iri', '0.8.0'
-gem 'loog', '0.5.1'
-gem 'minitest', '5.23.1', require: false
-gem 'pgtk', '0.9.3'
-gem 'rack', '3.0.11'
-gem 'rack-ssl', '1.4.1'
-gem 'rack-test', '2.1.0'
-gem 'rake', '13.2.1', require: false
-gem 'relative_time', '1.1.0'
-gem 'rerun', '0.14.0', require: false
-gem 'rspec-rails', '6.1.2', require: false
-gem 'rubocop', '1.64.0', require: false
-gem 'rubocop-rspec', '2.29.2', require: false
-gem 'sass', '3.7.4'
-gem 'sentry-raven', '3.1.2'
-gem 'simplecov', '0.22.0'
-gem 'simplecov-cobertura', '~> 2.1'
-gem 'sinatra', '4.0.0'
-gem 'sinatra-contrib', '4.0.0'
-gem 'sprockets', '4.2.1'
-gem 'xcop', '0.7.1'
+# Test.
+# Author:: Yegor Bugayenko (yegor256@gmail.com)
+# Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
+# License:: MIT
+class Baza::FactbasesTest < Minitest::Test
+  def test_fake_usage
+    fbs = Baza::Factbases.new('', '')
+    Dir.mktmpdir do |dir|
+      input = File.join(dir, 'a.fb')
+      File.write(input, 'hey')
+      uuid = fbs.save(input)
+      output = File.join(dir, 'b.fb')
+      fbs.load(uuid, output)
+      assert_equal('hey', File.read(output))
+    end
+  end
+
+  def test_aws_usage
+    skip
+    fbs = Baza::Factbases.new('AKIAQJE...', 'KmX8eM...', loog: Loog::VERBOSE)
+    Dir.mktmpdir do |dir|
+      input = File.join(dir, 'a.fb')
+      File.write(input, 'hey')
+      uuid = fbs.save(input)
+      output = File.join(dir, 'b.fb')
+      fbs.load(uuid, output)
+      assert_equal('hey', File.read(output))
+    end
+  end
+end
