@@ -60,4 +60,6 @@
             %li
               %span{title: 'Currently deployed version'}
                 = Baza::VERSION
+            %li
+              = format('%.3fs', Time.now - http_start)
 
