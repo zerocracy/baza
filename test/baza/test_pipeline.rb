@@ -23,34 +23,28 @@
 # SOFTWARE.
 
 require 'minitest/autorun'
+require 'loog'
 require_relative '../test__helper'
 require_relative '../../objects/baza'
-require_relative '../../objects/baza/humans'
+require_relative '../../objects/baza/pipeline'
 
 # Test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class Baza::JobsTest < Minitest::Test
-  def test_emptiness_checks
-    human = Baza::Humans.new(test_pgsql).ensure(test_name)
-    jobs = human.jobs
-    assert(jobs.empty?)
-  end
-
-  def test_start_and_finish
-    human = Baza::Humans.new(test_pgsql).ensure(test_name)
+class Baza::PipelineTest < Minitest::Test
+  def test_simple_processing
+    humans = Baza::Humans.new(test_pgsql)
+    pipeline = Baza::Pipeline.new(Loog::NULL)
+    pipeline.start
+    human = humans.ensure(test_name)
     token = human.tokens.add(test_name)
     job = token.start(test_name, test_name)
     assert(!human.jobs.get(job.id).finished?)
-    job.finish(test_name, 'stdout', 0, 544)
-    assert(human.jobs.get(job.id).finished?)
-    assert(!human.jobs.empty?)
-    found = 0
-    human.jobs.each do |j|
-      found += 1
-      assert(j.finished?)
+    pipeline.update(humans)
+    pipeline.wait do
+      assert(human.jobs.get(job.id).finished?)
     end
-    assert_equal(1, found)
+    pipeline.stop
   end
 end

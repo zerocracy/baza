@@ -42,6 +42,7 @@ require 'yaml'
 require_relative 'version'
 require_relative 'objects/baza/factbases'
 require_relative 'objects/baza/humans'
+require_relative 'objects/baza/pipeline'
 
 unless ENV['RACK_ENV'] == 'test'
   require 'rack/ssl'
@@ -80,7 +81,7 @@ configure do
   set :dump_errors, true
   set :config, config
   set :logging, true
-  set :log, Loog::REGULAR
+  set :loog, Loog::REGULAR
   set :server_settings, timeout: 25
   set :glogin, GLogin::Auth.new(
     config['github']['id'],
@@ -90,17 +91,20 @@ configure do
   if File.exist?('target/pgsql-config.yml')
     set :pgsql, Pgtk::Pool.new(
       Pgtk::Wire::Yaml.new(File.join(__dir__, 'target/pgsql-config.yml')),
-      log: settings.log
+      log: settings.loog
     )
   else
     set :pgsql, Pgtk::Pool.new(
       Pgtk::Wire::Env.new('DATABASE_URL'),
-      log: settings.log
+      log: settings.loog
     )
   end
   settings.pgsql.start(4)
   set :factbases, Baza::Factbases.new(config['s3']['key'], config['s3']['secret'])
   set :humans, Baza::Humans.new(settings.pgsql)
+  set :pipeline, Baza::Pipeline.new(settings.loog)
+  settings.pipeline.update(settings.humans)
+  settings.pipeline.start
 end
 
 get '/' do

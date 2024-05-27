@@ -38,6 +38,10 @@ class Baza::Result
     Time.parse(@job.pgsql.exec('SELECT created FROM result WHERE id = $1', [@id])[0]['created'])
   end
 
+  def fb
+    @job.pgsql.exec('SELECT factbase FROM result WHERE id = $1', [@id])[0]['fb']
+  end
+
   def stdout
     @job.pgsql.exec('SELECT stdout FROM result WHERE id = $1', [@id])[0]['stdout']
   end

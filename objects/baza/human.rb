@@ -55,6 +55,10 @@ class Baza::Human
     Baza::Jobs.new(self)
   end
 
+  def results
+    Baza::Results.new(self)
+  end
+
   def account
     Baza::Account.new(self)
   end

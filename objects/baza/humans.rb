@@ -36,6 +36,10 @@ class Baza::Humans
     @pgsql = pgsql
   end
 
+  def get(id)
+    Baza::Human.new(self, id)
+  end
+
   def exists?(login)
     !@pgsql.exec('SELECT id FROM human WHERE github = $1', [login]).empty?
   end
@@ -46,7 +50,7 @@ class Baza::Humans
       [login]
     )
     raise Baza::Urror, "Human @#{login} not found" if rows.empty?
-    Baza::Human.new(self, rows[0]['id'].to_i)
+    get(rows[0]['id'].to_i)
   end
 
   # Make sure this human exists (create if it doesn't) and return it.
@@ -58,6 +62,6 @@ class Baza::Humans
       [login]
     )
     return find(login) if rows.empty?
-    Baza::Human.new(self, rows[0]['id'].to_i)
+    get(rows[0]['id'].to_i)
   end
 end

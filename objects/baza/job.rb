@@ -22,6 +22,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+require_relative 'take'
 require_relative 'result'
 
 # One job.
@@ -57,6 +58,14 @@ class Baza::Job
 
   def finished?
     !@jobs.pgsql.exec('SELECT FROM result WHERE job = $1', [@id]).empty?
+  end
+
+  def name
+    @jobs.pgsql.exec('SELECT name FROM job WHERE id = $1', [@id])[0]['name']
+  end
+
+  def fb
+    @jobs.pgsql.exec('SELECT factbase FROM job WHERE id = $1', [@id])[0]['factbase']
   end
 
   def result

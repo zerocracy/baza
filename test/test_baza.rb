@@ -145,11 +145,13 @@ class Baza::AppTest < Minitest::Test
     get("/tokens/#{id}.json")
     token = JSON.parse(last_response.body)['text']
     get('/push')
+    name = test_name
     Tempfile.open do |f|
-      File.write(f.path, 'booom')
+      File.binwrite(f.path, 'booom \x01\x02\x03')
       post(
         '/push',
         'token' => token,
+        'name' => name,
         'factbase' => Rack::Test::UploadedFile.new(f.path, 'application/zip')
       )
     end
@@ -158,12 +160,27 @@ class Baza::AppTest < Minitest::Test
     assert(id.positive?)
     get("/jobs/#{id}")
     assert_status(200)
+    get("/recent/#{name}.txt")
+    assert_status(200)
+    jid = last_response.body.to_i
+    cycles = 0
+    loop do
+      get("/pull/#{jid}.fb")
+      break if last_response.status == 200
+      sleep 0.1
+      cycles += 1
+      break if cycles > 100
+    end
+    assert_status(200)
   end
 
   private
 
   def assert_status(code)
-    assert_equal(code, last_response.status, "#{last_request.url}:\n#{last_response.body}")
+    assert_equal(
+      code, last_response.status,
+      "#{last_request.url}:\n#{last_response.headers}\n#{last_response.body}"
+    )
   end
 
   def login(name = test_name)

@@ -22,35 +22,62 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require 'minitest/autorun'
-require_relative '../test__helper'
-require_relative '../../objects/baza'
-require_relative '../../objects/baza/humans'
+require 'loog'
+require_relative 'humans'
+require_relative 'urror'
 
-# Test.
+# Pipeline of jobs.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class Baza::JobsTest < Minitest::Test
-  def test_emptiness_checks
-    human = Baza::Humans.new(test_pgsql).ensure(test_name)
-    jobs = human.jobs
-    assert(jobs.empty?)
+class Baza::Pipeline
+  attr_reader :pgsql
+
+  def initialize(loog)
+    @loog = loog
+    @jobs = Queue.new
   end
 
-  def test_start_and_finish
-    human = Baza::Humans.new(test_pgsql).ensure(test_name)
-    token = human.tokens.add(test_name)
-    job = token.start(test_name, test_name)
-    assert(!human.jobs.get(job.id).finished?)
-    job.finish(test_name, 'stdout', 0, 544)
-    assert(human.jobs.get(job.id).finished?)
-    assert(!human.jobs.empty?)
-    found = 0
-    human.jobs.each do |j|
-      found += 1
-      assert(j.finished?)
+  def start
+    @thread ||= Thread.new do
+      loop do
+        job = @jobs.pop
+        @loog.info("Job #{job.id} taken from the queue, started...")
+        job.finish("s3://#{job.id}", 'stdout', 0, 42)
+        @loog.info("Job #{job.id} finished!")
+      end
     end
-    assert_equal(1, found)
+    @loog.info('Pipeline started')
+  end
+
+  def stop
+    @thread.terminate
+    @loog.info('Pipeline stopped')
+  end
+
+  def update(humans)
+    q =
+      'SELECT human.id AS h, job.id AS j FROM job ' \
+      'JOIN token ON job.token = token.id ' \
+      'JOIN human ON token.human = human.id ' \
+      'LEFT JOIN result ON result.job = job.id ' \
+      'WHERE result.id IS NULL'
+    humans.pgsql.exec(q).each do |row|
+      push(humans.get(row['h'].to_i).jobs.get(row['j'].to_i))
+    end
+    @loog.info("Pipeline updated with #{@jobs.size}")
+  end
+
+  def push(job)
+    @jobs << job
+    @loog.info("Job #{job.id} added to the jobs")
+  end
+
+  def wait
+    loop do
+      break if @jobs.empty?
+      sleep 0.01
+    end
+    yield
   end
 end

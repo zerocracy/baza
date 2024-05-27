@@ -10,6 +10,8 @@
         %th
           Id
         %th
+          Name
+        %th
           Started
         %th
     %tbody
@@ -18,6 +20,9 @@
         %td
           %a{href: iri.cut('/jobs').append(j.id)}
             = j.id
+        %td
+          %code
+            = j.name
         %td
           = j.created
         %td

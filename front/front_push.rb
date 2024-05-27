@@ -39,8 +39,24 @@ post '/push' do
     FileUtils.copy(params[:factbase][:tempfile], f.path)
     File.delete(params[:factbase][:tempfile])
     fid = settings.factbases.save(f.path)
-    job = token.start(fid)
+    job = token.start(params[:name], fid)
+    settings.pipeline.push(job)
     response.headers['X-Zerocracy-JobId'] = job.id.to_s
+    settings.loog.info("New push arrived via HTTP, job ID is #{job.id}")
     flash(iri.cut('/jobs'), "New job ##{job.id} started")
+  end
+end
+
+get(%r{/recent/([a-z0-9-]+).txt}) do
+  content_type('text/plain')
+  the_human.jobs.recent(params['captures'].first).id.to_s
+end
+
+get(%r{/pull/([0-9]+).fb}) do
+  r = the_human.jobs.get(params['captures'].first.to_i).result
+  Tempfile.open do |f|
+    settings.factbases.load(r.fb, f.path)
+    content_type('application/octet-stream')
+    File.binread(f.path)
   end
 end

@@ -22,35 +22,16 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require 'minitest/autorun'
-require_relative '../test__helper'
-require_relative '../../objects/baza'
-require_relative '../../objects/baza/humans'
+require 'pgtk/pool'
 
-# Test.
+# Pgtk utility methods.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class Baza::JobsTest < Minitest::Test
-  def test_emptiness_checks
-    human = Baza::Humans.new(test_pgsql).ensure(test_name)
-    jobs = human.jobs
-    assert(jobs.empty?)
-  end
-
-  def test_start_and_finish
-    human = Baza::Humans.new(test_pgsql).ensure(test_name)
-    token = human.tokens.add(test_name)
-    job = token.start(test_name, test_name)
-    assert(!human.jobs.get(job.id).finished?)
-    job.finish(test_name, 'stdout', 0, 544)
-    assert(human.jobs.get(job.id).finished?)
-    assert(!human.jobs.empty?)
-    found = 0
-    human.jobs.each do |j|
-      found += 1
-      assert(j.finished?)
-    end
-    assert_equal(1, found)
+class Pgtk::Pool
+  def one(table, column, key, value)
+    rows = exec("SELECT #{column} FROM #{table} WHERE #{key} = $1", [value])
+    raise Baza::Urror, "There is no row in #{table} where #{key}=#{value}" if rows.empty?
+    rows[0][key]
   end
 end

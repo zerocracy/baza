@@ -54,4 +54,17 @@ class Baza::Jobs
   def get(id)
     Baza::Job.new(self, id)
   end
+
+  def recent(name)
+    rows = @human.pgsql.exec(
+      'SELECT job.id FROM job ' \
+      'JOIN token ON token.id = job.token ' \
+      'WHERE token.human = $1 ' \
+      'ORDER BY job.created DESC ' \
+      'LIMIT 1',
+      [@human.id]
+    )
+    raise Baza::Urror, "No job by the name '#{name}' found" if rows.empty?
+    Baza::Job.new(self, rows[0]['id'].to_i)
+  end
 end
