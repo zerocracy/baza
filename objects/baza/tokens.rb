@@ -66,7 +66,7 @@ class Baza::Tokens
     @human.pgsql.exec('SELECT * FROM token WHERE human=$1', [@human.id]).each do |row|
       yield Unpiercable.new(
         Baza::Token.new(self, row['id'].to_i),
-        active: row['active'] == 't',
+        active?: row['active'] == 't',
         name: row['name'],
         text: row['text']
       )

@@ -75,6 +75,6 @@ def the_human
   h = settings.humans.get(@locals[:human])
   Veil.new(
     h.extend(Baza::Human::Admin),
-    login: @locals[:human_login]
+    github: @locals[:human_login]
   )
 end
