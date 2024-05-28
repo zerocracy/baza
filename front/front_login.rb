@@ -49,6 +49,20 @@ before '/*' do
   end
 end
 
+get '/fake-login' do
+  flash(iri.cut('/'), 'This URL is for testing only') unless ENV['RACK_ENV'] == 'test'
+  login = 'tester'
+  cookies[:auth] = GLogin::Cookie::Open.new(
+    {
+      'id' => settings.humans.ensure(login).id.to_s,
+      'login' => login,
+      'avatar_url' => 'none'
+    },
+    ''
+  ).to_s
+  flash(iri.cut('/'), "@#{login} has been logged in (FAKE!)")
+end
+
 get '/github-callback' do
   code = params[:code]
   error(400) if code.nil?
@@ -72,9 +86,8 @@ end
 
 def the_human
   flash(iri.cut('/'), 'You have to login first') unless @locals[:human]
-  h = settings.humans.get(@locals[:human])
   Unpiercable.new(
-    h.extend(Baza::Human::Admin),
+    settings.humans.get(@locals[:human]),
     github: @locals[:human_login]
-  )
+  ).extend(Baza::Human::Admin)
 end
