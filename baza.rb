@@ -82,7 +82,7 @@ configure do
   set :raise_errors, false
   set :dump_errors, true
   set :config, config
-  set :logging, true
+  set :logging, false # to disable default Sinatra logging and use Loog
   set :loog, Loog::REGULAR
   set :server_settings, timeout: 25
   set :glogin, GLogin::Auth.new(
