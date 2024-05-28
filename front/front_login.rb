@@ -22,7 +22,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require 'veil'
+require 'unpiercable'
 require_relative '../objects/baza/human'
 
 before '/*' do
@@ -73,7 +73,7 @@ end
 def the_human
   flash(iri.cut('/'), 'You have to login first') unless @locals[:human]
   h = settings.humans.get(@locals[:human])
-  Veil.new(
+  Unpiercable.new(
     h.extend(Baza::Human::Admin),
     github: @locals[:human_login]
   )
