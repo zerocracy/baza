@@ -63,7 +63,7 @@ class Baza::Tokens
   end
 
   def each
-    @human.pgsql.exec('SELECT * FROM token WHERE human=$1', [@human.id]).each do |row|
+    @human.pgsql.exec('SELECT * FROM token WHERE human=$1 ORDER BY active DESC', [@human.id]).each do |row|
       yield Unpiercable.new(
         Baza::Token.new(self, row['id'].to_i),
         active?: row['active'] == 't',
