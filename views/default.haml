@@ -62,6 +62,8 @@
                 = Baza::VERSION
             %li{title: 'How many seconds it took to build this page'}
               = format('%.3f', Time.now - http_start)
+            %li{title: 'The version of Ruby on the server'}
+              = "rb:#{RUBY_VERSION}"
             %li{title: 'The version of PostgreSQL server'}
               = "pg:#{settings.pgsql.version}"
             %li{title: 'Your visible IP address'}
