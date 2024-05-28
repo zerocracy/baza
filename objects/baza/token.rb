@@ -40,6 +40,13 @@ class Baza::Token
     @tokens.pgsql
   end
 
+  def human
+    Baza::Human.new(
+      Baza::Humans.new(@tokens.pgsql),
+      @tokens.pgsql.exec('SELECT human FROM token WHERE id = $1', [@id])[0]['human'].to_i
+    )
+  end
+
   def deactivate
     @tokens.pgsql.exec('UPDATE token SET active = false WHERE id = $1', [@id])
   end

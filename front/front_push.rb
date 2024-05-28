@@ -32,9 +32,9 @@ get '/push' do
 end
 
 post '/push' do
-  token = the_human.tokens.find(params[:token])
+  token = settings.humans.his_token(params[:token])
   raise Baza::Urror, 'The token is inactive' unless token.active?
-  raise Baza::Urror, 'The balance is negative' unless the_human.account.balance.positive?
+  raise Baza::Urror, 'The balance is negative' unless token.human.account.balance.positive?
   Tempfile.open do |f|
     FileUtils.copy(params[:factbase][:tempfile], f.path)
     File.delete(params[:factbase][:tempfile])

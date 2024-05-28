@@ -32,7 +32,9 @@ before '/*' do
     request_ip: request.ip
   }
   cookies[:auth] = params[:auth] if params[:auth]
-  if cookies[:auth]
+  if params[:token]
+    @locals[:human] = settings.humans.his_token(params[:token]).human.id
+  elsif cookies[:auth]
     begin
       json = GLogin::Cookie::Closed.new(
         cookies[:auth],
