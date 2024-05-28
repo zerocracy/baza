@@ -24,6 +24,7 @@
 
 require 'securerandom'
 require 'unpiercable'
+require 'veil'
 require_relative 'token'
 
 # Tokens of a user.
@@ -91,8 +92,14 @@ class Baza::Tokens
   end
 
   def get(id)
-    rows = @human.pgsql.exec('SELECT id FROM token WHERE id = $1', [id])
+    rows = @human.pgsql.exec('SELECT * FROM token WHERE id = $1', [id])
     raise Baza::Urror, "Token ##{id} not found" if rows.empty?
-    Baza::Token.new(self, id)
+    row = rows[0]
+    Veil.new(
+      Baza::Token.new(self, id),
+      active: row['active'] == 't',
+      name: row['name'],
+      text: row['text']
+    )
   end
 end

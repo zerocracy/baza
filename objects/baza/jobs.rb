@@ -47,17 +47,26 @@ class Baza::Jobs
 
   def each
     sql =
-      'SELECT job.*, result.id AS r FROM job ' \
+      'SELECT job.*, ' \
+      'result.id AS rid, result.factbase, result.stdout, result.exit, result.msec FROM job ' \
       'JOIN token ON token.id = job.token ' \
       'LEFT JOIN result ON result.job = job.id ' \
       'WHERE token.human = $1'
     @human.pgsql.exec(sql, [@human.id]).each do |row|
+      job = Baza::Job.new(self, row['id'].to_i)
       yield Unpiercable.new(
-        Baza::Job.new(self, row['id'].to_i),
+        job,
         created: Time.parse(row['created']),
         name: row['name'],
         fb: row['factbase'],
-        finished?: !row['r'].nil?
+        finished?: !row['rid'].nil?,
+        result: Unpiercable.new(
+          Baza::Result.new(job, row['rid'].to_i),
+          fb: row['factbase'],
+          exit: row['exit'].to_i,
+          empty?: row['factbase'].nil?,
+          stdout: row['stdout']
+        )
       )
     end
   end

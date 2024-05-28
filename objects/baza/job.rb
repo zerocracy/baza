@@ -57,7 +57,7 @@ class Baza::Job
   end
 
   def finished?
-    !@jobs.pgsql.exec('SELECT FROM result WHERE job = $1', [@id]).empty?
+    !@jobs.pgsql.exec('SELECT id FROM result WHERE job = $1', [@id]).empty?
   end
 
   def name
