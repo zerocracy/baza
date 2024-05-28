@@ -39,7 +39,7 @@
             %li
               %a{href: iri.cut('/account')}
                 Account
-            - if the_human.admin?
+            - if the_human.is_admin?
               %li
                 %a{href: iri.cut('/sql')}
                   SQL

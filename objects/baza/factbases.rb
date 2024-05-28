@@ -68,6 +68,7 @@ class Baza::Factbases
     raise 'UUID can\'t be nil' if uuid.nil?
     raise 'UUID can\'t be empty' if uuid.empty?
     if @key.empty?
+      FileUtils.mkdir_p(File.dirname(file))
       File.binwrite(file, File.binread(fake(uuid)))
     else
       key = oname(uuid)

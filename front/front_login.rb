@@ -22,6 +22,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+require 'veil'
+require_relative '../objects/baza/human'
+
 before '/*' do
   @locals = {
     http_start: Time.now,
@@ -32,12 +35,14 @@ before '/*' do
   cookies[:auth] = params[:auth] if params[:auth]
   if cookies[:auth]
     begin
-      id = GLogin::Cookie::Closed.new(
+      json = GLogin::Cookie::Closed.new(
         cookies[:auth],
         settings.config['github']['encryption_secret']
-      ).to_user['id'].to_i
+      ).to_user
+      id = json['id'].to_i
       raise GLogin::Codec::DecodingError unless id.positive?
       @locals[:human] = id
+      @locals[:human_login] = json['login']
     rescue GLogin::Codec::DecodingError
       cookies.delete(:auth)
     end
@@ -67,5 +72,9 @@ end
 
 def the_human
   flash(iri.cut('/'), 'You have to login first') unless @locals[:human]
-  settings.humans.get(@locals[:human])
+  h = settings.humans.get(@locals[:human])
+  Veil.new(
+    h.extend(Baza::Human::Admin),
+    login: @locals[:human_login]
+  )
 end

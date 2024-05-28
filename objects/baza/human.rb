@@ -40,10 +40,6 @@ class Baza::Human
     @id = id
   end
 
-  def admin?
-    github == 'yegor256'
-  end
-
   def pgsql
     @humans.pgsql
   end
@@ -71,5 +67,12 @@ class Baza::Human
     )
     raise Baza::Urror, "Human ##{@id} not found" if rows.empty?
     rows[0]['github']
+  end
+
+  # An admin.
+  module Admin
+    def is_admin?
+      self.github == 'yegor256'
+    end
   end
 end

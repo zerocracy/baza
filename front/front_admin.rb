@@ -25,7 +25,7 @@
 require_relative '../objects/baza/urror'
 
 def admin_only
-  raise Baza::Urror, 'You are not allowed to see this' unless the_human.admin?
+  raise Baza::Urror, 'You are not allowed to see this' unless the_human.is_admin?
 end
 
 get '/sql' do

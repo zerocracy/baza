@@ -44,7 +44,7 @@ class Baza::Pipeline
     @thread ||= Thread.new do
       loop do
         job = @jobs.pop
-        @loog.info("Job #{job.id} taken from the queue, started...")
+        @loog.info("Job ##{job.id} starts: #{job.fb}")
         Dir.mktmpdir do |dir|
           input = File.join(dir, 'input.fb')
           @fbs.load(job.fb, input)
@@ -54,7 +54,7 @@ class Baza::Pipeline
           code = run(input, output, stdout)
           uuid = code.zero? ? @fbs.save(output) : nil
           job.finish(uuid, stdout.to_s, code, ((Time.now - start) * 1000).to_i)
-          @loog.info("Job #{job.id} finished, exit=#{code}!")
+          @loog.info("Job ##{job.id} finished, exit=#{code}!")
         end
       rescue StandardError => e
         @loog.error(Backtrace.new(e))
@@ -78,12 +78,12 @@ class Baza::Pipeline
     humans.pgsql.exec(q).each do |row|
       push(humans.get(row['h'].to_i).jobs.get(row['j'].to_i))
     end
-    @loog.info("Pipeline updated with #{@jobs.size}")
+    @loog.info("Pipeline updated with #{@jobs.size} jobs previously existed in the DB")
   end
 
   def push(job)
     @jobs << job
-    @loog.info("Job #{job.id} added to the jobs")
+    @loog.info("Job ##{job.id} added to the queue: #{job.fb}")
   end
 
   # Wait for the pipeline to get empty. This is mostly used for unit

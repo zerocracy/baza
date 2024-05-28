@@ -27,6 +27,7 @@ require 'loog'
 require_relative '../test__helper'
 require_relative '../../objects/baza'
 require_relative '../../objects/baza/pipeline'
+require_relative '../../objects/baza/factbases'
 
 # Test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
