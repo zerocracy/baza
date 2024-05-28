@@ -38,7 +38,7 @@ error do
   status 503
   e = env['sinatra.error']
   if e.is_a?(Baza::Urror)
-    flash(@locals[:human] ? iri.cut('/dash') : iri.cut('/'), e.message, color: 'darkred')
+    flash(@locals[:human] ? iri.cut('/dash') : iri.cut('/'), e.message, color: 'darkred', code: 303)
   else
     Raven.capture_exception(e)
     assemble(
@@ -49,10 +49,10 @@ error do
   end
 end
 
-def flash(uri, msg = '', color: 'darkgreen')
+def flash(uri, msg = '', color: 'darkgreen', code: 302)
   cookies[:flash_msg] = msg
   cookies[:flash_color] = color
   response.headers['X-Zerocracy-Requested'] = request.url
   response.headers['X-Zerocracy-Flash'] = msg
-  redirect(uri)
+  redirect(uri, code)
 end

@@ -51,7 +51,26 @@ post '/push' do
     job = token.start(name, fid)
     settings.pipeline.push(job)
     response.headers['X-Zerocracy-JobId'] = job.id.to_s
-    settings.loog.info("New push arrived via HTTP, job ID is #{job.id}")
+    settings.loog.info("New push arrived via HTTP POSt, job ID is #{job.id}")
+    flash(iri.cut('/jobs'), "New job ##{job.id} started")
+  end
+end
+
+put(%r{/push/([a-z0-9-]+)}) do
+  text = request.env['HTTP_X_ZEROCRACY_TOKEN']
+  raise Baza::Urror, 'Auth token required in the "X-Zerocracy-Token" header' if text.nil?
+  token = settings.humans.his_token(text)
+  raise Baza::Urror, 'The token is inactive' unless token.active?
+  raise Baza::Urror, 'The balance is negative' unless token.human.account.balance.positive?
+  name = params['captures'].first
+  Tempfile.open do |f|
+    request.body.rewind
+    File.binwrite(f, request.body.read)
+    fid = settings.fbs.save(f.path)
+    job = token.start(name, fid)
+    settings.pipeline.push(job)
+    response.headers['X-Zerocracy-JobId'] = job.id.to_s
+    settings.loog.info("New push arrived via HTTP PUT, job ID is #{job.id}")
     flash(iri.cut('/jobs'), "New job ##{job.id} started")
   end
 end

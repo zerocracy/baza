@@ -108,7 +108,7 @@ class Baza::AppTest < Minitest::Test
     login
     pages.each do |p|
       get(p)
-      assert_status(302)
+      assert_status(303)
     end
   end
 
@@ -135,7 +135,7 @@ class Baza::AppTest < Minitest::Test
     assert_status(302)
   end
 
-  def test_starts_job
+  def test_starts_job_via_post
     uname = test_name
     login('yegor256')
     post('/gift', "human=#{uname}&zents=9999&summary=no")
@@ -180,6 +180,25 @@ class Baza::AppTest < Minitest::Test
     assert(fb.query('(exists foo)').each.to_a[0].foo.start_with?('booom'))
     get("/stdout/#{jid}.txt")
     assert_status(200)
+  end
+
+  def test_starts_job_via_put
+    uname = test_name
+    login('yegor256')
+    post('/gift', "human=#{uname}&zents=555555&summary=no")
+    login(uname)
+    get('/tokens')
+    post('/tokens/add', 'name=foo')
+    id = last_response.headers['X-Zerocracy-TokenId'].to_i
+    get("/tokens/#{id}.json")
+    token = JSON.parse(last_response.body)['text']
+    fb = Factbase.new
+    fb.insert.foo = 'booom \x01\x02\x03'
+    header('X-Zerocracy-Token', token)
+    put('/push/simple', fb.export)
+    assert_status(302)
+    id = last_response.headers['X-Zerocracy-JobId'].to_i
+    assert(id.positive?)
   end
 
   private
