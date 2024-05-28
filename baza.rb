@@ -83,7 +83,7 @@ configure do
   set :dump_errors, true
   set :config, config
   set :logging, false # to disable default Sinatra logging and use Loog
-  set :loog, Loog::REGULAR
+  set :loog, Loog::VERBOSE
   set :server_settings, timeout: 25
   set :glogin, GLogin::Auth.new(
     config['github']['id'],
