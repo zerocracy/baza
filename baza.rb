@@ -116,7 +116,7 @@ configure do
 end
 
 get '/' do
-  flash(iri.cut('/dash')) if @locals[:identity]
+  flash(iri.cut('/dash')) if @locals[:human]
   assemble(
     :index,
     :front,

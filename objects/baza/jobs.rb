@@ -63,6 +63,7 @@ class Baza::Jobs
   end
 
   def get(id)
+    raise 'Job ID must be an integer' unless id.is_a?(Integer)
     Baza::Job.new(self, id)
   end
 

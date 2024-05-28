@@ -35,7 +35,7 @@ before '/*' do
       @locals[:human] = GLogin::Cookie::Closed.new(
         cookies[:auth],
         settings.config['github']['encryption_secret']
-      ).to_user[:id]
+      ).to_user[:id].to_i
     rescue GLogin::Codec::DecodingError
       cookies.delete(:auth)
     end

@@ -31,6 +31,7 @@ class Baza::Result
 
   def initialize(job, id)
     @job = job
+    raise 'Result ID must be an integer' unless id.is_a?(Integer)
     @id = id
   end
 

@@ -36,6 +36,7 @@ class Baza::Human
 
   def initialize(humans, id)
     @humans = humans
+    raise 'Human ID must be an integer' unless id.is_a?(Integer)
     @id = id
   end
 

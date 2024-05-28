@@ -22,7 +22,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require_relative 'take'
 require_relative 'result'
 
 # One job.
@@ -34,6 +33,7 @@ class Baza::Job
 
   def initialize(jobs, id)
     @jobs = jobs
+    raise 'Job ID must be an integer' unless id.is_a?(Integer)
     @id = id
   end
 

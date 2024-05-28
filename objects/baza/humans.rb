@@ -37,14 +37,17 @@ class Baza::Humans
   end
 
   def get(id)
+    raise 'Human ID must be an integer' unless id.is_a?(Integer)
     Baza::Human.new(self, id)
   end
 
   def exists?(login)
+    raise 'Human login must be a String' unless login.is_a?(String)
     !@pgsql.exec('SELECT id FROM human WHERE github = $1', [login]).empty?
   end
 
   def find(login)
+    raise 'Human login must be a String' unless login.is_a?(String)
     rows = @pgsql.exec(
       'SELECT id FROM human WHERE github = $1',
       [login]
@@ -55,9 +58,10 @@ class Baza::Humans
 
   # Make sure this human exists (create if it doesn't) and return it.
   def ensure(login)
-    raise Baza::Urror, 'GitHub login is nil' if login.nil?
-    raise Baza::Urror, 'GitHub login is empty' if login.empty?
-    raise Baza::Urror, "GitHub login too long: \"@#{login}\"" if login.length > 64
+    raise 'Human login must be a String' unless login.is_a?(String)
+    raise 'GitHub login is nil' if login.nil?
+    raise 'GitHub login is empty' if login.empty?
+    raise "GitHub login too long: \"@#{login}\"" if login.length > 64
     rows = @pgsql.exec(
       'INSERT INTO human (github) VALUES ($1) ON CONFLICT DO NOTHING RETURNING id',
       [login]
