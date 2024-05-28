@@ -56,9 +56,16 @@ post '/push' do
   end
 end
 
+# What is the most newest Job ID with this name?
 get(%r{/recent/([a-z0-9-]+).txt}) do
   content_type('text/plain')
   the_human.jobs.recent(params['captures'].first).id.to_s
+end
+
+# Factbase artifact of this job exists?
+get(%r{/exists/([a-z0-9-]+)}) do
+  content_type('text/plain')
+  the_human.jobs.name_exists?(params['captures'].first) ? 'yes' : 'no'
 end
 
 get(%r{/stdout/([0-9]+).txt}) do
