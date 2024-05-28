@@ -49,9 +49,13 @@ get '/github-callback' do
   error(400) if code.nil?
   json = settings.glogin.user(code)
   login = json['login']
-  json['id'] = settings.humans.ensure(login).id.to_s
   cookies[:auth] = GLogin::Cookie::Open.new(
-    json, settings.config['github']['encryption_secret']
+    {
+      'id' => settings.humans.ensure(login).id.to_s,
+      'login' => login,
+      'avatar_url' => json['avatar_url']
+    },
+    settings.config['github']['encryption_secret']
   ).to_s
   flash(iri.cut('/'), "@#{login} has been logged in")
 end
