@@ -32,10 +32,12 @@ before '/*' do
   cookies[:auth] = params[:auth] if params[:auth]
   if cookies[:auth]
     begin
-      @locals[:human] = GLogin::Cookie::Closed.new(
+      id = GLogin::Cookie::Closed.new(
         cookies[:auth],
         settings.config['github']['encryption_secret']
-      ).to_user[:id].to_i
+      ).to_user['id'].to_i
+      raise GLogin::Codec::DecodingError unless id.positive?
+      @locals[:human] = id
     rescue GLogin::Codec::DecodingError
       cookies.delete(:auth)
     end

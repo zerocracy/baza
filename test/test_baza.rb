@@ -193,7 +193,7 @@ class Baza::AppTest < Minitest::Test
 
   def login(name = test_name)
     enc = GLogin::Cookie::Open.new(
-      { 'login' => name, 'id' => app.humans.ensure(name).id },
+      { 'login' => name, 'id' => app.humans.ensure(name).id.to_s },
       ''
     ).to_s
     set_cookie("auth=#{enc}")

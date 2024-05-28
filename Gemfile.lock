@@ -67,7 +67,7 @@ GEM
     faraday-net_http (3.1.0)
       net-http
     ffi (1.16.3)
-    glogin (0.14.2)
+    glogin (0.15.0)
       base58 (>= 0.2)
       openssl (>= 2.0)
     haml (6.3.0)
@@ -264,7 +264,7 @@ DEPENDENCIES
   aws-sdk-s3 (= 1.151.0)
   backtrace (= 0.4.0)
   factbase (= 0.0.38)
-  glogin (= 0.14.2)
+  glogin (= 0.15.0)
   haml (= 6.3.0)
   iri (= 0.8.0)
   loog (= 0.5.1)
