@@ -32,6 +32,16 @@ require_relative '../../objects/baza/humans'
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
 class Baza::JobsTest < Minitest::Test
+  def test_all_fields
+    human = Baza::Humans.new(test_pgsql).ensure(test_name)
+    token = human.tokens.add(test_name)
+    id = token.start(test_name, test_name).id
+    job = human.jobs.get(id)
+    assert_equal(id, job.id)
+    assert(!job.name.nil?)
+    assert(!job.uri1.nil?)
+  end
+
   def test_emptiness_checks
     human = Baza::Humans.new(test_pgsql).ensure(test_name)
     jobs = human.jobs

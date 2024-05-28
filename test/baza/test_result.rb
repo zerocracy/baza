@@ -43,6 +43,7 @@ class Baza::ResultTest < Minitest::Test
     end
     r = job.result
     assert(r.id.positive?)
+    assert(!r.empty?)
     assert_equal('Hello, world!', r.stdout)
     assert_equal(1, r.exit)
     assert_equal(42, r.msec)

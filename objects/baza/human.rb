@@ -71,8 +71,8 @@ class Baza::Human
 
   # An admin.
   module Admin
-    def is_admin?
-      self.github == 'yegor256'
+    def admin?
+      github == 'yegor256'
     end
   end
 end

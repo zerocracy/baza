@@ -40,11 +40,11 @@ class Baza::Result
   end
 
   def empty?
-    @job.pgsql.exec('SELECT factbase FROM result WHERE id = $1', [@id])[0]['factbase'].nil?
+    uri2.nil?
   end
 
-  def fb
-    @job.pgsql.exec('SELECT factbase FROM result WHERE id = $1', [@id])[0]['factbase']
+  def uri2
+    @job.pgsql.exec('SELECT uri2 FROM result WHERE id = $1', [@id])[0]['uri2']
   end
 
   def stdout

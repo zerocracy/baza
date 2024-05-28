@@ -38,16 +38,19 @@ class Baza::Pipeline
     @loog = loog
     @jobs = Queue.new
     @fbs = fbs
+    @busy = false
   end
 
   def start
     @thread ||= Thread.new do
       loop do
+        @busy = false
         job = @jobs.pop
-        @loog.info("Job ##{job.id} starts: #{job.fb}")
+        @busy = true
+        @loog.info("Job ##{job.id} starts: #{job.uri1}")
         Dir.mktmpdir do |dir|
           input = File.join(dir, 'input.fb')
-          @fbs.load(job.fb, input)
+          @fbs.load(job.uri1, input)
           output = File.join(dir, 'output.fb')
           start = Time.now
           stdout = Loog::Buffer.new
@@ -83,15 +86,16 @@ class Baza::Pipeline
 
   def push(job)
     @jobs << job
-    @loog.info("Job ##{job.id} added to the queue: #{job.fb}")
+    @loog.info("Job ##{job.id} added to the queue: #{job.uri1}")
   end
 
-  # Wait for the pipeline to get empty. This is mostly used for unit
+  # Wait for the pipeline to get empty and complete all tasks.
+  # This is mostly used for unit
   # testing. The +max+ argument is the number of seconds to wait maximum.
   def wait(max = 2)
     start = Time.now
     loop do
-      break if @jobs.empty?
+      break if @jobs.empty? && !@busy
       sleep 0.01
       raise 'The pipeline is still busy' if Time.now - start > max
     end

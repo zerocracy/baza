@@ -41,12 +41,12 @@ class Baza::Job
     @jobs.pgsql
   end
 
-  def finish(factbase, stdout, exit, msec)
+  def finish(uri2, stdout, exit, msec)
     raise Baza::Urror, 'Exit code must a Number' unless exit.is_a?(Integer)
     raise Baza::Urror, 'Milliseconds must a Number' unless msec.is_a?(Integer)
     @jobs.pgsql.exec(
-      'INSERT INTO result (job, factbase, stdout, exit, msec) VALUES ($1, $2, $3, $4, $5)',
-      [@id, factbase, stdout, exit, msec]
+      'INSERT INTO result (job, uri2, stdout, exit, msec) VALUES ($1, $2, $3, $4, $5)',
+      [@id, uri2, stdout, exit, msec]
     )
   end
 
@@ -64,8 +64,8 @@ class Baza::Job
     @jobs.pgsql.exec('SELECT name FROM job WHERE id = $1', [@id])[0]['name']
   end
 
-  def fb
-    @jobs.pgsql.exec('SELECT factbase FROM job WHERE id = $1', [@id])[0]['factbase']
+  def uri1
+    @jobs.pgsql.exec('SELECT uri1 FROM job WHERE id = $1', [@id])[0]['uri1']
   end
 
   def result

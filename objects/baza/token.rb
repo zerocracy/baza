@@ -53,10 +53,10 @@ class Baza::Token
     rows[0]['active'] == 't'
   end
 
-  def start(name, factbase)
+  def start(name, uri1)
     rows = @tokens.pgsql.exec(
-      'INSERT INTO job (token, name, factbase) VALUES ($1, $2, $3) RETURNING id',
-      [@id, name, factbase]
+      'INSERT INTO job (token, name, uri1) VALUES ($1, $2, $3) RETURNING id',
+      [@id, name, uri1]
     )
     id = rows[0]['id'].to_i
     Baza::Job.new(self, id)

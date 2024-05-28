@@ -45,26 +45,27 @@ class Baza::Jobs
     ).empty?
   end
 
-  def each
+  def each(cnd = '')
+    return to_enum(__method__, cnd) unless block_given?
     sql =
       'SELECT job.*, ' \
-      'result.id AS rid, result.factbase, result.stdout, result.exit, result.msec FROM job ' \
+      'result.id AS rid, result.uri2, result.stdout, result.exit, result.msec FROM job ' \
       'JOIN token ON token.id = job.token ' \
       'LEFT JOIN result ON result.job = job.id ' \
-      'WHERE token.human = $1'
+      "WHERE token.human = $1 #{cnd.empty? ? cnd : "AND #{cnd}"}"
     @human.pgsql.exec(sql, [@human.id]).each do |row|
       job = Baza::Job.new(self, row['id'].to_i)
       yield Unpiercable.new(
         job,
         created: Time.parse(row['created']),
         name: row['name'],
-        fb: row['factbase'],
+        uri1: row['uri1'],
         finished?: !row['rid'].nil?,
         result: Unpiercable.new(
           Baza::Result.new(job, row['rid'].to_i),
-          fb: row['factbase'],
+          uri2: row['uri2'],
           exit: row['exit'].to_i,
-          empty?: row['factbase'].nil?,
+          empty?: row['uri2'].nil?,
           stdout: row['stdout']
         )
       )
@@ -73,7 +74,7 @@ class Baza::Jobs
 
   def get(id)
     raise 'Job ID must be an integer' unless id.is_a?(Integer)
-    Baza::Job.new(self, id)
+    each("job.id = #{id}").to_a[0]
   end
 
   def recent(name)
