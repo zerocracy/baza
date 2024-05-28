@@ -55,6 +55,7 @@ class Baza::Humans
 
   # Make sure this human exists (create if it doesn't) and return it.
   def ensure(login)
+    raise Baza::Urror, 'GitHub login is nil' if login.nil?
     raise Baza::Urror, 'GitHub login is empty' if login.empty?
     raise Baza::Urror, "GitHub login too long: \"@#{login}\"" if login.length > 64
     rows = @pgsql.exec(
