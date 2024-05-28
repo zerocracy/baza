@@ -28,7 +28,6 @@ require_relative '../objects/baza/human'
 before '/*' do
   @locals = {
     http_start: Time.now,
-    ver: Baza::VERSION,
     github_login_link: settings.glogin.login_uri,
     request_ip: request.ip
   }
