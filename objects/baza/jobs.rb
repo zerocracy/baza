@@ -22,7 +22,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require 'veil'
+require 'unpiercable'
 require_relative 'token'
 
 # Jobs of a human.
@@ -52,7 +52,7 @@ class Baza::Jobs
       'LEFT JOIN result ON result.job = job.id ' \
       'WHERE token.human = $1'
     @human.pgsql.exec(sql, [@human.id]).each do |row|
-      yield Veil.new(
+      yield Unpiercable.new(
         Baza::Job.new(self, row['id'].to_i),
         created: Time.parse(row['created']),
         name: row['name'],
