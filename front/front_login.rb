@@ -46,8 +46,8 @@ get '/github-callback' do
   code = params[:code]
   error(400) if code.nil?
   json = settings.glogin.user(code)
-  login = json[:id]
-  json[:id] = settings.humans.ensure(login)
+  login = json[:login]
+  json['id'] = settings.humans.ensure(login)
   cookies[:auth] = GLogin::Cookie::Open.new(
     json, settings.config['github']['encryption_secret']
   ).to_s
