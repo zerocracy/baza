@@ -29,17 +29,15 @@ before '/*' do
     github_login_link: settings.glogin.login_uri,
     request_ip: request.ip
   }
-  cookies[:identity] = params[:identity] if params[:identity]
-  if cookies[:identity]
+  cookies[:auth] = params[:auth] if params[:auth]
+  if cookies[:auth]
     begin
-      user = GLogin::Cookie::Closed.new(
-        cookies[:identity],
+      @locals[:human] = GLogin::Cookie::Closed.new(
+        cookies[:auth],
         settings.config['github']['encryption_secret']
-      ).to_user
-      @locals[:identity] = user[:login]
-      @locals[:identity] = user[:id] if @locals[:identity].nil?
+      ).to_user[:id]
     rescue GLogin::Codec::DecodingError
-      cookies.delete(:identity)
+      cookies.delete(:auth)
     end
   end
 end
@@ -48,13 +46,19 @@ get '/github-callback' do
   code = params[:code]
   error(400) if code.nil?
   json = settings.glogin.user(code)
-  cookies[:identity] = GLogin::Cookie::Open.new(
+  json[:id] = settings.humans.ensure(json[:login])
+  cookies[:auth] = GLogin::Cookie::Open.new(
     json, settings.config['github']['encryption_secret']
   ).to_s
   flash(iri.cut('/'), "@#{json['login']} has been logged in")
 end
 
 get '/logout' do
-  cookies.delete(:identity)
+  cookies.delete(:auth)
   flash(iri.cut('/'), 'You have been logged out')
+end
+
+def the_human
+  flash(iri.cut('/'), 'You have to login first') unless @locals[:human]
+  settings.humans.get(@locals[:human])
 end

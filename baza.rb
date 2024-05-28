@@ -136,11 +136,6 @@ def assemble(haml, layout, map)
   haml(haml, layout: layout, locals: merged(map))
 end
 
-def the_human
-  flash(iri.cut('/'), 'You have to login first') unless @locals[:identity]
-  @locals[:human] = settings.humans.ensure(@locals[:identity])
-end
-
 def iri
   Iri.new(request.url)
 end
