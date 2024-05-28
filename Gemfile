@@ -28,6 +28,7 @@ ruby '~>3.2'
 gem 'aws-sdk-core', '3.196.1'
 gem 'aws-sdk-s3', '1.151.0'
 gem 'backtrace', '0.4.0'
+gem 'concurrent-ruby', '1.1.5'
 gem 'factbase', '0.0.38'
 gem 'glogin', '0.15.0'
 gem 'haml', '6.3.0'
@@ -39,7 +40,6 @@ gem 'rack', '3.0.11'
 gem 'rack-ssl', '1.4.1'
 gem 'rack-test', '2.1.0'
 gem 'rake', '13.2.1', require: false
-gem 'relative_time', '1.1.0'
 gem 'rerun', '0.14.0', require: false
 gem 'rspec-rails', '6.1.2', require: false
 gem 'rubocop', '1.64.0', require: false
