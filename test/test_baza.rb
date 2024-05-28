@@ -151,9 +151,9 @@ class Baza::AppTest < Minitest::Test
     fb.insert.foo = 'booom \x01\x02\x03'
     Tempfile.open do |f|
       File.binwrite(f.path, fb.export)
+      header('X-Zerocracy-Token', token)
       post(
         '/push',
-        'token' => token,
         'name' => name,
         'factbase' => Rack::Test::UploadedFile.new(f.path, 'application/zip')
       )

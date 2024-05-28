@@ -32,7 +32,9 @@ get '/push' do
 end
 
 post '/push' do
-  token = settings.humans.his_token(params[:token])
+  text = request.env['HTTP_X_ZEROCRACY_TOKEN']
+  raise Baza::Urror, 'Auth token required in the "X-Zerocracy-Token" header' if text.nil?
+  token = settings.humans.his_token(text)
   raise Baza::Urror, 'The token is inactive' unless token.active?
   raise Baza::Urror, 'The balance is negative' unless token.human.account.balance.positive?
   Tempfile.open do |f|

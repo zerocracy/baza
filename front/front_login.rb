@@ -32,9 +32,8 @@ before '/*' do
     request_ip: request.ip
   }
   cookies[:auth] = params[:auth] if params[:auth]
-  if params[:token]
-    @locals[:human] = settings.humans.his_token(params[:token]).human.id
-  elsif cookies[:auth]
+  token = request.env['HTTP_X_ZEROCRACY_TOKEN']
+  if cookies[:auth]
     begin
       json = GLogin::Cookie::Closed.new(
         cookies[:auth],
@@ -47,6 +46,8 @@ before '/*' do
     rescue GLogin::Codec::DecodingError
       cookies.delete(:auth)
     end
+  elsif !token.nil?
+    @locals[:human] = settings.humans.his_token(token).human.id
   end
 end
 

@@ -72,7 +72,7 @@ class Baza::Humans
 
   # Find a human by the text of his token and returns the token (not the human).
   def his_token(text)
-    raise 'Token must be a String' unless text.is_a?(String)
+    raise "Token (#{text.inspect}) must be a String" unless text.is_a?(String)
     rows = @pgsql.exec(
       'SELECT id, human FROM token WHERE text = $1',
       [text]
