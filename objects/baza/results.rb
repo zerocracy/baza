@@ -22,35 +22,36 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require 'minitest/autorun'
-require_relative '../test__helper'
-require_relative '../../objects/baza'
-require_relative '../../objects/baza/humans'
+require_relative 'result'
 
-# Test.
+# Results of a human.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class Baza::JobTest < Minitest::Test
-  def test_starts
-    human = Baza::Humans.new(test_pgsql).ensure(test_name)
-    token = human.tokens.add(test_name)
-    id = token.start(test_name, test_name).id
-    job = human.jobs.get(id)
-    assert(job.id.positive?)
-    assert_equal(id, job.id)
-    assert(!job.finished?)
-    assert(!job.created.nil?)
+class Baza::Results
+  attr_reader :human
+
+  def initialize(human)
+    @human = human
   end
 
-  def test_cant_finish_twice
-    human = Baza::Humans.new(test_pgsql).ensure(test_name)
-    token = human.tokens.add(test_name)
-    job = token.start(test_name, test_name)
-    assert(!job.finished?)
-    job.finish(test_name, 'stdout', 0, 544)
-    assert_raises do
-      job.finish(test_name, 'another stdout', 0, 11)
-    end
+  def pgsql
+    @human.pgsql
+  end
+
+  def get(id)
+    raise 'Result ID must be an integer' unless id.is_a?(Integer)
+    Baza::Result.new(self, id)
+  end
+
+  def add(job, uri2, stdout, exit, msec)
+    raise Baza::Urror, 'Exit code must a Number' unless exit.is_a?(Integer)
+    raise Baza::Urror, 'Milliseconds must a Number' unless msec.is_a?(Integer)
+    get(
+      @human.pgsql.exec(
+        'INSERT INTO result (job, uri2, stdout, exit, msec) VALUES ($1, $2, $3, $4, $5) RETURNING id',
+        [job, uri2, stdout, exit, msec]
+      )[0]['id'].to_i
+    )
   end
 end
