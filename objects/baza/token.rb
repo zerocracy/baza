@@ -62,11 +62,7 @@ class Baza::Token
   def start(name, uri1)
     raise Baza::Urror, 'The token is inactive' unless active?
     raise Baza::Urror, 'The balance is negative' unless human.account.balance.positive? || ENV['RACK_ENV'] == 'test'
-    rows = @tokens.pgsql.exec(
-      'INSERT INTO job (token, name, uri1) VALUES ($1, $2, $3) RETURNING id',
-      [@id, name, uri1]
-    )
-    @tokens.human.jobs.get(rows[0]['id'].to_i)
+    @tokens.human.jobs.start(@id, name, uri1)
   end
 
   def created
@@ -88,10 +84,7 @@ class Baza::Token
   end
 
   def jobs_count
-    @tokens.pgsql.exec(
-      'SELECT COUNT(job.id) AS c FROM job WHERE token = $1',
-      [@id]
-    )[0]['c']
+    @tokens.pgsql.exec('SELECT COUNT(job.id) AS c FROM job WHERE token = $1', [@id])[0]['c']
   end
 
   def to_json(*_args)

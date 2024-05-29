@@ -47,6 +47,15 @@ class Baza::Jobs
     ).empty?
   end
 
+  def start(token, name, uri1)
+    get(
+      @human.pgsql.exec(
+        'INSERT INTO job (token, name, uri1) VALUES ($1, $2, $3) RETURNING id',
+        [token, name, uri1]
+      )[0]['id'].to_i
+    )
+  end
+
   def each(name: nil, offset: 0, cnd: '')
     sql =
       'SELECT job.*, token.name AS token_name, ' \
