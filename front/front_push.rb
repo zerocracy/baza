@@ -35,11 +35,9 @@ get '/push' do
 end
 
 post '/push' do
-  text = request.env['HTTP_X_ZEROCRACY_TOKEN']
-  raise Baza::Urror, 'Auth token required in the "X-Zerocracy-Token" header' if text.nil?
-  token = settings.humans.his_token(text)
-  raise Baza::Urror, 'The token is inactive' unless token.active?
-  raise Baza::Urror, 'The balance is negative' unless token.human.account.balance.positive?
+  text = params[:token]
+  raise Baza::Urror, 'The "token" form part is missing' if text.nil?
+  token = the_human.tokens.find(text)
   tfile = params[:factbase]
   raise Baza::Urror, 'The "factbase" form part is missing' if tfile.nil?
   name = params[:name]
@@ -60,8 +58,6 @@ put(%r{/push/([a-z0-9-]+)}) do
   text = request.env['HTTP_X_ZEROCRACY_TOKEN']
   raise Baza::Urror, 'Auth token required in the "X-Zerocracy-Token" header' if text.nil?
   token = settings.humans.his_token(text)
-  raise Baza::Urror, 'The token is inactive' unless token.active?
-  raise Baza::Urror, 'The balance is negative' unless token.human.account.balance.positive?
   name = params['captures'].first
   Tempfile.open do |f|
     request.body.rewind

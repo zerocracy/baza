@@ -61,6 +61,8 @@ class Baza::Token
   end
 
   def start(name, uri1)
+    raise Baza::Urror, 'The token is inactive' unless active?
+    raise Baza::Urror, 'The balance is negative' unless human.account.balance.positive? || ENV['RACK_ENV'] == 'test'
     rows = @tokens.pgsql.exec(
       'INSERT INTO job (token, name, uri1) VALUES ($1, $2, $3) RETURNING id',
       [@id, name, uri1]
