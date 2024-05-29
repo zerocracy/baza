@@ -6,6 +6,10 @@
   %p.orange
     Expired:
     = job.expired.utc.iso8601
+- else
+  %p
+    %a{href: iri.cut('/jobs').append(job.id).append('expire'), onclick: "return confirm('If you expire this job, there will no way to return its data back. Are you sure want to proceed?')"}
+      Expire!
 
 %p
   Name:
