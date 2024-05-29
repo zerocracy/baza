@@ -56,7 +56,7 @@ end
 
 put(%r{/push/([a-z0-9-]+)}) do
   text = request.env['HTTP_X_ZEROCRACY_TOKEN']
-  raise Baza::Urror, 'Auth token required in the "X-Zerocracy-Token" header' if text.nil?
+  raise Baza::Urror, 'The "X-Zerocracy-Token" HTTP header with a token is missing' if text.nil?
   token = settings.humans.his_token(text)
   name = params['captures'].first
   Tempfile.open do |f|
