@@ -41,9 +41,10 @@ class Baza::Tokens
   end
 
   def add(name)
+    raise 'Name is nil' if name.nil?
     raise Baza::Urror, 'Name is too long (>32)' if name.length > 32
-    total = size
-    raise Baza::Urror, "Too many tokens already (#{total})" if total >= 8
+    total = actives
+    raise Baza::Urror, "Too many active tokens already (#{total})" if total >= 8
     raise Baza::Urror, 'Token with this name already exists' if exists?(name)
     uuid = SecureRandom.uuid
     rows = @human.pgsql.exec(
@@ -62,8 +63,17 @@ class Baza::Tokens
     @human.pgsql.exec('SELECT COUNT(id) AS c FROM token WHERE human = $1', [@human.id])[0]['c'].to_i
   end
 
-  def each
-    @human.pgsql.exec('SELECT * FROM token WHERE human=$1 ORDER BY active DESC', [@human.id]).each do |row|
+  def actives
+    @human.pgsql.exec('SELECT COUNT(id) AS c FROM token WHERE human = $1 AND active', [@human.id])[0]['c'].to_i
+  end
+
+  def each(offset: 0)
+    q =
+      'SELECT * FROM token ' \
+      'WHERE human=$1 ' \
+      'ORDER BY active DESC, created DESC ' \
+      "OFFSET #{offset.to_i}"
+    @human.pgsql.exec(q, [@human.id]).each do |row|
       yield Unpiercable.new(
         Baza::Token.new(self, row['id'].to_i),
         active?: row['active'] == 't',

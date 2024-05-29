@@ -18,7 +18,11 @@
           Token
         %th
     %tbody
-    - tokens.each do |t|
+    - total = 0
+    - max = 10
+    - tokens.each(offset: offset) do |t|
+      - total += 1
+      - break if total > max
       %tr{class: t.active? ? '' : 'gray'}
         %td
           = t.name
@@ -30,3 +34,10 @@
               Deactivate
           - else
             Inactive
+  %p
+    - unless offset.zero?
+      %a{href: iri.del(:offset)}
+        Back
+    - if total > max
+      %a{href: iri.over(offset: offset + max)}
+        More

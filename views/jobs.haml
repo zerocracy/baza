@@ -20,7 +20,11 @@
         %th
           Result
     %tbody
-    - jobs.each do |j|
+    - total = 0
+    - max = 10
+    - jobs.each(offset: offset) do |j|
+      - total += 1
+      - break if total > max
       %tr
         %td
           %a{href: iri.cut('/jobs').append(j.id)}
@@ -47,3 +51,10 @@
             = ' | '
             %a{href: iri.cut('/pull').append("#{j.id}.fb")}
               = "#{j.name}.fb"
+  %p
+    - unless offset.zero?
+      %a{href: iri.del(:offset)}
+        Back
+    - if total > max
+      %a{href: iri.over(offset: offset + max)}
+        More

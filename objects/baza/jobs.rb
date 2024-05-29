@@ -45,14 +45,15 @@ class Baza::Jobs
     ).empty?
   end
 
-  def each(cnd = '')
-    return to_enum(__method__, cnd) unless block_given?
+  def each(offset: 0, cnd: '')
+    return to_enum(__method__) unless block_given?
     sql =
       'SELECT job.*, ' \
       'result.id AS rid, result.uri2, result.stdout, result.exit, result.msec FROM job ' \
       'JOIN token ON token.id = job.token ' \
       'LEFT JOIN result ON result.job = job.id ' \
-      "WHERE token.human = $1 #{cnd.empty? ? cnd : "AND #{cnd}"}"
+      "WHERE token.human = $1 #{cnd.empty? ? cnd : "AND #{cnd}"} " \
+      "OFFSET #{offset.to_i}"
     @human.pgsql.exec(sql, [@human.id]).each do |row|
       job = Baza::Job.new(self, row['id'].to_i)
       yield Unpiercable.new(
@@ -74,7 +75,7 @@ class Baza::Jobs
 
   def get(id)
     raise 'Job ID must be an integer' unless id.is_a?(Integer)
-    each("job.id = #{id}").to_a[0]
+    each(cnd: "job.id = #{id}").to_a[0]
   end
 
   def name_exists?(name)

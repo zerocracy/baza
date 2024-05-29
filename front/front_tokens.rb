@@ -25,11 +25,13 @@
 require 'sinatra/json'
 
 get '/tokens' do
+  offset = (params[:offset] || '0').to_i
   assemble(
     :tokens,
     :default,
     title: '/tokens',
-    tokens: the_human.tokens
+    tokens: the_human.tokens,
+    offset: offset
   )
 end
 
@@ -39,6 +41,7 @@ end
 
 post '/tokens/add' do
   name = params[:name]
+  raise Baza::Urror, 'The "name" form part is missing' if name.nil?
   token = the_human.tokens.add(name)
   response.headers['X-Zerocracy-TokenId'] = token.id.to_s
   flash(iri.cut('/tokens'), "New token ##{token.id} added")

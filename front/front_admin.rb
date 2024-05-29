@@ -54,7 +54,9 @@ end
 
 post '/gift' do
   admin_only
-  human = settings.humans.ensure(params[:human])
+  login = params[:human]
+  raise Baza::Urror, 'The "human" form part is missing' if login.nil?
+  human = settings.humans.ensure(login)
   zents = params[:zents].to_i
   summary = params[:summary]
   human.account.add(zents, summary)
