@@ -22,47 +22,37 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require 'minitest/autorun'
-require_relative '../test__helper'
-require_relative '../../objects/baza'
-require_relative '../../objects/baza/humans'
-
-# Test.
+# Garbage collector for all humans.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class Baza::JobTest < Minitest::Test
-  def test_starts
-    human = Baza::Humans.new(test_pgsql).ensure(test_name)
-    token = human.tokens.add(test_name)
-    id = token.start(test_name, test_name).id
-    job = human.jobs.get(id)
-    assert(job.id.positive?)
-    assert_equal(id, job.id)
-    assert(!job.finished?)
-    assert(!job.created.nil?)
+class Baza::Gc
+  attr_reader :humans
+
+  def initialize(humans, days)
+    @humans = humans
+    @days = days
   end
 
-  def test_cant_finish_twice
-    human = Baza::Humans.new(test_pgsql).ensure(test_name)
-    token = human.tokens.add(test_name)
-    job = token.start(test_name, test_name)
-    assert(!job.finished?)
-    job.finish!(test_name, 'stdout', 0, 544)
-    assert_raises do
-      job.finish!(test_name, 'another stdout', 0, 11)
-    end
+  def pgsql
+    @humans.pgsql
   end
 
-  def test_expires_once
-    human = Baza::Humans.new(test_pgsql).ensure(test_name)
-    token = human.tokens.add(test_name)
-    job = token.start(test_name, test_name)
-    assert(!job.expired?)
-    job.expire!
-    assert(job.expired?)
-    assert_raises do
-      job.expire!
+  # Iterate jobs that may be deleted because they are too old.
+  def each
+    return to_enum(__method__) unless block_given?
+    q =
+      'SELECT f.id, token.human FROM ' \
+      '(SELECT l.id, l.token, l.created, COUNT(r.name) AS total, MAX(r.created) AS recent FROM job AS l ' \
+      'JOIN job AS r ON l.name = r.name ' \
+      'WHERE l.expired IS NULL ' \
+      'GROUP BY l.id) AS f ' \
+      'JOIN token ON token.id = token ' \
+      'WHERE f.total > 1 ' \
+      "AND f.created < NOW() - INTERVAL '#{@days.to_i} DAYS' " \
+      'AND f.recent != f.created'
+    pgsql.exec(q).each do |row|
+      yield @humans.get(row['human'].to_i).jobs.get(row['id'].to_i)
     end
   end
 end

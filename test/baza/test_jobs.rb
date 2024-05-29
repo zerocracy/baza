@@ -53,7 +53,7 @@ class Baza::JobsTest < Minitest::Test
     token = human.tokens.add(test_name)
     job = token.start(test_name, test_name)
     assert(!human.jobs.get(job.id).finished?)
-    job.finish(test_name, 'stdout', 0, 544)
+    job.finish!(test_name, 'stdout', 0, 544)
     assert(human.jobs.get(job.id).finished?)
     assert(!human.jobs.empty?)
     found = 0
@@ -68,7 +68,7 @@ class Baza::JobsTest < Minitest::Test
     human = Baza::Humans.new(test_pgsql).ensure(test_name)
     token = human.tokens.add(test_name)
     name = "#{test_name}-a"
-    token.start(name, test_name).finish(test_name, 'stdout', 0, 544)
+    token.start(name, test_name).finish!(test_name, 'stdout', 0, 544)
     token.start("#{test_name}-b", test_name)
     id2 = token.start(name, test_name).id
     assert(human.jobs.name_exists?(name))

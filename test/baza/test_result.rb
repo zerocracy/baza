@@ -39,7 +39,7 @@ class Baza::ResultTest < Minitest::Test
     job = token.start(test_name, test_name)
     Tempfile.open do |f|
       File.write(f.path, 'booom')
-      job.finish(Baza::Factbases.new('', '').save(f.path), 'Hello, world!', 1, 42)
+      job.finish!(Baza::Factbases.new('', '').save(f.path), 'Hello, world!', 1, 42)
     end
     r = job.result
     assert(r.id.positive?)

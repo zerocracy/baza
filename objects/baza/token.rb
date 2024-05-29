@@ -46,7 +46,7 @@ class Baza::Token
     )
   end
 
-  def deactivate
+  def deactivate!
     @tokens.pgsql.exec('UPDATE token SET active = false WHERE id = $1', [@id])
   end
 

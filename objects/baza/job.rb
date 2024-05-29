@@ -41,13 +41,27 @@ class Baza::Job
     @jobs.pgsql
   end
 
+  # Delete the data of the job, that take space.
+  def expire!
+    raise Baza::Urror, 'The job is already expired' if expired?
+    @jobs.pgsql.transaction do |t|
+      t.exec('UPDATE job SET expired = now() WHERE id = $1', [@id])
+      t.exec('UPDATE result SET expired = now() WHERE job = $1', [@id])
+    end
+  end
+
+  # Is it expired and doesn't have any data anymore?
+  def expired?
+    !@jobs.pgsql.exec('SELECT expired FROM job WHERE id = $1 AND expired IS NOT NULL', [@id]).empty?
+  end
+
   # Finish the job, create a RESULT for it and a RECEIPT.
   # @param [String] uri2 The location of the factbase produced by the job (URI in AWS)
   # @param [String] stdout The full log of the job (at the console)
   # @param [Integer] exit The exit code of the job (zero means success)
   # @param [Integer] msec The amount of milliseconds the job took
   # @return [Baza::Result] The result just created
-  def finish(uri2, stdout, exit, msec)
+  def finish!(uri2, stdout, exit, msec)
     raise Baza::Urror, 'Exit code must be a Number' unless exit.is_a?(Integer)
     raise Baza::Urror, 'Milliseconds must be a Number' unless msec.is_a?(Integer)
     raise Baza::Urror, 'STDOUT must be a String' unless stdout.is_a?(String)

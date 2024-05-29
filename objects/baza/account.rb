@@ -45,7 +45,7 @@ class Baza::Account
       'WHERE human = $1 ' \
       'ORDER BY created DESC ' \
       "OFFSET #{offset.to_i}"
-    @human.pgsql.exec(q, [@human.id]).each do |row|
+    pgsql.exec(q, [@human.id]).each do |row|
       yield Veil.new(
         get(row['id'].to_i),
         job_id: row['job']&.to_i,
@@ -58,7 +58,7 @@ class Baza::Account
 
   # Get total current balance of the human.
   def balance
-    @human.pgsql.exec(
+    pgsql.exec(
       'SELECT SUM(zents) FROM receipt WHERE human = $1',
       [@human.id]
     )[0]['sum'].to_i
@@ -66,7 +66,7 @@ class Baza::Account
 
   # Add a new receipt for a human, not attached to a job.
   def add(zents, summary)
-    @human.pgsql.exec(
+    pgsql.exec(
       'INSERT INTO receipt (human, zents, summary) VALUES ($1, $2, $3) RETURNING id',
       [@human.id, zents, summary]
     ).empty?

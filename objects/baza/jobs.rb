@@ -40,7 +40,7 @@ class Baza::Jobs
   end
 
   def empty?
-    @human.pgsql.exec(
+    pgsql.exec(
       'SELECT job.id FROM job JOIN token ON token.id = job.token WHERE token.human = $1',
       [@human.id]
     ).empty?
@@ -48,7 +48,7 @@ class Baza::Jobs
 
   def start(token, name, uri1)
     get(
-      @human.pgsql.exec(
+      pgsql.exec(
         'INSERT INTO job (token, name, uri1) VALUES ($1, $2, $3) RETURNING id',
         [token, name, uri1]
       )[0]['id'].to_i
@@ -66,7 +66,7 @@ class Baza::Jobs
       "OFFSET #{offset.to_i}"
     args = [@human.id]
     args << name unless name.nil?
-    @human.pgsql.exec(sql, args).each do |row|
+    pgsql.exec(sql, args).each do |row|
       yield Veil.new(
         get(row['id'].to_i),
         created: Time.parse(row['created']),
@@ -95,7 +95,7 @@ class Baza::Jobs
   end
 
   def name_exists?(name)
-    !@human.pgsql.exec(
+    !pgsql.exec(
       'SELECT job.id FROM job ' \
       'JOIN token ON token.id = job.token ' \
       'WHERE token.human = $1 AND job.name = $2 ' \
@@ -105,7 +105,7 @@ class Baza::Jobs
   end
 
   def recent(name)
-    rows = @human.pgsql.exec(
+    rows = pgsql.exec(
       'SELECT job.id FROM job ' \
       'JOIN token ON token.id = job.token ' \
       'WHERE token.human = $1 AND job.name = $2 ' \

@@ -56,7 +56,7 @@ class Baza::Pipeline
           stdout = Loog::Buffer.new
           code = run(input, output, stdout)
           uuid = code.zero? ? @fbs.save(output) : nil
-          job.finish(uuid, stdout.to_s, code, ((Time.now - start) * 1000).to_i)
+          job.finish!(uuid, stdout.to_s, code, ((Time.now - start) * 1000).to_i)
           @loog.info("Job ##{job.id} finished, exit=#{code}!")
         end
       rescue StandardError => e

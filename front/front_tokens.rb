@@ -49,6 +49,6 @@ end
 get(%r{/tokens/([0-9]+)/deactivate}) do
   id = params['captures'].first.to_i
   token = the_human.tokens.get(id)
-  token.deactivate
+  token.deactivate!
   flash(iri.cut('/tokens'), "Token ##{id} deactivated")
 end

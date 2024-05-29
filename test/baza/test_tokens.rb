@@ -55,7 +55,7 @@ class Baza::TokensTest < Minitest::Test
     token = tokens.add(name)
     assert_equal(1, tokens.size)
     assert(token.active?)
-    tokens.get(token.id).deactivate
+    tokens.get(token.id).deactivate!
     assert_equal(1, tokens.size)
     assert(!token.active?)
   end

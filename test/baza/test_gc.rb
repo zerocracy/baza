@@ -31,38 +31,18 @@ require_relative '../../objects/baza/humans'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class Baza::JobTest < Minitest::Test
-  def test_starts
-    human = Baza::Humans.new(test_pgsql).ensure(test_name)
+class Baza::GcTest < Minitest::Test
+  def test_finds_garbage
+    humans = Baza::Humans.new(test_pgsql)
+    humans.gc(days: 0).each(&:expire!)
+    assert_equal(0, humans.gc(days: 0).each.to_a.size)
+    human = humans.ensure(test_name)
     token = human.tokens.add(test_name)
-    id = token.start(test_name, test_name).id
-    job = human.jobs.get(id)
-    assert(job.id.positive?)
-    assert_equal(id, job.id)
-    assert(!job.finished?)
-    assert(!job.created.nil?)
-  end
-
-  def test_cant_finish_twice
-    human = Baza::Humans.new(test_pgsql).ensure(test_name)
-    token = human.tokens.add(test_name)
-    job = token.start(test_name, test_name)
-    assert(!job.finished?)
-    job.finish!(test_name, 'stdout', 0, 544)
-    assert_raises do
-      job.finish!(test_name, 'another stdout', 0, 11)
+    name = test_name
+    (0..4).each do |i|
+      token.start(name, test_name).finish!(test_name, 'stdout', i, i)
     end
-  end
-
-  def test_expires_once
-    human = Baza::Humans.new(test_pgsql).ensure(test_name)
-    token = human.tokens.add(test_name)
-    job = token.start(test_name, test_name)
-    assert(!job.expired?)
-    job.expire!
-    assert(job.expired?)
-    assert_raises do
-      job.expire!
-    end
+    assert_equal(0, humans.gc(days: 1).each.to_a.size)
+    assert_equal(4, humans.gc(days: 0).each.to_a.size)
   end
 end

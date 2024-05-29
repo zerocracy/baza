@@ -48,7 +48,7 @@ class Baza::Tokens
     raise Baza::Urror, "Too many active tokens already (#{total})" if total >= 8
     raise Baza::Urror, 'Token with this name already exists' if exists?(name)
     uuid = SecureRandom.uuid
-    rows = @human.pgsql.exec(
+    rows = pgsql.exec(
       'INSERT INTO token (human, name, text) VALUES ($1, $2, $3) RETURNING id',
       [@human.id, name, uuid]
     )
@@ -56,15 +56,15 @@ class Baza::Tokens
   end
 
   def empty?
-    @human.pgsql.exec('SELECT id FROM token WHERE human = $1', [@human.id]).empty?
+    pgsql.exec('SELECT id FROM token WHERE human = $1', [@human.id]).empty?
   end
 
   def size
-    @human.pgsql.exec('SELECT COUNT(id) AS c FROM token WHERE human = $1', [@human.id])[0]['c'].to_i
+    pgsql.exec('SELECT COUNT(id) AS c FROM token WHERE human = $1', [@human.id])[0]['c'].to_i
   end
 
   def actives
-    @human.pgsql.exec('SELECT COUNT(id) AS c FROM token WHERE human = $1 AND active', [@human.id])[0]['c'].to_i
+    pgsql.exec('SELECT COUNT(id) AS c FROM token WHERE human = $1 AND active', [@human.id])[0]['c'].to_i
   end
 
   def each(offset: 0)
@@ -75,7 +75,7 @@ class Baza::Tokens
       'GROUP BY token.id ' \
       'ORDER BY active DESC, created DESC ' \
       "OFFSET #{offset.to_i}"
-    @human.pgsql.exec(q, [@human.id]).each do |row|
+    pgsql.exec(q, [@human.id]).each do |row|
       yield Veil.new(
         get(row['id'].to_i),
         active?: row['active'] == 't',
@@ -95,17 +95,17 @@ class Baza::Tokens
   end
 
   def exists?(name)
-    !@human.pgsql.exec('SELECT id FROM token WHERE human = $1 AND name = $2', [@human.id, name]).empty?
+    !pgsql.exec('SELECT id FROM token WHERE human = $1 AND name = $2', [@human.id, name]).empty?
   end
 
   def find(text)
-    rows = @human.pgsql.exec('SELECT id FROM token WHERE text = $1', [text])
+    rows = pgsql.exec('SELECT id FROM token WHERE text = $1', [text])
     raise Baza::Urror, 'Token not found' if rows.empty?
     get(rows[0]['id'].to_i)
   end
 
   def get(id)
-    rows = @human.pgsql.exec('SELECT * FROM token WHERE id = $1', [id])
+    rows = pgsql.exec('SELECT * FROM token WHERE id = $1', [id])
     raise Baza::Urror, "Token ##{id} not found" if rows.empty?
     row = rows[0]
     require_relative 'token'

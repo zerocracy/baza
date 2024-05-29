@@ -36,6 +36,11 @@ class Baza::Humans
     @pgsql = pgsql
   end
 
+  def gc(days: 90)
+    require_relative 'gc'
+    Baza::Gc.new(self, days)
+  end
+
   def get(id)
     raise 'Human ID must be an integer' unless id.is_a?(Integer)
     Baza::Human.new(self, id)
