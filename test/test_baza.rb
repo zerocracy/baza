@@ -173,7 +173,9 @@ class Baza::AppTest < Minitest::Test
     get("/tokens/#{id}.json")
     token = JSON.parse(last_response.body)['text']
     fb = Factbase.new
-    fb.insert.foo = 'booom \x01\x02\x03'
+    (0..100).each do |i|
+      fb.insert.foo = "booom \x01\x02\x03 #{i}"
+    end
     header('X-Zerocracy-Token', token)
     name = test_name
     put("/push/#{name}", fb.export)
