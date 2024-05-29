@@ -69,17 +69,19 @@ class Baza::Jobs
     pgsql.exec(sql, args).each do |row|
       yield Veil.new(
         get(row['id'].to_i),
+        id: row['id'].to_i,
         created: Time.parse(row['created']),
         name: row['name'],
         uri1: row['uri1'],
         finished?: !row['rid'].nil?,
         expired?: !row['expired'].nil?,
         token: Veil.new(
-          @human.tokens.get(row['tid'].to_i),
+          nil, # this should be replaced by a lambda, when Veil supports it
           name: row['token_name']
         ),
         result: Veil.new(
           @human.results.get(row['rid'].to_i),
+          id: row['rid'].to_i,
           uri2: row['uri2'],
           exit: row['exit'].to_i,
           empty?: row['uri2'].nil?,
