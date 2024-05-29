@@ -58,7 +58,7 @@ class Baza::Jobs
 
   def each(name: nil, offset: 0, cnd: '')
     sql =
-      'SELECT job.*, token.name AS token_name, ' \
+      'SELECT job.*, token.id AS tid, token.name AS token_name, ' \
       'result.id AS rid, result.uri2, result.stdout, result.exit, result.msec FROM job ' \
       'JOIN token ON token.id = job.token ' \
       'LEFT JOIN result ON result.job = job.id ' \
@@ -75,7 +75,10 @@ class Baza::Jobs
         name: row['name'],
         uri1: row['uri1'],
         finished?: !row['rid'].nil?,
-        token_name: row['token_name'],
+        token: Veil.new(
+          @human.tokens.get(row['tid'].to_i),
+          name: row['token_name']
+        ),
         result: Veil.new(
           @human.results.get(row['rid'].to_i),
           uri2: row['uri2'],

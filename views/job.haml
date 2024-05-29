@@ -1,9 +1,9 @@
 %p
   ID:
-  = job.id
+  = "##{job.id}"
 
 %p
-  Created:
+  Created on:
   = job.created.utc.iso8601
 
 %p
@@ -15,6 +15,9 @@
 
 - if job.finished?
   - r = job.result
+  %p
+    Finished on:
+    = r.created.utc.iso8601
   %p
     Exit code:
     = r.exit

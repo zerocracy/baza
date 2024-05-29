@@ -11,7 +11,6 @@
       %col
       %col
       %col{style: 'width: 12em;'}
-      %col{style: 'width: 6em;'}
       %col{style: 'width: 3em;'}
       %col{style: 'width: 3em;'}
       %col{style: 'width: 3em;'}
@@ -28,8 +27,6 @@
           Token
         %th
           Started
-        %th
-          Finished?
         %th
           Code
         %th.right
@@ -54,31 +51,27 @@
         %td.ff
           %a{href: iri.over(name: j.name)}= j.name
         %td
-          = j.token_name
+          = j.token.name
         %td
           = j.created.utc.iso8601
-        %td
-          - if j.finished?
-            %span.darkgreen Yes
-          - else
-            %span.darkred No
-        %td
-          - if j.finished?
+        - if j.finished?
+          %td
             - if j.result.exit.zero?
               👍🏻
             - else
               %span.darkred
                 = j.result.exit
-        %td.right.ff
-          - if j.finished?
+          %td.right.ff
             = j.result.msec
-        %td.center.ff
-          - if j.finished?
+          %td.center.ff
             %a{href: iri.cut('/stdout').append("#{j.id}.txt")}> 📃
-        %td.center
-          - if j.finished? && j.result.exit.zero?
-            %a{href: iri.cut('/pull').append("#{j.id}.fb")}
-              📦
+          %td.center
+            - if j.result.exit.zero?
+              %a{href: iri.cut('/pull').append("#{j.id}.fb")}
+                📦
+        - else
+          %td.center{colspan: 4}
+            in progress...
   %p
     - unless offset.zero?
       %a{href: iri.del(:offset)}

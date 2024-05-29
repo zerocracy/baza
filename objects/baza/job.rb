@@ -43,6 +43,7 @@ class Baza::Job
 
   def finish(uri2, stdout, exit, msec)
     @jobs.human.results.add(@id, uri2, stdout, exit, msec)
+    @jobs.human.account.add(-msec, exit.zero? ? 'Completed' : "Failed (#{exit})", @id)
   end
 
   def created
@@ -57,6 +58,12 @@ class Baza::Job
 
   def name
     @jobs.pgsql.exec('SELECT name FROM job WHERE id = $1', [@id])[0]['name']
+  end
+
+  def token
+    @jobs.human.tokens.get(
+      @jobs.pgsql.exec('SELECT token FROM job WHERE id = $1', [@id])[0]['token']
+    )
   end
 
   def uri1
