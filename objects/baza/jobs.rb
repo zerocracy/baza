@@ -61,8 +61,8 @@ class Baza::Jobs
       'result.id AS rid, result.uri2, result.stdout, result.exit, result.msec FROM job ' \
       'JOIN token ON token.id = job.token ' \
       'LEFT JOIN result ON result.job = job.id ' \
-      'WHERE token.human = $1' \
-      "#{name.nil? ? '' : 'AND job.name = $2'}" \
+      'WHERE token.human = $1 ' \
+      "#{name.nil? ? '' : 'AND job.name = $2'} " \
       "OFFSET #{offset.to_i}"
     args = [@human.id]
     args << name unless name.nil?

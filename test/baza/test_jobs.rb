@@ -64,6 +64,17 @@ class Baza::JobsTest < Minitest::Test
     assert_equal(1, found)
   end
 
+  def test_iterates_with_offset
+    human = Baza::Humans.new(test_pgsql).ensure(test_name)
+    token = human.tokens.add(test_name)
+    token.start(test_name, test_name)
+    found = 0
+    human.jobs.each(offset: 1) do |_|
+      found += 1
+    end
+    assert_equal(0, found)
+  end
+
   def test_finds_recent_job
     human = Baza::Humans.new(test_pgsql).ensure(test_name)
     token = human.tokens.add(test_name)
