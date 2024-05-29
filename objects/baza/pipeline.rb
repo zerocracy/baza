@@ -34,19 +34,18 @@ require_relative 'urror'
 class Baza::Pipeline
   attr_reader :pgsql
 
-  def initialize(fbs, loog)
-    @loog = loog
-    @jobs = Queue.new
+  def initialize(humans, fbs, loog)
+    @humans = humans
     @fbs = fbs
-    @busy = false
+    @loog = loog
   end
 
-  def start
+  def start(pause)
     @thread ||= Thread.new do
       loop do
-        @busy = false
-        job = @jobs.pop
-        @busy = true
+        job = pop
+        sleep pause
+        next if job.nil?
         @loog.info("Job ##{job.id} starts: #{job.uri1}")
         Dir.mktmpdir do |dir|
           input = File.join(dir, 'input.fb')
@@ -71,38 +70,18 @@ class Baza::Pipeline
     @loog.info('Pipeline stopped')
   end
 
-  def update(humans)
-    q =
-      'SELECT human.id AS h, job.id AS j FROM job ' \
-      'JOIN token ON job.token = token.id ' \
-      'JOIN human ON token.human = human.id ' \
-      'LEFT JOIN result ON result.job = job.id ' \
-      'WHERE result.id IS NULL'
-    humans.pgsql.exec(q).each do |row|
-      push(humans.get(row['h'].to_i).jobs.get(row['j'].to_i))
-    end
-    @loog.info("Pipeline updated with #{@jobs.size} jobs previously existed in the DB")
-  end
-
-  def push(job)
-    @jobs << job
-    @loog.info("Job ##{job.id} added to the queue: #{job.uri1}")
-  end
-
-  # Wait for the pipeline to get empty and complete all tasks.
-  # This is mostly used for unit
-  # testing. The +max+ argument is the number of seconds to wait maximum.
-  def wait(max = 2)
-    start = Time.now
-    loop do
-      break if @jobs.empty? && !@busy
-      sleep 0.01
-      raise 'The pipeline is still busy' if Time.now - start > max
-    end
-    yield
+  # Is it empty? Nothing to process any more?
+  def empty?
+    humans.pgsql.exec('SELECT id FROM job WHERE taken IS NULL').empty?
   end
 
   private
+
+  def pop
+    rows = @humans.pgsql.exec('UPDATE job SET taken = $1 WHERE taken IS NULL RETURNING id', ['yes'])
+    return nil if rows.empty?
+    @humans.job_by_id(rows[0]['id'].to_i)
+  end
 
   def run(input, output, buf)
     FileUtils.cp(input, output)

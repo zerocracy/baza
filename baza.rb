@@ -106,9 +106,8 @@ configure do
     loog: settings.loog
   )
   set :humans, Baza::Humans.new(settings.pgsql)
-  set :pipeline, Baza::Pipeline.new(settings.fbs, settings.loog)
-  settings.pipeline.update(settings.humans)
-  settings.pipeline.start
+  set :pipeline, Baza::Pipeline.new(settings.humans, settings.fbs, settings.loog)
+  settings.pipeline.start unless ENV['RACK_ENV'] == 'test'
 end
 
 get '/' do

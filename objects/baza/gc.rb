@@ -42,17 +42,16 @@ class Baza::Gc
   def each
     return to_enum(__method__) unless block_given?
     q =
-      'SELECT f.id, token.human FROM ' \
+      'SELECT f.id FROM ' \
       '(SELECT l.id, l.token, l.created, COUNT(r.name) AS total, MAX(r.created) AS recent FROM job AS l ' \
       'JOIN job AS r ON l.name = r.name ' \
       'WHERE l.expired IS NULL ' \
       'GROUP BY l.id) AS f ' \
-      'JOIN token ON token.id = token ' \
       'WHERE f.total > 1 ' \
       "AND f.created < NOW() - INTERVAL '#{@days.to_i} DAYS' " \
       'AND f.recent != f.created'
     pgsql.exec(q).each do |row|
-      yield @humans.get(row['human'].to_i).jobs.get(row['id'].to_i)
+      yield @humans.job_by_id(row['id'].to_i)
     end
   end
 end

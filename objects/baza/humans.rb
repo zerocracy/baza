@@ -86,4 +86,13 @@ class Baza::Humans
     row = rows[0]
     get(row['human'].to_i).tokens.get(row['id'].to_i)
   end
+
+  # Get one job by its ID.
+  def job_by_id(id)
+    rows = @pgsql.exec(
+      'SELECT human FROM job JOIN token ON token.id = job.token WHERE job.id = $1',
+      [id]
+    )
+    get(rows[0]['human'].to_i).jobs.get(id)
+  end
 end

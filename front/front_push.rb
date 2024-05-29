@@ -47,7 +47,6 @@ post '/push' do
     File.delete(tfile[:tempfile])
     fid = settings.fbs.save(f.path)
     job = token.start(name, fid)
-    settings.pipeline.push(job)
     settings.loog.info("New push arrived via HTTP POSt, job ID is #{job.id}")
     flash(iri.cut('/jobs'), "New job ##{job.id} started")
   end
@@ -63,7 +62,6 @@ put(%r{/push/([a-z0-9-]+)}) do
     File.binwrite(f, request.body.read)
     fid = settings.fbs.save(f.path)
     job = token.start(name, fid)
-    settings.pipeline.push(job)
     settings.loog.info("New push arrived via HTTP PUT, job ID is #{job.id}")
     job.id.to_s
   end

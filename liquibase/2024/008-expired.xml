@@ -22,7 +22,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 -->
-<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd" logicalFilePath="009-expired.xml">
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd" logicalFilePath="008-expired.xml">
   <changeSet id="008" author="yegor256">
     <sql>
       ALTER TABLE job ADD COLUMN expired TIMESTAMPTZ;
@@ -32,12 +32,13 @@ SOFTWARE.
       ALTER TABLE result ADD COLUMN expired TIMESTAMPTZ;
       CREATE INDEX idx_result_exprired ON result(expired);
     </sql>
+    <!--
     <sql>
       CREATE FUNCTION job_expired_is_write_once()
       RETURNS trigger AS
       'BEGIN
         IF NEW.expired IS NULL THEN
-          RAISE EXCEPTION ''You cannot reset expired, it is only set once'';
+          RAISE EXCEPTION ''You cannot reset expired of a job, it is only set once'';
         END IF;
         RETURN NEW;
       END' LANGUAGE PLPGSQL;
@@ -50,7 +51,7 @@ SOFTWARE.
       RETURNS trigger AS
       'BEGIN
         IF NEW.expired IS NULL THEN
-          RAISE EXCEPTION ''You cannot reset expired, it is only set once'';
+          RAISE EXCEPTION ''You cannot reset expired of a result, it is only set once'';
         END IF;
         RETURN NEW;
       END' LANGUAGE PLPGSQL;
@@ -58,5 +59,6 @@ SOFTWARE.
       BEFORE UPDATE ON result
       FOR EACH ROW EXECUTE PROCEDURE result_expired_is_write_once();
     </sql>
+    -->
   </changeSet>
 </databaseChangeLog>

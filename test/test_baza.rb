@@ -162,6 +162,7 @@ class Baza::AppTest < Minitest::Test
   end
 
   def test_starts_job_via_put
+    app.settings.pipeline.start(0)
     uname = test_name
     login('yegor256')
     post('/gift', "human=#{uname}&zents=555555&summary=no")

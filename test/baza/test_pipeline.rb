@@ -37,8 +37,8 @@ class Baza::PipelineTest < Minitest::Test
   def test_simple_processing
     humans = Baza::Humans.new(test_pgsql)
     fbs = Baza::Factbases.new('', '')
-    pipeline = Baza::Pipeline.new(fbs, Loog::NULL)
-    pipeline.start
+    pipeline = Baza::Pipeline.new(humans, fbs, Loog::VERBOSE)
+    pipeline.start(0.1)
     human = humans.ensure(test_name)
     token = human.tokens.add(test_name)
     uuid = Tempfile.open do |f|
@@ -47,12 +47,11 @@ class Baza::PipelineTest < Minitest::Test
     end
     job = token.start(test_name, uuid)
     assert(!human.jobs.get(job.id).finished?)
-    pipeline.update(humans)
-    sleep 0.1
-    pipeline.wait do
+    loop do
       j = human.jobs.get(job.id)
-      assert(j.finished?)
+      next unless j.finished?
       assert(!j.result.empty?)
+      break
     end
     pipeline.stop
   end
