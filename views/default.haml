@@ -34,12 +34,12 @@
               %a{href: iri.cut('/jobs')}
                 Jobs
             %li
-              %a{href: iri.cut('/push')}
-                Push
-            %li
               %a{href: iri.cut('/account')}
                 Account
             - if the_human.admin?
+              %li
+                %a{href: iri.cut('/push')}
+                  Push
               %li
                 %a{href: iri.cut('/sql')}
                   SQL

@@ -23,13 +23,13 @@
 # SOFTWARE.
 
 get '/jobs' do
-  offset = (params[:offset] || '0').to_i
   assemble(
     :jobs,
     :default,
     title: '/jobs',
     jobs: the_human.jobs,
-    offset: offset
+    name: params[:name],
+    offset: (params[:offset] || '0').to_i
   )
 end
 

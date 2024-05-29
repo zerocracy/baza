@@ -25,13 +25,12 @@
 require 'sinatra/json'
 
 get '/tokens' do
-  offset = (params[:offset] || '0').to_i
   assemble(
     :tokens,
     :default,
     title: '/tokens',
     tokens: the_human.tokens,
-    offset: offset
+    offset: (params[:offset] || '0').to_i
   )
 end
 
