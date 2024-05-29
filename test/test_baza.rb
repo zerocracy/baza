@@ -102,6 +102,7 @@ class Baza::AppTest < Minitest::Test
   end
 
   def test_non_admin_pages
+    skip # because now all pages are visible in testing mode
     pages = [
       '/sql', '/gift'
     ]

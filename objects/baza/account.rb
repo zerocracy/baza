@@ -47,7 +47,7 @@ class Baza::Account
     @human.pgsql.exec(q, [@human.id]).each do |row|
       yield Unpiercable.new(
         Baza::Receipt.new(self, row['id'].to_i),
-        job_id: row['job'].nil? ? nil : row['job'].to_i,
+        job_id: row['job']&.to_i,
         zents: row['zents'].to_i,
         summary: row['summary'],
         created: Time.parse(row['created'])

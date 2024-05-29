@@ -46,7 +46,6 @@ class Baza::Jobs
   end
 
   def each(name: nil, offset: 0, cnd: '')
-    return to_enum(__method__) unless block_given?
     sql =
       'SELECT job.*, token.name AS token_name, ' \
       'result.id AS rid, result.uri2, result.stdout, result.exit, result.msec FROM job ' \
@@ -79,7 +78,7 @@ class Baza::Jobs
 
   def get(id)
     raise 'Job ID must be an integer' unless id.is_a?(Integer)
-    each(cnd: "job.id = #{id.to_i}").to_a[0]
+    each(cnd: "job.id = #{id.to_i}") { |j| return j }
   end
 
   def name_exists?(name)

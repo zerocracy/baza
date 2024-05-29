@@ -69,10 +69,7 @@ class Baza::Job
   end
 
   def result
-    rows = @jobs.pgsql.exec(
-      'SELECT * FROM result WHERE job = $1',
-      [@id]
-    )
+    rows = @jobs.pgsql.exec('SELECT id FROM result WHERE job = $1', [@id])
     raise Baza::Urror, 'There is no result yet' if rows.empty?
     Baza::Result.new(self, rows[0]['id'].to_i)
   end
