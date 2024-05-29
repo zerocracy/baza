@@ -73,7 +73,7 @@ class Baza::Job
     raise Baza::Urror, 'STDOUT must be a String' unless stdout.is_a?(String)
     summary =
       "Job ##{id} #{exit.zero? ? 'completed' : "failed (#{exit})"} " \
-      "in #{msec}ms, #{stdout.split("\n")} lines in stdout"
+      "in #{msec}ms, #{stdout.split("\n").size} lines in stdout"
     @jobs.pgsql.transaction do |t|
       t.exec(
         'INSERT INTO receipt (human, zents, summary, job) VALUES ($1, $2, $3, $4) RETURNING id',
