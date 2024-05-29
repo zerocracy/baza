@@ -68,10 +68,20 @@ class Baza::JobsTest < Minitest::Test
     human = Baza::Humans.new(test_pgsql).ensure(test_name)
     token = human.tokens.add(test_name)
     name = "#{test_name}-a"
-    token.start(name, test_name).id
+    token.start(name, test_name).finish(test_name, 'stdout', 0, 544)
     token.start("#{test_name}-b", test_name)
     id2 = token.start(name, test_name).id
     assert(human.jobs.name_exists?(name))
     assert_equal(id2, human.jobs.recent(name).id)
+  end
+
+  def test_prohibits_more_than_one_running_job
+    human = Baza::Humans.new(test_pgsql).ensure(test_name)
+    token = human.tokens.add(test_name)
+    name = test_name
+    token.start(name, test_name)
+    assert_raises do
+      token.start(name, test_name)
+    end
   end
 end
