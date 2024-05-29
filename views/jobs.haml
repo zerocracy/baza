@@ -40,7 +40,8 @@
             No
         %td
           - if j.finished?
-            = "Exit:#{j.result.exit}"
+            %span{style: "color: #{j.result.exit.zero? ? 'darkgreen' : 'darkred'}"}
+              = "Exit:#{j.result.exit}"
             = ' | '
             %a{href: iri.cut('/stdout').append("#{j.id}.txt")}> stdout
             = ' | '

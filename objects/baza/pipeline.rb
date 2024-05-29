@@ -106,7 +106,7 @@ class Baza::Pipeline
 
   def run(input, output, buf)
     FileUtils.cp(input, output)
-    buf.info('Simply copied input FB into output FB')
+    buf.info("Simply copied input FB into output FB (#{File.size(input)} bytes)")
     0
   end
 end
