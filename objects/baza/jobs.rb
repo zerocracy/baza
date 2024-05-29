@@ -63,6 +63,7 @@ class Baza::Jobs
       'LEFT JOIN result ON result.job = job.id ' \
       'WHERE token.human = $1 ' \
       "#{name.nil? ? '' : 'AND job.name = $2'} " \
+      'ORDER BY created DESC ' \
       "OFFSET #{offset.to_i}"
     args = [@human.id]
     args << name unless name.nil?
