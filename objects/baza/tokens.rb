@@ -69,8 +69,10 @@ class Baza::Tokens
 
   def each(offset: 0)
     q =
-      'SELECT * FROM token ' \
+      'SELECT token.*, COUNT(job.id) AS jobs_count FROM token ' \
+      'LEFT JOIN job ON job.token = token.id ' \
       'WHERE human=$1 ' \
+      'GROUP BY token.id ' \
       'ORDER BY active DESC, created DESC ' \
       "OFFSET #{offset.to_i}"
     @human.pgsql.exec(q, [@human.id]).each do |row|
@@ -78,7 +80,8 @@ class Baza::Tokens
         Baza::Token.new(self, row['id'].to_i),
         active?: row['active'] == 't',
         name: row['name'],
-        text: row['text']
+        text: row['text'],
+        jobs_count: row['jobs_count']
       )
     end
   end

@@ -89,6 +89,13 @@ class Baza::Token
     rows[0]['text']
   end
 
+  def jobs_count
+    @tokens.pgsql.exec(
+      'SELECT COUNT(job.id) AS c FROM job WHERE token = $1',
+      [@id]
+    )[0]['c']
+  end
+
   def to_json(*_args)
     {
       id: @id,

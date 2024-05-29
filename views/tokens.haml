@@ -17,6 +17,9 @@
         %th
           Token
         %th
+          Jobs
+        %th
+          Status
     %tbody
     - total = 0
     - max = 10
@@ -28,6 +31,8 @@
           = t.name
         %td
           %code= t.text
+        %td
+          = t.jobs_count
         %td
           - if t.active?
             %a{href: iri.cut('/tokens').append(t.id).append('deactivate')}
