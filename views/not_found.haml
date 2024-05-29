@@ -7,6 +7,4 @@
 
 %p
   Start from
-  = ' '
-  %a{href: iri.cut('/')}> home
-  = '.'
+  != href(iri.cut('/'), 'home', dot: true)

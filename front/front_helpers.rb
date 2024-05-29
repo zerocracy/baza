@@ -27,4 +27,8 @@ helpers do
     usd = format('%.5f', num.to_f / (1000 * 100))
     num.positive? ? "<span style='color:green'>+#{usd}</span>" : "<span style='color:firebrick'>#{usd}</span>"
   end
+
+  def href(link, text, dot: false)
+    " <a href='#{link}'>#{text}</a>#{dot ? '.' : ''} "
+  end
 end

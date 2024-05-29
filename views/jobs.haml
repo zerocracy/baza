@@ -1,9 +1,16 @@
 - if jobs.empty?
   %p
-    No jobs yet.
+    There are no jobs yet.
+    Once you configure the
+    != href('https://github.com/zerocracy/judges-action', 'zerocracy/judges-action')
+    plugin in one of your GitHub repositories and it will start working,
+    the jobs will start showing up at this page.
 - else
   %p
-    Full list of jobs:
+    The jobs you see at this page are posted by the
+    != href('https://github.com/zerocracy/judges-action', 'zerocracy/judges-action')
+    plugin.
+    Normally, there is no need to touch them, the process is fully automated.
   %table
     %colgroup
       %col{style: 'width: 4em;'}

@@ -3,9 +3,7 @@
   This will trigger a new job.
   However, it is not recommended to do this manual operation.
   Instead, configure the
-  = ' '
-  %a{href: 'https://github.com/zerocracy/judges-action'}> judges-action
-  = ' '
+  != href('https://github.com/zerocracy/judges-action', 'zerocracy/judges-action')
   plugin, which automatically submits factbases through this form.
 
 %form{method: 'post', action: iri.cut('/push'), enctype: 'multipart/form-data'}
@@ -21,9 +19,7 @@
     %input{ type: 'text', name: 'name', tabindex: 2, placeholder: 'Name', size: 25, maxlength: 24 }
     %label
       Factbase (a binary file created by the
-      = ' '
-      %a{href: 'https://github.com/yegor256/judges'}> judges
-      = ' '
+      != href('https://github.com/yegor256/judges', 'judges')
       toolkit):
     %input{ type: 'file', name: 'factbase', tabindex: 3, placeholder: 'Factbase' }
     %label
