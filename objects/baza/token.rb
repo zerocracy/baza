@@ -51,10 +51,7 @@ class Baza::Token
   end
 
   def active?
-    rows = @tokens.pgsql.exec(
-      'SELECT active FROM token WHERE id = $1',
-      [@id]
-    )
+    rows = @tokens.pgsql.exec('SELECT active FROM token WHERE id = $1', [@id])
     raise Baza::Urror, "Token ##{@id} not found" if rows.empty?
     rows[0]['active'] == 't'
   end
@@ -91,7 +88,9 @@ class Baza::Token
     {
       id: @id,
       name: name,
-      text: text
+      text: text,
+      created: created,
+      active: active?
     }
   end
 end
