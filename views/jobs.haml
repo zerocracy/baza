@@ -11,6 +11,8 @@
     != href('https://github.com/zerocracy/judges-action', 'zerocracy/judges-action')
     plugin.
     Normally, there is no need to touch them, the process is fully automated.
+    You most probably won't need them ever, but still, please keep in mind
+    that we automatically delete overwritten factbases that are older than 90 days.
   %table
     %colgroup
       %col{style: 'width: 4em;'}
@@ -52,8 +54,9 @@
           %a{href: iri.cut('/jobs').append(j.id)}
             = "##{j.id}"
         %td.center
-          %a{href: iri.cut('/inspect').append("#{j.id}.fb")}
-            📦
+          - unless j.expired?
+            %a{href: iri.cut('/inspect').append("#{j.id}.fb")}
+              📦
         %td.ff
           %a{href: iri.over(name: j.name)}= j.name
         %td
@@ -69,15 +72,19 @@
                 = j.result.exit
           %td.right.ff
             = j.result.msec
-          %td.center.ff
-            %a{href: iri.cut('/stdout').append("#{j.id}.txt")}> 📃
-          %td.center
-            - if j.result.exit.zero?
-              %a{href: iri.cut('/pull').append("#{j.id}.fb")}
-                📦
+          - if j.expired?
+            %td.center.orange{colspan: 2}
+              Expired
+          - else
+            %td.center.ff
+              %a{href: iri.cut('/stdout').append("#{j.id}.txt")}> 📃
+            %td.center
+              - if j.result.exit.zero?
+                %a{href: iri.cut('/pull').append("#{j.id}.fb")}
+                  📦
         - else
-          %td.center{colspan: 4}
-            in progress...
+          %td.center.orange{colspan: 4}
+            In progress...
   %p
     - unless offset.zero?
       %a{href: iri.del(:offset)}

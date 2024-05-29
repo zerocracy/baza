@@ -73,6 +73,7 @@ class Baza::Jobs
         name: row['name'],
         uri1: row['uri1'],
         finished?: !row['rid'].nil?,
+        expired?: !row['expired'].nil?,
         token: Veil.new(
           @human.tokens.get(row['tid'].to_i),
           name: row['token_name']

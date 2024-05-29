@@ -90,7 +90,9 @@ get(%r{/stdout/([0-9]+).txt}) do
 end
 
 get(%r{/pull/([0-9]+).fb}) do
-  r = the_human.jobs.get(params['captures'].first.to_i).result
+  j = the_human.jobs.get(params['captures'].first.to_i)
+  r = j.result
+  raise Baza::Urror, "The job ##{j.id} is expired" if j.expired?
   raise Baza::Urror, 'The result is empty' if r.empty?
   raise Baza::Urror, 'The result is broken' unless r.exit.zero?
   Tempfile.open do |f|
@@ -102,6 +104,7 @@ end
 
 get(%r{/inspect/([0-9]+).fb}) do
   j = the_human.jobs.get(params['captures'].first.to_i)
+  raise Baza::Urror, "The job ##{j.id} is expired" if j.expired?
   Tempfile.open do |f|
     settings.fbs.load(j.uri1, f.path)
     content_type('application/octet-stream')

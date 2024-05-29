@@ -62,7 +62,7 @@ class Baza::Factbases
     uuid
   end
 
-  # Read a BLOB from the cloud, identified by the +uuid+, and save it
+  # Read the BLOB from the cloud, identified by the +uuid+, and save it
   # to the file provided. Fail if there is not such BLOB.
   def load(uuid, file)
     raise 'UUID can\'t be nil' if uuid.nil?
@@ -78,6 +78,22 @@ class Baza::Factbases
         key: key
       )
       @loog.info("Loaded from S3: #{key} (#{File.size(file)} bytes)")
+    end
+  end
+
+  # Delete the BLOB from the cloud.
+  def delete(uuid)
+    raise 'UUID can\'t be nil' if uuid.nil?
+    raise 'UUID can\'t be empty' if uuid.empty?
+    if @key.empty?
+      FileUtils.rm(fake(uuid))
+    else
+      key = oname(uuid)
+      aws.delete_object(
+        bucket: @bucket,
+        key: key
+      )
+      @loog.info("Deleted in S3: #{key} (#{File.size(file)} bytes)")
     end
   end
 

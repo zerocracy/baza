@@ -2,6 +2,11 @@
   ID:
   = "##{job.id}"
 
+- if job.expired?
+  %p.orange
+    Expired:
+    = job.expired.utc.iso8601
+
 %p
   Name:
   = job.name
@@ -14,10 +19,11 @@
   Created on:
   = job.created.utc.iso8601
 
-%p
-  Input:
-  %a{href: iri.cut('/inspect').append("#{job.id}.fb")}
-    download
+- unless job.expired?
+  %p
+    Input:
+    %a{href: iri.cut('/inspect').append("#{job.id}.fb")}
+      download
 
 - if job.finished?
   - r = job.result
@@ -30,7 +36,7 @@
   %p
     Duration:
     = "#{r.msec}ms"
-  - if r.exit.zero?
+  - if r.exit.zero? && !job.expired?
     %p
       Output:
       %a{href: iri.cut('/pull').append("#{job.id}.fb")}

@@ -42,6 +42,7 @@ class Baza::FactbasesTest < Minitest::Test
       output = File.join(dir, 'b.fb')
       fbs.load(uuid, output)
       assert_equal('hey', File.read(output))
+      fbs.delete(uuid)
     end
   end
 
