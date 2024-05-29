@@ -42,12 +42,7 @@ class Baza::Job
   end
 
   def finish(uri2, stdout, exit, msec)
-    raise Baza::Urror, 'Exit code must a Number' unless exit.is_a?(Integer)
-    raise Baza::Urror, 'Milliseconds must a Number' unless msec.is_a?(Integer)
-    @jobs.pgsql.exec(
-      'INSERT INTO result (job, uri2, stdout, exit, msec) VALUES ($1, $2, $3, $4, $5)',
-      [@id, uri2, stdout, exit, msec]
-    )
+    @jobs.human.results.add(@id, uri2, stdout, exit, msec)
   end
 
   def created
