@@ -4,7 +4,7 @@
 
 %p
   Created:
-  = job.created
+  = job.created.utc.iso8601
 
 %p
   Finished:
@@ -16,11 +16,11 @@
 - if job.finished?
   - r = job.result
   %p
-    Stdout:
-    %pre= r.stdout
-  %p
     Exit code:
     = r.exit
   %p
     Milliseconds:
     = r.msec
+  %p
+    Stdout:
+    %pre= r.stdout

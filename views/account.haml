@@ -5,6 +5,12 @@
 %p
   Full list of receipts:
 %table
+  %colgroup
+    %col{style: 'width: 4em;'}
+    %col{style: 'width: 3em;'}
+    %col{style: 'width: 8em;'}
+    %col
+    %col{style: 'width: 12em;'}
   %thead
     %tr
       %th
@@ -12,24 +18,37 @@
       %th
         Job
       %th.right
-        USD
+        Zolds
       %th
         Summary
       %th
         Created
   %tbody
-  - account.each do |r|
+  - total = 0
+  - max = 10
+  - account.each(offset: offset) do |r|
+    - total += 1
+    - break if total > max
     %tr
       %td
-        = r.id
+        = "##{r.id}"
       %td
         - j = r.job_id
-        - unless j.nil?
+        - if j.nil?
+          = '—'
+        - else
           %a{href: iri.cut('/jobs').append(j)}
-            = j
-      %td.right
+            = "##{j}"
+      %td.right.ff
         != zents(r.zents)
       %td
         = r.summary
       %td
-        = r.created
+        = r.created.utc.iso8601
+%p
+  - unless offset.zero?
+    %a{href: iri.del(:offset)}
+      Back
+  - if total > max
+    %a{href: iri.over(offset: offset + max)}
+      More

@@ -1,10 +1,13 @@
+%p
+  You can make a gift to any user with any number of points (both positive and negative).
+
 %form{method: 'post', action: iri.cut('/gift')}
   %fieldset
     %label Human:
-    %input{ type: 'text', name: 'human', tabindex: 1, placeholder: 'To whom?', size: 18, maxlength: 64, value: the_human.github }
-    %label Zents (100,000 zents = $1):
-    %input{ type: 'text', name: 'zents', tabindex: 2, placeholder: 'How much?', size: 12, maxlength: 16 }
+    %input{ type: 'text', name: 'human', tabindex: 1, placeholder: 'To whom?', size: 18, maxlength: 64, value: the_human.github, required: true }
+    %label Zents:
+    %input{ type: 'text', name: 'zents', tabindex: 2, placeholder: 'How much?', size: 12, maxlength: 16, required: true }
     %label Summary:
-    %input{ type: 'text', name: 'summary', tabindex: 3, placeholder: 'What for?', size: 60, maxlength: 1024 }
+    %input{ type: 'text', name: 'summary', tabindex: 3, placeholder: 'What for?', size: 60, maxlength: 1024, required: true }
     %label
     %input{ type: 'submit', tabindex: 4, value: 'Add' }

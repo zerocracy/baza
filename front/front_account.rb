@@ -27,6 +27,7 @@ get '/account' do
     :account,
     :default,
     title: '/account',
-    account: the_human.account
+    account: the_human.account,
+    offset: (params[:offset] || '0').to_i
   )
 end

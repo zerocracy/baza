@@ -38,11 +38,16 @@ class Baza::Account
     @human.pgsql
   end
 
-  def each
-    @human.pgsql.exec('SELECT * FROM receipt WHERE human = $1', [@human.id]).each do |row|
+  def each(offset: 0)
+    q =
+      'SELECT * FROM receipt ' \
+      'WHERE human = $1 ' \
+      'ORDER BY created DESC ' \
+      "OFFSET #{offset.to_i}"
+    @human.pgsql.exec(q, [@human.id]).each do |row|
       yield Unpiercable.new(
         Baza::Receipt.new(self, row['id'].to_i),
-        job_id: row['job'].to_i,
+        job_id: row['job'].nil? ? nil : row['job'].to_i,
         zents: row['zents'].to_i,
         summary: row['summary'],
         created: Time.parse(row['created'])
