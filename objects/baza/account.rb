@@ -48,6 +48,7 @@ class Baza::Account
     pgsql.exec(q, [@human.id]).each do |row|
       yield Veil.new(
         get(row['id'].to_i),
+        id: row['id'].to_i,
         job_id: row['job']&.to_i,
         zents: row['zents'].to_i,
         summary: row['summary'],
