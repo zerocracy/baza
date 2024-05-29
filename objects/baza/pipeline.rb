@@ -40,7 +40,7 @@ class Baza::Pipeline
     @loog = loog
   end
 
-  def start(pause)
+  def start(pause = 15)
     @thread ||= Thread.new do
       loop do
         job = pop
