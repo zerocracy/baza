@@ -81,10 +81,18 @@ get(%r{/exists/([a-z0-9-]+)}) do
   the_human.jobs.name_exists?(params['captures'].first) ? 'yes' : 'no'
 end
 
+# Read the output of this job.
 get(%r{/stdout/([0-9]+).txt}) do
   r = the_human.jobs.get(params['captures'].first.to_i).result
   content_type('text/plain')
   r.stdout
+end
+
+# The job is finished?
+get(%r{/finished/([0-9]+)}) do
+  j = the_human.jobs.get(params['captures'].first.to_i)
+  content_type('text/plain')
+  j.finished? ? 'yes' : 'no'
 end
 
 get(%r{/pull/([0-9]+).fb}) do

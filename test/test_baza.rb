@@ -186,12 +186,14 @@ class Baza::AppTest < Minitest::Test
     rid = last_response.body.to_i
     cycles = 0
     loop do
-      get("/pull/#{rid}.fb")
-      break if last_response.status == 200
+      get("/finished/#{rid}")
+      assert_status(200)
+      break if last_response.body == 'yes'
       sleep 0.1
       cycles += 1
       break if cycles > 10
     end
+    get("/pull/#{rid}.fb")
     assert_status(200)
     get("/inspect/#{id}.fb")
     assert_status(200)
