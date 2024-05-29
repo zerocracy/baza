@@ -68,9 +68,10 @@ class Baza::JobsTest < Minitest::Test
     human = Baza::Humans.new(test_pgsql).ensure(test_name)
     token = human.tokens.add(test_name)
     name = "#{test_name}-a"
-    id = token.start(name, test_name).id
+    token.start(name, test_name).id
     token.start("#{test_name}-b", test_name)
+    id2 = token.start(name, test_name).id
     assert(human.jobs.name_exists?(name))
-    assert_equal(id, human.jobs.recent(name).id)
+    assert_equal(id2, human.jobs.recent(name).id)
   end
 end

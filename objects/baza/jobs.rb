@@ -82,7 +82,6 @@ class Baza::Jobs
       'SELECT job.id FROM job ' \
       'JOIN token ON token.id = job.token ' \
       'WHERE token.human = $1 AND job.name = $2 ' \
-      'ORDER BY job.created DESC ' \
       'LIMIT 1',
       [@human.id, name]
     ).empty?
