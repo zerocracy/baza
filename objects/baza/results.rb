@@ -43,15 +43,4 @@ class Baza::Results
     raise 'Result ID must be an integer' unless id.is_a?(Integer)
     Baza::Result.new(self, id)
   end
-
-  def add(job, uri2, stdout, exit, msec)
-    raise Baza::Urror, 'Exit code must a Number' unless exit.is_a?(Integer)
-    raise Baza::Urror, 'Milliseconds must a Number' unless msec.is_a?(Integer)
-    get(
-      @human.pgsql.exec(
-        'INSERT INTO result (job, uri2, stdout, exit, msec) VALUES ($1, $2, $3, $4, $5) RETURNING id',
-        [job, uri2, stdout, exit, msec]
-      )[0]['id'].to_i
-    )
-  end
 end
