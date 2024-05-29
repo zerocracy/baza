@@ -22,7 +22,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require 'unpiercable'
+require 'veil'
 require_relative 'receipt'
 
 # Account of a human.
@@ -45,7 +45,7 @@ class Baza::Account
       'ORDER BY created DESC ' \
       "OFFSET #{offset.to_i}"
     @human.pgsql.exec(q, [@human.id]).each do |row|
-      yield Unpiercable.new(
+      yield Veil.new(
         Baza::Receipt.new(self, row['id'].to_i),
         job_id: row['job']&.to_i,
         zents: row['zents'].to_i,

@@ -23,7 +23,6 @@
 # SOFTWARE.
 
 require 'securerandom'
-require 'unpiercable'
 require 'veil'
 require_relative 'token'
 
@@ -78,7 +77,7 @@ class Baza::Tokens
       'ORDER BY active DESC, created DESC ' \
       "OFFSET #{offset.to_i}"
     @human.pgsql.exec(q, [@human.id]).each do |row|
-      yield Unpiercable.new(
+      yield Veil.new(
         Baza::Token.new(self, row['id'].to_i),
         active?: row['active'] == 't',
         name: row['name'],
