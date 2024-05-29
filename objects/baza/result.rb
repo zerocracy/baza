@@ -27,16 +27,16 @@
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
 class Baza::Result
-  attr_reader :id
+  attr_reader :id, :results
 
-  def initialize(job, id)
-    @job = job
+  def initialize(results, id)
+    @results = results
     raise 'Result ID must be an integer' unless id.is_a?(Integer)
     @id = id
   end
 
   def created
-    Time.parse(@job.pgsql.exec('SELECT created FROM result WHERE id = $1', [@id])[0]['created'])
+    Time.parse(@results.pgsql.exec('SELECT created FROM result WHERE id = $1', [@id])[0]['created'])
   end
 
   def empty?
@@ -44,19 +44,19 @@ class Baza::Result
   end
 
   def uri2
-    @job.pgsql.exec('SELECT uri2 FROM result WHERE id = $1', [@id])[0]['uri2']
+    @results.pgsql.exec('SELECT uri2 FROM result WHERE id = $1', [@id])[0]['uri2']
   end
 
   def stdout
-    @job.pgsql.exec('SELECT stdout FROM result WHERE id = $1', [@id])[0]['stdout']
+    @results.pgsql.exec('SELECT stdout FROM result WHERE id = $1', [@id])[0]['stdout']
   end
 
   def exit
-    @job.pgsql.exec('SELECT exit FROM result WHERE id = $1', [@id])[0]['exit'].to_i
+    @results.pgsql.exec('SELECT exit FROM result WHERE id = $1', [@id])[0]['exit'].to_i
   end
 
   def msec
-    @job.pgsql.exec('SELECT msec FROM result WHERE id = $1', [@id])[0]['msec'].to_i
+    @results.pgsql.exec('SELECT msec FROM result WHERE id = $1', [@id])[0]['msec'].to_i
   end
 
   def to_json(*_args)

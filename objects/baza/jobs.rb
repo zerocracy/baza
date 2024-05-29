@@ -22,14 +22,16 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require 'unpiercable'
-require_relative 'token'
+require 'veil'
+require_relative 'job'
 
 # Jobs of a human.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
 class Baza::Jobs
+  attr_reader :human
+
   def initialize(human)
     @human = human
   end
@@ -58,15 +60,15 @@ class Baza::Jobs
     args << name unless name.nil?
     @human.pgsql.exec(sql, args).each do |row|
       job = Baza::Job.new(self, row['id'].to_i)
-      yield Unpiercable.new(
+      yield Veil.new(
         job,
         created: Time.parse(row['created']),
         name: row['name'],
         uri1: row['uri1'],
         finished?: !row['rid'].nil?,
         token_name: row['token_name'],
-        result: Unpiercable.new(
-          Baza::Result.new(job, row['rid'].to_i),
+        result: Veil.new(
+          @human.results.get(row['rid'].to_i),
           uri2: row['uri2'],
           exit: row['exit'].to_i,
           empty?: row['uri2'].nil?,

@@ -29,7 +29,7 @@ require_relative 'result'
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
 class Baza::Job
-  attr_reader :id
+  attr_reader :id, :jobs
 
   def initialize(jobs, id)
     @jobs = jobs
@@ -71,7 +71,7 @@ class Baza::Job
   def result
     rows = @jobs.pgsql.exec('SELECT id FROM result WHERE job = $1', [@id])
     raise Baza::Urror, 'There is no result yet' if rows.empty?
-    Baza::Result.new(self, rows[0]['id'].to_i)
+    @jobs.human.results.get(rows[0]['id'].to_i)
   end
 
   def to_json(*_args)

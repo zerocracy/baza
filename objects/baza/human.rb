@@ -23,16 +23,13 @@
 # SOFTWARE.
 
 require_relative 'urror'
-require_relative 'tokens'
-require_relative 'jobs'
-require_relative 'account'
 
 # Human being.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
 class Baza::Human
-  attr_reader :id
+  attr_reader :id, :humans
 
   def initialize(humans, id)
     @humans = humans
@@ -45,18 +42,22 @@ class Baza::Human
   end
 
   def tokens
+    require_relative 'tokens'
     Baza::Tokens.new(self)
   end
 
   def jobs
+    require_relative 'jobs'
     Baza::Jobs.new(self)
   end
 
   def results
+    require_relative 'results'
     Baza::Results.new(self)
   end
 
   def account
+    require_relative 'account'
     Baza::Account.new(self)
   end
 

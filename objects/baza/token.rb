@@ -29,7 +29,7 @@ require_relative 'job'
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
 class Baza::Token
-  attr_reader :id
+  attr_reader :id, :tokens
 
   def initialize(tokens, id)
     @tokens = tokens
@@ -41,8 +41,7 @@ class Baza::Token
   end
 
   def human
-    Baza::Human.new(
-      Baza::Humans.new(@tokens.pgsql),
+    @tokens.human.humans.get(
       @tokens.pgsql.exec('SELECT human FROM token WHERE id = $1', [@id])[0]['human'].to_i
     )
   end
@@ -67,8 +66,7 @@ class Baza::Token
       'INSERT INTO job (token, name, uri1) VALUES ($1, $2, $3) RETURNING id',
       [@id, name, uri1]
     )
-    id = rows[0]['id'].to_i
-    Baza::Job.new(self, id)
+    @tokens.human.jobs.get(rows[0]['id'].to_i)
   end
 
   def created

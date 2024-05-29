@@ -32,6 +32,8 @@ require_relative 'token'
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
 class Baza::Tokens
+  attr_reader :human
+
   def initialize(human)
     @human = human
   end
