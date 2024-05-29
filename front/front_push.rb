@@ -98,3 +98,12 @@ get(%r{/pull/([0-9]+).fb}) do
     File.binread(f.path)
   end
 end
+
+get(%r{/inspect/([0-9]+).fb}) do
+  j = the_human.jobs.get(params['captures'].first.to_i)
+  Tempfile.open do |f|
+    settings.fbs.load(j.uri1, f.path)
+    content_type('application/octet-stream')
+    File.binread(f.path)
+  end
+end

@@ -12,6 +12,8 @@
         %th
           Name
         %th
+          Input
+        %th
           Started
         %th
           Finished?
@@ -26,6 +28,9 @@
         %td
           %code
             = j.name
+        %td
+          %a{href: iri.cut('/inspect').append("#{j.id}.fb")}
+            = "#{j.name}.fb"
         %td
           = j.created.utc.iso8601
         %td

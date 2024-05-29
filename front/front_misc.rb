@@ -24,6 +24,10 @@
 
 require_relative '../version'
 
+after do
+  response.headers['X-Zerocracy-Version'] = Baza::VERSION
+end
+
 get '/robots.txt' do
   content_type 'text/plain'
   "User-agent: *\nDisallow: /"

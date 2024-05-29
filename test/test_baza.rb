@@ -165,20 +165,22 @@ class Baza::AppTest < Minitest::Test
     assert_status(200)
     get("/recent/#{name}.txt")
     assert_status(200)
-    jid = last_response.body.to_i
+    rid = last_response.body.to_i
     cycles = 0
     loop do
-      get("/pull/#{jid}.fb")
+      get("/pull/#{rid}.fb")
       break if last_response.status == 200
       sleep 0.1
       cycles += 1
       break if cycles > 10
     end
     assert_status(200)
+    get("/inspect/#{id}.fb")
+    assert_status(200)
     fb.query('(always)').delete!
     fb.import(last_response.body)
     assert(fb.query('(exists foo)').each.to_a[0].foo.start_with?('booom'))
-    get("/stdout/#{jid}.txt")
+    get("/stdout/#{rid}.txt")
     assert_status(200)
   end
 

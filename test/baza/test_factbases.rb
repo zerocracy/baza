@@ -47,7 +47,7 @@ class Baza::FactbasesTest < Minitest::Test
 
   def test_aws_usage
     skip
-    fbs = Baza::Factbases.new('AKIAQJE...', 'KmX8eM...', loog: Loog::VERBOSE)
+    fbs = Baza::Factbases.new('AKIAQJE...', 'KmX8eM...', loog: Loog::NULL)
     Dir.mktmpdir do |dir|
       input = File.join(dir, 'a.fb')
       File.write(input, 'hey')
