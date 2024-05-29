@@ -56,13 +56,9 @@ configure do
       'region' => '',
       'bucket' => ''
     },
-    'telegram' => {
-      'token' => '????',
-      'name' => '????'
-    },
     'github' => {
-      'id' => '????',
-      'secret' => '????',
+      'id' => '',
+      'secret' => '',
       'encryption_secret' => ''
     }
   }
@@ -72,7 +68,8 @@ configure do
       raise \
         "The config file #{f} is absent, can't start the app. " \
         'If you are running in a staging/testing mode, set RACK_ENV ' \
-        "envirornemt variable to 'test'"
+        "envirornemt variable to 'test' and run again:\n" \
+        'RACK_ENV=test ruby baza.app -p 8888'
     end
     config = YAML.safe_load(File.open(f))
   end
@@ -116,27 +113,11 @@ end
 
 get '/' do
   flash(iri.cut('/dash')) if @locals[:human]
-  assemble(
-    :index,
-    :front,
-    title: '/'
-  )
+  assemble(:index, :front, title: '/')
 end
 
 get '/dash' do
-  assemble(
-    :dash,
-    :default,
-    title: '/dash'
-  )
-end
-
-def assemble(haml, layout, map)
-  haml(haml, layout: layout, locals: merged(map))
-end
-
-def iri
-  Iri.new(request.url)
+  assemble(:dash, :default, title: '/dash')
 end
 
 require_relative 'front/front_misc'

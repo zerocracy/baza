@@ -49,3 +49,11 @@ def merged(hash)
   cookies.delete(:flash_color)
   out
 end
+
+def assemble(haml, layout, map)
+  haml(haml, layout: layout, locals: merged(map))
+end
+
+def iri
+  Iri.new(request.url)
+end
