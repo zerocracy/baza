@@ -78,6 +78,7 @@ class Baza::Tokens
     pgsql.exec(q, [@human.id]).each do |row|
       yield Veil.new(
         get(row['id'].to_i),
+        id: row['id'].to_i,
         active?: row['active'] == 't',
         name: row['name'],
         created: Time.parse(row['created']),

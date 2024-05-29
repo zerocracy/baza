@@ -36,7 +36,7 @@ gem 'iri', '0.8.0'
 gem 'loog', '0.5.1'
 gem 'minitest', '5.23.1', require: false
 gem 'pgtk', '0.9.3'
-gem 'rack', '3.0.11'
+gem 'rack', '2.2.9'
 gem 'rack-ssl', '1.4.1'
 gem 'rack-test', '2.1.0'
 gem 'rake', '13.2.1', require: false
