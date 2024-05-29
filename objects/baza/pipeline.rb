@@ -78,7 +78,8 @@ class Baza::Pipeline
   private
 
   def pop
-    rows = @humans.pgsql.exec('UPDATE job SET taken = $1 WHERE taken IS NULL RETURNING id', ['yes'])
+    me = "baza #{Baza::VERSION}"
+    rows = @humans.pgsql.exec('UPDATE job SET taken = $1 WHERE taken IS NULL RETURNING id', [me])
     return nil if rows.empty?
     @humans.job_by_id(rows[0]['id'].to_i)
   end
