@@ -13,12 +13,11 @@
     %col{style: 'width: 12em;'}
   %thead
     %tr
-      %th
-        Id
-      %th
+      %th.right
+      %th.right
         Job
       %th.right
-        Zolds
+        USD
       %th
         Summary
       %th
@@ -30,9 +29,9 @@
     - total += 1
     - break if total > max
     %tr
-      %td
+      %td.right
         = "##{r.id}"
-      %td
+      %td.right
         - j = r.job_id
         - if j.nil?
           = '—'
