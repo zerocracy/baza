@@ -106,17 +106,8 @@ class Baza::Tokens
   end
 
   def get(id)
-    rows = pgsql.exec('SELECT * FROM token WHERE id = $1', [id])
-    raise Baza::Urror, "Token ##{id} not found" if rows.empty?
-    row = rows[0]
+    raise 'Token ID must be an integer' unless id.is_a?(Integer)
     require_relative 'token'
-    token = Baza::Token.new(self, id)
-    Veil.new(
-      token,
-      active: row['active'] == 't',
-      name: row['name'],
-      text: row['text'],
-      created: Time.parse(row['created'])
-    )
+    Baza::Token.new(self, id)
   end
 end

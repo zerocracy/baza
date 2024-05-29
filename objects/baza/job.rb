@@ -96,7 +96,7 @@ class Baza::Job
 
   def token
     @jobs.human.tokens.get(
-      @jobs.pgsql.exec('SELECT token FROM job WHERE id = $1', [@id])[0]['token']
+      @jobs.pgsql.exec('SELECT token FROM job WHERE id = $1', [@id])[0]['token'].to_i
     )
   end
 

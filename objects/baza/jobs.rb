@@ -76,7 +76,7 @@ class Baza::Jobs
         finished?: !row['rid'].nil?,
         expired?: !row['expired'].nil?,
         token: Veil.new(
-          nil, # this should be replaced by a lambda, when Veil supports it
+          @human.tokens.get(row['tid'].to_i),
           name: row['token_name']
         ),
         result: Veil.new(
