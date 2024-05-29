@@ -42,10 +42,15 @@ class Baza::Job
   end
 
   # Finish the job, create a RESULT for it and a RECEIPT.
+  # @param [String] uri2 The location of the factbase produced by the job (URI in AWS)
+  # @param [String] stdout The full log of the job (at the console)
+  # @param [Integer] exit The exit code of the job (zero means success)
+  # @param [Integer] msec The amount of milliseconds the job took
   # @return [Baza::Result] The result just created
   def finish(uri2, stdout, exit, msec)
-    raise Baza::Urror, 'Exit code must a Number' unless exit.is_a?(Integer)
-    raise Baza::Urror, 'Milliseconds must a Number' unless msec.is_a?(Integer)
+    raise Baza::Urror, 'Exit code must be a Number' unless exit.is_a?(Integer)
+    raise Baza::Urror, 'Milliseconds must be a Number' unless msec.is_a?(Integer)
+    raise Baza::Urror, 'STDOUT must be a String' unless stdout.is_a?(String)
     @jobs.pgsql.transaction do |t|
       t.exec(
         'INSERT INTO receipt (human, zents, summary, job) VALUES ($1, $2, $3, $4) RETURNING id',
