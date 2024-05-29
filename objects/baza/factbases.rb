@@ -93,7 +93,7 @@ class Baza::Factbases
         bucket: @bucket,
         key: key
       )
-      @loog.info("Deleted in S3: #{key} (#{File.size(file)} bytes)")
+      @loog.info("Deleted in S3: #{key}")
     end
   end
 
