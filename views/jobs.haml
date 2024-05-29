@@ -5,20 +5,39 @@
   %p
     Full list of jobs:
   %table
+    %colgroup
+      %col{style: 'width: 4em;'}
+      %col{style: 'width: 3em;'}
+      %col
+      %col
+      %col{style: 'width: 12em;'}
+      %col{style: 'width: 6em;'}
+      %col{style: 'width: 3em;'}
+      %col{style: 'width: 3em;'}
+      %col{style: 'width: 3em;'}
+      %col{style: 'width: 3em;'}
     %thead
       %tr
-        %th
+        %th.right
           Id
+        %th.center
+          In
         %th
           Name
         %th
-          Input
+          Token
         %th
           Started
         %th
           Finished?
         %th
-          Result
+          Code
+        %th.right
+          Msec
+        %th.center
+          Log
+        %th.center
+          Out
     %tbody
     - total = 0
     - max = 10
@@ -26,32 +45,42 @@
       - total += 1
       - break if total > max
       %tr
-        %td
+        %td.right
           %a{href: iri.cut('/jobs').append(j.id)}
             = "##{j.id}"
-        %td
-          %a{href: iri.over(name: j.name)}
-            %code
-              = j.name
-        %td
+        %td.center
           %a{href: iri.cut('/inspect').append("#{j.id}.fb")}
-            = "#{j.name}.fb"
+            📦
+        %td
+          %code
+            %a{href: iri.over(name: j.name)}= j.name
+        %td
+          = j.token_name
         %td
           = j.created.utc.iso8601
         %td
           - if j.finished?
-            Yes
+            %span.darkgreen Yes
           - else
-            No
+            %span.darkred No
         %td
           - if j.finished?
-            %span{style: "color: #{j.result.exit.zero? ? 'darkgreen' : 'darkred'}"}
-              = "Exit:#{j.result.exit}"
-            = ' | '
-            %a{href: iri.cut('/stdout').append("#{j.id}.txt")}> stdout
-            = ' | '
+            - if j.result.exit.zero?
+              %span.darkgreen
+                OK
+            - else
+              %span.darkred
+                = j.result.exit
+        %td.right
+          - if j.finished?
+            = j.result.msec
+        %td.center
+          - if j.finished?
+            %a{href: iri.cut('/stdout').append("#{j.id}.txt")}> 📃
+        %td.center
+          - if j.finished?
             %a{href: iri.cut('/pull').append("#{j.id}.fb")}
-              = "#{j.name}.fb"
+              📦
   %p
     - unless offset.zero?
       %a{href: iri.del(:offset)}

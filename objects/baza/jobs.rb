@@ -48,7 +48,7 @@ class Baza::Jobs
   def each(name: nil, offset: 0, cnd: '')
     return to_enum(__method__) unless block_given?
     sql =
-      'SELECT job.*, ' \
+      'SELECT job.*, token.name AS token_name, ' \
       'result.id AS rid, result.uri2, result.stdout, result.exit, result.msec FROM job ' \
       'JOIN token ON token.id = job.token ' \
       'LEFT JOIN result ON result.job = job.id ' \
@@ -65,6 +65,7 @@ class Baza::Jobs
         name: row['name'],
         uri1: row['uri1'],
         finished?: !row['rid'].nil?,
+        token_name: row['token_name'],
         result: Unpiercable.new(
           Baza::Result.new(job, row['rid'].to_i),
           uri2: row['uri2'],
