@@ -3,15 +3,21 @@
   = "##{job.id}"
 
 %p
+  Name:
+  = job.name
+
+%p
+  Token:
+  = job.token.name
+
+%p
   Created on:
   = job.created.utc.iso8601
 
 %p
-  Finished:
-  - if job.finished?
-    Yes
-  - else
-    Not yet
+  Input:
+  %a{href: iri.cut('/inspect').append("#{job.id}.fb")}
+    download
 
 - if job.finished?
   - r = job.result
@@ -22,8 +28,16 @@
     Exit code:
     = r.exit
   %p
-    Milliseconds:
-    = r.msec
+    Duration:
+    = "#{r.msec}ms"
+  - if r.exit.zero?
+    %p
+      Output:
+      %a{href: iri.cut('/pull').append("#{job.id}.fb")}
+        download
   %p
     Stdout:
     %pre= r.stdout
+- else
+  %p.darkred
+    Not yet finished
