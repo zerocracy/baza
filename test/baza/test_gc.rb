@@ -26,6 +26,7 @@ require 'minitest/autorun'
 require_relative '../test__helper'
 require_relative '../../objects/baza'
 require_relative '../../objects/baza/humans'
+require_relative '../../objects/baza/factbases'
 
 # Test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -34,7 +35,9 @@ require_relative '../../objects/baza/humans'
 class Baza::GcTest < Minitest::Test
   def test_finds_garbage
     humans = Baza::Humans.new(test_pgsql)
-    humans.gc(days: 0).each(&:expire!)
+    humans.gc(days: 0).each do |j|
+      j.expire!(Baza::Factbases.new('', ''))
+    end
     assert_equal(0, humans.gc(days: 0).each.to_a.size)
     human = humans.ensure(test_name)
     token = human.tokens.add(test_name)

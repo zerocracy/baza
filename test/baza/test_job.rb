@@ -26,6 +26,7 @@ require 'minitest/autorun'
 require_relative '../test__helper'
 require_relative '../../objects/baza'
 require_relative '../../objects/baza/humans'
+require_relative '../../objects/baza/factbases'
 
 # Test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -59,7 +60,7 @@ class Baza::JobTest < Minitest::Test
     token = human.tokens.add(test_name)
     job = token.start(test_name, test_name)
     assert(!job.expired?)
-    job.expire!
+    job.expire!(Baza::Factbases.new('', ''))
     assert(job.expired?)
     assert_raises do
       job.expire!

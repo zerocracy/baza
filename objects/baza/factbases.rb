@@ -86,7 +86,7 @@ class Baza::Factbases
     raise 'UUID can\'t be nil' if uuid.nil?
     raise 'UUID can\'t be empty' if uuid.empty?
     if @key.empty?
-      FileUtils.rm(fake(uuid))
+      FileUtils.rm_f(fake(uuid))
     else
       key = oname(uuid)
       aws.delete_object(
