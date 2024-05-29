@@ -60,7 +60,6 @@ put(%r{/push/([a-z0-9-]+)}) do
   token = settings.humans.his_token(text)
   name = params['captures'].first
   Tempfile.open do |f|
-    request.body.rewind
     File.binwrite(f, request.body.read)
     fid = settings.fbs.save(f.path)
     job = token.start(name, fid)
