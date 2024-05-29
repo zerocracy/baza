@@ -28,6 +28,16 @@ helpers do
     num.positive? ? "<span style='color:green'>+#{usd}</span>" : "<span style='color:firebrick'>#{usd}</span>"
   end
 
+  def msec(msec)
+    if msec < 1000
+      "#{msec}ms"
+    elsif msec < 60 * 1000
+      "#{msec / 1000}s"
+    else
+      format('%.1fm', msec / (1000 * 60))
+    end
+  end
+
   def href(link, text, dot: false)
     " <a href='#{link}'>#{text}</a>#{dot ? '.' : ''} "
   end
