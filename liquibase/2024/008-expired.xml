@@ -32,33 +32,5 @@ SOFTWARE.
       ALTER TABLE result ADD COLUMN expired TIMESTAMPTZ;
       CREATE INDEX idx_result_exprired ON result(expired);
     </sql>
-    <!--
-    <sql>
-      CREATE FUNCTION job_expired_is_write_once()
-      RETURNS trigger AS
-      'BEGIN
-        IF NEW.expired IS NULL THEN
-          RAISE EXCEPTION ''You cannot reset expired of a job, it is only set once'';
-        END IF;
-        RETURN NEW;
-      END' LANGUAGE PLPGSQL;
-      CREATE TRIGGER job_expired_is_write_once
-      BEFORE UPDATE ON job
-      FOR EACH ROW EXECUTE PROCEDURE job_expired_is_write_once();
-    </sql>
-    <sql>
-      CREATE FUNCTION result_expired_is_write_once()
-      RETURNS trigger AS
-      'BEGIN
-        IF NEW.expired IS NULL THEN
-          RAISE EXCEPTION ''You cannot reset expired of a result, it is only set once'';
-        END IF;
-        RETURN NEW;
-      END' LANGUAGE PLPGSQL;
-      CREATE TRIGGER result_expired_is_write_once
-      BEFORE UPDATE ON result
-      FOR EACH ROW EXECUTE PROCEDURE result_expired_is_write_once();
-    </sql>
-    -->
   </changeSet>
 </databaseChangeLog>
