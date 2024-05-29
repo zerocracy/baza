@@ -83,6 +83,7 @@ class Baza::Jobs
           @human.results.get(row['rid'].to_i),
           id: row['rid'].to_i,
           uri2: row['uri2'],
+          msec: row['msec'].to_i,
           exit: row['exit'].to_i,
           empty?: row['uri2'].nil?,
           stdout: row['stdout']

@@ -80,6 +80,7 @@ class Baza::Tokens
         get(row['id'].to_i),
         active?: row['active'] == 't',
         name: row['name'],
+        created: Time.parse(row['created']),
         text: row['text'],
         jobs_count: row['jobs_count']
       )
