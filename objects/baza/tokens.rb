@@ -24,9 +24,8 @@
 
 require 'securerandom'
 require 'veil'
-require_relative 'token'
 
-# Tokens of a user.
+# Tokens of a human.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
@@ -53,8 +52,7 @@ class Baza::Tokens
       'INSERT INTO token (human, name, text) VALUES ($1, $2, $3) RETURNING id',
       [@human.id, name, uuid]
     )
-    id = rows[0]['id'].to_i
-    Baza::Token.new(self, id)
+    get(rows[0]['id'].to_i)
   end
 
   def empty?
@@ -79,7 +77,7 @@ class Baza::Tokens
       "OFFSET #{offset.to_i}"
     @human.pgsql.exec(q, [@human.id]).each do |row|
       yield Veil.new(
-        Baza::Token.new(self, row['id'].to_i),
+        get(row['id'].to_i),
         active?: row['active'] == 't',
         name: row['name'],
         text: row['text'],
@@ -103,15 +101,17 @@ class Baza::Tokens
   def find(text)
     rows = @human.pgsql.exec('SELECT id FROM token WHERE text = $1', [text])
     raise Baza::Urror, 'Token not found' if rows.empty?
-    Baza::Token.new(self, rows[0]['id'].to_i)
+    get(rows[0]['id'].to_i)
   end
 
   def get(id)
     rows = @human.pgsql.exec('SELECT * FROM token WHERE id = $1', [id])
     raise Baza::Urror, "Token ##{id} not found" if rows.empty?
     row = rows[0]
+    require_relative 'token'
+    token = Baza::Token.new(self, id)
     Veil.new(
-      Baza::Token.new(self, id),
+      token,
       active: row['active'] == 't',
       name: row['name'],
       text: row['text'],

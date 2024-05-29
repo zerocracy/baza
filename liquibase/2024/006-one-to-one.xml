@@ -28,7 +28,7 @@ SOFTWARE.
       CREATE FUNCTION only_one_result_per_job()
       RETURNS trigger AS
       'BEGIN
-        IF (SELECT result.id FROM result WHERE job = NEW.job) IS NOT NULL THEN
+        IF (SELECT id FROM result WHERE job = NEW.job) IS NOT NULL THEN
           RAISE EXCEPTION ''This job already has result'';
         END IF;
         RETURN NEW;
@@ -38,6 +38,21 @@ SOFTWARE.
       CREATE TRIGGER only_one_result
       BEFORE INSERT ON result
       FOR EACH ROW EXECUTE PROCEDURE only_one_result_per_job();
+    </sql>
+    <sql>
+      CREATE FUNCTION only_one_receipt_per_job()
+      RETURNS trigger AS
+      'BEGIN
+        IF (SELECT id FROM receipt WHERE job = NEW.job) IS NOT NULL THEN
+          RAISE EXCEPTION ''This job already has receipt attached'';
+        END IF;
+        RETURN NEW;
+      END' LANGUAGE PLPGSQL;
+    </sql>
+    <sql>
+      CREATE TRIGGER only_one_receipt
+      BEFORE INSERT ON receipt
+      FOR EACH ROW EXECUTE PROCEDURE only_one_receipt_per_job();
     </sql>
   </changeSet>
 </databaseChangeLog>

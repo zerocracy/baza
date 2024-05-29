@@ -43,7 +43,7 @@ class Baza::Job
 
   def finish(uri2, stdout, exit, msec)
     @jobs.human.results.add(@id, uri2, stdout, exit, msec)
-    @jobs.human.account.add(-msec, exit.zero? ? 'Completed' : "Failed (#{exit})", @id)
+    bill(-msec, exit.zero? ? 'Completed' : "Failed (#{exit})")
   end
 
   def created
@@ -74,6 +74,16 @@ class Baza::Job
     rows = @jobs.pgsql.exec('SELECT id FROM result WHERE job = $1', [@id])
     raise Baza::Urror, 'There is no result yet' if rows.empty?
     @jobs.human.results.get(rows[0]['id'].to_i)
+  end
+
+  # Add a new receipt for the job.
+  def bill(zents, summary)
+    @jobs.human.account.get(
+      @jobs.pgsql.exec(
+        'INSERT INTO receipt (human, zents, summary, job) VALUES ($1, $2, $3, $4) RETURNING id',
+        [@jobs.human.id, zents, summary, id]
+      )[0]['id'].to_i
+    )
   end
 
   def to_json(*_args)

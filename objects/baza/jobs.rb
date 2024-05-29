@@ -23,7 +23,6 @@
 # SOFTWARE.
 
 require 'veil'
-require_relative 'job'
 
 # Jobs of a human.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -56,21 +55,20 @@ class Baza::Jobs
     )
   end
 
-  def each(name: nil, offset: 0, cnd: '')
+  def each(name: nil, offset: 0)
     sql =
       'SELECT job.*, token.id AS tid, token.name AS token_name, ' \
       'result.id AS rid, result.uri2, result.stdout, result.exit, result.msec FROM job ' \
       'JOIN token ON token.id = job.token ' \
       'LEFT JOIN result ON result.job = job.id ' \
-      "WHERE token.human = $1 #{cnd.empty? ? cnd : "AND #{cnd}"} " \
+      'WHERE token.human = $1' \
       "#{name.nil? ? '' : 'AND job.name = $2'}" \
       "OFFSET #{offset.to_i}"
     args = [@human.id]
     args << name unless name.nil?
     @human.pgsql.exec(sql, args).each do |row|
-      job = Baza::Job.new(self, row['id'].to_i)
       yield Veil.new(
-        job,
+        get(row['id'].to_i),
         created: Time.parse(row['created']),
         name: row['name'],
         uri1: row['uri1'],
@@ -92,7 +90,8 @@ class Baza::Jobs
 
   def get(id)
     raise 'Job ID must be an integer' unless id.is_a?(Integer)
-    each(cnd: "job.id = #{id.to_i}") { |j| return j }
+    require_relative 'job'
+    Baza::Job.new(self, id)
   end
 
   def name_exists?(name)
@@ -115,6 +114,6 @@ class Baza::Jobs
       [@human.id, name]
     )
     raise Baza::Urror, "No job by the name '#{name}' found" if rows.empty?
-    Baza::Job.new(self, rows[0]['id'].to_i)
+    get(rows[0]['id'].to_i)
   end
 end

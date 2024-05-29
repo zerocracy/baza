@@ -53,4 +53,14 @@ class Baza::JobTest < Minitest::Test
       job.finish(test_name, 'another stdout', 0, 11)
     end
   end
+
+  def test_cant_bill_twice
+    human = Baza::Humans.new(test_pgsql).ensure(test_name)
+    token = human.tokens.add(test_name)
+    job = token.start(test_name, test_name)
+    job.bill(42, 'nothing')
+    assert_raises do
+      job.bill(42, 'nothing')
+    end
+  end
 end

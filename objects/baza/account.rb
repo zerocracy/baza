@@ -23,13 +23,14 @@
 # SOFTWARE.
 
 require 'veil'
-require_relative 'receipt'
 
 # Account of a human.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
 class Baza::Account
+  attr_reader :human
+
   def initialize(human)
     @human = human
   end
@@ -46,7 +47,7 @@ class Baza::Account
       "OFFSET #{offset.to_i}"
     @human.pgsql.exec(q, [@human.id]).each do |row|
       yield Veil.new(
-        Baza::Receipt.new(self, row['id'].to_i),
+        get(row['id'].to_i),
         job_id: row['job']&.to_i,
         zents: row['zents'].to_i,
         summary: row['summary'],
@@ -55,6 +56,7 @@ class Baza::Account
     end
   end
 
+  # Get total current balance of the human.
   def balance
     @human.pgsql.exec(
       'SELECT SUM(zents) FROM receipt WHERE human = $1',
@@ -62,10 +64,18 @@ class Baza::Account
     )[0]['sum'].to_i
   end
 
-  def add(zents, summary, job = nil)
+  # Add a new receipt for a human, not attached to a job.
+  def add(zents, summary)
     @human.pgsql.exec(
-      'INSERT INTO receipt (human, zents, summary, job) VALUES ($1, $2, $3, $4) RETURNING id',
-      [@human.id, zents, summary, job]
+      'INSERT INTO receipt (human, zents, summary) VALUES ($1, $2, $3) RETURNING id',
+      [@human.id, zents, summary]
     ).empty?
+  end
+
+  # Get a single receipt by ID.
+  def get(id)
+    raise 'Receipt ID must be an integer' unless id.is_a?(Integer)
+    require_relative 'receipt'
+    Baza::Receipt.new(self, id)
   end
 end
