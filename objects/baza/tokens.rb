@@ -112,7 +112,8 @@ class Baza::Tokens
       Baza::Token.new(self, id),
       active: row['active'] == 't',
       name: row['name'],
-      text: row['text']
+      text: row['text'],
+      created: Time.parse(row['created'])
     )
   end
 end

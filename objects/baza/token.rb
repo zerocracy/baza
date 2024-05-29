@@ -71,20 +71,20 @@ class Baza::Token
     Baza::Job.new(self, id)
   end
 
+  def created
+    rows = @tokens.pgsql.exec('SELECT created FROM token WHERE id = $1', [@id])
+    raise Baza::Urror, "Token ##{@id} not found" if rows.empty?
+    Time.parse(rows[0]['created'])
+  end
+
   def name
-    rows = @tokens.pgsql.exec(
-      'SELECT name FROM token WHERE id = $1',
-      [@id]
-    )
+    rows = @tokens.pgsql.exec('SELECT name FROM token WHERE id = $1', [@id])
     raise Baza::Urror, "Token ##{@id} not found" if rows.empty?
     rows[0]['name']
   end
 
   def text
-    rows = @tokens.pgsql.exec(
-      'SELECT text FROM token WHERE id = $1',
-      [@id]
-    )
+    rows = @tokens.pgsql.exec('SELECT text FROM token WHERE id = $1', [@id])
     raise Baza::Urror, "Token ##{@id} not found" if rows.empty?
     rows[0]['text']
   end

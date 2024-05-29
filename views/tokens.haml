@@ -10,6 +10,12 @@
   %p
     Full list of tokens:
   %table
+    %colgroup
+      %col
+      %col{style: 'width: 26em;'}
+      %col{style: 'width: 12em;'}
+      %col{style: 'width: 4em;'}
+      %col{style: 'width: 6em;'}
     %thead
       %tr
         %th
@@ -17,9 +23,10 @@
         %th
           Token
         %th
+          Created
+        %th.right
           Jobs
         %th
-          Status
     %tbody
     - total = 0
     - max = 10
@@ -29,14 +36,16 @@
       %tr{class: t.active? ? '' : 'gray'}
         %td
           = t.name
+        %td.ff
+          = t.text
         %td
-          %code= t.text
-        %td
+          = t.created.utc.iso8601
+        %td.right
           = t.jobs_count
         %td
           - if t.active?
             %a{href: iri.cut('/tokens').append(t.id).append('deactivate')}
-              Deactivate
+              ❌
           - else
             Inactive
   %p

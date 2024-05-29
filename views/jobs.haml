@@ -51,9 +51,8 @@
         %td.center
           %a{href: iri.cut('/inspect').append("#{j.id}.fb")}
             📦
-        %td
-          %code
-            %a{href: iri.over(name: j.name)}= j.name
+        %td.ff
+          %a{href: iri.over(name: j.name)}= j.name
         %td
           = j.token_name
         %td
@@ -66,19 +65,18 @@
         %td
           - if j.finished?
             - if j.result.exit.zero?
-              %span.darkgreen
-                OK
+              👍🏻
             - else
               %span.darkred
                 = j.result.exit
-        %td.right
+        %td.right.ff
           - if j.finished?
             = j.result.msec
-        %td.center
+        %td.center.ff
           - if j.finished?
             %a{href: iri.cut('/stdout').append("#{j.id}.txt")}> 📃
         %td.center
-          - if j.finished?
+          - if j.finished? && j.result.exit.zero?
             %a{href: iri.cut('/pull').append("#{j.id}.fb")}
               📦
   %p
