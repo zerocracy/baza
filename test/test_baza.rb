@@ -147,20 +147,37 @@ class Baza::AppTest < Minitest::Test
     get("/tokens/#{id}.json")
     token = JSON.parse(last_response.body)['text']
     get('/push')
-    name = test_name
     fb = Factbase.new
     fb.insert.foo = 'booom \x01\x02\x03'
     Tempfile.open do |f|
       File.binwrite(f.path, fb.export)
       post(
         '/push',
-        'name' => name,
+        'name' => test_name,
         'token' => token,
         'factbase' => Rack::Test::UploadedFile.new(f.path, 'application/zip')
       )
     end
     assert_status(302)
-    id = last_response.headers['X-Zerocracy-JobId'].to_i
+  end
+
+  def test_starts_job_via_put
+    uname = test_name
+    login('yegor256')
+    post('/gift', "human=#{uname}&zents=555555&summary=no")
+    login(uname)
+    get('/tokens')
+    post('/tokens/add', 'name=foo')
+    id = last_response.headers['X-Zerocracy-TokenId'].to_i
+    get("/tokens/#{id}.json")
+    token = JSON.parse(last_response.body)['text']
+    fb = Factbase.new
+    fb.insert.foo = 'booom \x01\x02\x03'
+    header('X-Zerocracy-Token', token)
+    name = test_name
+    put("/push/#{name}", fb.export)
+    assert_status(200)
+    id = last_response.body.to_i
     assert(id.positive?)
     get("/jobs/#{id}")
     assert_status(200)
@@ -183,25 +200,6 @@ class Baza::AppTest < Minitest::Test
     assert(fb.query('(exists foo)').each.to_a[0].foo.start_with?('booom'))
     get("/stdout/#{rid}.txt")
     assert_status(200)
-  end
-
-  def test_starts_job_via_put
-    uname = test_name
-    login('yegor256')
-    post('/gift', "human=#{uname}&zents=555555&summary=no")
-    login(uname)
-    get('/tokens')
-    post('/tokens/add', 'name=foo')
-    id = last_response.headers['X-Zerocracy-TokenId'].to_i
-    get("/tokens/#{id}.json")
-    token = JSON.parse(last_response.body)['text']
-    fb = Factbase.new
-    fb.insert.foo = 'booom \x01\x02\x03'
-    header('X-Zerocracy-Token', token)
-    put('/push/simple', fb.export)
-    assert_status(302)
-    id = last_response.headers['X-Zerocracy-JobId'].to_i
-    assert(id.positive?)
   end
 
   private

@@ -48,7 +48,6 @@ post '/push' do
     fid = settings.fbs.save(f.path)
     job = token.start(name, fid)
     settings.pipeline.push(job)
-    response.headers['X-Zerocracy-JobId'] = job.id.to_s
     settings.loog.info("New push arrived via HTTP POSt, job ID is #{job.id}")
     flash(iri.cut('/jobs'), "New job ##{job.id} started")
   end
@@ -65,9 +64,8 @@ put(%r{/push/([a-z0-9-]+)}) do
     fid = settings.fbs.save(f.path)
     job = token.start(name, fid)
     settings.pipeline.push(job)
-    response.headers['X-Zerocracy-JobId'] = job.id.to_s
     settings.loog.info("New push arrived via HTTP PUT, job ID is #{job.id}")
-    flash(iri.cut('/jobs'), "New job ##{job.id} started")
+    job.id.to_s
   end
 end
 
