@@ -65,13 +65,19 @@ class Baza::Job
   # @param [Integer] msec The amount of milliseconds the job took
   # @return [Baza::Result] The result just created
   def finish!(uri2, stdout, exit, msec)
+    raise Baza::Urror, 'Exit code is nil' if exit.nil?
     raise Baza::Urror, 'Exit code must be a Number' unless exit.is_a?(Integer)
+    raise Baza::Urror, 'Milliseconds is nil' if msec.nil?
     raise Baza::Urror, 'Milliseconds must be a Number' unless msec.is_a?(Integer)
+    raise Baza::Urror, 'STDOUT is nil' if stdout.nil?
     raise Baza::Urror, 'STDOUT must be a String' unless stdout.is_a?(String)
+    summary =
+      "Job ##{id} #{exit.zero? ? 'completed' : "failed (#{exit})"} " \
+      "in #{msec}ms, #{stdout.split("\n")} lines in stdout"
     @jobs.pgsql.transaction do |t|
       t.exec(
         'INSERT INTO receipt (human, zents, summary, job) VALUES ($1, $2, $3, $4) RETURNING id',
-        [@jobs.human.id, -msec, exit.zero? ? 'Completed' : "Failed (#{exit})", id]
+        [@jobs.human.id, -msec, summary, id]
       )[0]['id'].to_i
       @jobs.human.results.get(
         t.exec(
