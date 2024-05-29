@@ -37,7 +37,7 @@ class Baza::PipelineTest < Minitest::Test
   def test_simple_processing
     humans = Baza::Humans.new(test_pgsql)
     fbs = Baza::Factbases.new('', '')
-    pipeline = Baza::Pipeline.new(humans, fbs, Loog::VERBOSE)
+    pipeline = Baza::Pipeline.new(humans, fbs, Loog::NULL)
     pipeline.start(0.1)
     human = humans.ensure(test_name)
     token = human.tokens.add(test_name)

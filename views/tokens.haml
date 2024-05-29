@@ -1,4 +1,5 @@
-- if tokens.empty?
+- empty = tokens.empty?
+- if empty
   %p
     In order to make the
     != href('https://github.com/zerocracy/judges-action', 'here')
@@ -10,7 +11,7 @@
     %input{ type: 'text', name: 'name', tabindex: 1, placeholder: 'Unique token name', size: 40, maxlength: 32, autofocus: true, required: true }
     %input{ type: 'submit', tabindex: 2, value: 'Add' }
 
-- unless tokens.empty?
+- unless empty
   %p
     Full list of tokens:
   %table
