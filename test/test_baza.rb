@@ -205,6 +205,8 @@ class Baza::AppTest < Minitest::Test
     assert(fb.query('(exists foo)').each.to_a[0].foo.start_with?('booom'))
     get("/stdout/#{rid}.txt")
     assert_status(200)
+    get("/jobs/#{rid}/expire")
+    assert_status(302)
   end
 
   private

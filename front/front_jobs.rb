@@ -42,3 +42,10 @@ get(%r{/jobs/([0-9]+)}) do
     job: the_human.jobs.get(id)
   )
 end
+
+get(%r{/jobs/([0-9]+)/expire}) do
+  id = params['captures'].first.to_i
+  job = the_human.jobs.get(id)
+  job.expire!
+  flash(iri.cut('/job').append(id), "The job ##{job.id} expired, all data removed")
+end

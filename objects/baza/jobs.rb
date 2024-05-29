@@ -103,7 +103,7 @@ class Baza::Jobs
     !pgsql.exec(
       'SELECT job.id FROM job ' \
       'JOIN token ON token.id = job.token ' \
-      'WHERE token.human = $1 AND job.name = $2 ' \
+      'WHERE token.human = $1 AND job.name = $2 AND expired IS NULL ' \
       'LIMIT 1',
       [@human.id, name]
     ).empty?
@@ -113,7 +113,7 @@ class Baza::Jobs
     rows = pgsql.exec(
       'SELECT job.id FROM job ' \
       'JOIN token ON token.id = job.token ' \
-      'WHERE token.human = $1 AND job.name = $2 ' \
+      'WHERE token.human = $1 AND job.name = $2 AND expired IS NULL ' \
       'ORDER BY job.created DESC ' \
       'LIMIT 1',
       [@human.id, name]
