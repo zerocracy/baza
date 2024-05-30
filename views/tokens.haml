@@ -39,13 +39,13 @@
       - total += 1
       - break if total > max
       %tr{class: t.active? ? '' : 'gray'}
-        %td
+        %td.ff
           = t.name
         %td.ff
           = t.text
         %td
           != ago(t.created)
-        %td.right
+        %td.right.ff
           = t.jobs_count
         %td
           - if t.active?
