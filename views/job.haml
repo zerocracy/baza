@@ -1,6 +1,8 @@
 %p
   ID:
-  = "##{job.id}"
+  %br
+  %span.ff
+    = "##{job.id}"
 
 - if job.expired?
   %p.orange
@@ -12,19 +14,25 @@
 
 %p
   Name:
-  = job.name
+  %br
+  %a.ff{href: iri.over(name: job.name)}
+    = job.name
 
 %p
   Token:
-  = job.token.name
+  %br
+  %span.ff
+    = job.token.name
 
 %p
   Created on:
+  %br
   != ago(job.created)
 
 - unless job.expired?
   %p
     Input:
+    %br
     %a{href: iri.cut('/inspect').append("#{job.id}.fb")}
       download
 
@@ -32,20 +40,26 @@
   - r = job.result
   %p
     Finished on:
+    %br
     != ago(r.created)
   %p
     Exit code:
-    = r.exit
+    %br
+    %span.ff
+      = r.exit
   %p
     Duration:
+    %br
     = "#{r.msec}ms"
   - if r.exit.zero? && !job.expired?
     %p
       Output:
+      %br
       %a{href: iri.cut('/pull').append("#{job.id}.fb")}
         download
   %p
     Stdout:
+    %br
     %pre= r.stdout
 - else
   %p.darkred

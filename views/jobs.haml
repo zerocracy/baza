@@ -58,7 +58,8 @@
             %a{href: iri.cut('/inspect').append("#{j.id}.fb")}
               📦
         %td.ff
-          %a{href: iri.over(name: j.name)}= j.name
+          %a{href: iri.over(name: j.name)}
+            = j.name
         %td
           = j.token.name
         %td
