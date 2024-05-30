@@ -69,3 +69,5 @@ release:
 merge:
   script: |-
     bundle exec rake
+    sudo bundle exec rake clean
+
