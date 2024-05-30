@@ -38,6 +38,7 @@ require 'sinatra'
 require 'sinatra/cookies'
 require 'time'
 require 'yaml'
+require 'zache'
 require_relative 'version'
 require_relative 'objects/baza/factbases'
 require_relative 'objects/baza/humans'
@@ -106,6 +107,7 @@ configure do
     config['s3']['bucket'],
     loog: settings.loog
   )
+  set :zache, Zache.new
   set :humans, Baza::Humans.new(settings.pgsql)
   set :pipeline, Baza::Pipeline.new(settings.humans, settings.fbs, settings.loog)
   set :expiration_days, 14

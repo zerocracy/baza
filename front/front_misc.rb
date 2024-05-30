@@ -24,6 +24,19 @@
 
 require_relative '../version'
 
+before '/*' do
+  @locals = {
+    http_start: Time.now,
+    github_login_link: settings.glogin.login_uri,
+    request_ip: request.ip,
+    db_size: settings.zache.get(:db_size, lifetime: 30 * 60) do
+      settings.pgsql.exec(
+        'SELECT pg_size_pretty(pg_database_size(current_database())) AS s'
+      )[0]['s'].gsub(' ', '')
+    end
+  }
+end
+
 after do
   response.headers['X-Zerocracy-Version'] = Baza::VERSION
 end

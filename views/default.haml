@@ -64,8 +64,8 @@
               = format('%.3f', Time.now - http_start)
             %li{title: 'The version of Ruby on the server'}
               = "rb:#{RUBY_VERSION}"
-            %li{title: 'The version of PostgreSQL server'}
-              = "pg:#{settings.pgsql.version}"
+            %li{title: 'The version of PostgreSQL server and the size of the DB'}
+              = "pg:#{settings.pgsql.version}/#{db_size}"
             %li{title: 'Your visible IP address'}
               = request.ip
 
