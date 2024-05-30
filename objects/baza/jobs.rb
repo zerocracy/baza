@@ -57,14 +57,18 @@ class Baza::Jobs
 
   def each(name: nil, offset: 0)
     sql =
-      'SELECT job.*, token.id AS tid, token.name AS token_name, ' \
-      'result.id AS rid, result.uri2, result.stdout, result.exit, result.msec FROM job ' \
+      'SELECT job.id, job.created, job.name, job.uri1, job.expired, ' \
+      'token.id AS tid, token.name AS token_name, ' \
+      'result.id AS rid, result.uri2, result.stdout, result.exit, result.msec, ' \
+      'ROW_NUMBER() OVER (PARTITION BY job.name ORDER BY job.created DESC) AS row ' \
+      'FROM job ' \
       'JOIN token ON token.id = job.token ' \
       'LEFT JOIN result ON result.job = job.id ' \
       'WHERE token.human = $1 ' \
       "#{name.nil? ? '' : 'AND job.name = $2'} " \
-      'ORDER BY created DESC ' \
-      "OFFSET #{offset.to_i}"
+      'ORDER BY created DESC'
+    sql = "SELECT t.* FROM (#{sql}) AS t WHERE t.row = 1" if name.nil?
+    sql += " OFFSET #{offset.to_i}"
     args = [@human.id]
     args << name unless name.nil?
     pgsql.exec(sql, args).each do |row|
