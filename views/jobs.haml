@@ -62,7 +62,7 @@
         %td
           = j.token.name
         %td
-          = j.created.utc.iso8601
+          != ago(j.created)
         - if j.finished?
           %td
             - if j.result.exit.zero?

@@ -22,7 +22,20 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+require 'moments'
+
 helpers do
+  def ago(time)
+    diff = Moments.difference(time, Time.now).humanized
+    txt =
+      if diff.nil?
+        'just now'
+      else
+        "#{diff.split(' ', 3).take(2).join(' ').downcase.gsub(/[^a-z0-9 ]/, '')} ago"
+      end
+    "<span title='#{time.utc.iso8601}'>#{txt}</span>"
+  end
+
   def zents(num)
     usd = format('%.5f', num.to_f / (1000 * 100))
     num.positive? ? "<span style='color:green'>+#{usd}</span>" : "<span style='color:firebrick'>#{usd}</span>"

@@ -20,7 +20,7 @@
 
 %p
   Created on:
-  = job.created.utc.iso8601
+  != ago(job.created)
 
 - unless job.expired?
   %p
@@ -32,7 +32,7 @@
   - r = job.result
   %p
     Finished on:
-    = r.created.utc.iso8601
+    != ago(r.created)
   %p
     Exit code:
     = r.exit

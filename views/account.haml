@@ -43,7 +43,7 @@
       %td
         = r.summary
       %td
-        = r.created.utc.iso8601
+        != ago(r.created)
 %p
   - unless offset.zero?
     %a{href: iri.del(:offset)}

@@ -35,6 +35,7 @@ gem 'haml', '6.3.0'
 gem 'iri', '0.8.0'
 gem 'loog', '0.5.1'
 gem 'minitest', '5.23.1', require: false
+gem 'moments', '0.3.0'
 gem 'pgtk', '0.9.3'
 gem 'rack', '2.2.9'
 gem 'rack-ssl', '1.4.1'

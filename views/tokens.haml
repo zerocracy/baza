@@ -44,7 +44,7 @@
         %td.ff
           = t.text
         %td
-          = t.created.utc.iso8601
+          != ago(t.created)
         %td.right
           = t.jobs_count
         %td
