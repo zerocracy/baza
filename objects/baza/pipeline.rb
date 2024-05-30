@@ -26,6 +26,7 @@ require 'loog'
 require 'backtrace'
 require_relative 'humans'
 require_relative 'urror'
+require_relative 'daemon'
 
 # Pipeline of jobs.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -38,35 +39,32 @@ class Baza::Pipeline
     @humans = humans
     @fbs = fbs
     @loog = loog
+    @thread = Baza::Daemon.new(@loog)
   end
 
   def start(pause = 15)
-    @thread ||= Thread.new do
-      loop do
-        job = pop
-        sleep pause
-        next if job.nil?
-        @loog.info("Job ##{job.id} starts: #{job.uri1}")
-        Dir.mktmpdir do |dir|
-          input = File.join(dir, 'input.fb')
-          @fbs.load(job.uri1, input)
-          output = File.join(dir, 'output.fb')
-          start = Time.now
-          stdout = Loog::Buffer.new
-          code = run(input, output, stdout)
-          uuid = code.zero? ? @fbs.save(output) : nil
-          job.finish!(uuid, stdout.to_s, code, ((Time.now - start) * 1000).to_i)
-          @loog.info("Job ##{job.id} finished, exit=#{code}!")
-        end
-      rescue StandardError => e
-        @loog.error(Backtrace.new(e))
+    @thread.start do
+      job = pop
+      sleep pause
+      next if job.nil?
+      @loog.info("Job ##{job.id} starts: #{job.uri1}")
+      Dir.mktmpdir do |dir|
+        input = File.join(dir, 'input.fb')
+        @fbs.load(job.uri1, input)
+        output = File.join(dir, 'output.fb')
+        start = Time.now
+        stdout = Loog::Buffer.new
+        code = run(input, output, stdout)
+        uuid = code.zero? ? @fbs.save(output) : nil
+        job.finish!(uuid, stdout.to_s, code, ((Time.now - start) * 1000).to_i)
+        @loog.info("Job ##{job.id} finished, exit=#{code}!")
       end
     end
     @loog.info('Pipeline started')
   end
 
   def stop
-    @thread.terminate
+    @thread.stop
     @loog.info('Pipeline stopped')
   end
 
@@ -78,6 +76,7 @@ class Baza::Pipeline
   private
 
   def pop
+    require_relative '../../version'
     me = "baza #{Baza::VERSION}"
     rows = @humans.pgsql.exec('UPDATE job SET taken = $1 WHERE taken IS NULL RETURNING id', [me])
     return nil if rows.empty?

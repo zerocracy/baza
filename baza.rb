@@ -42,6 +42,7 @@ require_relative 'version'
 require_relative 'objects/baza/factbases'
 require_relative 'objects/baza/humans'
 require_relative 'objects/baza/pipeline'
+require_relative 'objects/baza/daemon'
 
 unless ENV['RACK_ENV'] == 'test'
   require 'rack/ssl'
@@ -108,6 +109,13 @@ configure do
   set :humans, Baza::Humans.new(settings.pgsql)
   set :pipeline, Baza::Pipeline.new(settings.humans, settings.fbs, settings.loog)
   settings.pipeline.start unless ENV['RACK_ENV'] == 'test'
+  Baza::Daemon.new(settings.loog).start do
+    sleep 30
+    settings.humans.gc.each do |j|
+      j.expire!(settings.fbs)
+      settings.loog.debug("Job ##{j.id} is garbage, expired")
+    end
+  end
 end
 
 get '/' do
