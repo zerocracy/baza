@@ -1,10 +1,9 @@
 %p
-  It is possible to submit a factbase through this form.
-  This will trigger a new job.
-  However, it is not recommended to do this manual operation.
+  It is possible to submit a factbase through this form, which will trigger a new job.
+  However, it is not recommended to perform this manual operation.
   Instead, configure the
   != href('https://github.com/zerocracy/judges-action', 'zerocracy/judges-action')
-  plugin, which automatically submits factbases through this form.
+  plugin to automatically submit factbases through this form.
 
 %form{method: 'post', action: iri.cut('/push'), enctype: 'multipart/form-data'}
   %fieldset

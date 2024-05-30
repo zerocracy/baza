@@ -10,9 +10,11 @@
     The jobs you see at this page are posted by the
     != href('https://github.com/zerocracy/judges-action', 'zerocracy/judges-action')
     plugin.
-    Normally, there is no need to touch them, the process is fully automated.
-    You most probably won't need them ever, but still, please keep in mind
-    that we automatically delete overwritten factbases that are older than 90 days.
+    Normally, there is no need to interact with them, as the process is fully automated.
+    You most likely won't ever need them, but please keep in mind
+    that we automatically delete overwritten factbases that are older than
+    = settings.expiration_days
+    days.
   %table
     %colgroup
       %col{style: 'width: 4em;'}
