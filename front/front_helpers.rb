@@ -26,7 +26,7 @@ require 'moments'
 
 helpers do
   def ago(time)
-    diff = Moments.difference(time, Time.now).humanized
+    diff = Moments.ago(time).humanized
     txt =
       if diff.nil?
         'just now'
