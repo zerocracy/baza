@@ -36,9 +36,9 @@ class Baza::Humans
     @pgsql = pgsql
   end
 
-  def gc(days: 90)
+  def gc
     require_relative 'gc'
-    Baza::Gc.new(self, days)
+    Baza::Gc.new(self)
   end
 
   def get(id)

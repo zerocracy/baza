@@ -29,9 +29,8 @@
 class Baza::Gc
   attr_reader :humans
 
-  def initialize(humans, days)
+  def initialize(humans)
     @humans = humans
-    @days = days
   end
 
   def pgsql
@@ -39,8 +38,8 @@ class Baza::Gc
   end
 
   # Iterate jobs that may be deleted because they are too old.
-  def ready_to_expire
-    return to_enum(__method__) unless block_given?
+  def ready_to_expire(days = 90)
+    return to_enum(__method__, days) unless block_given?
     q =
       'SELECT f.id FROM ' \
       '(SELECT l.id, l.token, l.created, COUNT(r.name) AS total, MAX(r.created) AS recent FROM job AS l ' \
@@ -48,7 +47,7 @@ class Baza::Gc
       'WHERE l.expired IS NULL ' \
       'GROUP BY l.id) AS f ' \
       'WHERE f.total > 1 ' \
-      "AND f.created < NOW() - INTERVAL '#{@days.to_i} DAYS' " \
+      "AND f.created < NOW() - INTERVAL '#{days.to_i} DAYS' " \
       'AND f.recent != f.created'
     pgsql.exec(q).each do |row|
       yield @humans.job_by_id(row['id'].to_i)

@@ -81,7 +81,11 @@ configure do
   set :dump_errors, true
   set :config, config
   set :logging, false # to disable default Sinatra logging and use Loog
-  set :loog, Loog::VERBOSE
+  if ENV['RACK_ENV'] == 'test'
+    set :loog, Loog::NULL
+  else
+    set :loog, Loog::VERBOSE
+  end
   set :server_settings, timeout: 25
   set :glogin, GLogin::Auth.new(
     config['github']['id'],
@@ -116,12 +120,13 @@ end
 
 configure do
   Always.new(1).start(30) do
-    settings.humans.gc(days: settings.expiration_days).ready_to_expire do |j|
+    settings.humans.gc.ready_to_expire(settings.expiration_days) do |j|
       j.expire!(settings.fbs)
       settings.loog.debug("Job ##{j.id} is garbage, expired")
     end
   end
 end
+# unless ENV['RACK_ENV'] == 'test'
 
 get '/' do
   flash(iri.cut('/dash')) if @locals[:human]
