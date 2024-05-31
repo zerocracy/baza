@@ -22,11 +22,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+require 'always'
 require 'loog'
 require 'backtrace'
 require_relative 'humans'
 require_relative 'urror'
-require_relative 'daemon'
 
 # Pipeline of jobs.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -39,13 +39,16 @@ class Baza::Pipeline
     @humans = humans
     @fbs = fbs
     @loog = loog
-    @thread = Baza::Daemon.new(@loog)
+    @always = Always.new(1).on_error { |e, _| @loog.error(Backtrace.new(e)) }
+  end
+
+  def to_s
+    @always.to_s
   end
 
   def start(pause = 15)
-    @thread.start do
+    @always.start(pause) do
       job = pop
-      sleep pause
       next if job.nil?
       @loog.info("Job ##{job.id} starts: #{job.uri1}")
       Dir.mktmpdir do |dir|
@@ -64,7 +67,7 @@ class Baza::Pipeline
   end
 
   def stop
-    @thread.stop
+    @always.stop
     @loog.info('Pipeline stopped')
   end
 
