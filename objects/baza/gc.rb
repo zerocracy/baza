@@ -39,7 +39,7 @@ class Baza::Gc
   end
 
   # Iterate jobs that may be deleted because they are too old.
-  def each
+  def ready_to_expire
     return to_enum(__method__) unless block_given?
     q =
       'SELECT f.id FROM ' \

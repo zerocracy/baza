@@ -35,17 +35,17 @@ require_relative '../../objects/baza/factbases'
 class Baza::GcTest < Minitest::Test
   def test_finds_garbage
     humans = Baza::Humans.new(test_pgsql)
-    humans.gc(days: 0).each do |j|
+    humans.gc(days: 0).ready_to_expire do |j|
       j.expire!(Baza::Factbases.new('', ''))
     end
-    assert_equal(0, humans.gc(days: 0).each.to_a.size)
+    assert_equal(0, humans.gc(days: 0).ready_to_expire.to_a.size)
     human = humans.ensure(test_name)
     token = human.tokens.add(test_name)
     name = test_name
     (0..4).each do |i|
       token.start(name, test_name).finish!(test_name, 'stdout', i, i)
     end
-    assert_equal(0, humans.gc(days: 1).each.to_a.size)
-    assert_equal(4, humans.gc(days: 0).each.to_a.size)
+    assert_equal(0, humans.gc(days: 1).ready_to_expire.to_a.size)
+    assert_equal(4, humans.gc(days: 0).ready_to_expire.to_a.size)
   end
 end

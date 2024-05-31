@@ -112,8 +112,11 @@ configure do
   set :pipeline, Baza::Pipeline.new(settings.humans, settings.fbs, settings.loog)
   set :expiration_days, 14
   settings.pipeline.start unless ENV['RACK_ENV'] == 'test'
+end
+
+configure do
   Always.new(1).start(30) do
-    settings.humans.gc(days: settings.expiration_days).each do |j|
+    settings.humans.gc(days: settings.expiration_days).ready_to_expire do |j|
       j.expire!(settings.fbs)
       settings.loog.debug("Job ##{j.id} is garbage, expired")
     end
