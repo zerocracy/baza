@@ -68,4 +68,8 @@
               = "pg:#{settings.pgsql.version}/#{db_size}"
             %li{title: 'Your visible IP address'}
               = request.ip
-
+          - if the_human.admin?
+            %ul{style: 'font-family: monospace;'}
+              %li
+                %span{title: 'Pipeline status'}
+                  = settings.pipeline
