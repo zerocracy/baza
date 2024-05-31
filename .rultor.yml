@@ -70,4 +70,3 @@ merge:
   script: |-
     bundle exec rake
     bundle exec rake clean
-
