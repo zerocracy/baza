@@ -85,6 +85,9 @@
               - if j.result.exit.zero?
                 %a{href: iri.cut('/pull').append("#{j.id}.fb")}
                   📦
+        - elsif j.expired?
+          %td.center.orange{colspan: 4}
+            Never finished
         - else
           %td.center.orange{colspan: 4}
             In progress...

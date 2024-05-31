@@ -65,7 +65,7 @@ class Baza::Jobs
       'JOIN token ON token.id = job.token ' \
       'LEFT JOIN result ON result.job = job.id ' \
       'WHERE token.human = $1 ' \
-      "#{name.nil? ? '' : 'AND job.name = $2'} " \
+      "#{name.nil? ? '' : 'AND job.name = $2 AND job.expired IS NULL'} " \
       'ORDER BY created DESC'
     sql = "SELECT t.* FROM (#{sql}) AS t WHERE t.row = 1" if name.nil?
     sql += " OFFSET #{offset.to_i}"
