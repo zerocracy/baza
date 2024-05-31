@@ -124,6 +124,10 @@ configure do
       j.expire!(settings.fbs)
       settings.loog.debug("Job ##{j.id} is garbage, expired")
     end
+    settings.humans.gc.stuck(60) do |j|
+      j.expire!(settings.fbs)
+      settings.loog.debug("Job ##{j.id} was stuck, expired")
+    end
   end
 end
 # unless ENV['RACK_ENV'] == 'test'

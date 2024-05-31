@@ -37,6 +37,22 @@ class Baza::Gc
     @humans.pgsql
   end
 
+  # Iterate jobs that are stuck: taken too long time ago but don't have results.
+  def stuck(minutes = 2 * 60)
+    return to_enum(__method__, minutes) unless block_given?
+    q =
+      'SELECT job.id FROM job ' \
+      'LEFT JOIN result ON result.job = job.id ' \
+      'WHERE job.taken IS NOT NULL ' \
+      'AND result.id IS NULL ' \
+      'AND job.expired IS NULL ' \
+      'AND result.expired IS NULL ' \
+      "AND job.created < NOW() - INTERVAL '#{minutes.to_i} MINUTES'"
+    pgsql.exec(q).each do |row|
+      yield @humans.job_by_id(row['id'].to_i)
+    end
+  end
+
   # Iterate jobs that may be deleted because they are too old.
   def ready_to_expire(days = 90)
     return to_enum(__method__, days) unless block_given?

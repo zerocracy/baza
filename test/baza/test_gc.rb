@@ -33,7 +33,7 @@ require_relative '../../objects/baza/factbases'
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
 class Baza::GcTest < Minitest::Test
-  def test_finds_garbage
+  def test_finds_too_old
     humans = Baza::Humans.new(test_pgsql)
     humans.gc.ready_to_expire(0) do |j|
       j.expire!(Baza::Factbases.new('', ''))
@@ -47,5 +47,17 @@ class Baza::GcTest < Minitest::Test
     end
     assert_equal(0, humans.gc.ready_to_expire(1).to_a.size)
     assert_equal(4, humans.gc.ready_to_expire(0).to_a.size)
+  end
+
+  def test_finds_stuck
+    humans = Baza::Humans.new(test_pgsql)
+    humans.gc.stuck(0) do |j|
+      j.expire!(Baza::Factbases.new('', ''))
+    end
+    human = humans.ensure(test_name)
+    token = human.tokens.add(test_name)
+    job = token.start(test_name, test_name)
+    humans.pgsql.exec("UPDATE job SET taken = 'yes' WHERE id = $1", [job.id])
+    assert_equal(1, humans.gc.stuck(0).to_a.size)
   end
 end
