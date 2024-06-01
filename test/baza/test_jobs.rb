@@ -95,4 +95,13 @@ class Baza::JobsTest < Minitest::Test
       token.start(name, test_name)
     end
   end
+
+  def test_allows_more_than_one_running_job_when_expired
+    human = Baza::Humans.new(test_pgsql).ensure(test_name)
+    token = human.tokens.add(test_name)
+    name = test_name
+    job = token.start(name, test_name)
+    job.expire!(Baza::Factbases.new('', ''))
+    token.start(name, test_name)
+  end
 end
