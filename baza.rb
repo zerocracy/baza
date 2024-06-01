@@ -130,7 +130,6 @@ configure do
     end
   end
 end
-# unless ENV['RACK_ENV'] == 'test'
 
 get '/' do
   flash(iri.cut('/dash')) if @locals[:human]
