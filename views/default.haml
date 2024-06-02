@@ -72,7 +72,7 @@
             %ul{style: 'font-family: monospace;'}
               %li
                 %span{title: 'Pipeline status'}
-                  = settings.pipeline
+                  = "pipeline:#{settings.pipeline}"
               %li
                 %span{title: 'GC status'}
-                  = settings.gc
+                  = "gc:#{settings.gc}"
