@@ -119,7 +119,8 @@ configure do
 end
 
 configure do
-  Always.new(1).start(30) do
+  set :gc, Always.new(1)
+  settings.gc.start(30) do
     settings.humans.gc.ready_to_expire(settings.expiration_days) do |j|
       j.expire!(settings.fbs)
       settings.loog.debug("Job ##{j.id} is garbage, expired")
