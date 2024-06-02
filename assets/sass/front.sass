@@ -20,31 +20,33 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+.logo
+  width: 128px
+  height: 128px
+
 section
   width: 100%
-  margin: 0
-
 article
   border: none
 
-article, header, footer
-  padding: 0
+header, footer, article
+  text-align: center
+  padding-top: .5em
+  padding-bottom: .5em
 
-header nav ul,
-footer nav ul
-  text-align: left
+.outer
+  display: table
+  position: absolute
+  top: 0
+  left: 0
+  height: 100%
+  width: 100%
 
-footer nav ul
-  margin-bottom: 0
+.middle
+  display: table-cell
+  vertical-align: middle
 
-footer
-  padding-top: 2em
-  font-size: 0.9em
-  color: gray
-
-.logo
-  width: 64px
-  height: 64px
-
-.ff
-  font-family: monospace
+.inner
+  margin-left: auto
+  margin-right: auto
+  width: 40em
