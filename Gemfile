@@ -45,7 +45,7 @@ gem 'rake', '13.2.1', require: false
 gem 'rerun', '0.14.0', require: false
 gem 'rspec-rails', '6.1.2', require: false
 gem 'rubocop', '1.64.1', require: false
-gem 'rubocop-rspec', '2.29.2', require: false
+gem 'rubocop-rspec', '2.30.0', require: false
 gem 'sass', '3.7.4'
 gem 'sentry-raven', '3.1.2'
 gem 'simplecov', '0.22.0'
