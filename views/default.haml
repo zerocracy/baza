@@ -20,28 +20,14 @@
             %li
               %span{title: "Current user ##{the_human.id}"}
                 = "@#{the_human.github}"
-            %li
-              %a{href: iri.cut('/tokens')}
-                Tokens
-            %li
-              %a{href: iri.cut('/jobs')}
-                Jobs
-            %li
-              %a{href: iri.cut('/account')}
-                Account
+            != menu('/tokens', 'Tokens')
+            != menu('/jobs', 'Jobs')
+            != menu('/account', 'Account')
             - if the_human.admin?
-              %li
-                %a{href: iri.cut('/push')}
-                  Push
-              %li
-                %a{href: iri.cut('/sql')}
-                  SQL
-              %li
-                %a{href: iri.cut('/gift')}
-                  Gift
-            %li
-              %a{href: iri.cut('/logout')}
-                Logout
+              != menu('/push', 'Push')
+              != menu('/sql', 'SQL')
+              != menu('/gift', 'Gift')
+            != menu('/logout', 'Logout')
       %article
         - if defined?(flash_msg) && !flash_msg.empty?
           %p{style: 'background-color:' + flash_color + ';color:white;padding:.1em .5em;border-radius:4px;width:100%;'}

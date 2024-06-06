@@ -54,4 +54,13 @@ helpers do
   def href(link, text, dot: false)
     " <a href='#{link}'>#{text}</a>#{dot ? '.' : ''} "
   end
+
+  def menu(cut, name)
+    href = iri.cut(cut)
+    if iri.to_s == href.to_s
+      "<li><u>#{name}</u></li>"
+    else
+      "<li><a href='#{iri.cut(cut)}'>#{name}</a></li>"
+    end
+  end
 end
