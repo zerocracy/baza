@@ -55,7 +55,9 @@ error do
   else
     require 'raven'
     Raven.capture_exception(e)
-    assemble(:error, :empty, error: Backtrace.new(e).to_s)
+    bt = Backtrace.new(e)
+    settings.loog.error("At #{request.url}:\n#{bt}")
+    assemble(:error, :empty, error: bt.to_s)
   end
 end
 
