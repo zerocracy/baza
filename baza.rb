@@ -34,7 +34,6 @@ require 'json'
 require 'cgi'
 require 'pgtk'
 require 'pgtk/pool'
-require 'raven'
 require 'sinatra'
 require 'sinatra/cookies'
 require 'time'
@@ -52,6 +51,7 @@ end
 
 configure do
   config = {
+    'sentry' => '',
     's3' => {
       'key' => '',
       'secret' => '',

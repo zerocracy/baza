@@ -34,12 +34,24 @@ not_found do
   )
 end
 
+configure do
+  if ENV['RACK_ENV'] != 'test'
+    require 'raven'
+    Raven.configure do |c|
+      c.dsn = settings.config['sentry']
+      require_relative '../version'
+      c.release = Baza::VERSION
+    end
+  end
+end
+
 error do
   status 503
   e = env['sinatra.error']
   if e.is_a?(Baza::Urror)
     flash(@locals[:human] ? iri.cut('/dash') : iri.cut('/'), e.message, color: 'darkred', code: 303)
   else
+    require 'raven'
     Raven.capture_exception(e)
     assemble(
       :error,
