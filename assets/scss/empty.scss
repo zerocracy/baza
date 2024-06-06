@@ -20,31 +20,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-section
-  width: 100%
-  margin: 0
+.logo {
+  height: 64px;
+  width: 64px;
+}
 
-article
-  border: none
-
-article, header, footer
-  padding: 0
-
-header nav ul,
-footer nav ul
-  text-align: left
-
-footer nav ul
-  margin-bottom: 0
-
-footer
-  padding-top: 2em
-  font-size: 0.9em
-  color: gray
-
-.logo
-  width: 64px
-  height: 64px
-
-.ff
-  font-family: monospace
+section {
+  width: 100%;
+}

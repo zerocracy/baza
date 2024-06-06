@@ -22,8 +22,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require 'sass'
-
 get '/svg/{name}' do
   content_type 'image/svg+xml'
   file = "./assets/svg/#{params[:name]}"
@@ -39,9 +37,10 @@ get '/png/{name}' do
 end
 
 get '/css/*.css' do
+  require 'sass-embedded'
   content_type 'text/css', charset: 'utf-8'
   file = params[:splat].first
-  template = File.join(File.absolute_path('./assets/sass/'), "#{file}.sass")
+  template = File.join(File.absolute_path('./assets/scss/'), "#{file}.scss")
   error 404 unless File.exist?(template)
-  Sass::Engine.new(File.read(template)).render
+  Sass.compile(template, style: :compressed)
 end

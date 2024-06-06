@@ -20,33 +20,43 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-.logo
-  width: 128px
-  height: 128px
+.logo {
+  height: 128px;
+  width: 128px;
+}
 
-section
-  width: 100%
-article
-  border: none
+section {
+  width: 100%;
+}
 
-header, footer, article
-  text-align: center
-  padding-top: .5em
-  padding-bottom: .5em
+article {
+  border: 0;
+}
 
-.outer
-  display: table
-  position: absolute
-  top: 0
-  left: 0
-  height: 100%
-  width: 100%
+header,
+footer,
+article {
+  padding-bottom: .5em;
+  padding-top: .5em;
+  text-align: center;
+}
 
-.middle
-  display: table-cell
-  vertical-align: middle
+.outer {
+  display: table;
+  height: 100%;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
 
-.inner
-  margin-left: auto
-  margin-right: auto
-  width: 40em
+  > div {
+    display: table-cell;
+    vertical-align: middle;
+
+    > div {
+      margin-left: auto;
+      margin-right: auto;
+      width: 40em;
+    }
+  }
+}

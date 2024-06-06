@@ -20,9 +20,43 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-.logo
-  width: 64px
-  height: 64px
+$gray: #808080;
 
-section
-  width: 100%
+section {
+  margin: 0;
+  width: 100%;
+}
+
+article {
+  border: 0;
+}
+
+article,
+header,
+footer {
+  padding: 0;
+}
+
+header nav ul,
+footer nav ul {
+  text-align: left;
+}
+
+footer {
+  color: $gray;
+  font-size: .9em;
+  padding-top: 2em;
+
+  > nav ul {
+    margin-bottom: 0;
+  }
+}
+
+.logo {
+  height: 64px;
+  width: 64px;
+}
+
+.ff {
+  font-family: monospace;
+}

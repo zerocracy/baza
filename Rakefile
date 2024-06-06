@@ -30,7 +30,7 @@ require 'yaml'
 
 ENV['RACK_ENV'] = 'test'
 
-task default: %i[clean test rubocop xcop copyright]
+task default: %i[clean test rubocop scss_lint xcop copyright]
 
 require 'rake/testtask'
 Rake::TestTask.new(test: %i[pgsql liquibase]) do |test|
@@ -71,6 +71,11 @@ Xcop::RakeTask.new(:xcop) do |task|
   task.license = 'LICENSE.txt'
   task.includes = ['**/*.xml', '**/*.xsl', '**/*.xsd', '**/*.html']
   task.excludes = ['target/**/*', 'coverage/**/*']
+end
+
+require 'scss_lint/rake_task'
+SCSSLint::RakeTask.new do |t|
+  t.files = Dir.glob(['assets/scss/*.scss'])
 end
 
 desc 'Check the quality of config file'
