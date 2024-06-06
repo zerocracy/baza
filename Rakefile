@@ -90,7 +90,7 @@ end
 task(:copyright) do
   sh "grep -q -r '2009-#{Date.today.strftime('%Y')}' \
     --include '*.yml' \
-    --include '*.sass' \
+    --include '*.scss' \
     --include '*.haml' \
     --include '*.rb' \
     --include '*.txt' \

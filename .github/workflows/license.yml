@@ -50,6 +50,7 @@ jobs:
             -name "Makefile" -o \
             -name "Rakefile" -o \
             -name "*.sh" -o \
+            -name "*.scss" -o \
             -name "*.rb" -o \
             -name "*.fe" -o \
             -name "*.yml" \
