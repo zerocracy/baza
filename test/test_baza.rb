@@ -90,6 +90,12 @@ class Baza::AppTest < Minitest::Test
     end
   end
 
+  def test_fatal_error
+    get('/error')
+    assert_status(503)
+    assert(last_response.body.include?('intentional'))
+  end
+
   def test_protected_pages
     pages = [
       '/sql', '/push', '/gift',

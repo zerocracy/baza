@@ -27,11 +27,7 @@ require_relative '../objects/baza/urror'
 not_found do
   status 404
   content_type('text/html', charset: 'utf-8')
-  assemble(
-    :not_found,
-    :empty,
-    url: request.url
-  )
+  assemble(:not_found, :empty, url: request.url)
 end
 
 configure do
@@ -45,6 +41,12 @@ configure do
   end
 end
 
+if ENV['RACK_ENV'] == 'test'
+  get '/error' do
+    raise 'The error is intentional'
+  end
+end
+
 error do
   status 503
   e = env['sinatra.error']
@@ -53,11 +55,7 @@ error do
   else
     require 'raven'
     Raven.capture_exception(e)
-    assemble(
-      :error,
-      :empty,
-      error: "#{e.message}\n\t#{e.backtrace.join("\n\t")}"
-    )
+    assemble(:error, :empty, error: Backtrace.new(e).to_s)
   end
 end
 
