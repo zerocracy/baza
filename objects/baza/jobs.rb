@@ -113,6 +113,18 @@ class Baza::Jobs
     ).empty?
   end
 
+  # There is a job by this name that is running now and now yet finished?
+  def busy?(name)
+    !pgsql.exec(
+      'SELECT job.id FROM job ' \
+      'JOIN token ON token.id = job.token ' \
+      'LEFT JOIN result ON result.job = job.id ' \
+      'WHERE token.human = $1 AND job.name = $2 AND job.expired IS NULL AND result.id IS NULL ' \
+      'LIMIT 1',
+      [@human.id, name]
+    ).empty?
+  end
+
   def recent(name)
     rows = pgsql.exec(
       'SELECT job.id FROM job ' \

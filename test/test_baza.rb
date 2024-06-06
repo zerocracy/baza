@@ -175,15 +175,16 @@ class Baza::AppTest < Minitest::Test
 
   def test_starts_job_via_put
     app.settings.pipeline.start(0)
-    uname = test_name
-    login('yegor256')
-    post('/gift', "human=#{uname}&zents=555555&summary=no")
-    login(uname)
-    get('/tokens')
-    post('/tokens/add', 'name=foo')
-    id = last_response.headers['X-Zerocracy-TokenId'].to_i
-    get("/tokens/#{id}.json")
-    token = JSON.parse(last_response.body)['text']
+    token = make_valid_token
+    # uname = test_name
+    # login('yegor256')
+    # post('/gift', "human=#{uname}&zents=555555&summary=no")
+    # login(uname)
+    # get('/tokens')
+    # post('/tokens/add', 'name=foo')
+    # id = last_response.headers['X-Zerocracy-TokenId'].to_i
+    # get("/tokens/#{id}.json")
+    # token = JSON.parse(last_response.body)['text']
     fb = Factbase.new
     (0..100).each do |i|
       fb.insert.foo = "booom \x01\x02\x03 #{i}"
@@ -219,9 +220,34 @@ class Baza::AppTest < Minitest::Test
     assert_status(200)
     get("/jobs/#{rid}/expire")
     assert_status(302)
+    app.settings.pipeline.stop
+  end
+
+  def test_rejects_duplicate_puts
+    token = make_valid_token
+    fb = Factbase.new
+    fb.insert.foo = 42
+    header('X-Zerocracy-Token', token)
+    name = test_name
+    put("/push/#{name}", fb.export)
+    assert_status(200)
+    put("/push/#{name}", fb.export)
+    assert_status(303)
   end
 
   private
+
+  def make_valid_token
+    uname = test_name
+    login('yegor256')
+    post('/gift', "human=#{uname}&zents=555555&summary=no")
+    login(uname)
+    get('/tokens')
+    post('/tokens/add', 'name=foo')
+    id = last_response.headers['X-Zerocracy-TokenId'].to_i
+    get("/tokens/#{id}.json")
+    JSON.parse(last_response.body)['text']
+  end
 
   def assert_status(code)
     assert_equal(

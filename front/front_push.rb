@@ -42,6 +42,7 @@ post '/push' do
   raise Baza::Urror, 'The "factbase" form part is missing' if tfile.nil?
   name = params[:name]
   raise Baza::Urror, 'The "name" form part is missing' if name.nil?
+  raise Baza::Urror, "An existing job named '#{name}' is running now" if token.human.jobs.busy?(name)
   Tempfile.open do |f|
     FileUtils.copy(tfile[:tempfile], f.path)
     File.delete(tfile[:tempfile])
@@ -57,6 +58,7 @@ put(%r{/push/([a-z0-9-]+)}) do
   raise Baza::Urror, 'The "X-Zerocracy-Token" HTTP header with a token is missing' if text.nil?
   token = settings.humans.his_token(text)
   name = params['captures'].first
+  raise Baza::Urror, "An existing job named '#{name}' is running now" if token.human.jobs.busy?(name)
   Tempfile.open do |f|
     request.body.rewind
     File.binwrite(f, request.body.read)
