@@ -69,10 +69,14 @@ GEM
     faraday-net_http (3.1.0)
       net-http
     ffi (1.17.0-arm64-darwin)
+    ffi (1.17.0-x86_64-linux-gnu)
     glogin (0.15.0)
       base58 (>= 0.2)
       openssl (>= 2.0)
     google-protobuf (4.27.0-arm64-darwin)
+      bigdecimal
+      rake (>= 13)
+    google-protobuf (4.27.0-x86_64-linux)
       bigdecimal
       rake (>= 13)
     haml (6.3.0)
@@ -105,6 +109,8 @@ GEM
     net-http (0.4.1)
       uri
     nokogiri (1.16.5-arm64-darwin)
+      racc (~> 1.4)
+    nokogiri (1.16.5-x86_64-linux)
       racc (~> 1.4)
     openssl (3.2.0)
     parallel (1.24.0)
@@ -210,6 +216,8 @@ GEM
       sass-listen (~> 4.0.0)
     sass-embedded (1.77.4-arm64-darwin)
       google-protobuf (>= 3.25, < 5.0)
+    sass-embedded (1.77.4-x86_64-linux-gnu)
+      google-protobuf (>= 3.25, < 5.0)
     sass-listen (4.0.0)
       rb-fsevent (~> 0.9, >= 0.9.4)
       rb-inotify (~> 0.9, >= 0.9.7)
@@ -263,6 +271,7 @@ GEM
 
 PLATFORMS
   arm64-darwin-22
+  x86_64-linux
 
 DEPENDENCIES
   always (= 0.0.4)
