@@ -29,7 +29,7 @@ require 'yaml'
 
 ENV['RACK_ENV'] = 'test'
 
-task default: %i[clean test rubocop scss_lint xcop copyright]
+task default: %i[clean test rubocop scss_lint xcop config copyright]
 
 require 'rake/testtask'
 Rake::TestTask.new(test: %i[pgsql liquibase]) do |test|
@@ -79,7 +79,8 @@ end
 
 desc 'Check the quality of config file'
 task(:config) do
-  YAML.safe_load(File.open('config.yml')).to_yaml
+  f = 'config.yml'
+  YAML.safe_load(File.open(f)).to_yaml if File.exist?(f)
 end
 
 task(run: %i[pgsql liquibase]) do
