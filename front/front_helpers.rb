@@ -22,18 +22,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require 'moments'
+require 'tago'
 
 helpers do
   def ago(time)
-    diff = Moments.ago(time).humanized
-    txt =
-      if diff.nil?
-        'just now'
-      else
-        "#{diff.split(' ', 3).take(2).join(' ').downcase.gsub(/[^a-z0-9 ]/, '')} ago"
-      end
-    "<span title='#{time.utc.iso8601}'>#{txt}</span>"
+    "<span title='#{time.utc.iso8601}'>#{time.ago} ago</span>"
   end
 
   def zents(num)
