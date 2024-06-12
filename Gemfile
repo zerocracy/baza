@@ -45,7 +45,7 @@ gem 'rerun', '0.14.0', require: false
 gem 'rspec-rails', '6.1.2', require: false
 gem 'rubocop', '1.64.1', require: false
 gem 'rubocop-rspec', '2.31.0', require: false
-gem 'sass-embedded', '1.77.4'
+gem 'sass-embedded', '1.77.5'
 gem 'scss_lint', '0.60.0', require: false
 gem 'sentry-raven', '3.1.2'
 gem 'simplecov', '0.22.0'
