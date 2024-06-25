@@ -29,12 +29,12 @@ SOFTWARE.
         id SERIAL PRIMARY KEY,
         human INT NOT NULL REFERENCES human(id),
         name VARCHAR(32) NOT NULL,
-        uuid VARCHAR(36) NOT NULL,
+        owner VARCHAR(64) NOT NULL,
         created TIMESTAMPTZ DEFAULT now() NOT NULL,
-        UNIQUE(uuid),
-        UNIQUE(human, name)
+        UNIQUE(human, name),
+        UNIQUE(human, name, owner)
       );
-      CREATE INDEX idx_lock1 ON lock(name, uuid, human);
+      CREATE INDEX idx_lock1 ON lock(human, name, owner);
     </sql>
   </changeSet>
 </databaseChangeLog>

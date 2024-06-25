@@ -22,22 +22,31 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# Is the name locked?
-get(%r{/locked/([a-z0-9-]+)}) do
-  content_type('text/plain')
-  the_human.locks.locked?(params['captures'].first) ? 'yes' : 'no'
+get '/locks' do
+  assemble(
+    :locks,
+    :default,
+    title: '/locks',
+    locks: the_human.locks
+  )
 end
 
 # Lock the name of the job.
 get(%r{/lock/([a-z0-9-]+)}) do
   n = params['captures'].first
-  the_human.locks.lock(n)
-  flash(iri.cut('/jobs'), "The name '#{n}' just locked")
+  owner = params[:owner]
+  raise Baza::Urror, 'The "owner" is a mandatory query param' if owner.nil?
+  raise Baza::Urror, 'The "owner" can\'t be empty' if owner.empty?
+  the_human.locks.lock(n, owner)
+  flash(iri.cut('/locks'), "The name '#{n}' just locked for '#{owner}'")
 end
 
 # Unlock the name of the job.
 get(%r{/unlock/([a-z0-9-]+)}) do
   n = params['captures'].first
-  the_human.locks.unlock(n)
-  flash(iri.cut('/jobs'), "The name '#{n}' just unlocked")
+  owner = params[:owner]
+  raise Baza::Urror, 'The "owner" is a mandatory query param' if owner.nil?
+  raise Baza::Urror, 'The "owner" can\'t be empty' if owner.empty?
+  the_human.locks.lock(n, owner)
+  flash(iri.cut('/locks'), "The name '#{n}' just unlocked for '#{owner}'")
 end

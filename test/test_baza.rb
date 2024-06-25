@@ -235,6 +235,18 @@ class Baza::AppTest < Minitest::Test
     assert_status(303)
   end
 
+  def test_lock_unlock
+    login(test_name)
+    name = test_name
+    owner = test_name
+    get("/lock/#{name}?owner=#{owner}")
+    assert_status(302)
+    get("/unlock/#{name}?owner=#{owner}")
+    assert_status(302)
+    get('/locks')
+    assert_status(200)
+  end
+
   private
 
   def make_valid_token

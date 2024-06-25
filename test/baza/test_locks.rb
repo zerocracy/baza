@@ -26,22 +26,22 @@ require 'minitest/autorun'
 require_relative '../test__helper'
 require_relative '../../objects/baza'
 require_relative '../../objects/baza/humans'
-require_relative '../../objects/baza/factbases'
 
 # Test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
 class Baza::LocksTest < Minitest::Test
-  def test_simple_scenario
+  def test_simple_locking_scenario
     human = Baza::Humans.new(test_pgsql).ensure(test_name)
     locks = human.locks
-    name = test_name
-    assert(!locks.locked?(name))
-    uuid = locks.lock(name)
-    assert(locks.locked?(name))
-    assert_raises { locks.lock(name) }
-    locks.unlock(uuid)
-    assert(!locks.locked?(name))
+    owner = test_name
+    n = test_name
+    locks.lock(n, owner)
+    locks.lock(n, owner)
+    assert_raises { locks.lock(n, test_name) }
+    locks.lock(n, owner)
+    locks.unlock(n, owner)
+    locks.lock(n, owner)
   end
 end

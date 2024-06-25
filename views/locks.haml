@@ -1,0 +1,28 @@
+- if locks.empty?
+  %p
+    There are no locks yet.
+- else
+  %p
+    These are the active locks:
+  %table
+    %colgroup
+      %col{style: 'width: 3em;'}
+      %col{style: 'width: 4em;'}
+      %col
+    %thead
+      %tr
+        %th
+          ID
+        %th
+          Name
+        %th
+          Owner
+    %tbody
+    - locks.each do |lk|
+      %tr
+        %td.ff
+          = "##{lk['id']}"
+        %td.ff
+          = "##{lk['name']}"
+        %td.ff
+          = "##{lk['owner']}"

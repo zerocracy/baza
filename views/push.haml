@@ -12,14 +12,14 @@
       = ' '
       %a{href: iri.cut('/tokens')}> tokens
       = ':'
-    %input{ type: 'text', name: 'token', value: token, tabindex: 1, placeholder: 'Token', size: 40, maxlength: 36 }
+    %input{ type: 'text', name: 'token', value: token, tabindex: 1, placeholder: 'Token', size: 40, maxlength: 36, required: true }
     %label
       Job name:
-    %input{ type: 'text', name: 'name', tabindex: 2, placeholder: 'Name', size: 25, maxlength: 24 }
+    %input{ type: 'text', name: 'name', tabindex: 2, placeholder: 'Name', size: 25, maxlength: 24, required: true }
     %label
       Factbase (a binary file created by the
       != href('https://github.com/yegor256/judges', 'judges')
       toolkit):
-    %input{ type: 'file', name: 'factbase', tabindex: 3, placeholder: 'Factbase' }
+    %input{ type: 'file', name: 'factbase', tabindex: 3, placeholder: 'Factbase', required: true }
     %label
     %input{ type: 'submit', tabindex: 4, value: 'Start' }

@@ -48,12 +48,13 @@ post '/push' do
     File.delete(tfile[:tempfile])
     fid = settings.fbs.save(f.path)
     job = token.start(name, fid)
-    settings.loog.info("New push arrived via HTTP POSt, job ID is #{job.id}")
+    settings.loog.info("New push arrived via HTTP POST, job ID is ##{job.id}")
     flash(iri.cut('/jobs'), "New job ##{job.id} started")
   end
 end
 
 put(%r{/push/([a-z0-9-]+)}) do
+  the_human.jobs.lock(params[:owner]) unless params[:owner].nil?
   text = request.env['HTTP_X_ZEROCRACY_TOKEN']
   raise Baza::Urror, 'The "X-Zerocracy-Token" HTTP header with a token is missing' if text.nil?
   token = settings.humans.his_token(text)
@@ -83,19 +84,23 @@ end
 
 # Read the output of this job.
 get(%r{/stdout/([0-9]+).txt}) do
-  r = the_human.jobs.get(params['captures'].first.to_i).result
+  the_human.locks.lock(params[:owner]) unless params[:owner].nil?
+  j = the_human.jobs.get(params['captures'].first.to_i)
+  r = j.result
   content_type('text/plain')
   r.stdout
 end
 
 # The job is finished?
 get(%r{/finished/([0-9]+)}) do
+  the_human.locks.lock(params[:owner]) unless params[:owner].nil?
   j = the_human.jobs.get(params['captures'].first.to_i)
   content_type('text/plain')
   j.finished? ? 'yes' : 'no'
 end
 
 get(%r{/pull/([0-9]+).fb}) do
+  the_human.locks.lock(params[:owner]) unless params[:owner].nil?
   j = the_human.jobs.get(params['captures'].first.to_i)
   r = j.result
   raise Baza::Urror, "The job ##{j.id} is expired" if j.expired?
@@ -109,6 +114,7 @@ get(%r{/pull/([0-9]+).fb}) do
 end
 
 get(%r{/inspect/([0-9]+).fb}) do
+  the_human.locks.lock(params[:owner]) unless params[:owner].nil?
   j = the_human.jobs.get(params['captures'].first.to_i)
   raise Baza::Urror, "The job ##{j.id} is expired" if j.expired?
   Tempfile.open do |f|
