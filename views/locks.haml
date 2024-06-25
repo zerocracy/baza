@@ -9,6 +9,7 @@
       %col{style: 'width: 3em;'}
       %col{style: 'width: 4em;'}
       %col
+      %col{style: 'width: 6em;'}
     %thead
       %tr
         %th
@@ -17,12 +18,17 @@
           Name
         %th
           Owner
+        %th
+          Owner
     %tbody
     - locks.each do |lk|
       %tr
         %td.ff
           = "##{lk['id']}"
         %td.ff
-          = "##{lk['name']}"
+          %a{href: iri.cut('/jobs').over(name: lk['name'])}
+            = lk['name']
         %td.ff
-          = "##{lk['owner']}"
+          = lk['owner']
+        %td
+          != ago(Time.parse(lk['created']))
