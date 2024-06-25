@@ -17,15 +17,25 @@
     days.
   %table
     %colgroup
+      -# ID
       %col{style: 'width: 4em;'}
-      %col{style: 'width: 3em;'}
-      %col{style: 'width: 3em;'}
-      %col
-      %col
-      %col{style: 'width: 12em;'}
-      %col{style: 'width: 3em;'}
+      -# In
       %col{style: 'width: 4em;'}
+      -# Name
+      %col{style: 'width: 20em;'}
+      -# Lock
+      %col{style: 'width: 4em;'}
+      -# Token
+      %col
+      -# Started
+      %col{style: 'width: 9em;'}
+      -# Code
+      %col{style: 'width: 4em;'}
+      -# Time
+      %col{style: 'width: 4em;'}
+      -# Log
       %col{style: 'width: 3em;'}
+      -# Out
       %col{style: 'width: 3em;'}
     %thead
       %tr
@@ -67,7 +77,8 @@
             = j.name
         %td.ff
           - if j.locked?
-            🔒
+            %a{href: iri.cut('/locks')}
+              🔒
         %td.ff
           = j.token.name
         %td
