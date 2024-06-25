@@ -243,6 +243,8 @@ class Baza::AppTest < Minitest::Test
     assert_status(302)
     get("/unlock/#{name}?owner=#{owner}")
     assert_status(302)
+    get("/lock/#{name}?owner=#{test_name}")
+    assert_status(302)
     get('/locks')
     assert_status(200)
   end

@@ -47,6 +47,6 @@ get(%r{/unlock/([a-z0-9-]+)}) do
   owner = params[:owner]
   raise Baza::Urror, 'The "owner" is a mandatory query param' if owner.nil?
   raise Baza::Urror, 'The "owner" can\'t be empty' if owner.empty?
-  the_human.locks.lock(n, owner)
+  the_human.locks.unlock(n, owner)
   flash(iri.cut('/locks'), "The name '#{n}' just unlocked for '#{owner}'")
 end
