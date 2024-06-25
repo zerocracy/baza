@@ -27,7 +27,7 @@ require_relative '../objects/baza/human'
 
 before '/*' do
   cookies[:auth] = params[:auth] if params[:auth]
-  token = request.env['HTTP_X_ZEROCRACY_TOKEN']
+  p params
   if cookies[:auth]
     begin
       json = GLogin::Cookie::Closed.new(
@@ -38,11 +38,13 @@ before '/*' do
       raise GLogin::Codec::DecodingError unless id.positive?
       @locals[:human] = id
       @locals[:human_login] = json['login']
-    rescue GLogin::Codec::DecodingError
+    rescue GLogin::Codec::DecodingError => e
+      settings.loog.debug("Logged off: #{e.message}")
       cookies.delete(:auth)
     end
-  elsif !token.nil?
-    @locals[:human] = settings.humans.his_token(token).human.id
+  else
+    token = request.env['HTTP_X_ZEROCRACY_TOKEN']
+    @locals[:human] = settings.humans.his_token(token).human.id unless token.nil?
   end
 end
 

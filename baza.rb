@@ -44,6 +44,11 @@ require_relative 'objects/baza/factbases'
 require_relative 'objects/baza/humans'
 require_relative 'objects/baza/pipeline'
 
+# see https://stackoverflow.com/questions/78547207
+disable :method_override
+use Rack::RewindableInput::Middleware
+use Rack::MethodOverride
+
 unless ENV['RACK_ENV'] == 'test'
   require 'rack/ssl'
   use Rack::SSL
