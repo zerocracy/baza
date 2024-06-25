@@ -159,8 +159,11 @@ class Baza::AppTest < Minitest::Test
     get("/tokens/#{id}.json")
     token = JSON.parse(last_response.body)['text']
     get('/push')
+    post('/push', 'name' => test_name, 'token' => token)
+    assert_status(302)
     fb = Factbase.new
     fb.insert.foo = 'booom \x01\x02\x03'
+    assert_status(302)
     Tempfile.open do |f|
       File.binwrite(f.path, fb.export)
       post(
@@ -176,15 +179,6 @@ class Baza::AppTest < Minitest::Test
   def test_starts_job_via_put
     app.settings.pipeline.start(0)
     token = make_valid_token
-    # uname = test_name
-    # login('yegor256')
-    # post('/gift', "human=#{uname}&zents=555555&summary=no")
-    # login(uname)
-    # get('/tokens')
-    # post('/tokens/add', 'name=foo')
-    # id = last_response.headers['X-Zerocracy-TokenId'].to_i
-    # get("/tokens/#{id}.json")
-    # token = JSON.parse(last_response.body)['text']
     fb = Factbase.new
     (0..100).each do |i|
       fb.insert.foo = "booom \x01\x02\x03 #{i}"

@@ -23,6 +23,7 @@
 # SOFTWARE.
 
 require 'fileutils'
+require 'factbase'
 require_relative '../objects/baza/urror'
 
 get '/push' do
@@ -38,14 +39,17 @@ post '/push' do
   text = params[:token]
   raise Baza::Urror, 'The "token" form part is missing' if text.nil?
   token = the_human.tokens.find(text)
-  tfile = params[:factbase]
-  raise Baza::Urror, 'The "factbase" form part is missing' if tfile.nil?
   name = params[:name]
   raise Baza::Urror, 'The "name" form part is missing' if name.nil?
   raise Baza::Urror, "An existing job named '#{name}' is running now" if token.human.jobs.busy?(name)
   Tempfile.open do |f|
-    FileUtils.copy(tfile[:tempfile], f.path)
-    File.delete(tfile[:tempfile])
+    tfile = params[:factbase]
+    if tfile.nil?
+      File.binwrite(f.path, Factbase.new.export)
+    else
+      FileUtils.copy(tfile[:tempfile], f.path)
+      File.delete(tfile[:tempfile])
+    end
     fid = settings.fbs.save(f.path)
     job = token.start(name, fid)
     settings.loog.info("New push arrived via HTTP POST, job ID is ##{job.id}")
