@@ -36,7 +36,7 @@ helpers do
 
   def msec(msec)
     if msec < 1000
-      "#{msec}ms"
+      "#{msec}㎳"
     elsif msec < 60 * 1000
       "#{msec / 1000}s"
     else

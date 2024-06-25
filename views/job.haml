@@ -1,69 +1,74 @@
-%p
-  ID:
-  %br
-  %span.ff
-    = "##{job.id}"
-
-- if job.expired?
-  %p.orange
-    - if job.finished?
-      Expired
+%nav
+  %ul{style: 'text-align: left'}
+    - if job.expired?
+      %li.orange
+        - if job.finished?
+          Expired
+        - else
+          Never finished and expired
     - else
-      Never finished and expired
-- else
+      %li
+        %a{href: iri.cut('/jobs').append(job.id).append('expire'), onclick: "return confirm('If you expire this job, there will no way to return its data back. Are you sure want to proceed?')"}
+          Expire!
+    - unless job.expired?
+      %li.darkred
+        Not yet finished
+
+%div{'column-count' => 3}
   %p
-    %a{href: iri.cut('/jobs').append(job.id).append('expire'), onclick: "return confirm('If you expire this job, there will no way to return its data back. Are you sure want to proceed?')"}
-      Expire!
-
-%p
-  Name:
-  %br
-  %a.ff{href: iri.over(name: job.name)}
-    = job.name
-
-%p
-  Token:
-  %br
-  %span.ff
-    = job.token.name
-
-%p
-  Created on:
-  %br
-  != ago(job.created)
-
-- unless job.expired?
-  %p
-    Input:
-    %br
-    %a{href: iri.cut('/inspect').append("#{job.id}.fb")}
-      download
-
-- if job.finished?
-  - r = job.result
-  %p
-    Finished on:
-    %br
-    != ago(r.created)
-  %p
-    Exit code:
+    ID:
     %br
     %span.ff
-      = r.exit
+      = "##{job.id}"
+
   %p
-    Duration:
+    Name:
     %br
-    = "#{r.msec}ms"
-  - if r.exit.zero? && !job.expired?
+    %a.ff{href: iri.over(name: job.name)}
+      = job.name
+
+  %p
+    Token:
+    %br
+    %span.ff
+      = job.token.name
+
+  %p
+    Created on:
+    %br
+    != ago(job.created)
+
+  - unless job.expired?
     %p
-      Output:
+      Input:
       %br
-      %a{href: iri.cut('/pull').append("#{job.id}.fb")}
+      %a{href: iri.cut('/inspect').append("#{job.id}.fb")}
         download
+
+  - if job.finished?
+    - r = job.result
+    %p
+      Finished on:
+      %br
+      != ago(r.created)
+    %p
+      Exit code:
+      %br
+      %span.ff
+        = r.exit
+    %p
+      Duration:
+      %br
+      = "#{r.msec}ms"
+    - if r.exit.zero? && !job.expired?
+      %p
+        Output:
+        %br
+        %a{href: iri.cut('/pull').append("#{job.id}.fb")}
+          download
+
+- if job.finished?
   %p
     Stdout:
     %br
     %pre= r.stdout
-- elsif !job.expired?
-  %p.darkred
-    Not yet finished
