@@ -23,6 +23,7 @@
 # SOFTWARE.
 
 require 'veil'
+require 'securerandom'
 
 # Locks of a human.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -47,16 +48,18 @@ class Baza::Locks
   end
 
   def lock(name)
+    uuid = SecureRandom.uuid
     pgsql.exec(
-      'INSERT INTO lock (human, name) VALUES ($1, $2) RETURNING id',
-      [@human.id, name]
-    )[0]['id'].to_i
+      'INSERT INTO lock (human, name, uuid) VALUES ($1, $2, $3)',
+      [@human.id, name, uuid]
+    )
+    uuid
   end
 
-  def unlock(name)
+  def unlock(uuid)
     pgsql.exec(
-      'DELETE FROM lock WHERE human = $1 AND name = $2',
-      [@human.id, name]
+      'DELETE FROM lock WHERE human = $1 AND uuid = $2',
+      [@human.id, uuid]
     )
   end
 end

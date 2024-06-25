@@ -38,10 +38,10 @@ class Baza::LocksTest < Minitest::Test
     locks = human.locks
     name = test_name
     assert(!locks.locked?(name))
-    locks.lock(name)
+    uuid = locks.lock(name)
     assert(locks.locked?(name))
     assert_raises { locks.lock(name) }
-    locks.unlock(name)
+    locks.unlock(uuid)
     assert(!locks.locked?(name))
   end
 end
