@@ -22,63 +22,22 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require_relative 'urror'
+# Is the name locked?
+get(%r{/locked/([a-z0-9-]+)}) do
+  content_type('text/plain')
+  the_human.locks.locked?(params['captures'].first) ? 'yes' : 'no'
+end
 
-# Human being.
-# Author:: Yegor Bugayenko (yegor256@gmail.com)
-# Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
-# License:: MIT
-class Baza::Human
-  attr_reader :id, :humans
+# Lock the name of the job.
+get(%r{/lock/([a-z0-9-]+)}) do
+  n = params['captures'].first
+  the_human.locks.lock(n)
+  flash(iri.cut('/jobs'), "The name '#{n}' just locked")
+end
 
-  def initialize(humans, id)
-    @humans = humans
-    raise 'Human ID must be an integer' unless id.is_a?(Integer)
-    @id = id
-  end
-
-  def pgsql
-    @humans.pgsql
-  end
-
-  def tokens
-    require_relative 'tokens'
-    Baza::Tokens.new(self)
-  end
-
-  def jobs
-    require_relative 'jobs'
-    Baza::Jobs.new(self)
-  end
-
-  def locks
-    require_relative 'locks'
-    Baza::Locks.new(self)
-  end
-
-  def results
-    require_relative 'results'
-    Baza::Results.new(self)
-  end
-
-  def account
-    require_relative 'account'
-    Baza::Account.new(self)
-  end
-
-  def github
-    rows = @humans.pgsql.exec(
-      'SELECT github FROM human WHERE id = $1',
-      [@id]
-    )
-    raise Baza::Urror, "Human ##{@id} not found" if rows.empty?
-    rows[0]['github']
-  end
-
-  # An admin.
-  module Admin
-    def admin?
-      github == 'yegor256' || ENV['RACK_ENV'] == 'test'
-    end
-  end
+# Unlock the name of the job.
+get(%r{/unlock/([a-z0-9-]+)}) do
+  n = params['captures'].first
+  the_human.locks.unlock(n)
+  flash(iri.cut('/jobs'), "The name '#{n}' just unlocked")
 end

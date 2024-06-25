@@ -22,63 +22,26 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require_relative 'urror'
+require 'minitest/autorun'
+require_relative '../test__helper'
+require_relative '../../objects/baza'
+require_relative '../../objects/baza/humans'
+require_relative '../../objects/baza/factbases'
 
-# Human being.
+# Test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class Baza::Human
-  attr_reader :id, :humans
-
-  def initialize(humans, id)
-    @humans = humans
-    raise 'Human ID must be an integer' unless id.is_a?(Integer)
-    @id = id
-  end
-
-  def pgsql
-    @humans.pgsql
-  end
-
-  def tokens
-    require_relative 'tokens'
-    Baza::Tokens.new(self)
-  end
-
-  def jobs
-    require_relative 'jobs'
-    Baza::Jobs.new(self)
-  end
-
-  def locks
-    require_relative 'locks'
-    Baza::Locks.new(self)
-  end
-
-  def results
-    require_relative 'results'
-    Baza::Results.new(self)
-  end
-
-  def account
-    require_relative 'account'
-    Baza::Account.new(self)
-  end
-
-  def github
-    rows = @humans.pgsql.exec(
-      'SELECT github FROM human WHERE id = $1',
-      [@id]
-    )
-    raise Baza::Urror, "Human ##{@id} not found" if rows.empty?
-    rows[0]['github']
-  end
-
-  # An admin.
-  module Admin
-    def admin?
-      github == 'yegor256' || ENV['RACK_ENV'] == 'test'
-    end
+class Baza::LocksTest < Minitest::Test
+  def test_simple_scenario
+    human = Baza::Humans.new(test_pgsql).ensure(test_name)
+    locks = human.locks
+    name = test_name
+    assert(!locks.locked?(name))
+    locks.lock(name)
+    assert(locks.locked?(name))
+    assert_raises { locks.lock(name) }
+    locks.unlock(name)
+    assert(!locks.locked?(name))
   end
 end

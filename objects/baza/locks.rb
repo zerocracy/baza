@@ -22,63 +22,41 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require_relative 'urror'
+require 'veil'
 
-# Human being.
+# Locks of a human.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class Baza::Human
-  attr_reader :id, :humans
+class Baza::Locks
+  attr_reader :human
 
-  def initialize(humans, id)
-    @humans = humans
-    raise 'Human ID must be an integer' unless id.is_a?(Integer)
-    @id = id
+  def initialize(human)
+    @human = human
   end
 
   def pgsql
-    @humans.pgsql
+    @human.pgsql
   end
 
-  def tokens
-    require_relative 'tokens'
-    Baza::Tokens.new(self)
+  def locked?(name)
+    !pgsql.exec(
+      'SELECT lock.id FROM lock WHERE human = $1 AND name = $2',
+      [@human.id, name]
+    ).empty?
   end
 
-  def jobs
-    require_relative 'jobs'
-    Baza::Jobs.new(self)
+  def lock(name)
+    pgsql.exec(
+      'INSERT INTO lock (human, name) VALUES ($1, $2) RETURNING id',
+      [@human.id, name]
+    )[0]['id'].to_i
   end
 
-  def locks
-    require_relative 'locks'
-    Baza::Locks.new(self)
-  end
-
-  def results
-    require_relative 'results'
-    Baza::Results.new(self)
-  end
-
-  def account
-    require_relative 'account'
-    Baza::Account.new(self)
-  end
-
-  def github
-    rows = @humans.pgsql.exec(
-      'SELECT github FROM human WHERE id = $1',
-      [@id]
+  def unlock(name)
+    pgsql.exec(
+      'DELETE FROM lock WHERE human = $1 AND name = $2',
+      [@human.id, name]
     )
-    raise Baza::Urror, "Human ##{@id} not found" if rows.empty?
-    rows[0]['github']
-  end
-
-  # An admin.
-  module Admin
-    def admin?
-      github == 'yegor256' || ENV['RACK_ENV'] == 'test'
-    end
   end
 end
