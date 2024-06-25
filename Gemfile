@@ -50,7 +50,7 @@ gem 'scss_lint', '0.60.0', require: false
 gem 'sentry-raven', '3.1.2'
 gem 'simplecov', '0.22.0'
 gem 'simplecov-cobertura', '~> 2.1'
-gem 'sinatra', '3.2.0'
+gem 'sinatra', '4.0.0'
 gem 'sinatra-contrib', '3.2.0'
 gem 'sprockets', '4.2.1'
 gem 'tago', '0.0.2'
