@@ -27,7 +27,6 @@ require_relative '../objects/baza/human'
 
 before '/*' do
   cookies[:auth] = params[:auth] if params[:auth]
-  p params
   if cookies[:auth]
     begin
       json = GLogin::Cookie::Closed.new(

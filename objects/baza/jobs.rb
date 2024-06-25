@@ -59,10 +59,12 @@ class Baza::Jobs
     sql =
       'SELECT job.id, job.created, job.name, job.uri1, job.expired, ' \
       'token.id AS tid, token.name AS token_name, ' \
+      'lock.id AS lid, ' \
       'result.id AS rid, result.uri2, result.stdout, result.exit, result.msec, ' \
       'ROW_NUMBER() OVER (PARTITION BY job.name ORDER BY job.created DESC) AS row ' \
       'FROM job ' \
       'JOIN token ON token.id = job.token ' \
+      'LEFT JOIN lock ON lock.human = token.human ' \
       'LEFT JOIN result ON result.job = job.id ' \
       'WHERE token.human = $1 ' \
       "AND #{name.nil? ? 'job.expired IS NULL' : 'job.name = $2'} " \
@@ -78,6 +80,7 @@ class Baza::Jobs
         created: Time.parse(row['created']),
         name: row['name'],
         uri1: row['uri1'],
+        locked?: !row['lid'].nil?,
         finished?: !row['rid'].nil?,
         expired?: !row['expired'].nil?,
         token: Veil.new(

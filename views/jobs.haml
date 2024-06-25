@@ -34,6 +34,8 @@
         %th
           Name
         %th
+          Lock
+        %th
           Token
         %th
           Started
@@ -62,6 +64,9 @@
         %td.ff
           %a{href: iri.over(name: j.name)}
             = j.name
+        %td.ff
+          - if j.locked?
+            🔒
         %td.ff
           = j.token.name
         %td
