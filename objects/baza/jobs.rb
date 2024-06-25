@@ -64,7 +64,7 @@ class Baza::Jobs
       'ROW_NUMBER() OVER (PARTITION BY job.name ORDER BY job.created DESC) AS row ' \
       'FROM job ' \
       'JOIN token ON token.id = job.token ' \
-      'LEFT JOIN lock ON lock.human = token.human ' \
+      'LEFT JOIN lock ON lock.human = token.human AND lock.name = job.name ' \
       'LEFT JOIN result ON result.job = job.id ' \
       'WHERE token.human = $1 ' \
       "AND #{name.nil? ? 'job.expired IS NULL' : 'job.name = $2'} " \
