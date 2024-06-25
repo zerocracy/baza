@@ -27,7 +27,7 @@ ruby '~>3.2'
 
 gem 'always', '0.0.4'
 gem 'aws-sdk-core', '3.198.0'
-gem 'aws-sdk-s3', '1.152.3'
+gem 'aws-sdk-s3', '1.153.0'
 gem 'backtrace', '0.4.0'
 gem 'concurrent-ruby', '1.3.3'
 gem 'factbase', '0.0.45'
