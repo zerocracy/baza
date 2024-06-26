@@ -23,6 +23,12 @@
 
 set -e
 
+if [ -e j ]; then
+  git pull --git-repo=j/.git
+else
+  git clone git@github.com:zerocracy/j.git
+fi
+
 cd $(dirname $0)
 bundle update
 # rake
