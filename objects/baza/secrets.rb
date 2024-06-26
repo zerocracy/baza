@@ -26,7 +26,7 @@
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class Baza::Locks
+class Baza::Secrets
   attr_reader :human
 
   def initialize(human)
@@ -39,30 +39,26 @@ class Baza::Locks
 
   def empty?
     pgsql.exec(
-      'SELECT id FROM lock WHERE human = $1',
+      'SELECT id FROM secret WHERE human = $1',
       [@human.id]
     ).empty?
   end
 
   def each(&block)
-    pgsql.exec('SELECT * FROM lock WHERE human = $1', [@human.id]).each(&block)
+    pgsql.exec('SELECT * FROM secret WHERE human = $1', [@human.id]).each(&block)
   end
 
-  def lock(name, owner)
+  def add(name, key, value)
     pgsql.exec(
-      [
-        'INSERT INTO lock (human, name, owner) ',
-        'VALUES ($1, $2, $3) ',
-        'ON CONFLICT (human, name, owner) DO UPDATE SET owner = lock.owner'
-      ],
-      [@human.id, name, owner]
+      'INSERT INTO secret (human, name, key, value) VALUES ($1, $2, $3, $4)',
+      [@human.id, name, key, value]
     )
   end
 
-  def unlock(name, owner)
+  def remove(name, key)
     pgsql.exec(
-      'DELETE FROM lock WHERE human = $1 AND owner = $3 AND name = $2',
-      [@human.id, name, owner]
+      'DELETE FROM secret WHERE human = $1 AND name = $2 AND key = $3',
+      [@human.id, name, key]
     )
   end
 end

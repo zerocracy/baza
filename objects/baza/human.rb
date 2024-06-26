@@ -56,6 +56,11 @@ class Baza::Human
     Baza::Locks.new(self)
   end
 
+  def secrets
+    require_relative 'secrets'
+    Baza::Secrets.new(self)
+  end
+
   def results
     require_relative 'results'
     Baza::Results.new(self)

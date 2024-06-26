@@ -22,47 +22,26 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# Locks of a human.
-# Author:: Yegor Bugayenko (yegor256@gmail.com)
-# Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
-# License:: MIT
-class Baza::Locks
-  attr_reader :human
+get '/secrets' do
+  assemble(
+    :secrets,
+    :default,
+    title: '/secrets',
+    secrets: the_human.secrets
+  )
+end
 
-  def initialize(human)
-    @human = human
-  end
+get(%r{/secrets/([a-z0-9]+)/([a-z_0-9]+)/remove}) do
+  n = params['captures'].first
+  key = params['captures'][1]
+  the_human.secrets.remove(n, key)
+  flash(iri.cut('/secrets'), "The secret '#{key}' just removed for '#{n}'")
+end
 
-  def pgsql
-    @human.pgsql
-  end
-
-  def empty?
-    pgsql.exec(
-      'SELECT id FROM lock WHERE human = $1',
-      [@human.id]
-    ).empty?
-  end
-
-  def each(&block)
-    pgsql.exec('SELECT * FROM lock WHERE human = $1', [@human.id]).each(&block)
-  end
-
-  def lock(name, owner)
-    pgsql.exec(
-      [
-        'INSERT INTO lock (human, name, owner) ',
-        'VALUES ($1, $2, $3) ',
-        'ON CONFLICT (human, name, owner) DO UPDATE SET owner = lock.owner'
-      ],
-      [@human.id, name, owner]
-    )
-  end
-
-  def unlock(name, owner)
-    pgsql.exec(
-      'DELETE FROM lock WHERE human = $1 AND owner = $3 AND name = $2',
-      [@human.id, name, owner]
-    )
-  end
+post('/secrets/add') do
+  n = params[:name]
+  key = params[:key]
+  value = params[:value]
+  the_human.secrets.add(n, key, value)
+  flash(iri.cut('/secrets'), "The secret '#{key}' just added for '#{n}'")
 end
