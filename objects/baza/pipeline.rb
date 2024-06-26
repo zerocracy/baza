@@ -25,6 +25,8 @@
 require 'always'
 require 'loog'
 require 'backtrace'
+require 'judges/options'
+require 'judges/commands/update'
 require_relative 'humans'
 require_relative 'urror'
 
@@ -35,7 +37,8 @@ require_relative 'urror'
 class Baza::Pipeline
   attr_reader :pgsql
 
-  def initialize(humans, fbs, loog)
+  def initialize(lib, humans, fbs, loog)
+    @lib = lib
     @humans = humans
     @fbs = fbs
     @loog = loog
@@ -56,7 +59,7 @@ class Baza::Pipeline
         @fbs.load(job.uri1, input)
         start = Time.now
         stdout = Loog::Buffer.new
-        code = run(input, stdout)
+        code = run(job, input, stdout)
         uuid = code.zero? ? @fbs.save(input) : nil
         job.finish!(uuid, stdout.to_s, code, ((Time.now - start) * 1000).to_i)
         @loog.info("Job ##{job.id} finished, exit=#{code}!")
@@ -85,8 +88,20 @@ class Baza::Pipeline
     @humans.job_by_id(rows[0]['id'].to_i)
   end
 
-  def run(input, buf)
-    buf.info("Did nothing with the Factbase (#{File.size(input)} bytes)")
+  def run(job, input, stdout)
+    Judges::Update.new(stdout).run(
+      {
+        'quiet' => true,
+        'summary' => true,
+        'max-cycles' => 2,
+        'log' => true,
+        'option' => job.secrets.map { |s| "#{s['key']}=#{s['value']}" }
+      },
+      [@lib, input]
+    )
     0
+  rescue StandardError => e
+    stdout.error(Backtrace.new(e))
+    1
   end
 end

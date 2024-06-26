@@ -29,6 +29,7 @@ require 'glogin'
 require 'glogin/codec'
 require 'haml'
 require 'iri'
+require 'fileutils'
 require 'loog'
 require 'json'
 require 'cgi'
@@ -118,13 +119,18 @@ configure do
   )
   set :zache, Zache.new
   set :humans, Baza::Humans.new(settings.pgsql)
-  set :pipeline, Baza::Pipeline.new(settings.humans, settings.fbs, settings.loog)
-  set :expiration_days, 14
+end
+
+configure do
+  lib = File.absolute_path(File.join(__dir__, 'j'))
+  FileUtils.mkdir_p(lib) if !File.exist?(lib) && ENV['RACK_ENV'] == 'test'
+  set :pipeline, Baza::Pipeline.new(lib, settings.humans, settings.fbs, settings.loog)
   settings.pipeline.start unless ENV['RACK_ENV'] == 'test'
 end
 
 configure do
   set :gc, Always.new(1)
+  set :expiration_days, 14
   settings.gc.start(30) do
     settings.humans.gc.ready_to_expire(settings.expiration_days) do |j|
       j.expire!(settings.fbs)

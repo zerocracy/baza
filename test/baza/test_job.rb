@@ -66,4 +66,15 @@ class Baza::JobTest < Minitest::Test
       job.expire!
     end
   end
+
+  def test_job_secrets
+    human = Baza::Humans.new(test_pgsql).ensure(test_name)
+    n = test_name
+    human.secrets.add(n, 'k', 'v')
+    human.secrets.add(test_name, 'k', 'v')
+    token = human.tokens.add(test_name)
+    job = token.start(n, test_name)
+    assert_equal(1, job.secrets.size)
+    assert_equal('k', job.secrets.first['key'])
+  end
 end

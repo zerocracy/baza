@@ -24,6 +24,7 @@
 
 require 'minitest/autorun'
 require 'loog'
+require 'factbase'
 require_relative '../test__helper'
 require_relative '../../objects/baza'
 require_relative '../../objects/baza/pipeline'
@@ -37,22 +38,24 @@ class Baza::PipelineTest < Minitest::Test
   def test_simple_processing
     humans = Baza::Humans.new(test_pgsql)
     fbs = Baza::Factbases.new('', '')
-    pipeline = Baza::Pipeline.new(humans, fbs, Loog::NULL)
-    pipeline.start(0.1)
-    human = humans.ensure(test_name)
-    token = human.tokens.add(test_name)
-    uuid = Tempfile.open do |f|
-      File.write(f, 'hello')
-      uuid = fbs.save(f.path)
+    Dir.mktmpdir do |lib|
+      pipeline = Baza::Pipeline.new(lib, humans, fbs, Loog::NULL)
+      pipeline.start(0.1)
+      human = humans.ensure(test_name)
+      token = human.tokens.add(test_name)
+      uuid = Tempfile.open do |f|
+        File.binwrite(f, Factbase.new.export)
+        uuid = fbs.save(f.path)
+      end
+      job = token.start(test_name, uuid)
+      assert(!human.jobs.get(job.id).finished?)
+      loop do
+        j = human.jobs.get(job.id)
+        next unless j.finished?
+        assert(!j.result.empty?)
+        break
+      end
+      pipeline.stop
     end
-    job = token.start(test_name, uuid)
-    assert(!human.jobs.get(job.id).finished?)
-    loop do
-      j = human.jobs.get(job.id)
-      next unless j.finished?
-      assert(!j.result.empty?)
-      break
-    end
-    pipeline.stop
   end
 end

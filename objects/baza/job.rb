@@ -88,6 +88,18 @@ class Baza::Job
     end
   end
 
+  def secrets
+    @jobs.pgsql.exec(
+      [
+        'SELECT secret.* FROM secret ',
+        'JOIN token ON secret.human = token.human ',
+        'JOIN job ON token.id = job.token ',
+        'WHERE secret.name = $1'
+      ],
+      [name]
+    ).each.to_a
+  end
+
   def created
     rows = @jobs.pgsql.exec('SELECT created FROM job WHERE id = $1', [@id])
     raise Baza::Urror, "There is no job ##{@id}" if rows.empty?
