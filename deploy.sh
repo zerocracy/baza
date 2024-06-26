@@ -24,7 +24,7 @@
 set -e
 
 if [ -e j ]; then
-  git --git-repo=j/.git pull
+  git --git-dir=j/.git pull
 else
   git clone git@github.com:zerocracy/j.git
 fi
