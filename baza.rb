@@ -123,7 +123,7 @@ end
 
 configure do
   lib = File.absolute_path(File.join(__dir__, 'j'))
-  FileUtils.mkdir_p(lib) if !File.exist?(lib) && ENV['RACK_ENV'] == 'test'
+  ['', 'lib', 'judges'].each { |d| FileUtils.mkdir_p(File.join(lib, d)) } if ENV['RACK_ENV'] == 'test'
   set :pipeline, Baza::Pipeline.new(lib, settings.humans, settings.fbs, settings.loog)
   settings.pipeline.start unless ENV['RACK_ENV'] == 'test'
 end

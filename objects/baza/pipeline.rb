@@ -37,8 +37,8 @@ require_relative 'urror'
 class Baza::Pipeline
   attr_reader :pgsql
 
-  def initialize(lib, humans, fbs, loog)
-    @lib = lib
+  def initialize(jdir, humans, fbs, loog)
+    @jdir = jdir
     @humans = humans
     @fbs = fbs
     @loog = loog
@@ -95,9 +95,10 @@ class Baza::Pipeline
         'summary' => true,
         'max-cycles' => 2,
         'log' => true,
-        'option' => job.secrets.map { |s| "#{s['key']}=#{s['value']}" }
+        'option' => job.secrets.map { |s| "#{s['key']}=#{s['value']}" },
+        'lib' => File.join(@jdir, 'lib')
       },
-      [@lib, input]
+      [File.join(@jdir, 'judges'), input]
     )
     0
   rescue StandardError => e
