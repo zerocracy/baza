@@ -54,11 +54,10 @@ class Baza::Pipeline
       Dir.mktmpdir do |dir|
         input = File.join(dir, 'input.fb')
         @fbs.load(job.uri1, input)
-        output = File.join(dir, 'output.fb')
         start = Time.now
         stdout = Loog::Buffer.new
-        code = run(input, output, stdout)
-        uuid = code.zero? ? @fbs.save(output) : nil
+        code = run(input, stdout)
+        uuid = code.zero? ? @fbs.save(input) : nil
         job.finish!(uuid, stdout.to_s, code, ((Time.now - start) * 1000).to_i)
         @loog.info("Job ##{job.id} finished, exit=#{code}!")
       end
@@ -86,9 +85,8 @@ class Baza::Pipeline
     @humans.job_by_id(rows[0]['id'].to_i)
   end
 
-  def run(input, output, buf)
-    FileUtils.cp(input, output)
-    buf.info("Simply copied input FB into output FB (#{File.size(input)} bytes)")
+  def run(input, buf)
+    buf.info("Did nothing with the Factbase (#{File.size(input)} bytes)")
     0
   end
 end
