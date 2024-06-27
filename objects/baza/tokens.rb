@@ -44,6 +44,7 @@ class Baza::Tokens
     raise 'Name is nil' if name.nil?
     raise Baza::Urror, 'Name is too long (>32)' if name.length > 32
     raise Baza::Urror, 'Name can\'t be empty' if name.empty?
+    raise Baza::Urror, 'The name is not valid' unless name.match?(/^[a-zA-Z0-9_]+$/)
     total = actives
     raise Baza::Urror, "Too many active tokens already (#{total})" if total >= 8
     raise Baza::Urror, 'Token with this name already exists' if exists?(name)
