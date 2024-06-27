@@ -23,16 +23,22 @@
 
 set -e
 
-if [ -e j ]; then
-  git --git-dir=j/.git pull
+if [ -e /code/z/j ]; then
+  git --git-dir=/code/z/j/.git pull
 else
-  git clone git@github.com:zerocracy/j.git
+  git clone git@github.com:zerocracy/j.git /code/z
 fi
+rm -rf j
+mkdir j
+cp -R /code/z/j/j.gemspec j
+cp -R /code/z/j/judges j
+cp -R /code/z/j/lib j
+sed -i -s 's|j/||g' .gitignore
+git add j
 
 cd $(dirname $0)
 bundle update
 # rake
-sed -i -s 's|Gemfile.lock||g' .gitignore
 cp /code/home/assets/zerocracy/baza.yml config.yml
 git add config.yml
 git add Gemfile.lock

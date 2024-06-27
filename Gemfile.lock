@@ -1,3 +1,16 @@
+PATH
+  remote: j
+  specs:
+    j (0.0.0)
+      faraday (~> 2.9)
+      faraday-http-cache (~> 2.5)
+      faraday-multipart (~> 1.0)
+      faraday-retry (~> 2.2)
+      fbe (~> 0.0)
+      loog (~> 0.2)
+      octokit (~> 9.1)
+      verbose (~> 0.0)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -390,11 +403,10 @@ DEPENDENCIES
   backtrace (= 0.4.0)
   concurrent-ruby (= 1.3.3)
   factbase (= 0.0.54)
-  fbe (~> 0.0)
   glogin (= 0.15.0)
   haml (= 6.3.0)
   iri (= 0.8.0)
-  judges (= 0.13.0)
+  j!
   loog (= 0.5.1)
   minitest (= 5.24.0)
   pgtk (= 0.9.3)
