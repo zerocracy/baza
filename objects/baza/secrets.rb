@@ -54,6 +54,7 @@ class Baza::Secrets
     raise Baza::Urror, 'The key cannot be empty' if key.empty?
     raise Baza::Urror, 'The key is not valid' unless key.match?(/^[a-zA-Z0-9_]+$/)
     raise Baza::Urror, 'The value cannot be empty' if value.empty?
+    raise Baza::Urror, 'The value is not ASCII' unless value.ascii_only?
     pgsql.exec(
       'INSERT INTO secret (human, name, key, value) VALUES ($1, $2, $3, $4)',
       [@human.id, name, key, value]
