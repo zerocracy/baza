@@ -47,7 +47,7 @@ class Baza::Jobs
   end
 
   def start(token, name, uri1)
-    raise Baza::Urror, 'The name is not valid' unless name.match?(/^[a-z0-9]+$/)
+    raise Baza::Urror, "The name '#{name}' is not valid" unless name.match?(/^[a-z0-9-]+$/)
     get(
       pgsql.exec(
         'INSERT INTO job (token, name, uri1) VALUES ($1, $2, $3) RETURNING id',
