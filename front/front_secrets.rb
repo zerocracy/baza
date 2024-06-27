@@ -31,7 +31,7 @@ get '/secrets' do
   )
 end
 
-get(%r{/secrets/([a-z0-9]+)/([a-z_0-9]+)/remove}) do
+get(%r{/secrets/([a-z0-9]+)/([a-z_A-Z0-9]+)/remove}) do
   n = params['captures'].first
   key = params['captures'][1]
   the_human.secrets.remove(n, key)
