@@ -77,4 +77,13 @@ class Baza::JobTest < Minitest::Test
     assert_equal(1, job.secrets.size)
     assert_equal('k', job.secrets.first['key'])
   end
+
+  def test_valve
+    human = Baza::Humans.new(test_pgsql).ensure(test_name)
+    token = human.tokens.add(test_name)
+    job = token.start(test_name, test_name)
+    b = test_name
+    job.valve.enter(b)
+    assert_raises { job.valve.enter(b) }
+  end
 end

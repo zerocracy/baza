@@ -1,0 +1,43 @@
+- if valves.empty?
+  %p
+    There are no valves yet.
+- else
+  %p
+    These are your valves:
+  %table
+    %colgroup
+      -# ID
+      %col{style: 'width: 3em;'}
+      -# Name
+      %col{style: 'width: 20em;'}
+      -# Badge
+      %col
+      -# Created
+      %col{style: 'width: 10em;'}
+      -# Commands
+      %col{style: 'width: 6em;'}
+    %thead
+      %tr
+        %th
+          ID
+        %th
+          Name
+        %th
+          Badge
+        %th
+          Created
+        %th
+    %tbody
+    - secrets.each do |s|
+      %tr
+        %td.ff
+          = "##{s['id']}"
+        %td.ff
+          = s['name']
+        %td.ff
+          = s['badge']
+        %td
+          != ago(Time.parse(s['created']))
+        %td
+          %a{href: iri.cut('/valves').append(s['name']).append(s['badge']).append('remove'), title: 'Remove this valve', onclick: "return confirm('Are you sure you want to remove this valve?')"}
+            🗑️

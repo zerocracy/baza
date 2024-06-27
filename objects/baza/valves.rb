@@ -22,73 +22,47 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require_relative 'urror'
-
-# Human being.
+# Valves of a human.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class Baza::Human
-  attr_reader :id, :humans
+class Baza::Valves
+  attr_reader :human
 
-  def initialize(humans, id)
-    @humans = humans
-    raise 'Human ID must be an integer' unless id.is_a?(Integer)
-    @id = id
+  def initialize(human)
+    @human = human
   end
 
   def pgsql
-    @humans.pgsql
+    @human.pgsql
   end
 
-  def tokens
-    require_relative 'tokens'
-    Baza::Tokens.new(self)
+  def empty?
+    pgsql.exec(
+      'SELECT id FROM valve WHERE human = $1',
+      [@human.id]
+    ).empty?
   end
 
-  def jobs
-    require_relative 'jobs'
-    Baza::Jobs.new(self)
+  def each(&block)
+    pgsql.exec('SELECT * FROM valve WHERE human = $1', [@human.id]).each(&block)
   end
 
-  def locks
-    require_relative 'locks'
-    Baza::Locks.new(self)
-  end
-
-  def secrets
-    require_relative 'secrets'
-    Baza::Secrets.new(self)
-  end
-
-  def valves
-    require_relative 'valves'
-    Baza::Valves.new(self)
-  end
-
-  def results
-    require_relative 'results'
-    Baza::Results.new(self)
-  end
-
-  def account
-    require_relative 'account'
-    Baza::Account.new(self)
-  end
-
-  def github
-    rows = @humans.pgsql.exec(
-      'SELECT github FROM human WHERE id = $1',
-      [@id]
+  def enter(name, badge)
+    raise Baza::Urror, 'The name cannot be empty' if name.empty?
+    raise Baza::Urror, 'The name is not valid' unless name.match?(/^[a-z0-9]+$/)
+    raise Baza::Urror, 'The badge cannot be empty' if badge.empty?
+    raise Baza::Urror, 'The badge is not valid' unless badge.match?(/^[a-zA-Z0-9_-]+$/)
+    pgsql.exec(
+      'INSERT INTO valve (human, name, badge) VALUES ($1, $2, $3)',
+      [@human.id, name, badge]
     )
-    raise Baza::Urror, "Human ##{@id} not found" if rows.empty?
-    rows[0]['github']
   end
 
-  # An admin.
-  module Admin
-    def admin?
-      github == 'yegor256' || ENV['RACK_ENV'] == 'test'
-    end
+  def remove(name, badge)
+    pgsql.exec(
+      'DELETE FROM valve WHERE human = $1 AND name = $2 AND badge = $3',
+      [@human.id, name, badge]
+    )
   end
 end

@@ -39,7 +39,8 @@ class Baza::PipelineTest < Minitest::Test
     humans = Baza::Humans.new(test_pgsql)
     fbs = Baza::Factbases.new('', '')
     Dir.mktmpdir do |lib|
-      %w[judges lib].each { |d| FileUtils.mkdir_p(File.join(lib, d)) }
+      %w[judges/foo lib].each { |d| FileUtils.mkdir_p(File.join(lib, d)) }
+      File.write(File.join(lib, 'judges/foo/foo.rb'), '$valve.enter("boom!")')
       pipeline = Baza::Pipeline.new(lib, humans, fbs, Loog::NULL)
       pipeline.start(0.1)
       human = humans.ensure(test_name)

@@ -88,6 +88,9 @@ class Baza::Pipeline
   end
 
   def run(job, input, stdout)
+    # rubocop:disable Style/GlobalVars
+    $valve = job.valve
+    # rubocop:enable Style/GlobalVars
     Judges::Update.new(stdout).run(
       {
         'quiet' => true,

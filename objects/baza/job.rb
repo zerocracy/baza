@@ -100,6 +100,10 @@ class Baza::Job
     ).each.to_a
   end
 
+  def valve
+    Valve.new(self)
+  end
+
   def created
     rows = @jobs.pgsql.exec('SELECT created FROM job WHERE id = $1', [@id])
     raise Baza::Urror, "There is no job ##{@id}" if rows.empty?
@@ -135,5 +139,16 @@ class Baza::Job
       id: @id,
       finished: finished?
     }
+  end
+
+  # A valve of a job.
+  class Valve
+    def initialize(job)
+      @job = job
+    end
+
+    def enter(badge)
+      @job.jobs.human.valves.enter(@job.name, badge)
+    end
   end
 end

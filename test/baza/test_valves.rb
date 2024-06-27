@@ -22,73 +22,26 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require_relative 'urror'
+require 'minitest/autorun'
+require_relative '../test__helper'
+require_relative '../../objects/baza'
+require_relative '../../objects/baza/humans'
 
-# Human being.
+# Test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class Baza::Human
-  attr_reader :id, :humans
-
-  def initialize(humans, id)
-    @humans = humans
-    raise 'Human ID must be an integer' unless id.is_a?(Integer)
-    @id = id
-  end
-
-  def pgsql
-    @humans.pgsql
-  end
-
-  def tokens
-    require_relative 'tokens'
-    Baza::Tokens.new(self)
-  end
-
-  def jobs
-    require_relative 'jobs'
-    Baza::Jobs.new(self)
-  end
-
-  def locks
-    require_relative 'locks'
-    Baza::Locks.new(self)
-  end
-
-  def secrets
-    require_relative 'secrets'
-    Baza::Secrets.new(self)
-  end
-
-  def valves
-    require_relative 'valves'
-    Baza::Valves.new(self)
-  end
-
-  def results
-    require_relative 'results'
-    Baza::Results.new(self)
-  end
-
-  def account
-    require_relative 'account'
-    Baza::Account.new(self)
-  end
-
-  def github
-    rows = @humans.pgsql.exec(
-      'SELECT github FROM human WHERE id = $1',
-      [@id]
-    )
-    raise Baza::Urror, "Human ##{@id} not found" if rows.empty?
-    rows[0]['github']
-  end
-
-  # An admin.
-  module Admin
-    def admin?
-      github == 'yegor256' || ENV['RACK_ENV'] == 'test'
-    end
+class Baza::ValveTest < Minitest::Test
+  def test_simple_scenario
+    human = Baza::Humans.new(test_pgsql).ensure(test_name)
+    valves = human.valves
+    n = test_name
+    b = test_name
+    valves.enter(n, b)
+    assert_equal(n, valves.each.to_a.first['name'])
+    assert_equal(b, valves.each.to_a.first['badge'])
+    assert_raises { valves.enter(n, b) }
+    valves.remove(n, b)
+    assert(valves.each.to_a.empty?)
   end
 end
