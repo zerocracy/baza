@@ -60,7 +60,7 @@ class Baza::Pipeline
         stdout = Loog::Buffer.new
         code = run(job, input, stdout)
         uuid = code.zero? ? @fbs.save(input) : nil
-        job.finish!(uuid, stdout.to_s, code, ((Time.now - start) * 1000).to_i)
+        job.finish!(uuid, escaped(job, stdout.to_s), code, ((Time.now - start) * 1000).to_i)
         @loog.info("Job ##{job.id} finished, exit=#{code}!")
       end
     end
@@ -104,5 +104,14 @@ class Baza::Pipeline
   rescue StandardError => e
     stdout.error(Backtrace.new(e))
     1
+  end
+
+  # Replace all secrets in the text with *****
+  def escaped(job, stdout)
+    e = stdout
+    job.secrets.each do |s|
+      e.gsub(s['value'], '********')
+    end
+    e
   end
 end

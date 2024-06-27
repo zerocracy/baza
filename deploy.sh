@@ -23,10 +23,9 @@
 
 set -e
 
-if [ -e /code/z/j ]; then
-  git --git-dir=/code/z/j/.git pull
-else
-  git clone git@github.com:zerocracy/j.git /code/z
+if [ ! -e /code/z/j ]; then
+  echo "You should git clone git@github.com:zerocracy/j.git to /code/z/j"
+  exit 1
 fi
 rm -rf j
 mkdir j
@@ -44,7 +43,7 @@ git add config.yml
 git add Gemfile.lock
 git add .gitignore
 git commit -m 'config.yml for heroku'
-trap 'git reset HEAD~1 && rm config.yml && git checkout -- .gitignore && git checkout -- Gemfile.lock' EXIT
+trap 'git reset HEAD~1 && rm -rf j && rm config.yml && git checkout -- .gitignore && git checkout -- Gemfile.lock' EXIT
 git push heroku master -f
 rm -f target/pgsql-config.yml
 bundle exec rake liquibase
