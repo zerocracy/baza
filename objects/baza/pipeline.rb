@@ -94,6 +94,7 @@ class Baza::Pipeline
         'summary' => true,
         'max-cycles' => 2,
         'log' => true,
+        'verbose' => true,
         'option' => job.secrets.map { |s| "#{s['key']}=#{s['value']}" },
         'lib' => File.join(@jdir, 'lib')
       },
