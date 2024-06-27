@@ -89,7 +89,7 @@
               👍🏻
             - else
               %span.darkred
-                = j.result.exit
+                = format('%03d', j.result.exit)
           %td.right.ff
             = msec(j.result.msec)
           - if j.expired?
