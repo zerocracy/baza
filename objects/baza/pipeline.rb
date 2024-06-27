@@ -25,7 +25,6 @@
 require 'always'
 require 'loog'
 require 'backtrace'
-require 'judges/options'
 require 'judges/commands/update'
 require_relative 'humans'
 require_relative 'urror'

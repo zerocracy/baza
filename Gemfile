@@ -35,6 +35,7 @@ gem 'glogin', '0.15.0'
 gem 'haml', '6.3.0'
 gem 'iri', '0.8.0'
 gem 'j', path: 'j' if File.exist?('j')
+gem 'judges', '0.13.0'
 gem 'loog', '0.5.1'
 gem 'minitest', '5.24.0', require: false
 gem 'pgtk', '0.9.3'
