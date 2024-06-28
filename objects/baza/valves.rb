@@ -86,12 +86,20 @@ class Baza::Valves
         raise "Time out while waiting for '#{badge}'" if Time.now - start > 60
       end
     end
-    r = yield
-    pgsql.exec(
-      'UPDATE valve SET result = $1 WHERE human = $2 AND name = $3 AND badge = $4',
-      [enc(r), @human.id, name, badge]
-    )
-    r
+    begin
+      r = yield
+      pgsql.exec(
+        'UPDATE valve SET result = $1 WHERE human = $2 AND name = $3 AND badge = $4',
+        [enc(r), @human.id, name, badge]
+      )
+      r
+    rescue StandardError => e
+      pgsql.exec(
+        'DELETE FROM valve WHERE human = $1 AND name = $2 AND badge = $3',
+        [@human.id, name, badge]
+      )
+      raise e
+    end
   end
 
   def remove(name, badge)

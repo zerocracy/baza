@@ -48,6 +48,15 @@ class Baza::ValveTest < Minitest::Test
     assert(valves.each.to_a.empty?)
   end
 
+  def test_with_exception
+    human = Baza::Humans.new(test_pgsql).ensure(test_name)
+    valves = human.valves
+    n = test_name
+    b = test_name
+    assert_raises { valves.enter(n, b) { raise 'intentional' } }
+    assert_equal(42, valves.enter(n, b) { 42 })
+  end
+
   def test_with_two_threads
     human = Baza::Humans.new(test_pgsql).ensure(test_name)
     valves = human.valves
