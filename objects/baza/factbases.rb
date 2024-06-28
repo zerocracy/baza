@@ -55,7 +55,7 @@ class Baza::Factbases
         aws.put_object(
           body: f,
           bucket: @bucket,
-          key: key
+          key:
         )
       end
       @loog.info("Saved to S3: #{key} (#{File.size(file)} bytes)")
@@ -77,7 +77,7 @@ class Baza::Factbases
       aws.get_object(
         response_target: file,
         bucket: @bucket,
-        key: key
+        key:
       )
       @loog.info("Loaded from S3: #{key} (#{File.size(file)} bytes)")
     end
@@ -93,7 +93,7 @@ class Baza::Factbases
       key = oname(uuid)
       aws.delete_object(
         bucket: @bucket,
-        key: key
+        key:
       )
       @loog.info("Deleted in S3: #{key}")
     end

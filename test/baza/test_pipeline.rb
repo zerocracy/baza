@@ -38,7 +38,7 @@ class Baza::PipelineTest < Minitest::Test
   def test_simple_processing
     loog = Loog::NULL
     humans = Baza::Humans.new(test_pgsql)
-    fbs = Baza::Factbases.new('', '', loog: loog)
+    fbs = Baza::Factbases.new('', '', loog:)
     Dir.mktmpdir do |lib|
       %w[judges/foo lib].each { |d| FileUtils.mkdir_p(File.join(lib, d)) }
       File.write(

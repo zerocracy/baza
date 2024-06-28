@@ -37,8 +37,8 @@ get '/sql' do
     :sql,
     :default,
     title: '/sql',
-    query: query,
-    result: result,
+    query:,
+    result:,
     lag: Time.now - start
   )
 end

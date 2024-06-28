@@ -44,8 +44,8 @@ class Baza::Secrets
     ).empty?
   end
 
-  def each(&block)
-    pgsql.exec('SELECT * FROM secret WHERE human = $1', [@human.id]).each(&block)
+  def each(&)
+    pgsql.exec('SELECT * FROM secret WHERE human = $1', [@human.id]).each(&)
   end
 
   def add(name, key, value)

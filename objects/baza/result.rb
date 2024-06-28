@@ -62,7 +62,7 @@ class Baza::Result
   def to_json(*_args)
     {
       id: @id,
-      stdout: stdout
+      stdout:
     }
   end
 end

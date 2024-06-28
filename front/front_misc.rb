@@ -64,7 +64,7 @@ def merged(hash)
 end
 
 def assemble(haml, layout, map)
-  haml(haml, layout: layout, locals: merged(map))
+  haml(haml, layout:, locals: merged(map))
 end
 
 def iri

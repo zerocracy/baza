@@ -87,9 +87,9 @@ class Baza::Token
   def to_json(*_args)
     {
       id: @id,
-      name: name,
-      text: text,
-      created: created,
+      name:,
+      text:,
+      created:,
       active: active?
     }
   end

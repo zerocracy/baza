@@ -44,8 +44,8 @@ class Baza::Locks
     ).empty?
   end
 
-  def each(&block)
-    pgsql.exec('SELECT * FROM lock WHERE human = $1', [@human.id]).each(&block)
+  def each(&)
+    pgsql.exec('SELECT * FROM lock WHERE human = $1', [@human.id]).each(&)
   end
 
   def lock(name, owner)
