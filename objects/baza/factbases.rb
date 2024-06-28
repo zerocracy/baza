@@ -48,6 +48,7 @@ class Baza::Factbases
     uuid = "#{Time.now.strftime('%Y-%m-%d')}-#{SecureRandom.uuid}"
     if @key.empty?
       File.binwrite(fake(uuid), File.binread(file))
+      @loog.debug("Fake saved #{file} (#{File.size(file)} bytes) into #{uuid}")
     else
       key = oname(uuid)
       File.open(file, 'rb') do |f|
@@ -70,6 +71,7 @@ class Baza::Factbases
     if @key.empty?
       FileUtils.mkdir_p(File.dirname(file))
       File.binwrite(file, File.binread(fake(uuid)))
+      @loog.debug("Fake loaded #{uuid} into #{file} (#{File.size(file)} bytes)")
     else
       key = oname(uuid)
       aws.get_object(

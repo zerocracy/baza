@@ -59,7 +59,7 @@ class Baza::Job
   end
 
   # Finish the job, create a RESULT for it and a RECEIPT.
-  # @param [String] uri2 The location of the factbase produced by the job (URI in AWS)
+  # @param [String] uri2 The location of the factbase produced by the job (URI in AWS), or NIL
   # @param [String] stdout The full log of the job (at the console)
   # @param [Integer] exit The exit code of the job (zero means success)
   # @param [Integer] msec The amount of milliseconds the job took

@@ -37,10 +37,18 @@ require_relative '../../objects/baza/factbases'
 class Baza::PipelineTest < Minitest::Test
   def test_simple_processing
     humans = Baza::Humans.new(test_pgsql)
-    fbs = Baza::Factbases.new('', '')
+    fbs = Baza::Factbases.new('', '', loog: Loog::NULL)
     Dir.mktmpdir do |lib|
       %w[judges/foo lib].each { |d| FileUtils.mkdir_p(File.join(lib, d)) }
-      File.write(File.join(lib, 'judges/foo/foo.rb'), '$valve.enter("boom!")')
+      File.write(
+        File.join(lib, 'judges/foo/foo.rb'),
+        '
+        if $fb.query("(exists foo)").each.to_a.empty?
+          $valve.enter("boom");
+          $fb.insert.foo = 42;
+        end
+        '
+      )
       pipeline = Baza::Pipeline.new(lib, humans, fbs, Loog::NULL)
       pipeline.start(0.1)
       human = humans.ensure(test_name)
@@ -58,6 +66,13 @@ class Baza::PipelineTest < Minitest::Test
         break
       end
       pipeline.stop
+      Tempfile.open do |f|
+        fbs.load(job.result.uri2, f.path)
+        fb = Factbase.new
+        fb.import(File.binread(f))
+        assert_equal(2, fb.query('(always)').each.to_a.size)
+        assert_equal(42, fb.query('(exists foo)').each.to_a.first.foo)
+      end
     end
   end
 end

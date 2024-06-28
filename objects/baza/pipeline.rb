@@ -24,6 +24,7 @@
 
 require 'always'
 require 'loog'
+require 'loog/tee'
 require 'backtrace'
 require 'judges/commands/update'
 require_relative 'humans'
@@ -58,7 +59,7 @@ class Baza::Pipeline
         @fbs.load(job.uri1, input)
         start = Time.now
         stdout = Loog::Buffer.new
-        code = run(job, input, stdout)
+        code = run(job, input, Loog::Tee.new(stdout, @loog))
         uuid = code.zero? ? @fbs.save(input) : nil
         job.finish!(uuid, escaped(job, stdout.to_s), code, ((Time.now - start) * 1000).to_i)
         @loog.info("Job ##{job.id} finished, exit=#{code}!")

@@ -52,7 +52,7 @@ class Baza::Valves
     raise Baza::Urror, 'The name cannot be empty' if name.empty?
     raise Baza::Urror, 'The name is not valid' unless name.match?(/^[a-z0-9]+$/)
     raise Baza::Urror, 'The badge cannot be empty' if badge.empty?
-    raise Baza::Urror, 'The badge is not valid' unless badge.match?(/^[a-zA-Z0-9_-]+$/)
+    raise Baza::Urror, "The badge '#{badge}' is not valid" unless badge.match?(/^[a-zA-Z0-9_-]+$/)
     pgsql.exec(
       'INSERT INTO valve (human, name, badge) VALUES ($1, $2, $3)',
       [@human.id, name, badge]
