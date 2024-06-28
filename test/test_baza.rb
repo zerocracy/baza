@@ -72,6 +72,9 @@ class Baza::AppTest < Minitest::Test
       '/dash',
       '/tokens',
       '/jobs',
+      '/locks',
+      '/secrets',
+      '/valves',
       '/account'
     ]
     login
