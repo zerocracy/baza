@@ -29,7 +29,9 @@ SOFTWARE.
         id SERIAL PRIMARY KEY,
         human INT NOT NULL REFERENCES human(id),
         name VARCHAR(32) NOT NULL,
-        badge VARCHAR(128) NOT NULL,
+        badge TEXT NOT NULL,
+        result TEXT,
+        owner INT NOT NULL,
         created TIMESTAMPTZ DEFAULT now() NOT NULL,
         UNIQUE(human, name, badge)
       );

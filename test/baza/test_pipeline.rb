@@ -36,20 +36,22 @@ require_relative '../../objects/baza/factbases'
 # License:: MIT
 class Baza::PipelineTest < Minitest::Test
   def test_simple_processing
+    loog = Loog::NULL
     humans = Baza::Humans.new(test_pgsql)
-    fbs = Baza::Factbases.new('', '', loog: Loog::NULL)
+    fbs = Baza::Factbases.new('', '', loog: loog)
     Dir.mktmpdir do |lib|
       %w[judges/foo lib].each { |d| FileUtils.mkdir_p(File.join(lib, d)) }
       File.write(
         File.join(lib, 'judges/foo/foo.rb'),
         '
         if $fb.query("(exists foo)").each.to_a.empty?
-          $valve.enter("boom");
-          $fb.insert.foo = 42;
+          $valve.enter("boom") do
+            $fb.insert.foo = 42
+          end
         end
         '
       )
-      pipeline = Baza::Pipeline.new(lib, humans, fbs, Loog::NULL)
+      pipeline = Baza::Pipeline.new(lib, humans, fbs, loog)
       pipeline.start(0.1)
       human = humans.ensure(test_name)
       token = human.tokens.add(test_name)

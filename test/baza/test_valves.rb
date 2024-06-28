@@ -37,11 +37,31 @@ class Baza::ValveTest < Minitest::Test
     valves = human.valves
     n = test_name
     b = test_name
-    valves.enter(n, b)
-    assert_equal(n, valves.each.to_a.first['name'])
-    assert_equal(b, valves.each.to_a.first['badge'])
-    assert_raises { valves.enter(n, b) }
+    x = valves.enter(n, b) { 42 }
+    assert_equal(42, x)
+    assert_equal(n, valves.each.to_a.first[:name])
+    assert_equal(b, valves.each.to_a.first[:badge])
+    assert_equal(42, valves.each.to_a.first[:result])
+    y = valves.enter(n, b) { 55 }
+    assert_equal(42, y)
     valves.remove(n, b)
     assert(valves.each.to_a.empty?)
+  end
+
+  def test_with_two_threads
+    human = Baza::Humans.new(test_pgsql).ensure(test_name)
+    valves = human.valves
+    n = test_name
+    b = test_name
+    entered = false
+    Thread.new do
+      valves.enter(n, b) do
+        entered = true
+        sleep 0.05
+        42
+      end
+    end
+    loop { break if entered }
+    assert_equal(42, valves.enter(n, b) { 55 })
   end
 end

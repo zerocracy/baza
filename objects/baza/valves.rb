@@ -22,6 +22,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+require 'base64'
+
 # Valves of a human.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
@@ -44,19 +46,50 @@ class Baza::Valves
     ).empty?
   end
 
-  def each(&block)
-    pgsql.exec('SELECT * FROM valve WHERE human = $1', [@human.id]).each(&block)
+  def each
+    return to_enum(__method__) unless block_given?
+    pgsql.exec('SELECT * FROM valve WHERE human = $1', [@human.id]).each do |row|
+      v = {
+        name: row['name'],
+        badge: row['badge'],
+        result: dec(row['result'])
+      }
+      yield v
+    end
   end
 
   def enter(name, badge)
+    raise 'A block is required by the enter()' unless block_given?
     raise Baza::Urror, 'The name cannot be empty' if name.empty?
     raise Baza::Urror, 'The name is not valid' unless name.match?(/^[a-z0-9]+$/)
     raise Baza::Urror, 'The badge cannot be empty' if badge.empty?
     raise Baza::Urror, "The badge '#{badge}' is not valid" unless badge.match?(/^[a-zA-Z0-9_-]+$/)
+    catch :stop do
+      loop do
+        catch :rollback do
+          pgsql.transaction do |t|
+            row = t.exec(
+              [
+                'INSERT INTO valve (human, name, badge, owner) ',
+                'VALUES ($1, $2, $3, 1) ',
+                'ON CONFLICT(human, name, badge) DO UPDATE SET owner = valve.owner + 1 ',
+                'RETURNING owner, result'
+              ],
+              [@human.id, name, badge]
+            )[0]
+            return dec(row['result']) unless row['result'].nil?
+            throw :rollback unless row['owner'] == '1'
+            throw :stop
+          end
+        end
+      end
+    end
+    r = yield
     pgsql.exec(
-      'INSERT INTO valve (human, name, badge) VALUES ($1, $2, $3)',
-      [@human.id, name, badge]
+      'UPDATE valve SET result = $1 WHERE human = $2 AND name = $3 AND badge = $4',
+      [enc(r), @human.id, name, badge]
     )
+    r
   end
 
   def remove(name, badge)
@@ -64,5 +97,17 @@ class Baza::Valves
       'DELETE FROM valve WHERE human = $1 AND name = $2 AND badge = $3',
       [@human.id, name, badge]
     )
+  end
+
+  private
+
+  def enc(obj)
+    Base64.encode64(Marshal.dump(obj))
+  end
+
+  def dec(base64)
+    # rubocop:disable Security/MarshalLoad
+    Marshal.load(Base64.decode64(base64))
+    # rubocop:enable Security/MarshalLoad
   end
 end
