@@ -64,6 +64,7 @@ class Baza::Valves
     raise Baza::Urror, 'The name is not valid' unless name.match?(/^[a-z0-9]+$/)
     raise Baza::Urror, 'The badge cannot be empty' if badge.empty?
     raise Baza::Urror, "The badge '#{badge}' is not valid" unless badge.match?(/^[a-zA-Z0-9_-]+$/)
+    start = Time.now
     catch :stop do
       loop do
         catch :rollback do
@@ -82,6 +83,7 @@ class Baza::Valves
             throw :stop
           end
         end
+        raise "Time out while waiting for '#{badge}'" if Time.now - start > 60
       end
     end
     r = yield
