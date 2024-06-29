@@ -51,7 +51,7 @@ post '/push' do
       File.delete(tfile[:tempfile])
     end
     fid = settings.fbs.save(f.path)
-    job = token.start(name, fid)
+    job = token.start(name, fid, File.size(f.path))
     settings.loog.info("New push arrived via HTTP POST, job ID is ##{job.id}")
     flash(iri.cut('/jobs'), "New job ##{job.id} started")
   end
@@ -68,7 +68,7 @@ put(%r{/push/([a-z0-9-]+)}) do
     request.body.rewind
     File.binwrite(f, request.body.read)
     fid = settings.fbs.save(f.path)
-    job = token.start(name, fid)
+    job = token.start(name, fid, File.size(f.path))
     settings.loog.info("New push arrived via HTTP PUT, job ID is #{job.id}")
     job.id.to_s
   end

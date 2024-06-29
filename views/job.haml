@@ -42,8 +42,8 @@
     %p
       Input:
       %br
-      %a{href: iri.cut('/inspect').append("#{job.id}.fb")}
-        download
+      %a{href: iri.cut('/inspect').append("#{job.id}.fb")}= 'download'
+      != "(#{bytes(job.size)})"
 
   - if job.finished?
     - r = job.result
@@ -64,8 +64,8 @@
       %p
         Output:
         %br
-        %a{href: iri.cut('/pull').append("#{job.id}.fb")}
-          download
+        %a{href: iri.cut('/pull').append("#{job.id}.fb")}= 'download'
+        != "(#{bytes(r.size)})"
 
 - if job.finished?
   %p

@@ -61,7 +61,13 @@ class Baza::Pipeline
         stdout = Loog::Buffer.new
         code = run(job, input, Loog::Tee.new(stdout, @loog))
         uuid = code.zero? ? @fbs.save(input) : nil
-        job.finish!(uuid, escaped(job, stdout.to_s), code, ((Time.now - start) * 1000).to_i)
+        job.finish!(
+          uuid,
+          escaped(job, stdout.to_s),
+          code,
+          ((Time.now - start) * 1000).to_i,
+          code.zero? ? File.size(input) : nil
+        )
         @loog.info("Job ##{job.id} finished, exit=#{code}!")
       end
     end

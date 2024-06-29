@@ -21,6 +21,8 @@
       %col{style: 'width: 4em;'}
       -# In
       %col{style: 'width: 4em;'}
+      -# In-Size
+      %col{style: 'width: 3em;'}
       -# Name
       %col{style: 'width: 20em;'}
       -# Lock
@@ -37,11 +39,14 @@
       %col{style: 'width: 3em;'}
       -# Out
       %col{style: 'width: 3em;'}
+      -# Out-Size
+      %col{style: 'width: 3em;'}
     %thead
       %tr
         %th.right
         %th.center
           In
+        %th
         %th
           Name
         %th
@@ -58,6 +63,7 @@
           Log
         %th.center
           Out
+        %th
     %tbody
     - total = 0
     - max = 10
@@ -72,6 +78,8 @@
           - unless j.expired?
             %a{href: iri.cut('/inspect').append("#{j.id}.fb")}
               📦
+        %td.right
+          != bytes(j.size)
         %td.ff
           %a{href: iri.over(name: j.name)}
             = j.name
@@ -102,11 +110,13 @@
               - if j.result.exit.zero?
                 %a{href: iri.cut('/pull').append("#{j.id}.fb")}
                   📦
+            %td.right
+              != bytes(j.result.size)
         - elsif j.expired?
-          %td.center.orange{colspan: 4}
+          %td.center.orange{colspan: 5}
             Never finished
         - else
-          %td.center.orange{colspan: 4}
+          %td.center.orange{colspan: 5}
             In progress...
   %p
     - unless offset.zero?

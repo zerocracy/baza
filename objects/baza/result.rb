@@ -47,6 +47,10 @@ class Baza::Result
     @results.pgsql.exec('SELECT uri2 FROM result WHERE id = $1', [@id])[0]['uri2']
   end
 
+  def size
+    @results.pgsql.exec('SELECT size FROM result WHERE id = $1', [@id])[0]['size'].to_i
+  end
+
   def stdout
     @results.pgsql.exec('SELECT stdout FROM result WHERE id = $1', [@id])[0]['stdout']
   end

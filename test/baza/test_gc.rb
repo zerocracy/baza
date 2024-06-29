@@ -43,7 +43,7 @@ class Baza::GcTest < Minitest::Test
     token = human.tokens.add(test_name)
     name = test_name
     (0..4).each do |i|
-      token.start(name, test_name).finish!(test_name, 'stdout', i, i)
+      token.start(name, test_name, 1).finish!(test_name, 'stdout', i, i)
     end
     assert_equal(0, humans.gc.ready_to_expire(1).to_a.size)
     assert_equal(4, humans.gc.ready_to_expire(0).to_a.size)
@@ -56,7 +56,7 @@ class Baza::GcTest < Minitest::Test
     end
     human = humans.ensure(test_name)
     token = human.tokens.add(test_name)
-    job = token.start(test_name, test_name)
+    job = token.start(test_name, test_name, 1)
     humans.pgsql.exec("UPDATE job SET taken = 'yes' WHERE id = $1", [job.id])
     assert_equal(1, humans.gc.stuck(0).to_a.size)
   end

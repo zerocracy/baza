@@ -46,22 +46,23 @@ class Baza::Jobs
     ).empty?
   end
 
-  def start(token, name, uri1)
+  def start(token, name, uri1, size)
     raise Baza::Urror, "The name '#{name}' is not valid" unless name.match?(/^[a-z0-9-]+$/)
+    raise Baza::Urror, "The size '#{size}' is not positive" unless size.positive?
     get(
       pgsql.exec(
-        'INSERT INTO job (token, name, uri1) VALUES ($1, $2, $3) RETURNING id',
-        [token, name, uri1]
+        'INSERT INTO job (token, name, uri1, size) VALUES ($1, $2, $3, $4) RETURNING id',
+        [token, name, uri1, size]
       )[0]['id'].to_i
     )
   end
 
   def each(name: nil, offset: 0)
     sql =
-      'SELECT job.id, job.created, job.name, job.uri1, job.expired, ' \
+      'SELECT job.id, job.created, job.name, job.uri1, job.expired, job.size, ' \
       'token.id AS tid, token.name AS token_name, ' \
       'lock.id AS lid, ' \
-      'result.id AS rid, result.uri2, result.stdout, result.exit, result.msec, ' \
+      'result.id AS rid, result.uri2, result.stdout, result.exit, result.msec, result.size AS rsize, ' \
       'ROW_NUMBER() OVER (PARTITION BY job.name ORDER BY job.created DESC) AS row ' \
       'FROM job ' \
       'JOIN token ON token.id = job.token ' \
@@ -81,6 +82,7 @@ class Baza::Jobs
         created: Time.parse(row['created']),
         name: row['name'],
         uri1: row['uri1'],
+        size: row['size'].to_i,
         locked?: !row['lid'].nil?,
         finished?: !row['rid'].nil?,
         expired?: !row['expired'].nil?,
@@ -92,6 +94,7 @@ class Baza::Jobs
           @human.results.get(row['rid'].to_i),
           id: row['rid'].to_i,
           uri2: row['uri2'],
+          size: row['rsize'].to_i,
           msec: row['msec'].to_i,
           exit: row['exit'].to_i,
           empty?: row['uri2'].nil?,

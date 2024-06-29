@@ -44,6 +44,16 @@ helpers do
     end
   end
 
+  def bytes(bytes)
+    if bytes < 1000
+      "#{bytes}b"
+    elsif bytes < 100 * 1000
+      "#{bytes / 1000}㎅"
+    else
+      "#{bytes / (1000 * 1000)}㎆"
+    end
+  end
+
   def href(link, text, dot: false)
     " <a href='#{link}'>#{text}</a>#{dot ? '.' : ''} "
   end

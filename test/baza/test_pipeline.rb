@@ -59,7 +59,7 @@ class Baza::PipelineTest < Minitest::Test
         File.binwrite(f, Factbase.new.export)
         uuid = fbs.save(f.path)
       end
-      job = token.start(test_name, uuid)
+      job = token.start(test_name, uuid, 1)
       assert(!human.jobs.get(job.id).finished?)
       loop do
         j = human.jobs.get(job.id)

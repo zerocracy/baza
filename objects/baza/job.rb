@@ -63,14 +63,16 @@ class Baza::Job
   # @param [String] stdout The full log of the job (at the console)
   # @param [Integer] exit The exit code of the job (zero means success)
   # @param [Integer] msec The amount of milliseconds the job took
+  # @param [Integer] size The size of the output factbase file
   # @return [Baza::Result] The result just created
-  def finish!(uri2, stdout, exit, msec)
+  def finish!(uri2, stdout, exit, msec, size = nil)
     raise Baza::Urror, 'Exit code is nil' if exit.nil?
     raise Baza::Urror, 'Exit code must be a Number' unless exit.is_a?(Integer)
     raise Baza::Urror, 'Milliseconds is nil' if msec.nil?
     raise Baza::Urror, 'Milliseconds must be a Number' unless msec.is_a?(Integer)
     raise Baza::Urror, 'STDOUT is nil' if stdout.nil?
     raise Baza::Urror, 'STDOUT must be a String' unless stdout.is_a?(String)
+    raise Baza::Urror, 'Size must be positive' unless size.nil? || size.positive?
     summary =
       "Job ##{id} #{exit.zero? ? 'completed' : "failed (#{exit})"} " \
       "in #{msec}ms, #{stdout.split("\n").size} lines in stdout"
@@ -81,8 +83,8 @@ class Baza::Job
       )[0]['id'].to_i
       @jobs.human.results.get(
         t.exec(
-          'INSERT INTO result (job, uri2, stdout, exit, msec) VALUES ($1, $2, $3, $4, $5) RETURNING id',
-          [id, uri2, stdout, exit, msec]
+          'INSERT INTO result (job, uri2, stdout, exit, msec, size) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
+          [id, uri2, stdout, exit, msec, size]
         )[0]['id'].to_i
       )
     end
@@ -126,6 +128,10 @@ class Baza::Job
 
   def uri1
     @jobs.pgsql.exec('SELECT uri1 FROM job WHERE id = $1', [@id])[0]['uri1']
+  end
+
+  def size
+    @jobs.pgsql.exec('SELECT size FROM job WHERE id = $1', [@id])[0]['size'].to_i
   end
 
   def result
