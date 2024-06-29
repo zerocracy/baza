@@ -48,9 +48,9 @@ helpers do
     if bytes < 1000
       "#{bytes}b"
     elsif bytes < 1000 * 1000
-      "#{format('%0.02f', bytes / 1000)}㎅"
+      "#{format('%d', bytes / 1000)}㎅"
     else
-      "#{format('%0.02f', bytes / (1000 * 1000))}㎆"
+      "#{format('%d', bytes / (1000 * 1000))}㎆"
     end
   end
 
