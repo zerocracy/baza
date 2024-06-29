@@ -46,11 +46,11 @@ helpers do
 
   def bytes(bytes)
     if bytes < 1000
-      "#{bytes}b"
+      "#{bytes}B"
     elsif bytes < 1000 * 1000
-      "#{format('%d', bytes / 1000)}㎅"
+      "#{format('%d', bytes / 1000)}kB"
     else
-      "#{format('%d', bytes / (1000 * 1000))}㎆"
+      "#{format('%d', bytes / (1000 * 1000))}MB"
     end
   end
 
