@@ -94,7 +94,7 @@ class Baza::Jobs
           @human.results.get(row['rid'].to_i),
           id: row['rid'].to_i,
           uri2: row['uri2'],
-          size: row['rsize'].to_i,
+          size: row['rsize'].nil? ? nil : row['rsize'].to_i,
           msec: row['msec'].to_i,
           exit: row['exit'].to_i,
           empty?: row['uri2'].nil?,
