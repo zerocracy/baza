@@ -49,7 +49,7 @@
           = t.jobs_count
         %td
           - if t.active?
-            %a{href: iri.cut('/tokens').append(t.id).append('deactivate'), onclick: "return confirm('Once you deactive this token, it will be impossible to activate it back. Are you sure you want to deactivate it?')"}
+            %a.ico{href: iri.cut('/tokens').append(t.id).append('deactivate'), onclick: "return confirm('Once you deactive this token, it will be impossible to activate it back. Are you sure you want to deactivate it?')"}
               ❌
           - else
             Inactive

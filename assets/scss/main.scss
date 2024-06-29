@@ -60,3 +60,9 @@ footer {
 .ff {
   font-family: monospace;
 }
+
+.ico {
+  &:hover {
+    text-decoration: none;
+  }
+}

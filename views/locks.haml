@@ -33,7 +33,7 @@
         %td.ff
           = "##{lk['id']}"
         %td
-          %a{href: iri.cut('/unlock').append(lk['name']).add(owner: lk['owner']), title: 'Unlock (remove this lock)', onclick: "return confirm('Are you sure you want to remove this lock?')"}
+          %a.ico{href: iri.cut('/unlock').append(lk['name']).add(owner: lk['owner']), title: 'Unlock (remove this lock)', onclick: "return confirm('Are you sure you want to remove this lock?')"}
             🔓
         %td.ff
           %a{href: iri.cut('/jobs').over(name: lk['name'])}
