@@ -64,8 +64,9 @@ class Baza::Job
   # @param [Integer] exit The exit code of the job (zero means success)
   # @param [Integer] msec The amount of milliseconds the job took
   # @param [Integer] size The size of the output factbase file
+  # @param [Integer] errors How many errors found in the summary?
   # @return [Baza::Result] The result just created
-  def finish!(uri2, stdout, exit, msec, size = nil)
+  def finish!(uri2, stdout, exit, msec, size = nil, errors = nil)
     raise Baza::Urror, 'Exit code is nil' if exit.nil?
     raise Baza::Urror, 'Exit code must be a Number' unless exit.is_a?(Integer)
     raise Baza::Urror, 'Milliseconds is nil' if msec.nil?
@@ -73,6 +74,9 @@ class Baza::Job
     raise Baza::Urror, 'STDOUT is nil' if stdout.nil?
     raise Baza::Urror, 'STDOUT must be a String' unless stdout.is_a?(String)
     raise Baza::Urror, 'Size must be positive' unless size.nil? || size.positive?
+    raise Baza::Urror, 'Number of errors cannot be negative' unless errors.nil? || !errors.negative?
+    raise Baza::Urror, 'When exit code is zero, size is mandatory' if exit.zero? && size.nil?
+    raise Baza::Urror, 'When exit code is zero, errors count is mandatory' if exit.zero? && errors.nil?
     summary =
       "Job ##{id} #{exit.zero? ? 'completed' : "failed (#{exit})"} " \
       "in #{msec}ms, #{stdout.split("\n").size} lines in stdout"
@@ -83,8 +87,11 @@ class Baza::Job
       )[0]['id'].to_i
       @jobs.human.results.get(
         t.exec(
-          'INSERT INTO result (job, uri2, stdout, exit, msec, size) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
-          [id, uri2, stdout, exit, msec, size]
+          [
+            'INSERT INTO result (job, uri2, stdout, exit, msec, size, errors) ',
+            'VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id'
+          ],
+          [id, uri2, stdout, exit, msec, size, errors]
         )[0]['id'].to_i
       )
     end
@@ -132,6 +139,10 @@ class Baza::Job
 
   def size
     @jobs.pgsql.exec('SELECT size FROM job WHERE id = $1', [@id])[0]['size'].to_i
+  end
+
+  def errors
+    @jobs.pgsql.exec('SELECT errors FROM job WHERE id = $1', [@id])[0]['errors'].to_i
   end
 
   def result

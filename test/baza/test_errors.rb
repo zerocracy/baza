@@ -23,41 +23,43 @@
 # SOFTWARE.
 
 require 'minitest/autorun'
+require 'factbase'
 require_relative '../test__helper'
 require_relative '../../objects/baza'
-require_relative '../../objects/baza/humans'
-require_relative '../../objects/baza/factbases'
+require_relative '../../objects/baza/errors'
 
 # Test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class Baza::GcTest < Minitest::Test
-  def test_finds_too_old
-    humans = Baza::Humans.new(test_pgsql)
-    humans.gc.ready_to_expire(0) do |j|
-      j.expire!(Baza::Factbases.new('', ''))
+class Baza::ErrorsTest < Minitest::Test
+  def test_counting
+    Tempfile.open do |f|
+      fb = Factbase.new
+      s = fb.insert
+      s.what = 'judges-summary'
+      s.error = 'oops, failed'
+      s.error = 'second failure'
+      File.binwrite(f, fb.export)
+      assert_equal(2, Baza::Errors.new(f).count)
     end
-    assert_equal(0, humans.gc.ready_to_expire(0).to_a.size)
-    human = humans.ensure(test_name)
-    token = human.tokens.add(test_name)
-    name = test_name
-    (0..4).each do |i|
-      token.start(name, test_name, 1, 0).finish!(test_name, 'stdout', i, i, 433, 0)
-    end
-    assert_equal(0, humans.gc.ready_to_expire(1).to_a.size)
-    assert_equal(4, humans.gc.ready_to_expire(0).to_a.size)
   end
 
-  def test_finds_stuck
-    humans = Baza::Humans.new(test_pgsql)
-    humans.gc.stuck(0) do |j|
-      j.expire!(Baza::Factbases.new('', ''))
+  def test_counting_no_summary
+    Tempfile.open do |f|
+      fb = Factbase.new
+      File.binwrite(f, fb.export)
+      assert_equal(0, Baza::Errors.new(f).count)
     end
-    human = humans.ensure(test_name)
-    token = human.tokens.add(test_name)
-    job = token.start(test_name, test_name, 1, 0)
-    humans.pgsql.exec("UPDATE job SET taken = 'yes' WHERE id = $1", [job.id])
-    assert_equal(1, humans.gc.stuck(0).to_a.size)
+  end
+
+  def test_counting_no_errors
+    Tempfile.open do |f|
+      fb = Factbase.new
+      s = fb.insert
+      s.what = 'judges-summary'
+      File.binwrite(f, fb.export)
+      assert_equal(0, Baza::Errors.new(f).count)
+    end
   end
 end

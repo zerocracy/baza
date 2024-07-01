@@ -36,7 +36,7 @@
       -# Log
       %col{style: 'width: 3em;'}
       -# Out
-      %col{style: 'width: 3em;'}
+      %col{style: 'width: 4em;'}
     %thead
       %tr
         %th.right
@@ -72,6 +72,9 @@
           - unless j.expired?
             %a.ico{href: iri.cut('/inspect').append("#{j.id}.fb"), title: "Click here to download the binary Factbase file (#{bytes(j.size)})"}
               📦
+          - if j.errors.positive?
+            %span{title: "#{j.errors} error(s) in the 'judges-summary' fact"}
+              ⚠️
         %td.ff
           %a{href: iri.over(name: j.name)}
             = j.name
@@ -102,6 +105,9 @@
               - if j.result.exit.zero?
                 %a.ico{href: iri.cut('/pull').append("#{j.id}.fb"), title: "Click here to download the binary Factbase file (#{bytes(j.result.size)})"}
                   📦
+              - if j.result.errors.positive?
+                %span{title: "#{j.errors} error(s) in the 'judges-summary' fact"}
+                  ⚠️
         - elsif j.expired?
           %td.center.orange{colspan: 5}
             Never finished

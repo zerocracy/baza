@@ -36,7 +36,7 @@ class Baza::JobTest < Minitest::Test
   def test_starts
     human = Baza::Humans.new(test_pgsql).ensure(test_name)
     token = human.tokens.add(test_name)
-    id = token.start(test_name, test_name, 1).id
+    id = token.start(test_name, test_name, 1, 0).id
     job = human.jobs.get(id)
     assert(job.id.positive?)
     assert_equal(id, job.id)
@@ -47,9 +47,9 @@ class Baza::JobTest < Minitest::Test
   def test_cant_finish_twice
     human = Baza::Humans.new(test_pgsql).ensure(test_name)
     token = human.tokens.add(test_name)
-    job = token.start(test_name, test_name, 1)
+    job = token.start(test_name, test_name, 1, 0)
     assert(!job.finished?)
-    job.finish!(test_name, 'stdout', 0, 544)
+    job.finish!(test_name, 'stdout', 0, 544, 111, 0)
     assert_raises do
       job.finish!(test_name, 'another stdout', 0, 11)
     end
@@ -58,7 +58,7 @@ class Baza::JobTest < Minitest::Test
   def test_expires_once
     human = Baza::Humans.new(test_pgsql).ensure(test_name)
     token = human.tokens.add(test_name)
-    job = token.start(test_name, test_name, 1)
+    job = token.start(test_name, test_name, 1, 0)
     assert(!job.expired?)
     job.expire!(Baza::Factbases.new('', ''))
     assert(job.expired?)
@@ -73,7 +73,7 @@ class Baza::JobTest < Minitest::Test
     human.secrets.add(n, 'k', 'v')
     human.secrets.add(test_name, 'k', 'v')
     token = human.tokens.add(test_name)
-    job = token.start(n, test_name, 1)
+    job = token.start(n, test_name, 1, 0)
     assert_equal(1, job.secrets.size)
     assert_equal('k', job.secrets.first['key'])
   end
@@ -81,7 +81,7 @@ class Baza::JobTest < Minitest::Test
   def test_valve
     human = Baza::Humans.new(test_pgsql).ensure(test_name)
     token = human.tokens.add(test_name)
-    job = token.start(test_name, test_name, 1)
+    job = token.start(test_name, test_name, 1, 0)
     b = test_name
     x = job.valve.enter(b) { 42 }
     assert_equal(42, x)

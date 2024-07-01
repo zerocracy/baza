@@ -52,6 +52,11 @@ class Baza::Result
     s.nil? ? s : s.to_i
   end
 
+  def errors
+    @results.pgsql.exec('SELECT errors FROM result WHERE id = $1', [@id])[0]['errors']
+    s.nil? ? s : s.to_i
+  end
+
   def stdout
     @results.pgsql.exec('SELECT stdout FROM result WHERE id = $1', [@id])[0]['stdout']
   end

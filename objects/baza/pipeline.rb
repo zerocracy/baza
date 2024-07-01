@@ -29,6 +29,7 @@ require 'backtrace'
 require 'judges/commands/update'
 require_relative 'humans'
 require_relative 'urror'
+require_relative 'errors'
 
 # Pipeline of jobs.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -66,7 +67,8 @@ class Baza::Pipeline
           escaped(job, stdout.to_s),
           code,
           ((Time.now - start) * 1000).to_i,
-          code.zero? ? File.size(input) : nil
+          code.zero? ? File.size(input) : nil,
+          code.zero? ? Baza::Errors.new(input).count : nil
         )
         @loog.info("Job ##{job.id} finished, exit=#{code}!")
       end
