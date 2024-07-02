@@ -61,7 +61,7 @@ def render_html(uri, name)
       {
         'format' => 'html',
         'columns' => 'what,when,who,repository,issue,details',
-        'hide' => '_id,_time,_version'
+        'hide' => '_id,_time,_version,where'
       },
       [fb, html]
     )
