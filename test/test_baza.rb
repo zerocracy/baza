@@ -194,6 +194,8 @@ class Baza::AppTest < Minitest::Test
     assert(id.positive?)
     get("/jobs/#{id}")
     assert_status(200)
+    get("/jobs/#{id}/input.html")
+    assert_status(200)
     get("/recent/#{name}.txt")
     assert_status(200)
     rid = last_response.body.to_i
@@ -214,6 +216,8 @@ class Baza::AppTest < Minitest::Test
     fb.import(last_response.body)
     assert(fb.query('(exists foo)').each.to_a[0].foo.start_with?('booom'))
     get("/stdout/#{rid}.txt")
+    assert_status(200)
+    get("/jobs/#{id}/output.html")
     assert_status(200)
     get("/jobs/#{rid}/expire")
     assert_status(302)

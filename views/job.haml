@@ -42,8 +42,10 @@
     %p
       Input:
       %br
-      %a{href: iri.cut('/inspect').append("#{job.id}.fb")}= 'download'
+      %a{href: iri.cut('/inspect').append("#{job.id}.fb")}= 'Download'
       != "(#{bytes(job.size)})"
+      = '|'
+      %a{href: iri.cut('/jobs').append(job.id).append('input.html')}= 'HTML'
 
   - if job.finished?
     - r = job.result
@@ -64,8 +66,10 @@
       %p
         Output:
         %br
-        %a{href: iri.cut('/pull').append("#{job.id}.fb")}= 'download'
+        %a{href: iri.cut('/pull').append("#{job.id}.fb")}= 'Download'
         != "(#{bytes(r.size)})"
+        = '|'
+        %a{href: iri.cut('/jobs').append(job.id).append('output.html')}= 'HTML'
 
 - if job.finished?
   %p

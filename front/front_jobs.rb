@@ -22,6 +22,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+require 'judges/commands/print'
+
 get '/jobs' do
   assemble(
     :jobs,
@@ -48,4 +50,36 @@ get(%r{/jobs/([0-9]+)/expire}) do
   job = the_human.jobs.get(id)
   job.expire!(settings.fbs)
   flash(iri.cut('/jobs').append(id), "The job ##{job.id} expired, all data removed")
+end
+
+get(%r{/jobs/([0-9]+)/input.html}) do
+  id = params['captures'].first.to_i
+  job = the_human.jobs.get(id)
+  Dir.mktmpdir do |d|
+    fb = File.join(d, "#{job.id}.fb")
+    html = File.join(d, "#{job.id}.html")
+    settings.fbs.load(job.uri1, fb)
+    Judges::Print.new(settings.loog).run(
+      { 'format' => 'html', 'columns' => 'what,when' },
+      [fb, html]
+    )
+    File.binread(html)
+    content_type('text/html')
+  end
+end
+
+get(%r{/jobs/([0-9]+)/output.html}) do
+  id = params['captures'].first.to_i
+  job = the_human.jobs.get(id)
+  Dir.mktmpdir do |d|
+    fb = File.join(d, "#{job.result.id}.fb")
+    html = File.join(d, "#{job.result.id}.html")
+    settings.fbs.load(job.result.uri2, fb)
+    Judges::Print.new(settings.loog).run(
+      { 'format' => 'html', 'columns' => 'what,when' },
+      [fb, html]
+    )
+    File.binread(html)
+    content_type('text/html')
+  end
 end
