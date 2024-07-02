@@ -151,6 +151,19 @@ class Baza::AppTest < Minitest::Test
     assert_status(302)
   end
 
+  def test_valves
+    uname = 'tester'
+    login(uname)
+    get('/valves')
+    assert_status(200)
+    human = app.humans.ensure(uname)
+    human.valves.enter('foo', 'boom') do
+      # nothing
+    end
+    get('/valves')
+    assert_status(200)
+  end
+
   def test_starts_job_via_post
     uname = test_name
     login('yegor256')
