@@ -51,11 +51,12 @@ class Baza::Job
     end
     fbs.delete(uri1)
     fbs.delete(result.uri2) if finished?
+    @to_json = nil
   end
 
   # Is it expired and doesn't have any data anymore?
   def expired?
-    !@jobs.pgsql.exec('SELECT expired FROM job WHERE id = $1 AND expired IS NOT NULL', [@id]).empty?
+    to_json[:expired]
   end
 
   # Finish the job, create a RESULT for it and a RECEIPT.
@@ -95,6 +96,7 @@ class Baza::Job
         )[0]['id'].to_i
       )
     end
+    @to_json = nil
   end
 
   def secrets
@@ -114,35 +116,31 @@ class Baza::Job
   end
 
   def created
-    rows = @jobs.pgsql.exec('SELECT created FROM job WHERE id = $1', [@id])
-    raise Baza::Urror, "There is no job ##{@id}" if rows.empty?
-    Time.parse(rows[0]['created'])
+    to_json[:created]
   end
 
   def finished?
-    !@jobs.pgsql.exec('SELECT id FROM result WHERE job = $1', [@id]).empty?
+    to_json[:finished]
   end
 
   def name
-    @jobs.pgsql.exec('SELECT name FROM job WHERE id = $1', [@id])[0]['name']
+    to_json[:name]
   end
 
   def token
-    @jobs.human.tokens.get(
-      @jobs.pgsql.exec('SELECT token FROM job WHERE id = $1', [@id])[0]['token'].to_i
-    )
+    @jobs.human.tokens.get(to_json[:token])
   end
 
   def uri1
-    @jobs.pgsql.exec('SELECT uri1 FROM job WHERE id = $1', [@id])[0]['uri1']
+    to_json[:uri1]
   end
 
   def size
-    @jobs.pgsql.exec('SELECT size FROM job WHERE id = $1', [@id])[0]['size'].to_i
+    to_json[:size]
   end
 
   def errors
-    @jobs.pgsql.exec('SELECT errors FROM job WHERE id = $1', [@id])[0]['errors'].to_i
+    to_json[:errors]
   end
 
   def result
@@ -152,10 +150,28 @@ class Baza::Job
   end
 
   def to_json(*_args)
-    {
-      id: @id,
-      finished: finished?
-    }
+    @to_json ||=
+      begin
+        row = @jobs.pgsql.exec(
+          [
+            'SELECT job.*, result.id AS rid FROM job',
+            'LEFT JOIN result ON result.job = job.id',
+            'WHERE job.id = $1'
+          ],
+          [@id]
+        ).first
+        {
+          id: @id,
+          name: row['name'],
+          created: Time.parse(row['created']),
+          uri1: row['uri1'],
+          token: row['token'].to_i,
+          size: row['size'].to_i,
+          errors: row['errors'].to_i,
+          finished: !row['rid'].nil?,
+          expired: !row['expired'].nil?
+        }
+      end
   end
 
   # A valve of a job.
