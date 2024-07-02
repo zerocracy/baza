@@ -120,11 +120,11 @@ class Baza::Job
   end
 
   def finished?
-    !@jobs.pgsql.exec('SELECT id FROM result WHERE job = $1', [@id]).empty?
+    to_json[:finished]
   end
 
   def name
-    @jobs.pgsql.exec('SELECT name FROM job WHERE id = $1', [@id])[0]['name']
+    to_json[:name]
   end
 
   def token
@@ -134,15 +134,15 @@ class Baza::Job
   end
 
   def uri1
-    @jobs.pgsql.exec('SELECT uri1 FROM job WHERE id = $1', [@id])[0]['uri1']
+    to_json[:uri1]
   end
 
   def size
-    @jobs.pgsql.exec('SELECT size FROM job WHERE id = $1', [@id])[0]['size'].to_i
+    to_json[:size]
   end
 
   def errors
-    @jobs.pgsql.exec('SELECT errors FROM job WHERE id = $1', [@id])[0]['errors'].to_i
+    to_json[:errors]
   end
 
   def result
@@ -152,10 +152,25 @@ class Baza::Job
   end
 
   def to_json(*_args)
-    {
-      id: @id,
-      finished: finished?
-    }
+    @to_json ||=
+      begin
+        row = @jobs.pgsql.exec(
+          [
+            'SELECT job.*, result.id AS rid FROM job',
+            'LEFT JOIN result ON result.job = job.id',
+            'WHERE job.id = $1'
+          ],
+          [@id]
+        ).first
+        {
+          id: @id,
+          name: row['name'],
+          uri1: row['uri1'],
+          size: row['size'].to_i,
+          errors: row['errors'].to_i,
+          finished: !row['rid'].nil?
+        }
+      end
   end
 
   # A valve of a job.
