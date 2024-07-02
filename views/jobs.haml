@@ -40,7 +40,7 @@
     %thead
       %tr
         %th.right
-        %th.center
+        %th
           In
         %th
           Name
@@ -56,7 +56,7 @@
           Time
         %th.center
           Log
-        %th.center
+        %th
           Out
     %tbody
     - total = 0
@@ -68,7 +68,7 @@
         %td.right
           %a{href: iri.cut('/jobs').append(j.id)}
             = "##{j.id}"
-        %td.center
+        %td
           - unless j.expired?
             %a.ico{href: iri.cut('/inspect').append("#{j.id}.fb"), title: "Click here to download the binary Factbase file (#{bytes(j.size)})"}
               📦
@@ -101,7 +101,7 @@
           - else
             %td.center.ff
               %a.ico{href: iri.cut('/stdout').append("#{j.id}.txt"), title: 'See the full stdout'}> 📃
-            %td.center
+            %td
               - if j.result.exit.zero?
                 %a.ico{href: iri.cut('/pull').append("#{j.id}.fb"), title: "Click here to download the binary Factbase file (#{bytes(j.result.size)})"}
                   📦
