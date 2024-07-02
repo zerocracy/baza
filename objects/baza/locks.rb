@@ -49,6 +49,7 @@ class Baza::Locks
   end
 
   def lock(name, owner)
+    raise Baza::Urror, 'The balance is negative' unless @human.account.balance.positive? || ENV['RACK_ENV'] == 'test'
     pgsql.exec(
       [
         'INSERT INTO lock (human, name, owner) ',
