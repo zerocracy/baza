@@ -47,5 +47,7 @@ class Baza::ResultTest < Minitest::Test
     assert_equal('Hello, world!', r.stdout)
     assert_equal(1, r.exit)
     assert_equal(42, r.msec)
+    assert_nil(r.size)
+    assert_nil(r.errors)
   end
 end
