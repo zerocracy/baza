@@ -39,7 +39,7 @@ gem 'judges', '~>0.0'
 gem 'loog', '0.5.2'
 gem 'minitest', '5.24.1', require: false
 gem 'pgtk', '0.9.3'
-gem 'rack', '3.1.4'
+gem 'rack', '3.1.5'
 gem 'rack-ssl', '1.4.1'
 gem 'rack-test', '2.1.0'
 gem 'rake', '13.2.1', require: false
