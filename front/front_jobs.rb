@@ -63,8 +63,8 @@ get(%r{/jobs/([0-9]+)/input.html}) do
       { 'format' => 'html', 'columns' => 'what,when' },
       [fb, html]
     )
-    File.binread(html)
     content_type('text/html')
+    File.binread(html)
   end
 end
 
@@ -79,7 +79,7 @@ get(%r{/jobs/([0-9]+)/output.html}) do
       { 'format' => 'html', 'columns' => 'what,when' },
       [fb, html]
     )
-    File.binread(html)
     content_type('text/html')
+    File.binread(html)
   end
 end

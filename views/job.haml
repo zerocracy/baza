@@ -38,6 +38,11 @@
     %br
     != ago(job.created)
 
+  %p
+    Errors:
+    %br
+    = job.errors
+
   - unless job.expired?
     %p
       Input:
@@ -70,6 +75,10 @@
         != "(#{bytes(r.size)})"
         = '|'
         %a{href: iri.cut('/jobs').append(job.id).append('output.html')}= 'HTML'
+      %p
+        Output Errors:
+        %br
+        = r.errors
 
 - if job.finished?
   %p
