@@ -51,11 +51,12 @@ class Baza::Job
     end
     fbs.delete(uri1)
     fbs.delete(result.uri2) if finished?
+    @to_json = nil
   end
 
   # Is it expired and doesn't have any data anymore?
   def expired?
-    !@jobs.pgsql.exec('SELECT expired FROM job WHERE id = $1 AND expired IS NOT NULL', [@id]).empty?
+    to_json[:expired]
   end
 
   # Finish the job, create a RESULT for it and a RECEIPT.
@@ -95,6 +96,7 @@ class Baza::Job
         )[0]['id'].to_i
       )
     end
+    @to_json = nil
   end
 
   def secrets
@@ -114,9 +116,7 @@ class Baza::Job
   end
 
   def created
-    rows = @jobs.pgsql.exec('SELECT created FROM job WHERE id = $1', [@id])
-    raise Baza::Urror, "There is no job ##{@id}" if rows.empty?
-    Time.parse(rows[0]['created'])
+    to_json[:created]
   end
 
   def finished?
@@ -128,9 +128,7 @@ class Baza::Job
   end
 
   def token
-    @jobs.human.tokens.get(
-      @jobs.pgsql.exec('SELECT token FROM job WHERE id = $1', [@id])[0]['token'].to_i
-    )
+    @jobs.human.tokens.get(to_json[:token])
   end
 
   def uri1
@@ -165,10 +163,13 @@ class Baza::Job
         {
           id: @id,
           name: row['name'],
+          created: Time.parse(row['created']),
           uri1: row['uri1'],
+          token: row['token'].to_i,
           size: row['size'].to_i,
           errors: row['errors'].to_i,
-          finished: !row['rid'].nil?
+          finished: !row['rid'].nil?,
+          expired: !row['expired'].nil?
         }
       end
   end
