@@ -1,20 +1,11 @@
 %nav
   %ul{style: 'text-align: left'}
-    - if job.expired?
-      %li.orange
-        - if job.finished?
-          Expired
-        - else
-          Never finished and expired
-    - else
+    - unless job.expired?
       %li
         %a{href: iri.cut('/jobs').append(job.id).append('expire'), onclick: "return confirm('If you expire this job, there will no way to return its data back. Are you sure want to proceed?')"}
           Expire!
-    - unless job.expired?
-      %li.darkred
-        Not yet finished
 
-%div{'column-count' => 3}
+%div{'style' => 'column-count:3'}
   %p
     ID:
     %br
@@ -30,8 +21,9 @@
   %p
     Token:
     %br
-    %span.ff
-      = job.token.name
+    %a{href: iri.cut('/tokens')}
+      %span.ff
+        = job.token.name
 
   %p
     Created on:
@@ -41,7 +33,31 @@
   %p
     Errors:
     %br
-    = job.errors
+    - if job.errors.zero?
+      %span.darkgreen
+        None
+    - else
+      %span.darkred
+        = job.errors
+
+  %p
+    Expired:
+    %br
+    - if job.expired?
+      %span.orange
+        - if job.finished?
+          Yes
+        - else
+          Still running
+    - else
+      Nope
+
+  - unless job.finished?
+    %p
+      Finished:
+      %br
+      %span.darkred
+        Not yet
 
   - unless job.expired?
     %p
