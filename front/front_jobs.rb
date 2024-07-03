@@ -59,6 +59,7 @@ def render_html(uri, name)
     settings.fbs.load(uri, fb)
     Judges::Print.new(settings.loog).run(
       {
+        'title' => name,
         'format' => 'html',
         'columns' => 'what,when,who,repository,issue,details',
         'hide' => '_id,_time,_version,where'
