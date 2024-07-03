@@ -26,7 +26,7 @@
         = job.token.name
 
   %p
-    Created on:
+    Created:
     %br
     != ago(job.created)
 
@@ -71,7 +71,7 @@
   - if job.finished?
     - r = job.result
     %p
-      Finished on:
+      Finished:
       %br
       != ago(r.created)
     %p
