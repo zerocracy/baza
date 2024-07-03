@@ -59,6 +59,6 @@ post '/gift' do
   human = settings.humans.ensure(login)
   zents = params[:zents].to_i
   summary = params[:summary]
-  human.account.add(zents, summary)
+  human.account.top_up(zents, summary)
   flash(iri.cut('/account'), 'New receipt added')
 end

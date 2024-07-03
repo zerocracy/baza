@@ -40,4 +40,15 @@ class Baza::HumansTest < Minitest::Test
     assert_equal(human.github, login)
     assert_equal(human.id, humans.find(login).id)
   end
+
+  def test_donate_all
+    humans = Baza::Humans.new(test_pgsql)
+    human = humans.ensure(test_name)
+    token = human.tokens.add(test_name)
+    job = token.start(test_name, test_name, 1, 0)
+    job.finish!(test_name, 'stdout', 0, 544, 111, 0)
+    assert(!human.account.balance.positive?)
+    humans.donate(amount: 100_000, days: 0)
+    assert(human.account.balance.positive?)
+  end
 end

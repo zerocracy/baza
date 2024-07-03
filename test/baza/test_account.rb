@@ -36,10 +36,10 @@ class Baza::AccountTest < Minitest::Test
     human = Baza::Humans.new(test_pgsql).ensure(test_name)
     acc = human.account
     assert_equal(0, acc.balance)
-    acc.add(42, 'nothing')
-    acc.add(-10, 'foo')
+    acc.top_up(42, 'nothing')
+    acc.top_up(-10, 'foo')
     assert_equal(32, acc.balance)
-    acc.add(-32, 'fun')
+    acc.top_up(-32, 'fun')
     assert_equal(0, acc.balance)
   end
 end

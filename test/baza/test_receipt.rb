@@ -36,7 +36,7 @@ class Baza::ReceiptTest < Minitest::Test
     human = Baza::Humans.new(test_pgsql).ensure(test_name)
     acc = human.account
     assert_equal(0, acc.balance)
-    acc.add(42, 'nothing')
+    acc.top_up(42, 'nothing')
     acc.each do |r|
       assert_equal(42, r.zents)
       assert_equal('nothing', r.summary)

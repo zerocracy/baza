@@ -143,6 +143,13 @@ configure do
   end
 end
 
+configure do
+  set :donations, Always.new(1)
+  settings.donations.start(30) do
+    settings.humans.donate(8 * 100_000, 30)
+  end
+end
+
 get '/' do
   flash(iri.cut('/dash')) if @locals[:human]
   assemble(:index, :front, title: '/')
