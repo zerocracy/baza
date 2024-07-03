@@ -16,13 +16,22 @@
     Full list of tokens:
   %table
     %colgroup
-      %col
-      %col{style: 'width: 26em;'}
-      %col{style: 'width: 12em;'}
+      -# ID
       %col{style: 'width: 4em;'}
+      -# Name
+      %col
+      -# Token
+      %col{style: 'width: 26em;'}
+      -# Created
+      %col{style: 'width: 12em;'}
+      -# Jobs
+      %col{style: 'width: 4em;'}
+      -# Commands
       %col{style: 'width: 6em;'}
     %thead
       %tr
+        %th.right
+          = '#'
         %th
           Name
         %th
@@ -39,6 +48,8 @@
       - total += 1
       - break if total > max
       %tr{class: t.active? ? '' : 'gray'}
+        %td.ff.right
+          = "##{t.id}"
         %td.ff
           = t.name
         %td.ff
