@@ -149,7 +149,7 @@ configure do
   set :donation_amount, 8 * 100_000
   set :donation_period, 30
   settings.donations.start(30) do
-    settings.humans.donate(settings.donation_amount, settings.donation_period)
+    settings.humans.donate(amount: settings.donation_amount, days: settings.donation_period)
   end
 end
 
