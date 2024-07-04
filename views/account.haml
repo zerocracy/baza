@@ -5,11 +5,12 @@
 %p
   At the moment, it's impossible to add funds to the account,
   because the system is running in an experimental mode.
-  However, we automatically top up your account by
+  Don't worry, we won't let you know:
+  we will automatically top up your account by
   != zents(settings.donation_amount)
-  if it doesn't have enough funds, but only once every
+  when it runs out of funds (we will do it only once every
   = settings.donation_period
-  days.
+  days).
 
 %p
   Full list of receipts:
@@ -27,7 +28,7 @@
     %col{style: 'width: 12em;'}
   %thead
     %tr
-      %th.right
+      %th
         = '#'
       %th.right
         Job
@@ -44,7 +45,7 @@
     - total += 1
     - break if total > max
     %tr
-      %td.right
+      %td
         = "##{r.id}"
       %td.right
         - j = r.job_id

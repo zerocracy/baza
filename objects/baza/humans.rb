@@ -102,14 +102,14 @@ class Baza::Humans
       [
         'INSERT INTO receipt(human, zents, summary)',
         "SELECT human, #{amount.to_i} AS zents, 'Donation' AS summary FROM",
-        '(SELECT a.human AS human, SUM(a.zents) AS balance FROM receipt AS a',
-        'LEFT JOIN receipt AS b',
-        'ON a.human = b.human',
+        '(SELECT human.id AS human, SUM(a.zents) AS balance FROM human',
+        'LEFT JOIN receipt AS a ON a.human = human.id',
+        'LEFT JOIN receipt AS b ON b.human = human.id',
         "AND b.created > NOW() - INTERVAL '#{days.to_i} DAYS'",
         'AND b.summary LIKE \'Donation%"\'',
         'WHERE b.id IS NULL',
-        'GROUP BY a.human) AS x',
-        'WHERE x.balance < $1',
+        'GROUP BY human.id) AS x',
+        'WHERE x.balance < $1 OR x.balance IS NULL',
         'RETURNING id'
       ],
       [amount]

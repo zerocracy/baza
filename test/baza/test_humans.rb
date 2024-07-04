@@ -41,7 +41,7 @@ class Baza::HumansTest < Minitest::Test
     assert_equal(human.id, humans.find(login).id)
   end
 
-  def test_donate_all
+  def test_donate_when_small
     humans = Baza::Humans.new(test_pgsql)
     human = humans.ensure(test_name)
     token = human.tokens.add(test_name)
@@ -49,6 +49,14 @@ class Baza::HumansTest < Minitest::Test
     job.finish!(test_name, 'stdout', 0, 544, 111, 0)
     assert(!human.account.balance.positive?)
     humans.donate(amount: 100_000, days: 0)
+    assert(human.account.balance.positive?)
+  end
+
+  def test_donate_even_empty
+    humans = Baza::Humans.new(test_pgsql)
+    human = humans.ensure(test_name)
+    assert(human.account.balance.zero?)
+    humans.donate
     assert(human.account.balance.positive?)
   end
 end

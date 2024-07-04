@@ -30,7 +30,7 @@
       %col{style: 'width: 6em;'}
     %thead
       %tr
-        %th.right
+        %th
           = '#'
         %th
           Name
@@ -48,7 +48,7 @@
       - total += 1
       - break if total > max
       %tr{class: t.active? ? '' : 'gray'}
-        %td.ff.right
+        %td.ff
           = "##{t.id}"
         %td.ff
           = t.name
