@@ -43,11 +43,15 @@ post '/push' do
   name = params[:name]
   raise Baza::Urror, 'The "name" form part is missing' if name.nil?
   raise Baza::Urror, "An existing job named '#{name}' is running now" if token.human.jobs.busy?(name)
+  max_file_size = 10 * 1024 * 1024
   Tempfile.open do |f|
     tfile = params[:factbase]
     if tfile.nil?
       File.binwrite(f.path, Factbase.new.export)
     else
+      if tfile[:tempfile].size > max_file_size
+        error 413, "The uploaded file exceeds the maximum allowed size of #{max_file_size} bytes"
+      end
       FileUtils.copy(tfile[:tempfile], f.path)
       File.delete(tfile[:tempfile])
     end
