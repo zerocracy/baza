@@ -66,4 +66,10 @@ helpers do
       "<li><a href='#{iri.cut(cut)}'>#{name}</a></li>"
     end
   end
+
+  def footer_status(title, always)
+    a, b, c = always.to_s.split('/').map(&:to_i)
+    c = "<span style='color:firebrick;'>#{c}</span>" if c.positive?
+    "#{title}:#{a}/#{b}/#{c}"
+  end
 end

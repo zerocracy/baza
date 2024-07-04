@@ -65,10 +65,10 @@
             %ul{style: 'font-family: monospace;'}
               %li
                 %span{title: 'Pipeline status'}
-                  = "pipeline:#{settings.pipeline}"
+                  != footer_status('pipeline', settings.pipeline)
               %li
                 %span{title: 'GC status'}
-                  = "gc:#{settings.gc}"
+                  != footer_status('gc', settings.gc)
               %li
                 %span{title: 'Donations status'}
-                  = "donations:#{settings.donations}"
+                  != footer_status('donations', settings.donations)
