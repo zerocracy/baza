@@ -41,7 +41,16 @@
         %td.ff
           = s[:badge]
         %td.ff
-          = s[:result].class
+          - if s[:result].nil?
+            %span.darkred
+              NULL
+          - elsif s[:result].is_a?(String)
+            = s[:result].truncate.inspect
+          - elsif s[:result].is_a?(Integer) || s[:result].is_a?(Float)
+            = s[:result]
+          - else
+            %span.gray
+              = s[:result].class
         %td
           != ago(s[:created])
         %td
