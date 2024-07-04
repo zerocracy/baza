@@ -50,6 +50,10 @@ class Baza::Pipeline
     @always.to_s
   end
 
+  def backtraces
+    @always.backtraces
+  end
+
   def start(pause = 15)
     @always.start(pause) do
       job = pop

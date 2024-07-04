@@ -117,14 +117,17 @@ class Baza::AppTest < Minitest::Test
   end
 
   def test_non_admin_pages
-    skip # because now all pages are visible in testing mode
     pages = [
-      '/sql', '/gift'
+      '/sql',
+      '/gift',
+      '/footer/status?badge=gc',
+      '/footer/status?badge=pipeline',
+      '/footer/status?badge=donations'
     ]
-    login
+    login('yegor256')
     pages.each do |p|
       get(p)
-      assert_status(303)
+      assert_status(200)
     end
   end
 

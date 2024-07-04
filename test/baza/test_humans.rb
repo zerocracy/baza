@@ -57,6 +57,9 @@ class Baza::HumansTest < Minitest::Test
     human = humans.ensure(test_name)
     assert(human.account.balance.zero?)
     humans.donate
-    assert(human.account.balance.positive?)
+    b = human.account.balance
+    assert(b.positive?)
+    humans.donate
+    assert_equal(b, human.account.balance)
   end
 end

@@ -62,3 +62,10 @@ post '/gift' do
   human.account.top_up(zents, summary)
   flash(iri.cut('/account'), 'New receipt added')
 end
+
+get '/footer/status' do
+  admin_only
+  b = params[:badge]
+  content_type 'text/plain'
+  settings.send(b).backtraces.map { |bt| Backtrace.new(bt).to_s }.join("\n\n")
+end
