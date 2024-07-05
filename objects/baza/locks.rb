@@ -50,14 +50,18 @@ class Baza::Locks
 
   def lock(name, owner)
     raise Baza::Urror, 'The balance is negative' unless @human.account.balance.positive? || ENV['RACK_ENV'] == 'test'
-    pgsql.exec(
-      [
-        'INSERT INTO lock (human, name, owner) ',
-        'VALUES ($1, $2, $3) ',
-        'ON CONFLICT (human, name, owner) DO UPDATE SET owner = lock.owner'
-      ],
-      [@human.id, name, owner]
-    )
+    begin
+      pgsql.exec(
+        [
+          'INSERT INTO lock (human, name, owner) ',
+          'VALUES ($1, $2, $3) ',
+          'ON CONFLICT (human, name, owner) DO UPDATE SET owner = lock.owner'
+        ],
+        [@human.id, name, owner]
+      )
+    rescue PG::UniqueViolation
+      raise Baza::Urror, "The '#{name}' lock is occupied by another owner, '#{owner}' can't get it now"
+    end
   end
 
   def unlock(name, owner)

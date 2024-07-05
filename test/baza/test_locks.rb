@@ -39,7 +39,8 @@ class Baza::LocksTest < Minitest::Test
     n = test_name
     locks.lock(n, owner)
     locks.lock(n, owner)
-    assert_raises { locks.lock(n, test_name) }
+    e = assert_raises(Baza::Urror) { locks.lock(n, test_name) }
+    assert(e.message.include?('is occupied by another owner'), e.message)
     locks.lock(n, owner)
     locks.unlock(n, owner)
     locks.lock(n, owner)
