@@ -57,6 +57,7 @@ error do
     Raven.capture_exception(e)
     bt = Backtrace.new(e)
     settings.loog.error("At #{request.url}:\n#{bt}")
+    response.headers['X-Zerocracy-Failure'] = e.message
     haml(:error, layout: :empty, locals: { backtrace: bt.to_s })
   end
 end
