@@ -29,6 +29,8 @@ if [ ! -e /code/z/j ]; then
   echo "You should git clone git@github.com:zerocracy/j.git to /code/z/j"
   exit 1
 fi
+
+trap 'rm -rf j && git checkout -- .gitignore' EXIT
 rm -rf j
 mkdir j
 cp -R /code/z/j/j.gemspec j
@@ -36,6 +38,7 @@ cp -R /code/z/j/judges j
 cp -R /code/z/j/lib j
 sed -i -s 's|j/||g' .gitignore
 git add j
+bundle update
 
 cp /code/home/assets/zerocracy/baza.yml config.yml
 git add config.yml
@@ -44,7 +47,6 @@ git add .gitignore
 git commit -m 'config.yml for heroku and j sources'
 trap 'git reset HEAD~1 && rm -rf j && rm -f config.yml && git checkout -- .gitignore && git checkout -- Gemfile.lock' EXIT
 
-bundle update
 git push heroku master -f
 rm -f target/pgsql-config.yml
 bundle exec rake liquibase
