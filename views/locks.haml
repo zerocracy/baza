@@ -8,33 +8,30 @@
     %colgroup
       -# ID
       %col{style: 'width: 3em;'}
-      -# Unlock
-      %col{style: 'width: 3em;'}
       -# Name
       %col{style: 'width: 4em;'}
       -# Owner
       %col
       -# Created
       %col{style: 'width: 10em;'}
+      -# Commands
+      %col{style: 'width: 3em;'}
     %thead
       %tr
         %th
           = '#'
-        %th
         %th
           Name
         %th
           Owner
         %th
           Created
+        %th
     %tbody
     - locks.each do |lk|
       %tr
         %td.ff
           = "##{lk['id']}"
-        %td
-          %a.ico{href: iri.cut('/unlock').append(lk['name']).add(owner: lk['owner']), title: 'Unlock (remove this lock)', onclick: "return confirm('Are you sure you want to remove this lock?')"}
-            🔓
         %td.ff
           %a{href: iri.cut('/jobs').over(name: lk['name'])}
             = lk['name']
@@ -42,3 +39,6 @@
           = lk['owner']
         %td
           != ago(Time.parse(lk['created']))
+        %td
+          %a.ico{href: iri.cut('/unlock').append(lk['name']).add(owner: lk['owner']), title: 'Unlock (remove this lock)', onclick: "return confirm('Are you sure you want to remove this lock?')"}
+            🔓
