@@ -39,6 +39,21 @@ class Baza::Account
     @human.pgsql
   end
 
+  def bars(days: 12 * 7)
+    pgsql.exec(
+      [
+        'SELECT SUM(CASE WHEN zents > 0 THEN zents ELSE 0 END) AS debit,',
+        'SUM(CASE WHEN zents < 0 THEN zents ELSE 0 END) AS credit,',
+        "to_char(created, 'YYYY.MM') AS week",
+        'FROM receipt',
+        'WHERE human = $1',
+        "AND created > NOW() - INTERVAL '#{days.to_i} DAYS'",
+        'GROUP BY week'
+      ],
+      [@human.id]
+    ).map { |row| { week: row['week'], debit: row['debit'].to_i, credit: row['credit'].to_i } }
+  end
+
   def each(offset: 0)
     q =
       'SELECT * FROM receipt ' \
@@ -66,10 +81,10 @@ class Baza::Account
   end
 
   # Add a new receipt for a human, not attached to a job.
-  def top_up(zents, summary)
+  def top_up(zents, summary, created: Time.now)
     pgsql.exec(
-      'INSERT INTO receipt (human, zents, summary) VALUES ($1, $2, $3) RETURNING id',
-      [@human.id, zents, summary]
+      'INSERT INTO receipt (human, zents, summary, created) VALUES ($1, $2, $3, $4) RETURNING id',
+      [@human.id, zents, summary, created]
     ).empty?
   end
 

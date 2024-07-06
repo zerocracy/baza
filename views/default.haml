@@ -10,6 +10,8 @@
     %link{href: iri.cut('/css/main.css'), rel: 'stylesheet'}
     %link{rel: 'shortcut icon', href: iri.cut('/svg/logo.svg')}
     %script{src: 'https://code.jquery.com/jquery-3.3.1.min.js'}
+    - if defined?(css)
+      %link{href: iri.cut("/css/#{css}.css"), rel: 'stylesheet'}
   %body
     %section
       %header

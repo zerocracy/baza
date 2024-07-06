@@ -26,6 +26,7 @@ get '/account' do
   assemble(
     :account,
     :default,
+    css: 'account',
     title: '/account',
     account: the_human.account,
     offset: (params[:offset] || '0').to_i

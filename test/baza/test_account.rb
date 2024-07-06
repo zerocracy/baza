@@ -42,4 +42,16 @@ class Baza::AccountTest < Minitest::Test
     acc.top_up(-32, 'fun')
     assert_equal(0, acc.balance)
   end
+
+  def test_fetch_bars
+    human = Baza::Humans.new(test_pgsql).ensure(test_name)
+    acc = human.account
+    (-10..0).each do |week|
+      created = Time.now - (week * 7 * 24 * 60 * 60)
+      acc.top_up(42, 'something', created:)
+      acc.top_up(-10, 'foo', created:)
+    end
+    bars = acc.bars
+    assert(!bars.empty?)
+  end
 end
