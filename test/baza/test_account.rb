@@ -53,5 +53,12 @@ class Baza::AccountTest < Minitest::Test
     end
     bars = acc.bars
     assert(!bars.empty?)
+    bars.each do |b|
+      assert(!b[:week].nil?)
+      assert(!b[:credit].nil?)
+      assert(!b[:debit].nil?)
+      assert(!b[:credit].negative?)
+      assert(!b[:debit].negative?)
+    end
   end
 end

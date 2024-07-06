@@ -43,7 +43,7 @@ class Baza::Account
     pgsql.exec(
       [
         'SELECT SUM(CASE WHEN zents > 0 THEN zents ELSE 0 END) AS debit,',
-        'SUM(CASE WHEN zents < 0 THEN zents ELSE 0 END) AS credit,',
+        'SUM(CASE WHEN zents < 0 THEN -zents ELSE 0 END) AS credit,',
         "to_char(created, 'YYYY.MM') AS week",
         'FROM receipt',
         'WHERE human = $1',
@@ -51,7 +51,7 @@ class Baza::Account
         'GROUP BY week'
       ],
       [@human.id]
-    ).map { |row| { week: row['week'], debit: row['debit'].to_i, credit: row['credit'].to_i } }
+    ).map { |row| { week: row['week'], debit: row['debit'].to_i, credit: row['credit'].to_i } }.reverse
   end
 
   def each(offset: 0)
