@@ -48,7 +48,8 @@ class Baza::Account
         'FROM receipt',
         'WHERE human = $1',
         "AND created > NOW() - INTERVAL '#{days.to_i} DAYS'",
-        'GROUP BY week'
+        'GROUP BY week',
+        'ORDER BY week'
       ],
       [@human.id]
     ).map { |row| { week: row['week'], debit: row['debit'].to_i, credit: row['credit'].to_i } }.reverse
