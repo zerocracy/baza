@@ -31,7 +31,7 @@ helpers do
 
   def zents(num)
     usd = format('%.5f', num.to_f / (1000 * 100))
-    num.positive? ? "<span style='color:green'>+#{usd}</span>" : "<span style='color:firebrick'>#{usd}</span>"
+    num.positive? ? "<span style='color:darkgreen'>+#{usd}</span>" : "<span style='color:firebrick'>#{usd}</span>"
   end
 
   def msec(msec)
