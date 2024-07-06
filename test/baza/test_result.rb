@@ -36,7 +36,7 @@ class Baza::ResultTest < Minitest::Test
   def test_keeps_data
     human = Baza::Humans.new(test_pgsql).ensure(test_name)
     token = human.tokens.add(test_name)
-    job = token.start(test_name, test_name, 1, 0)
+    job = token.start(test_name, test_name, 1, 0, 'n/a')
     Tempfile.open do |f|
       File.write(f.path, 'booom')
       job.finish!(Baza::Factbases.new('', '').save(f.path), 'Hello, world!', 1, 42)

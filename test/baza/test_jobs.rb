@@ -36,7 +36,7 @@ class Baza::JobsTest < Minitest::Test
   def test_all_fields
     human = Baza::Humans.new(test_pgsql).ensure(test_name)
     token = human.tokens.add(test_name)
-    id = token.start(test_name, test_name, 1, 0).id
+    id = token.start(test_name, test_name, 1, 0, 'n/a').id
     job = human.jobs.get(id)
     assert_equal(id, job.id)
     assert(!job.name.nil?)
@@ -52,7 +52,7 @@ class Baza::JobsTest < Minitest::Test
   def test_start_and_finish
     human = Baza::Humans.new(test_pgsql).ensure(test_name)
     token = human.tokens.add(test_name)
-    job = token.start(test_name, test_name, 1, 0)
+    job = token.start(test_name, test_name, 1, 0, 'n/a')
     assert(!human.jobs.get(job.id).finished?)
     job.finish!(test_name, 'stdout', 0, 544, 111, 0)
     assert(human.jobs.get(job.id).finished?)
@@ -68,7 +68,7 @@ class Baza::JobsTest < Minitest::Test
   def test_iterates_with_offset
     human = Baza::Humans.new(test_pgsql).ensure(test_name)
     token = human.tokens.add(test_name)
-    token.start(test_name, test_name, 1, 0)
+    token.start(test_name, test_name, 1, 0, 'n/a')
     found = 0
     human.jobs.each(offset: 1) do |_|
       found += 1
@@ -80,9 +80,10 @@ class Baza::JobsTest < Minitest::Test
     human = Baza::Humans.new(test_pgsql).ensure(test_name)
     token = human.tokens.add(test_name)
     name = "#{test_name}-a"
-    token.start(name, test_name, 1, 0).finish!(test_name, 'stdout', 1, 544)
-    token.start("#{test_name}-b", test_name, 1, 0)
-    id2 = token.start(name, test_name, 1, 0).id
+    j = token.start(name, test_name, 1, 0, 'n/a')
+    j.finish!(test_name, 'stdout', 1, 544)
+    token.start("#{test_name}-b", test_name, 1, 0, 'n/a')
+    id2 = token.start(name, test_name, 1, 0, 'n/a').id
     assert(human.jobs.name_exists?(name))
     assert_equal(id2, human.jobs.recent(name).id)
   end
@@ -91,7 +92,7 @@ class Baza::JobsTest < Minitest::Test
     human = Baza::Humans.new(test_pgsql).ensure(test_name)
     token = human.tokens.add(test_name)
     name = "#{test_name}-a"
-    job = token.start(name, test_name, 1, 0)
+    job = token.start(name, test_name, 1, 0, 'n/a')
     assert(human.jobs.busy?(name))
     job.finish!(test_name, 'stdout', 0, 544, 1, 0)
     assert(!human.jobs.busy?(name))
@@ -101,9 +102,9 @@ class Baza::JobsTest < Minitest::Test
     human = Baza::Humans.new(test_pgsql).ensure(test_name)
     token = human.tokens.add(test_name)
     name = test_name
-    token.start(name, test_name, 1, 0)
+    token.start(name, test_name, 1, 0, 'n/a')
     assert_raises do
-      token.start(name, test_name, 1, 0)
+      token.start(name, test_name, 1, 0, 'n/a')
     end
   end
 
@@ -111,8 +112,8 @@ class Baza::JobsTest < Minitest::Test
     human = Baza::Humans.new(test_pgsql).ensure(test_name)
     token = human.tokens.add(test_name)
     name = test_name
-    job = token.start(name, test_name, 1, 0)
+    job = token.start(name, test_name, 1, 0, 'n/a')
     job.expire!(Baza::Factbases.new('', ''))
-    token.start(name, test_name, 1, 0)
+    token.start(name, test_name, 1, 0, 'n/a')
   end
 end

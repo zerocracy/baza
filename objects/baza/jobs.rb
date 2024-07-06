@@ -46,20 +46,21 @@ class Baza::Jobs
     ).empty?
   end
 
-  def start(token, name, uri1, size, errors)
+  def start(token, name, uri1, size, errors, agent)
     raise Baza::Urror, "The name '#{name}' is not valid" unless name.match?(/^[a-z0-9-]+$/)
     raise Baza::Urror, "The size '#{size}' is not positive" unless size.positive?
+    raise Baza::Urror, 'The agent is empty' if agent.empty?
     get(
       pgsql.exec(
-        'INSERT INTO job (token, name, uri1, size, errors) VALUES ($1, $2, $3, $4, $5) RETURNING id',
-        [token, name, uri1, size, errors]
+        'INSERT INTO job (token, name, uri1, size, errors, agent) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
+        [token, name, uri1, size, errors, agent]
       )[0]['id'].to_i
     )
   end
 
   def each(name: nil, offset: 0)
     sql =
-      'SELECT job.id, job.created, job.name, job.uri1, job.expired, job.size, job.errors, ' \
+      'SELECT job.id, job.created, job.name, job.uri1, job.expired, job.size, job.errors, job.agent, ' \
       'token.id AS tid, token.name AS token_name, ' \
       'lock.id AS lid, ' \
       'result.id AS rid, result.uri2, result.stdout, result.exit, result.msec, ' \
@@ -83,6 +84,7 @@ class Baza::Jobs
         created: Time.parse(row['created']),
         name: row['name'],
         uri1: row['uri1'],
+        agent: row['agent'],
         size: row['size'].to_i,
         errors: row['errors'].to_i,
         locked?: !row['lid'].nil?,

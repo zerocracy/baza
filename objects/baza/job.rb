@@ -127,6 +127,10 @@ class Baza::Job
     to_json[:name]
   end
 
+  def agent
+    to_json[:agent]
+  end
+
   def token
     @jobs.human.tokens.get(to_json[:token])
   end

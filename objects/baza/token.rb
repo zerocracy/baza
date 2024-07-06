@@ -56,10 +56,10 @@ class Baza::Token
     rows[0]['active'] == 't'
   end
 
-  def start(name, uri1, size, errors)
+  def start(name, uri1, size, errors, agent)
     raise Baza::Urror, 'The token is inactive' unless active?
     raise Baza::Urror, 'The balance is negative' unless human.account.balance.positive? || ENV['RACK_ENV'] == 'test'
-    @tokens.human.jobs.start(@id, name, uri1, size, errors)
+    @tokens.human.jobs.start(@id, name, uri1, size, errors, agent)
   end
 
   def created

@@ -27,6 +27,13 @@ require 'factbase'
 require_relative '../objects/baza/urror'
 require_relative '../objects/baza/errors'
 
+def user_agent
+  agent = request.env['HTTP_USER_AGENT']
+  raise Baza::Urror, 'It is mandatory to provide User-Agent HTTP header' if agent.nil?
+  raise Baza::Urror, 'The User-Agent HTTP header cannot be empty' if agent.empty?
+  agent
+end
+
 get '/push' do
   assemble(
     :push,
@@ -52,7 +59,12 @@ post '/push' do
       File.delete(tfile[:tempfile])
     end
     fid = settings.fbs.save(f.path)
-    job = token.start(name, fid, File.size(f.path), Baza::Errors.new(f.path).count)
+    job = token.start(
+      name, fid,
+      File.size(f.path),
+      Baza::Errors.new(f.path).count,
+      user_agent
+    )
     settings.loog.info("New push arrived via HTTP POST, job ID is ##{job.id}")
     flash(iri.cut('/jobs'), "New job ##{job.id} started")
   end
@@ -69,7 +81,12 @@ put(%r{/push/([a-z0-9-]+)}) do
     request.body.rewind
     File.binwrite(f, request.body.read)
     fid = settings.fbs.save(f.path)
-    job = token.start(name, fid, File.size(f.path), Baza::Errors.new(f.path).count)
+    job = token.start(
+      name, fid,
+      File.size(f.path),
+      Baza::Errors.new(f.path).count,
+      user_agent
+    )
     settings.loog.info("New push arrived via HTTP PUT, job ID is #{job.id}")
     job.id.to_s
   end

@@ -31,6 +31,12 @@
     != ago(job.created)
 
   %p
+    User-Agent:
+    %br
+    %span.ff
+      = job.agent
+
+  %p
     Errors:
     %br
     - if job.errors.zero?

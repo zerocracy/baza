@@ -178,6 +178,7 @@ class Baza::AppTest < Minitest::Test
     get("/tokens/#{id}.json")
     token = JSON.parse(last_response.body)['text']
     get('/push')
+    header('User-Agent', 'something')
     post('/push', 'name' => test_name, 'token' => token)
     assert_status(302)
     fb = Factbase.new
@@ -203,6 +204,7 @@ class Baza::AppTest < Minitest::Test
       fb.insert.foo = "booom \x01\x02\x03 #{i}"
     end
     header('X-Zerocracy-Token', token)
+    header('User-Agent', 'something')
     name = test_name
     put("/push/#{name}", fb.export)
     assert_status(200)
@@ -246,8 +248,10 @@ class Baza::AppTest < Minitest::Test
     fb.insert.foo = 42
     header('X-Zerocracy-Token', token)
     name = test_name
+    header('User-Agent', 'something')
     put("/push/#{name}", fb.export)
     assert_status(200)
+    header('User-Agent', 'something')
     put("/push/#{name}", fb.export)
     assert_status(303)
   end

@@ -45,7 +45,7 @@ class Baza::HumansTest < Minitest::Test
     humans = Baza::Humans.new(test_pgsql)
     human = humans.ensure(test_name)
     token = human.tokens.add(test_name)
-    job = token.start(test_name, test_name, 1, 0)
+    job = token.start(test_name, test_name, 1, 0, 'n/a')
     job.finish!(test_name, 'stdout', 0, 544, 111, 0)
     assert(!human.account.balance.positive?)
     humans.donate(amount: 100_000, days: 0)
