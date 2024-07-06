@@ -44,7 +44,7 @@ class Baza::Account
       [
         'SELECT SUM(CASE WHEN zents > 0 THEN zents ELSE 0 END) AS debit,',
         'SUM(CASE WHEN zents < 0 THEN -zents ELSE 0 END) AS credit,',
-        "to_char(created, 'YY.MM') AS week",
+        "to_char(created, 'YY.WW') AS week",
         'FROM receipt',
         'WHERE human = $1',
         "AND created > NOW() - INTERVAL '#{days.to_i} DAYS'",
