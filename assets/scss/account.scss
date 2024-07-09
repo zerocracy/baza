@@ -23,19 +23,26 @@
 $debit: #006400;
 $credit: #b22222;
 
+$height: 7em;
+$legend_height: 1em;
+
 .bars {
+  border: 1px solid #dddddd;
+  display: inline-block;
+  padding: .5em;
   position: relative;
+  margin: 0;
 
   .week {
     display: inline-block;
-    height: 7em;
+    height: $height;
     position: relative;
     width: 3em;
 
     .legend {
       bottom: 0;
       font-size: .8em;
-      height: 2em;
+      height: $legend_height;
       left: 0;
       position: absolute;
       text-align: center;
@@ -43,7 +50,7 @@ $credit: #b22222;
     }
 
     .both {
-      height: 5em;
+      height: $height - $legend_height;
       position: relative;
       width: 100%;
     }

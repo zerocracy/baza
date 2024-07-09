@@ -16,16 +16,19 @@
 - unless bars.empty?
   - bars.each { |b| b[:max] = b[:debit] > b[:credit] ? b[:debit] : b[:credit] }
   - max = bars.map { |b| b[:max] }.max
-  %div.bars
-    - bars.each do |b|
-      %div.week
-        %div.both
-          %div.credit{style: "height: #{100 * b[:credit] / max}%", title: b[:credit]}
-            != '&nbsp;'
-          %div.debit{style: "height: #{100 * b[:debit] / max}%", title: b[:debit]}
-            != '&nbsp;'
-        %div.legend{title: "Week ##{b[:week]}"}
-          = b[:week]
+  %p
+    This is how much you spend, per week:
+  %p
+    %div.bars
+      - bars.each do |b|
+        %div.week
+          %div.both
+            %div.credit{style: "height: #{100 * b[:credit] / max}%", title: b[:credit]}
+              != '&nbsp;'
+            %div.debit{style: "height: #{100 * b[:debit] / max}%", title: b[:debit]}
+              != '&nbsp;'
+          %div.legend{title: "Week ##{b[:week]}"}
+            = b[:week]
 
 %p
   Full list of receipts:

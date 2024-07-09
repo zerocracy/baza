@@ -52,7 +52,7 @@ class Baza::Account
         'ORDER BY week'
       ],
       [@human.id]
-    ).map { |row| { week: row['week'], debit: row['debit'].to_i, credit: row['credit'].to_i } }.reverse
+    ).map { |row| { week: row['week'], debit: row['debit'].to_i, credit: row['credit'].to_i } }
   end
 
   def each(offset: 0)

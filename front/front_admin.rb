@@ -58,6 +58,7 @@ post '/gift' do
   raise Baza::Urror, 'The "human" form part is missing' if login.nil?
   human = settings.humans.ensure(login)
   zents = params[:zents].to_i
+  raise Baza::Urror, 'The amount can\'t be zero' if zents.nil?
   summary = params[:summary]
   human.account.top_up(zents, summary)
   flash(iri.cut('/account'), 'New receipt added')
