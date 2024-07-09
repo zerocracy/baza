@@ -30,7 +30,7 @@ if [ ! -e /code/z/j ]; then
   exit 1
 fi
 
-trap 'rm -rf j && git checkout -- .gitignore' EXIT
+trap 'git rm -r j && rm -rf j && git checkout -- .gitignore' EXIT
 rm -rf j
 mkdir j
 cp -R /code/z/j/j.gemspec j
