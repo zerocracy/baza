@@ -62,7 +62,7 @@ class Baza::Jobs
     sql =
       'SELECT job.id, job.created, job.name, job.uri1, job.expired, job.size, job.errors, job.agent, ' \
       'token.id AS tid, token.name AS token_name, ' \
-      'lock.id AS lid, ' \
+      'lock.id AS lid, lock.created AS when_locked, ' \
       'result.id AS rid, result.uri2, result.stdout, result.exit, result.msec, ' \
       'result.size AS rsize, result.errors AS rerrors, ' \
       'ROW_NUMBER() OVER (PARTITION BY job.name ORDER BY job.created DESC) AS row ' \
@@ -87,7 +87,7 @@ class Baza::Jobs
         agent: row['agent'],
         size: row['size'].to_i,
         errors: row['errors'].to_i,
-        locked?: !row['lid'].nil?,
+        when_locked: row['when_locked'].nil? ? nil : Time.parse(row['when_locked']),
         finished?: !row['rid'].nil?,
         expired?: !row['expired'].nil?,
         token: Veil.new(

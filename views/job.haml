@@ -37,6 +37,15 @@
       = job.agent
 
   %p
+    Lock:
+    %br
+    - if job.when_locked.nil?
+      None
+    - else
+      🔒
+      != ago(job.when_locked)
+
+  %p
     Errors:
     %br
     - if job.errors.zero?
