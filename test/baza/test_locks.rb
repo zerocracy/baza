@@ -35,7 +35,7 @@ class Baza::LocksTest < Minitest::Test
   def test_simple_locking_scenario
     human = Baza::Humans.new(test_pgsql).ensure(test_name)
     locks = human.locks
-    owner = test_name
+    owner = "#{test_name} #{test_name} #{test_name} --"
     n = test_name
     locks.lock(n, owner)
     locks.lock(n, owner)
