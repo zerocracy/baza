@@ -172,6 +172,7 @@ class Baza::Job
           token: row['token'].to_i,
           size: row['size'].to_i,
           errors: row['errors'].to_i,
+          agent: row['agent'],
           finished: !row['rid'].nil?,
           expired: !row['expired'].nil?
         }

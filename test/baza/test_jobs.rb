@@ -41,6 +41,9 @@ class Baza::JobsTest < Minitest::Test
     assert_equal(id, job.id)
     assert(!job.name.nil?)
     assert(!job.uri1.nil?)
+    assert(!job.agent.nil?)
+    assert(!job.size.nil?)
+    assert(!job.errors.nil?)
   end
 
   def test_emptiness_checks

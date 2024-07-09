@@ -22,16 +22,17 @@
 
 $debit: #006400;
 $credit: #b22222;
+$gray: #ddd;
 
 $height: 7em;
-$legend_height: 1em;
+$legend-height: 1em;
 
 .bars {
-  border: 1px solid #dddddd;
+  border: 1px solid $gray;
   display: inline-block;
+  margin: 0;
   padding: .5em;
   position: relative;
-  margin: 0;
 
   .week {
     display: inline-block;
@@ -42,7 +43,7 @@ $legend_height: 1em;
     .legend {
       bottom: 0;
       font-size: .8em;
-      height: $legend_height;
+      height: $legend-height;
       left: 0;
       position: absolute;
       text-align: center;
@@ -50,7 +51,7 @@ $legend_height: 1em;
     }
 
     .both {
-      height: $height - $legend_height;
+      height: $height - $legend-height;
       position: relative;
       width: 100%;
     }

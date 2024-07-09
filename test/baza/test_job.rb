@@ -42,6 +42,9 @@ class Baza::JobTest < Minitest::Test
     assert_equal(id, job.id)
     assert(!job.finished?)
     assert(!job.created.nil?)
+    assert(!job.agent.nil?)
+    assert(!job.size.nil?)
+    assert(!job.errors.nil?)
   end
 
   def test_cant_finish_twice
