@@ -17,7 +17,7 @@
   - bars.each { |b| b[:max] = b[:debit] > b[:credit] ? b[:debit] : b[:credit] }
   - max = bars.map { |b| b[:max] }.max
   %p
-    This is how much you spend, per week:
+    This is how much you spend, per week (YY.WW):
   %p
     %div.bars
       - bars.each do |b|
