@@ -112,7 +112,13 @@
       %p
         Output Errors:
         %br
-        = r.errors
+        - if r.errors.zero?
+          %span.darkgreen
+            None
+        - else
+          %i.fa-regular.fa-triangle-exclamation
+          %span.darkred
+            = r.errors
 
 - if job.finished?
   %p
