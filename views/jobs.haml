@@ -72,17 +72,20 @@
         %td
           - unless j.expired?
             %a.ico{href: iri.cut('/inspect').append("#{j.id}.fb"), title: "Click here to download the binary Factbase file (#{bytes(j.size)})"}
-              📦
+              %i.fa-solid.fa-box-archive
           - if j.errors.positive?
             %span{title: "#{j.errors} error(s) in the 'judges-summary' fact"}
-              ⚠️
+              %i.fa-regular.fa-triangle-exclamation
         %td.ff
           %a{href: iri.over(name: j.name)}
             = j.name
         %td.ff
           - unless j.when_locked.nil?
             %a.ico{href: iri.cut('/locks'), title: "The job was locked #{j.when_locked.ago} ago, click to unlock"}
-              🔒
+              %i.fa-regular.fa-lock
+            - if j.when_locked < Time.now - (60 * 60)
+              %span{title: 'It is locked for too long, something is wrong'}
+                %i.fa-regular.fa-triangle-exclamation
         %td.ff
           = j.token.name
         %td
@@ -90,7 +93,7 @@
         - if j.finished?
           %td
             - if j.result.exit.zero?
-              👍🏻
+              %i.fa-regular.fa-thumbs-up
             - else
               %span.darkred
                 = format('%03d', j.result.exit)
@@ -105,10 +108,10 @@
             %td
               - if j.result.exit.zero?
                 %a.ico{href: iri.cut('/pull').append("#{j.id}.fb"), title: "Click here to download the binary Factbase file (#{bytes(j.result.size)})"}
-                  📦
+                  %i.fa-solid.fa-box-archive
               - if j.result.errors.positive?
                 %span{title: "#{j.errors} error(s) in the 'judges-summary' fact"}
-                  ⚠️
+                  %i.fa-regular.fa-triangle-exclamation
         - elsif j.expired?
           %td.center.orange{colspan: 5}
             Never finished

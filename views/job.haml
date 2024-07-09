@@ -42,7 +42,7 @@
     - if job.when_locked.nil?
       None
     - else
-      🔒
+      %i.fa-regular.fa-lock
       != ago(job.when_locked)
 
   %p
@@ -52,6 +52,7 @@
       %span.darkgreen
         None
     - else
+      %i.fa-regular.fa-triangle-exclamation
       %span.darkred
         = job.errors
 
@@ -92,6 +93,8 @@
     %p
       Exit code:
       %br
+      - if r.exit.zero?
+        %i.fa-regular.fa-thumbs-up
       %span.ff
         = r.exit
     %p

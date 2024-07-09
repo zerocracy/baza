@@ -41,4 +41,4 @@
           != ago(Time.parse(lk['created']))
         %td
           %a.ico{href: iri.cut('/unlock').append(lk['name']).add(owner: lk['owner']), title: 'Unlock (remove this lock)', onclick: "return confirm('Are you sure you want to remove this lock?')"}
-            🔓
+            %i.fa-regular.fa-unlock

@@ -61,7 +61,7 @@
         %td
           - if t.active?
             %a.ico{href: iri.cut('/tokens').append(t.id).append('deactivate'), onclick: "return confirm('Once you deactive this token, it will be impossible to activate it back. Are you sure you want to deactivate it?')"}
-              ❌
+              %i.fa-regular.fa-trash-can
           - else
             Inactive
   %p
