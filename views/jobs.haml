@@ -104,7 +104,8 @@
               Expired
           - else
             %td.center.ff
-              %a.ico{href: iri.cut('/stdout').append("#{j.id}.txt"), title: 'See the full stdout'}> 📃
+              %a.ico{href: iri.cut('/stdout').append("#{j.id}.txt"), title: 'See the full stdout'}
+                %i.fa-regular.fa-note-sticky
             %td
               - if j.result.exit.zero?
                 %a.ico{href: iri.cut('/pull').append("#{j.id}.fb"), title: "Click here to download the binary Factbase file (#{bytes(j.result.size)})"}
