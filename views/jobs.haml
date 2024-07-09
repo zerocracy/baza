@@ -72,7 +72,7 @@
         %td
           - unless j.expired?
             %a.ico{href: iri.cut('/inspect').append("#{j.id}.fb"), title: "Click here to download the binary Factbase file (#{bytes(j.size)})"}
-              %i.fa-regular.fa-box-archive
+              %i.fa-solid.fa-box-archive
           - if j.errors.positive?
             %span{title: "#{j.errors} error(s) in the 'judges-summary' fact"}
               %i.fa-regular.fa-triangle-exclamation
@@ -82,7 +82,7 @@
         %td.ff
           - unless j.when_locked.nil?
             %a.ico{href: iri.cut('/locks'), title: "The job was locked #{j.when_locked.ago} ago, click to unlock"}
-              %i.fa-regular.fa-lock
+              %i.fa-solid.fa-lock
             - if j.when_locked < Time.now - (60 * 60)
               %span{title: 'It is locked for too long, something is wrong'}
                 %i.fa-regular.fa-triangle-exclamation
@@ -109,7 +109,7 @@
             %td
               - if j.result.exit.zero?
                 %a.ico{href: iri.cut('/pull').append("#{j.id}.fb"), title: "Click here to download the binary Factbase file (#{bytes(j.result.size)})"}
-                  %i.fa-regular.fa-box-archive
+                  %i.fa-solid.fa-box-archive
               - if j.result.errors.positive?
                 %span{title: "#{j.errors} error(s) in the 'judges-summary' fact"}
                   %i.fa-regular.fa-triangle-exclamation
