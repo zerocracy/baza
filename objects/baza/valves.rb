@@ -48,7 +48,7 @@ class Baza::Valves
 
   def each
     return to_enum(__method__) unless block_given?
-    pgsql.exec('SELECT * FROM valve WHERE human = $1', [@human.id]).each do |row|
+    pgsql.exec('SELECT * FROM valve WHERE human = $1 ORDER BY created DESC', [@human.id]).each do |row|
       v = {
         id: row['id'].to_i,
         created: Time.parse(row['created']),

@@ -45,7 +45,7 @@ class Baza::Locks
   end
 
   def each(&)
-    pgsql.exec('SELECT * FROM lock WHERE human = $1', [@human.id]).each(&)
+    pgsql.exec('SELECT * FROM lock WHERE human = $1 ORDER BY created DESC', [@human.id]).each(&)
   end
 
   def lock(name, owner)
