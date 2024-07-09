@@ -44,6 +44,9 @@
     - else
       %i.fa-solid.fa-lock
       != ago(job.when_locked)
+      - if job.lock_owner.start_with?('http')
+        %a{href: job.lock_owner}
+          %i.fa-solid.fa-link
 
   %p
     Errors:

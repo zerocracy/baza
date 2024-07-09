@@ -86,6 +86,9 @@
             - if j.when_locked < Time.now - (60 * 60)
               %span{title: 'It is locked for too long, something is wrong'}
                 %i.fa-regular.fa-triangle-exclamation.darkred
+            - if j.lock_owner.start_with?('http')
+              %a{href: job.lock_owner}
+                %i.fa-solid.fa-link
         %td.ff
           = j.token.name
         %td

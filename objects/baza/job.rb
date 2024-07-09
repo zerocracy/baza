@@ -123,6 +123,10 @@ class Baza::Job
     to_json[:when_locked]
   end
 
+  def lock_owner
+    to_json[:lock_owner]
+  end
+
   def finished?
     to_json[:finished]
   end
@@ -162,7 +166,9 @@ class Baza::Job
       begin
         row = @jobs.pgsql.exec(
           [
-            'SELECT job.*, result.id AS rid, lock.created AS when_locked FROM job',
+            'SELECT job.*, result.id AS rid, ',
+            'lock.created AS when_locked, lock.owner AS lock_owner',
+            'FROM job',
             'JOIN token ON token.id = job.token',
             'LEFT JOIN result ON result.job = job.id',
             'LEFT JOIN lock ON lock.name = job.name AND lock.human = token.human',
@@ -177,6 +183,7 @@ class Baza::Job
           uri1: row['uri1'],
           token: row['token'].to_i,
           when_locked: row['when_locked'].nil? ? nil : Time.parse(row['when_locked']),
+          lock_owner: row['lock_owner'],
           size: row['size'].to_i,
           errors: row['errors'].to_i,
           agent: row['agent'],
