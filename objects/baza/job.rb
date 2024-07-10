@@ -139,6 +139,10 @@ class Baza::Job
     to_json[:agent]
   end
 
+  def taken
+    to_json[:taken]
+  end
+
   def token
     @jobs.human.tokens.get(to_json[:token])
   end
@@ -182,6 +186,7 @@ class Baza::Job
           created: Time.parse(row['created']),
           uri1: row['uri1'],
           token: row['token'].to_i,
+          taken: row['taken'],
           when_locked: row['when_locked'].nil? ? nil : Time.parse(row['when_locked']),
           lock_owner: row['lock_owner'],
           size: row['size'].to_i,

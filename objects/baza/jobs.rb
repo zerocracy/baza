@@ -86,6 +86,7 @@ class Baza::Jobs
         uri1: row['uri1'],
         agent: row['agent'],
         size: row['size'].to_i,
+        taken: row['taken'],
         errors: row['errors'].to_i,
         when_locked: row['when_locked'].nil? ? nil : Time.parse(row['when_locked']),
         lock_owner: row['lock_owner'],

@@ -37,6 +37,16 @@
       = job.agent
 
   %p
+    Taken:
+    %br
+    - if job.taken.nil?
+      %span.darkred
+        Not yet
+    - else
+      %span.ff
+        = job.taken
+
+  %p
     Lock:
     %br
     - if job.when_locked.nil?

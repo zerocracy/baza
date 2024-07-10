@@ -119,6 +119,9 @@
         - elsif j.expired?
           %td.center.orange{colspan: 5}
             Never finished
+        - elsif j.taken.nil?
+          %td.center.orange{colspan: 5}
+            Waiting...
         - else
           %td.center.orange{colspan: 5}
             In progress...
