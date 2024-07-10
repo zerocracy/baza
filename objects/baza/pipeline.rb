@@ -58,7 +58,11 @@ class Baza::Pipeline
     @always.start(pause) do
       job = pop
       next if job.nil?
-      process_it(job)
+      begin
+        process_it(job)
+      rescue StandardError => e
+        @humans.pgsql.exec('UPDATE job SET taken = $1 WHERE id = $2', [e.message, job.id])
+      end
     end
     @loog.info('Pipeline started')
   end
