@@ -75,7 +75,7 @@
               %i.fa-solid.fa-box-archive
           - if j.errors.positive?
             %span{title: "#{j.errors} error(s) in the 'judges-summary' fact"}
-              %i.fa-regular.fa-triangle-exclamation.darkred
+              %i.fa-solid.fa-triangle-exclamation.darkred
         %td.ff
           %a{href: iri.over(name: j.name)}
             = j.name
@@ -85,7 +85,7 @@
               %i.fa-solid.fa-lock
             - if j.when_locked < Time.now - (60 * 60)
               %span{title: 'It is locked for too long, something is wrong'}
-                %i.fa-regular.fa-triangle-exclamation.darkred
+                %i.fa-solid.fa-triangle-exclamation.darkred
             - if j.lock_owner.start_with?('http')
               %a{href: j.lock_owner}
                 %i.fa-solid.fa-link
@@ -115,7 +115,7 @@
                   %i.fa-solid.fa-box-archive
               - if j.result.errors.positive?
                 %span{title: "#{j.errors} error(s) in the 'judges-summary' fact"}
-                  %i.fa-regular.fa-triangle-exclamation.darkred
+                  %i.fa-solid.fa-triangle-exclamation.darkred
         - elsif j.expired?
           %td.center.orange{colspan: 5}
             Never finished

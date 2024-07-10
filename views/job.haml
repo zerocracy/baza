@@ -55,8 +55,8 @@
       %span.darkgreen
         None
     - else
-      %i.fa-regular.fa-triangle-exclamation.darkred
-      %span.darkred
+      %i.fa-solid.fa-triangle-exclamation.darkred
+      %span.darkred{title: 'Find the "judges-summary" fact in the HTML, the error are there'}
         = job.errors
 
   %p
@@ -119,7 +119,7 @@
           %span.darkgreen
             None
         - else
-          %i.fa-regular.fa-triangle-exclamation.darkred
+          %i.fa-solid.fa-triangle-exclamation.darkred{title: 'Find the "judges-summary" fact in the HTML, the error are there'}
           %span.darkred
             = r.errors
 
