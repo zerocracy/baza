@@ -61,7 +61,8 @@ class Baza::Pipeline
       begin
         process_it(job)
       rescue StandardError => e
-        @humans.pgsql.exec('UPDATE job SET taken = $1 WHERE id = $2', [e.message, job.id])
+        @humans.pgsql.exec('UPDATE job SET taken = $1 WHERE id = $2', [e.message[0..255], job.id])
+        raise e
       end
     end
     @loog.info('Pipeline started')
