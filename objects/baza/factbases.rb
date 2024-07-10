@@ -28,6 +28,7 @@ require 'time'
 require 'aws-sdk-s3'
 require 'aws-sdk-core'
 require 'loog'
+require 'retries'
 
 # All factbases.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -52,11 +53,13 @@ class Baza::Factbases
     else
       key = oname(uuid)
       File.open(file, 'rb') do |f|
-        aws.put_object(
-          body: f,
-          bucket: @bucket,
-          key:
-        )
+        with_retries do
+          aws.put_object(
+            body: f,
+            bucket: @bucket,
+            key:
+          )
+        end
       end
       @loog.info("Saved to S3: #{key} (#{File.size(file)} bytes)")
     end
@@ -74,11 +77,13 @@ class Baza::Factbases
       @loog.debug("Fake loaded #{uuid} into #{file} (#{File.size(file)} bytes)")
     else
       key = oname(uuid)
-      aws.get_object(
-        response_target: file,
-        bucket: @bucket,
-        key:
-      )
+      with_retries do
+        aws.get_object(
+          response_target: file,
+          bucket: @bucket,
+          key:
+        )
+      end
       @loog.info("Loaded from S3: #{key} (#{File.size(file)} bytes)")
     end
   end
@@ -91,10 +96,12 @@ class Baza::Factbases
       FileUtils.rm_f(fake(uuid))
     else
       key = oname(uuid)
-      aws.delete_object(
-        bucket: @bucket,
-        key:
-      )
+      with_retries do
+        aws.delete_object(
+          bucket: @bucket,
+          key:
+        )
+      end
       @loog.info("Deleted in S3: #{key}")
     end
   end
