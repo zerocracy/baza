@@ -58,24 +58,7 @@ class Baza::Pipeline
     @always.start(pause) do
       job = pop
       next if job.nil?
-      @loog.info("Job ##{job.id} starts: #{job.uri1}")
-      Dir.mktmpdir do |dir|
-        input = File.join(dir, 'input.fb')
-        @fbs.load(job.uri1, input)
-        start = Time.now
-        stdout = Loog::Buffer.new
-        code = run(job, input, Loog::Tee.new(stdout, @loog))
-        uuid = code.zero? ? @fbs.save(input) : nil
-        job.finish!(
-          uuid,
-          escaped(job, stdout.to_s),
-          code,
-          ((Time.now - start) * 1000).to_i,
-          code.zero? ? File.size(input) : nil,
-          code.zero? ? Baza::Errors.new(input).count : nil
-        )
-        @loog.info("Job ##{job.id} finished, exit=#{code}!")
-      end
+      process_it(job)
     end
     @loog.info('Pipeline started')
   end
@@ -91,6 +74,27 @@ class Baza::Pipeline
   end
 
   private
+
+  def process_it(job)
+    @loog.info("Job ##{job.id} starts: #{job.uri1}")
+    Dir.mktmpdir do |dir|
+      input = File.join(dir, 'input.fb')
+      @fbs.load(job.uri1, input)
+      start = Time.now
+      stdout = Loog::Buffer.new
+      code = run(job, input, Loog::Tee.new(stdout, @loog))
+      uuid = code.zero? ? @fbs.save(input) : nil
+      job.finish!(
+        uuid,
+        escaped(job, stdout.to_s),
+        code,
+        ((Time.now - start) * 1000).to_i,
+        code.zero? ? File.size(input) : nil,
+        code.zero? ? Baza::Errors.new(input).count : nil
+      )
+      @loog.info("Job ##{job.id} finished, exit=#{code}!")
+    end
+  end
 
   def pop
     require_relative '../../version'
