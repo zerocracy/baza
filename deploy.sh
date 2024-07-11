@@ -38,7 +38,7 @@ cp -R /code/z/j/judges j
 cp -R /code/z/j/lib j
 sed -i -s 's|j/||g' .gitignore
 git add j
-bundle update
+bundle up
 
 cp /code/home/assets/zerocracy/baza.yml config.yml
 git add config.yml
