@@ -103,14 +103,19 @@ class Baza::Pipeline
         unless Baza::Errors.new(input).count.zero?
           @tbot.notify(
             job.jobs.human,
-            "The job [##{job.id}](https://www.zerocracy.com/jobs/#{job.id})",
-            'finished with errors.'
+            "⚠️ The job [##{job.id}](https://www.zerocracy.com/jobs/#{job.id})",
+            'finished with errors. You better pay attention to it ASAP,',
+            'before it gets too late.'
           )
         end
       else
         @tbot.notify(
           job.jobs.human,
-          "The job [##{job.id}](https://www.zerocracy.com/jobs/#{job.id}) failed."
+          "💔 The job [##{job.id}](https://www.zerocracy.com/jobs/#{job.id}) has failed :(",
+          'This most probably means that there is an internal error on our server.',
+          'Please, report this situation to us by ',
+          '[submitting an issue](https://github.com/zerocracy/baza/issues) and',
+          "mentioning this job ID: `#{job.id}`."
         )
       end
       @loog.info("Job ##{job.id} finished, exit=#{code}!")
