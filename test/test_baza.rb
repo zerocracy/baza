@@ -196,6 +196,33 @@ class Baza::AppTest < Minitest::Test
     assert_status(302)
   end
 
+  def test_rejects_file_upload
+    uname = test_name
+    login('yegor256')
+    post('/gift', "human=#{uname}&zents=9999&summary=no")
+    login(uname)
+    get('/tokens')
+    post('/tokens/add', 'name=foo')
+    id = last_response.headers['X-Zerocracy-TokenId'].to_i
+    get("/tokens/#{id}.json")
+    token = JSON.parse(last_response.body)['text']
+    get('/push')
+    post('/push', 'name' => test_name, 'token' => token)
+    assert_status(302)
+    fb = Factbase.new
+    fb.insert.foo = 'a' * (11 * 1024 * 1024)
+    Tempfile.open do |f|
+      File.binwrite(f.path, fb.export)
+      post(
+        '/push',
+        'name' => test_name,
+        'token' => token,
+        'factbase' => Rack::Test::UploadedFile.new(f.path, 'application/zip')
+      )
+    end
+    assert_status(413)
+  end
+
   def test_starts_job_via_put
     app.settings.pipeline.start(0)
     token = make_valid_token
