@@ -85,7 +85,7 @@ class Baza::Tbot
       @tp.post(
         chat,
         [
-          'I don\'t know you yet, please ',
+          '🐶 I\'m sorry, I don\'t know you as of yet. Please ',
           "[click here](#{auth}) ",
           'in order to authenticate.'
         ].join
@@ -94,7 +94,10 @@ class Baza::Tbot
     else
       @tp.post(
         chat,
-        "I know that you are `@#{row['github']}`"
+        '😸 Hey, I know that you are ',
+        "[`@#{row['github']}`](https://github.com/#{row['github']})! ",
+        'In this chat you will get updates from me, when something intersting ',
+        'happens in your account at [zerocracy.com](https://www.zerocracy.com).'
       )
       @loog.debug("Greeted user @#{row['github']} in TG chat ##{chat}")
     end
