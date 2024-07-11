@@ -50,14 +50,14 @@ class Baza::Humans
 
   def exists?(login)
     raise 'Human login must be a String' unless login.is_a?(String)
-    !@pgsql.exec('SELECT id FROM human WHERE github = $1', [login]).empty?
+    !@pgsql.exec('SELECT id FROM human WHERE github = $1', [login.downcase]).empty?
   end
 
   def find(login)
     raise 'Human login must be a String' unless login.is_a?(String)
     rows = @pgsql.exec(
       'SELECT id FROM human WHERE github = $1',
-      [login]
+      [login.downcase]
     )
     raise Baza::Urror, "Human @#{login} not found" if rows.empty?
     get(rows[0]['id'].to_i)
@@ -71,7 +71,7 @@ class Baza::Humans
     raise "GitHub login too long: \"@#{login}\"" if login.length > 64
     rows = @pgsql.exec(
       'INSERT INTO human (github) VALUES ($1) ON CONFLICT DO NOTHING RETURNING id',
-      [login]
+      [login.downcase]
     )
     return find(login) if rows.empty?
     get(rows[0]['id'].to_i)

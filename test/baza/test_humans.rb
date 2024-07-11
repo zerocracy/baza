@@ -35,10 +35,10 @@ class Baza::HumansTest < Minitest::Test
   def test_simple_fetching
     humans = Baza::Humans.new(test_pgsql)
     login = test_name
-    human = humans.ensure(login)
-    assert(humans.exists?(login))
-    assert_equal(human.github, login)
-    assert_equal(human.id, humans.find(login).id)
+    human = humans.ensure("#{login}_ABC")
+    assert(humans.exists?("#{login}_aBc"))
+    assert_equal(human.github, "#{login}_abc")
+    assert_equal(human.id, humans.find("#{login}_abC").id)
   end
 
   def test_donate_when_small
