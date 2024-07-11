@@ -36,10 +36,12 @@ class Baza::JobsTest < Minitest::Test
   def test_all_fields
     human = Baza::Humans.new(test_pgsql).ensure(test_name)
     token = human.tokens.add(test_name)
-    id = token.start(test_name, test_name, 1, 0, 'n/a').id
+    n = "#{test_name}abc"
+    id = token.start(n, test_name, 1, 0, 'n/a').id
     job = human.jobs.get(id)
     assert_equal(id, job.id)
     assert(!job.name.nil?)
+    assert_equal(n.downcase, job.name)
     assert(!job.uri1.nil?)
     assert(!job.agent.nil?)
     assert(!job.size.nil?)

@@ -57,14 +57,14 @@ class Baza::Secrets
     raise Baza::Urror, 'The value is not ASCII' unless value.ascii_only?
     pgsql.exec(
       'INSERT INTO secret (human, name, key, value) VALUES ($1, $2, $3, $4)',
-      [@human.id, name, key, value]
+      [@human.id, name.downcase, key, value]
     )
   end
 
   def remove(name, key)
     pgsql.exec(
       'DELETE FROM secret WHERE human = $1 AND name = $2 AND key = $3',
-      [@human.id, name, key]
+      [@human.id, name.downcase, key]
     )
   end
 end

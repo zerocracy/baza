@@ -47,13 +47,13 @@ class Baza::Jobs
   end
 
   def start(token, name, uri1, size, errors, agent)
-    raise Baza::Urror, "The name '#{name}' is not valid" unless name.match?(/^[a-z0-9-]+$/)
+    raise Baza::Urror, "The name '#{name}' is not valid, make it low-case" unless name.match?(/^[a-z0-9-]+$/)
     raise Baza::Urror, "The size '#{size}' is not positive" unless size.positive?
     raise Baza::Urror, 'The agent is empty' if agent.empty?
     get(
       pgsql.exec(
         'INSERT INTO job (token, name, uri1, size, errors, agent) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
-        [token, name, uri1, size, errors, agent]
+        [token, name.downcase, uri1, size, errors, agent]
       )[0]['id'].to_i
     )
   end
@@ -82,7 +82,7 @@ class Baza::Jobs
         get(row['id'].to_i),
         id: row['id'].to_i,
         created: Time.parse(row['created']),
-        name: row['name'],
+        name: row['name'].downcase,
         uri1: row['uri1'],
         agent: row['agent'],
         size: row['size'].to_i,
@@ -123,7 +123,7 @@ class Baza::Jobs
       'JOIN token ON token.id = job.token ' \
       'WHERE token.human = $1 AND job.name = $2 AND expired IS NULL ' \
       'LIMIT 1',
-      [@human.id, name]
+      [@human.id, name.downcase]
     ).empty?
   end
 
@@ -135,7 +135,7 @@ class Baza::Jobs
       'LEFT JOIN result ON result.job = job.id ' \
       'WHERE token.human = $1 AND job.name = $2 AND job.expired IS NULL AND result.id IS NULL ' \
       'LIMIT 1',
-      [@human.id, name]
+      [@human.id, name.downcase]
     ).empty?
   end
 
@@ -146,7 +146,7 @@ class Baza::Jobs
       'WHERE token.human = $1 AND job.name = $2 AND expired IS NULL ' \
       'ORDER BY job.created DESC ' \
       'LIMIT 1',
-      [@human.id, name]
+      [@human.id, name.downcase]
     )
     raise Baza::Urror, "No job by the name '#{name}' found" if rows.empty?
     get(rows[0]['id'].to_i)

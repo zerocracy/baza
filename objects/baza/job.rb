@@ -107,7 +107,7 @@ class Baza::Job
         'JOIN job ON token.id = job.token ',
         'WHERE secret.name = $1'
       ],
-      [name]
+      [name.downcase]
     ).each.to_a
   end
 
@@ -182,7 +182,7 @@ class Baza::Job
         ).first
         {
           id: @id,
-          name: row['name'],
+          name: row['name'].downcase,
           created: Time.parse(row['created']),
           uri1: row['uri1'],
           token: row['token'].to_i,
