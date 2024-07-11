@@ -208,7 +208,7 @@ class Baza::AppTest < Minitest::Test
     token = JSON.parse(last_response.body)['text']
     get('/push')
     post('/push', 'name' => test_name, 'token' => token)
-    assert_status(302)
+    assert_status(303)
     fb = Factbase.new
     fb.insert.foo = 'a' * (11 * 1024 * 1024)
     Tempfile.open do |f|
