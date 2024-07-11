@@ -102,6 +102,14 @@ class Baza::FrontPushTest < Minitest::Test
     assert_status(303)
   end
 
+  def test_rejects_broken_file_format
+    token = make_valid_token
+    header('X-Zerocracy-Token', token)
+    header('User-Agent', 'something')
+    put("/push/#{test_name}", 'some broken content')
+    assert_status(303)
+  end
+
   def test_starts_job_via_put
     app.settings.pipeline.start(0)
     token = make_valid_token

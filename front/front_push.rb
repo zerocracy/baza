@@ -49,6 +49,7 @@ def job_start(token, file, name)
   rescue StandardError => e
     raise Baza::Urror, "Cannot parse the data, try to upload again: #{e.message}"
   end
+  raise Baza::Urror, "An existing job named '#{name}' is running now" if token.human.jobs.busy?(name)
   fid = settings.fbs.save(file.path)
   token.start(
     name, fid,
@@ -73,7 +74,6 @@ post '/push' do
   token = the_human.tokens.find(text)
   name = params[:name]
   raise Baza::Urror, 'The "name" form part is missing' if name.nil?
-  raise Baza::Urror, "An existing job named '#{name}' is running now" if token.human.jobs.busy?(name)
   Tempfile.open do |f|
     tfile = params[:factbase]
     if tfile.nil?
@@ -94,7 +94,6 @@ put(%r{/push/([a-z0-9-]+)}) do
   raise Baza::Urror, 'The "X-Zerocracy-Token" HTTP header with a token is missing' if text.nil?
   token = settings.humans.his_token(text)
   name = params['captures'].first
-  raise Baza::Urror, "An existing job named '#{name}' is running now" if token.human.jobs.busy?(name)
   Tempfile.open do |f|
     request.body.rewind
     File.binwrite(f, request.body.read)
