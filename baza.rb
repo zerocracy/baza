@@ -129,7 +129,7 @@ end
 # Humans:
 configure do
   require_relative 'objects/baza/humans'
-  set :humans, Baza::Humans.new(settings.pgsql)
+  set :humans, Baza::Humans.new(settings.pgsql, tbot: settings.tbot)
 end
 
 # Factbases:
@@ -177,8 +177,7 @@ configure do
   settings.donations.start(60) do
     settings.humans.donate(
       amount: settings.donation_amount,
-      days: settings.donation_period,
-      tbot: settings.tbot
+      days: settings.donation_period
     )
   end
 end

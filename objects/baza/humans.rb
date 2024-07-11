@@ -33,8 +33,9 @@ require_relative 'urror'
 class Baza::Humans
   attr_reader :pgsql
 
-  def initialize(pgsql)
+  def initialize(pgsql, tbot: Baza::Tbot::Fake.new)
     @pgsql = pgsql
+    @tbot = tbot
   end
 
   def gc
@@ -98,7 +99,7 @@ class Baza::Humans
   end
 
   # Donate to all accounts that are not funded enough (and eligible for donation).
-  def donate(amount: 8, days: 30, tbot: Baza::Tbot::Fake.new)
+  def donate(amount: 8, days: 30)
     rows = @pgsql.exec(
       [
         'INSERT INTO receipt(human, zents, summary)',
@@ -116,9 +117,11 @@ class Baza::Humans
       [amount]
     )
     rows.each do |row|
-      tbot.notify(
+      @tbot.notify(
         get(row['human'].to_i),
-        "We topped up your account by #{format('%+0.2f', amount.to_f / 100_000)}."
+        "🍎 We topped up your account by #{format('%+0.2f', amount.to_f / 100_000)}.",
+        "We do this automatically every #{days} days, if your account doesn't",
+        'have enough funds.'
       )
     end
     rows.count

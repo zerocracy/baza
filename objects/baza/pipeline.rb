@@ -103,7 +103,8 @@ class Baza::Pipeline
         unless Baza::Errors.new(input).count.zero?
           @tbot.notify(
             job.jobs.human,
-            "The job [##{job.id}](https://www.zerocracy.com/jobs/#{job.id}) finished with errors."
+            "The job [##{job.id}](https://www.zerocracy.com/jobs/#{job.id})",
+            'finished with errors.'
           )
         end
       else

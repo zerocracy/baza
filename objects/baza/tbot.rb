@@ -35,7 +35,7 @@ require 'securerandom'
 class Baza::Tbot
   # Fake tbot.
   class Fake
-    def notify(human, msg)
+    def notify(human, *msg)
       # nothing
     end
   end
@@ -104,10 +104,10 @@ class Baza::Tbot
     row['secret']
   end
 
-  def notify(human, msg)
+  def notify(human, *lines)
     row = @pgsql.exec('SELECT id FROM telechat WHERE human = $1', [human.id])[0]
     return if row.nil?
-    @tp.post(row['chat'].to_i, msg)
+    @tp.post(row['chat'].to_i, lines.join(' '))
   end
 
   # Authentical the user and return his chat ID in Telegram.

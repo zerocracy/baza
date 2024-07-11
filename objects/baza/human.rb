@@ -23,6 +23,7 @@
 # SOFTWARE.
 
 require_relative 'urror'
+require_relative 'tbot'
 
 # Human being.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -31,10 +32,11 @@ require_relative 'urror'
 class Baza::Human
   attr_reader :id, :humans
 
-  def initialize(humans, id)
+  def initialize(humans, id, tbot: Baza::Tbot::Fake.new)
     @humans = humans
     raise 'Human ID must be an integer' unless id.is_a?(Integer)
     @id = id
+    @tbot = tbot
   end
 
   def pgsql
@@ -63,7 +65,7 @@ class Baza::Human
 
   def valves
     require_relative 'valves'
-    Baza::Valves.new(self)
+    Baza::Valves.new(self, tbot: @tbot)
   end
 
   def results

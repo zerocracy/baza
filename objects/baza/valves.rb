@@ -23,6 +23,7 @@
 # SOFTWARE.
 
 require 'base64'
+require_relative 'tbot'
 
 # Valves of a human.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -31,8 +32,9 @@ require 'base64'
 class Baza::Valves
   attr_reader :human
 
-  def initialize(human)
+  def initialize(human, tbot: Baza::Tbot::Fake.new)
     @human = human
+    @tbot = tbot
   end
 
   def pgsql
@@ -60,7 +62,7 @@ class Baza::Valves
     end
   end
 
-  def enter(name, badge)
+  def enter(name, badge, why: '')
     raise 'A block is required by the enter()' unless block_given?
     raise Baza::Urror, 'The name cannot be empty' if name.empty?
     raise Baza::Urror, 'The name is not valid' unless name.match?(/^[a-z0-9]+$/)
@@ -82,6 +84,11 @@ class Baza::Valves
             )[0]
             return dec(row['result']) unless row['result'].nil?
             throw :rollback unless row['owner'] == '1'
+            @tbot.notify(
+              human,
+              '🍒 A new [valve](https://www.zerocracy.com/valves) ',
+              "just entered for '`#{name}`': #{why.inspect}."
+            )
             throw :stop
           end
         end
