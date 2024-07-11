@@ -23,6 +23,7 @@
 # SOFTWARE.
 
 require 'iri'
+require 'always'
 require 'loog'
 require 'telepost'
 require 'securerandom'
@@ -43,13 +44,18 @@ class Baza::Tbot
     @pgsql = pgsql
     @tp = token.empty? ? Telepost::Fake.new : Telepost.new(token)
     @loog = loog
+    @always = Always.new(1).on_error { |e, _| @loog.error(Backtrace.new(e)) }
+  end
+
+  def to_s
+    @always.to_s
   end
 
   def start
-    Thread.start do
+    @always.start do
       @tp.run do |chat, message|
         @loog.debug("TG incoming message in chat ##{chat.id}: #{message.inspect}")
-        entry(chat.id)
+        entry(chat)
       end
     end
   end
@@ -57,6 +63,7 @@ class Baza::Tbot
   # Reply to the user in the chat and return user's secret.
   # @return [String] Secret to use in web auth
   def entry(chat)
+    chat = chat.id unless chat.is_a?(Integer)
     if @pgsql.exec('SELECT id FROM telechat WHERE id = $1', [chat]).empty?
       @pgsql.exec(
         'INSERT INTO telechat (id, secret) VALUES ($1, $2)',
@@ -83,11 +90,13 @@ class Baza::Tbot
           'in order to authenticate.'
         ].join
       )
+      @loog.debug("Invited user to authenticat, in TG chat ##{chat}")
     else
       @tp.post(
         chat,
         "I know that you are `@#{row['github']}`"
       )
+      @loog.debug("Greeted user @#{row['github']} in TG chat ##{chat}")
     end
     row['secret']
   end
