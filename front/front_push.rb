@@ -47,7 +47,7 @@ def job_start(token, file, name)
   begin
     fb.import(File.binread(file.path)) # just to check that it's readable
   rescue StandardError => e
-    raise Baza::Urror, "Cannot parse the data, try to upload again: #{e.message}"
+    raise Baza::Urror, "Cannot parse the data, try to upload again: #{e.message.inspect}"
   end
   raise Baza::Urror, "An existing job named '#{name}' is running now" if token.human.jobs.busy?(name)
   fid = settings.fbs.save(file.path)
