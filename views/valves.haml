@@ -18,9 +18,9 @@
       -# ID
       %col{style: 'width: 3em;'}
       -# Name
-      %col{style: 'width: 20em;'}
+      %col{style: 'width: 14em;'}
       -# Badge
-      %col{style: 'width: 20em;'}
+      %col{style: 'width: 18em;'}
       -# Why
       %col
       -# Result
@@ -28,7 +28,7 @@
       -# Created
       %col{style: 'width: 10em;'}
       -# Commands
-      %col{style: 'width: 6em;'}
+      %col{style: 'width: 3em;'}
     %thead
       %tr
         %th
@@ -73,7 +73,7 @@
         %td
           != ago(s[:created])
         %td
-          %a.ico{href: iri.cut('/valves').append(s['name']).append(s['badge']).append('remove'), title: 'Remove this valve', onclick: "return confirm('Are you sure you want to remove this valve?')"}
+          %a.ico{href: iri.cut('/valves').append(s[:name]).append(s[:badge]).append('remove'), title: 'Remove this valve', onclick: "return confirm('Are you sure you want to remove this valve?')"}
             %i.fa-regular.fa-trash-can
   %p
     - unless offset.zero?
