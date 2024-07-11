@@ -80,7 +80,7 @@ class Baza::Valves
                 'ON CONFLICT(human, name, badge) DO UPDATE SET owner = valve.owner + 1 ',
                 'RETURNING owner, result'
               ],
-              [@human.id, name, badge]
+              [@human.id, name.downcase, badge]
             )[0]
             return dec(row['result']) unless row['result'].nil?
             throw :rollback unless row['owner'] == '1'
@@ -99,13 +99,13 @@ class Baza::Valves
       r = yield
       pgsql.exec(
         'UPDATE valve SET result = $1 WHERE human = $2 AND name = $3 AND badge = $4',
-        [enc(r), @human.id, name, badge]
+        [enc(r), @human.id, name.downcase, badge]
       )
       r
     rescue StandardError => e
       pgsql.exec(
         'DELETE FROM valve WHERE human = $1 AND name = $2 AND badge = $3',
-        [@human.id, name, badge]
+        [@human.id, name.downcase, badge]
       )
       raise e
     end
@@ -114,7 +114,7 @@ class Baza::Valves
   def remove(name, badge)
     pgsql.exec(
       'DELETE FROM valve WHERE human = $1 AND name = $2 AND badge = $3',
-      [@human.id, name, badge]
+      [@human.id, name.downcase, badge]
     )
   end
 

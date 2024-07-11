@@ -34,7 +34,11 @@ SOFTWARE.
     </sql>
     <sql>
       DROP INDEX idx_lock1;
-      CREATE INDEX idx_lock_name_owner ON lock(human, LOWER(name), owner);
+      CREATE UNIQUE INDEX idx_lock_name_owner ON lock(human, LOWER(name), owner);
+    </sql>
+    <sql>
+      DROP INDEX idx_valve1;
+      CREATE UNIQUE INDEX idx_valve_name_badge ON valve(human, LOWER(name), badge);
     </sql>
   </changeSet>
 </databaseChangeLog>
