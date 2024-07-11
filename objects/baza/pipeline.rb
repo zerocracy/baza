@@ -27,6 +27,7 @@ require 'loog'
 require 'loog/tee'
 require 'backtrace'
 require 'judges/commands/update'
+require_relative 'tbot'
 require_relative 'humans'
 require_relative 'urror'
 require_relative 'errors'
@@ -38,11 +39,12 @@ require_relative 'errors'
 class Baza::Pipeline
   attr_reader :pgsql
 
-  def initialize(jdir, humans, fbs, loog)
+  def initialize(jdir, humans, fbs, loog, tbot: Baza::Tbot::Fake.new)
     @jdir = jdir
     @humans = humans
     @fbs = fbs
     @loog = loog
+    @tbot = tbot
     @always = Always.new(1).on_error { |e, _| @loog.error(Backtrace.new(e)) }
   end
 
@@ -97,6 +99,19 @@ class Baza::Pipeline
         code.zero? ? File.size(input) : nil,
         code.zero? ? Baza::Errors.new(input).count : nil
       )
+      if code.zero?
+        unless Baza::Errors.new(input).count.zero?
+          @tbot.notify(
+            job.jobs.human,
+            "The job [##{job.id}](https://www.zerocracy.com/jobs/#{job.id}) finished with errors."
+          )
+        end
+      else
+        @tbot.notify(
+          job.jobs.human,
+          "The job [##{job.id}](https://www.zerocracy.com/jobs/#{job.id}) failed."
+        )
+      end
       @loog.info("Job ##{job.id} finished, exit=#{code}!")
     end
   end

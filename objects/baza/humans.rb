@@ -22,6 +22,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+require_relative 'tbot'
 require_relative 'human'
 require_relative 'urror'
 
@@ -97,7 +98,7 @@ class Baza::Humans
   end
 
   # Donate to all accounts that are not funded enough (and eligible for donation).
-  def donate(amount: 8, days: 30)
+  def donate(amount: 8, days: 30, tbot: Baza::Tbot::Fake.new)
     rows = @pgsql.exec(
       [
         'INSERT INTO receipt(human, zents, summary)',
@@ -110,10 +111,16 @@ class Baza::Humans
         'WHERE b.id IS NULL',
         'GROUP BY human.id) AS x',
         'WHERE x.balance < $1 OR x.balance IS NULL',
-        'RETURNING id'
+        'RETURNING human'
       ],
       [amount]
     )
+    rows.each do |row|
+      tbot.notify(
+        get(row['human'].to_i),
+        "We topped up your account by #{format('%+0.2f', amount.to_f / 100_000)}."
+      )
+    end
     rows.count
   end
 end

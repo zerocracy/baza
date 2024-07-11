@@ -42,9 +42,6 @@ require 'truncate'
 require 'yaml'
 require 'zache'
 require_relative 'version'
-require_relative 'objects/baza/factbases'
-require_relative 'objects/baza/humans'
-require_relative 'objects/baza/pipeline'
 
 # see https://stackoverflow.com/questions/78547207
 disable :method_override
@@ -56,9 +53,17 @@ unless ENV['RACK_ENV'] == 'test'
   use Rack::SSL
 end
 
+# Sinatra configs:
+configure do
+  set :bind, '0.0.0.0'
+  set :server_settings, timeout: 25
+end
+
+# Global config data:
 configure do
   config = {
     'sentry' => '',
+    'tg_token' => '',
     's3' => {
       'key' => '',
       'secret' => '',
@@ -82,23 +87,24 @@ configure do
     end
     config = YAML.safe_load(File.open(f))
   end
-  set :bind, '0.0.0.0'
+  set :config, config
+end
+
+# Logging:
+configure do
   set :show_exceptions, false
   set :raise_errors, false
   set :dump_errors, true
-  set :config, config
   set :logging, false # to disable default Sinatra logging and use Loog
   if ENV['RACK_ENV'] == 'test'
     set :loog, Loog::NULL
   else
     set :loog, Loog::VERBOSE
   end
-  set :server_settings, timeout: 25
-  set :glogin, GLogin::Auth.new(
-    config['github']['id'],
-    config['github']['secret'],
-    'https://www.zerocracy.com/github-callback'
-  )
+end
+
+# PostgreSQL:
+configure do
   if File.exist?('target/pgsql-config.yml')
     set :pgsql, Pgtk::Pool.new(
       Pgtk::Wire::Yaml.new(File.join(__dir__, 'target/pgsql-config.yml')),
@@ -111,24 +117,43 @@ configure do
     )
   end
   settings.pgsql.start(4)
-  set :fbs, Baza::Factbases.new(
-    config['s3']['key'],
-    config['s3']['secret'],
-    config['s3']['region'],
-    config['s3']['bucket'],
-    loog: settings.loog
-  )
-  set :zache, Zache.new
+end
+
+# Telegram client:
+configure do
+  require_relative 'objects/baza/tbot'
+  set :tbot, Baza::Tbot.new(settings.pgsql, settings.config['tg_token'])
+  settings.tbot.start unless ENV['RACK_ENV'] == 'test'
+end
+
+# Humans:
+configure do
+  require_relative 'objects/baza/humans'
   set :humans, Baza::Humans.new(settings.pgsql)
 end
 
+# Factbases:
 configure do
+  require_relative 'objects/baza/factbases'
+  set :fbs, Baza::Factbases.new(
+    settings.config['s3']['key'],
+    settings.config['s3']['secret'],
+    settings.config['s3']['region'],
+    settings.config['s3']['bucket'],
+    loog: settings.loog
+  )
+end
+
+# Pipeline:
+configure do
+  require_relative 'objects/baza/pipeline'
   lib = File.absolute_path(File.join(__dir__, ENV['RACK_ENV'] == 'test' ? 'target/j' : 'j'))
   ['', 'lib', 'judges'].each { |d| FileUtils.mkdir_p(File.join(lib, d)) }
-  set :pipeline, Baza::Pipeline.new(lib, settings.humans, settings.fbs, settings.loog)
+  set :pipeline, Baza::Pipeline.new(lib, settings.humans, settings.fbs, settings.loog, tbot: settings.tbot)
   settings.pipeline.start unless ENV['RACK_ENV'] == 'test'
 end
 
+# Garbage collection:
 configure do
   set :gc, Always.new(1)
   set :expiration_days, 14
@@ -144,13 +169,28 @@ configure do
   end
 end
 
+# Donations:
 configure do
   set :donations, Always.new(1)
   set :donation_amount, 8 * 100_000
   set :donation_period, 30
   settings.donations.start(60) do
-    settings.humans.donate(amount: settings.donation_amount, days: settings.donation_period)
+    settings.humans.donate(
+      amount: settings.donation_amount,
+      days: settings.donation_period,
+      tbot: settings.tbot
+    )
   end
+end
+
+# Login and others:
+configure do
+  set :glogin, GLogin::Auth.new(
+    settings.config['github']['id'],
+    settings.config['github']['secret'],
+    'https://www.zerocracy.com/github-callback'
+  )
+  set :zache, Zache.new
 end
 
 get '/' do
