@@ -53,8 +53,9 @@ class Baza::Tbot
 
   def start
     @always.start do
-      @tp.run do |chat, message|
-        @loog.debug("TG incoming message in chat ##{chat.id}: #{message.inspect}")
+      @tp.run do |_client, message|
+        chat = message.chat.id
+        @loog.debug("TG incoming message in chat ##{chat}: #{message.inspect}")
         entry(chat)
       end
     end
@@ -63,7 +64,6 @@ class Baza::Tbot
   # Reply to the user in the chat and return user's secret.
   # @return [String] Secret to use in web auth
   def entry(chat)
-    chat = chat.id unless chat.is_a?(Integer)
     if @pgsql.exec('SELECT id FROM telechat WHERE id = $1', [chat]).empty?
       @pgsql.exec(
         'INSERT INTO telechat (id, secret) VALUES ($1, $2)',
