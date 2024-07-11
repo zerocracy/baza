@@ -41,9 +41,11 @@ class Baza::ValveTest < Minitest::Test
     assert_equal(42, x)
     assert(valves.each.to_a.first[:id].positive?)
     assert(!valves.each.to_a.first[:created].nil?)
-    assert_equal(n, valves.each.to_a.first[:name])
-    assert_equal(b, valves.each.to_a.first[:badge])
-    assert_equal(42, valves.each.to_a.first[:result])
+    v = valves.each.to_a.first
+    assert_equal(n, v[:name])
+    assert_equal(b, v[:badge])
+    assert_equal(42, v[:result])
+    assert_equal('', v[:why])
     y = valves.enter(n, b) { 55 }
     assert_equal(42, y)
     valves.remove(n, b)

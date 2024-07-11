@@ -27,7 +27,8 @@ get '/valves' do
     :valves,
     :default,
     title: '/valves',
-    valves: the_human.valves
+    valves: the_human.valves,
+    offset: (params[:offset] || '0').to_i
   )
 end
 

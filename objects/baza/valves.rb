@@ -48,15 +48,23 @@ class Baza::Valves
     ).empty?
   end
 
-  def each
-    return to_enum(__method__) unless block_given?
-    pgsql.exec('SELECT * FROM valve WHERE human = $1 ORDER BY created DESC', [@human.id]).each do |row|
+  def each(offset: 0)
+    return to_enum(__method__, offset:) unless block_given?
+    pgsql.exec(
+      [
+        'SELECT * FROM valve WHERE human = $1 ',
+        'ORDER BY created DESC ',
+        "OFFSET #{offset.to_i}"
+      ].join,
+      [@human.id]
+    ).each do |row|
       v = {
         id: row['id'].to_i,
         created: Time.parse(row['created']),
         name: row['name'],
         badge: row['badge'],
-        result: dec(row['result'])
+        result: dec(row['result']),
+        why: row['why']
       }
       yield v
     end
@@ -75,12 +83,12 @@ class Baza::Valves
           pgsql.transaction do |t|
             row = t.exec(
               [
-                'INSERT INTO valve (human, name, badge, owner) ',
-                'VALUES ($1, $2, $3, 1) ',
+                'INSERT INTO valve (human, name, badge, owner, why) ',
+                'VALUES ($1, $2, $3, 1, $4) ',
                 'ON CONFLICT(human, name, badge) DO UPDATE SET owner = valve.owner + 1 ',
                 'RETURNING owner, result'
               ],
-              [@human.id, name.downcase, badge]
+              [@human.id, name.downcase, badge, why]
             )[0]
             return dec(row['result']) unless row['result'].nil?
             throw :rollback unless row['owner'] == '1'

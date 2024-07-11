@@ -11,6 +11,8 @@
       -# Name
       %col{style: 'width: 20em;'}
       -# Badge
+      %col{style: 'width: 20em;'}
+      -# Why
       %col
       -# Result
       %col{style: 'width: 10em;'}
@@ -27,12 +29,18 @@
         %th
           Badge
         %th
+          Why
+        %th
           Result
         %th
           Created
         %th
     %tbody
-    - valves.each do |s|
+    - total = 0
+    - max = 10
+    - valves.each(offset: offset) do |s|
+      - total += 1
+      - break if total > max
       %tr
         %td.ff
           = "##{s[:id]}"
@@ -40,6 +48,8 @@
           = s[:name]
         %td.ff
           = s[:badge]
+        %td
+          = s[:why]
         %td.ff
           - if s[:result].nil?
             %span.darkred
@@ -56,3 +66,10 @@
         %td
           %a.ico{href: iri.cut('/valves').append(s['name']).append(s['badge']).append('remove'), title: 'Remove this valve', onclick: "return confirm('Are you sure you want to remove this valve?')"}
             %i.fa-regular.fa-trash-can
+  %p
+    - unless offset.zero?
+      %a{href: iri.del(:offset)}
+        Back
+    - if total > max
+      %a{href: iri.over(offset: offset + max)}
+        More
