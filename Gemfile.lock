@@ -390,25 +390,26 @@ PLATFORMS
   x86_64-linux-musl
 
 DEPENDENCIES
-  always (~> 0.0)
+  always
   aws-sdk-core (= 3.201.1)
   aws-sdk-s3 (= 1.156.0)
-  backtrace (= 0.4.0)
+  backtrace
   concurrent-ruby (= 1.3.3)
-  factbase (~> 0.0)
-  glogin (= 0.15.0)
+  factbase
+  faraday
+  glogin
   haml (= 6.3.0)
-  iri (= 0.8.0)
-  judges (~> 0.0)
-  loog (= 0.5.2)
+  iri
+  judges
+  loog
   minitest (= 5.24.1)
-  pgtk (= 0.9.3)
+  pgtk
   rack (= 3.1.6)
   rack-ssl (= 1.4.1)
   rack-test (= 2.1.0)
   rake (= 13.2.1)
   rerun (= 0.14.0)
-  retries (~> 0.0)
+  retries
   rspec-rails (= 6.1.3)
   rubocop (= 1.65.0)
   rubocop-rspec (= 3.0.2)
@@ -420,12 +421,12 @@ DEPENDENCIES
   sinatra (= 4.0.0)
   sinatra-contrib (= 4.0.0)
   sprockets (= 4.2.1)
-  tago (= 0.0.2)
-  telepost (~> 0.0)
+  tago
+  telepost
   truncate (= 0.1.0)
-  veils (= 0.4.0)
-  xcop (= 0.7.1)
-  zache (= 0.13.1)
+  veils
+  xcop
+  zache
 
 RUBY VERSION
    ruby 3.2.1p31
