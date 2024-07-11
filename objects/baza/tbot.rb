@@ -48,7 +48,7 @@ class Baza::Tbot
   def start
     Thread.start do
       @tp.run do |chat, _message|
-        entry(chat)
+        entry(chat.id)
       end
     end
   end
