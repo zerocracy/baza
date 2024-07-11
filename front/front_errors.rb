@@ -24,6 +24,12 @@
 
 require_relative '../objects/baza/urror'
 
+configure do
+  set :show_exceptions, false
+  set :raise_errors, false
+  set :dump_errors, true
+end
+
 not_found do
   status 404
   content_type('text/html', charset: 'utf-8')

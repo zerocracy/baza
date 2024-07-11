@@ -95,9 +95,6 @@ end
 
 # Logging:
 configure do
-  set :show_exceptions, false
-  set :raise_errors, false
-  set :dump_errors, true
   set :logging, false # to disable default Sinatra logging and use Loog
   if ENV['RACK_ENV'] == 'test'
     set :loog, Loog::NULL

@@ -1,0 +1,193 @@
+# frozen_string_literal: true
+
+# MIT License
+#
+# Copyright (c) 2009-2024 Zerocracy
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+require 'minitest/autorun'
+require 'rack/test'
+require 'factbase'
+require_relative '../test__helper'
+require_relative '../../objects/baza'
+require_relative '../../baza'
+
+module Rack
+  module Test
+    class Session
+      def default_env
+        { 'REMOTE_ADDR' => '127.0.0.1', 'HTTPS' => 'on' }.merge(headers_for_env)
+      end
+    end
+  end
+end
+
+class Baza::FrontPushTest < Minitest::Test
+  include Rack::Test::Methods
+
+  def app
+    Sinatra::Application
+  end
+
+  def test_starts_job_via_post
+    uname = test_name
+    login('yegor256')
+    post('/gift', "human=#{uname}&zents=9999&summary=no")
+    login(uname)
+    get('/tokens')
+    post('/tokens/add', 'name=foo')
+    id = last_response.headers['X-Zerocracy-TokenId'].to_i
+    get("/tokens/#{id}.json")
+    token = JSON.parse(last_response.body)['text']
+    get('/push')
+    header('User-Agent', 'something')
+    post('/push', 'name' => test_name, 'token' => token)
+    assert_status(302)
+    fb = Factbase.new
+    fb.insert.foo = 'booom \x01\x02\x03'
+    assert_status(302)
+    Tempfile.open do |f|
+      File.binwrite(f.path, fb.export)
+      post(
+        '/push',
+        'name' => test_name,
+        'token' => token,
+        'factbase' => Rack::Test::UploadedFile.new(f.path, 'application/zip')
+      )
+    end
+    assert_status(302)
+  end
+
+  def test_rejects_file_upload
+    uname = test_name
+    login('yegor256')
+    post('/gift', "human=#{uname}&zents=9999&summary=no")
+    login(uname)
+    get('/tokens')
+    post('/tokens/add', 'name=foo')
+    id = last_response.headers['X-Zerocracy-TokenId'].to_i
+    get("/tokens/#{id}.json")
+    token = JSON.parse(last_response.body)['text']
+    get('/push')
+    post('/push', 'name' => test_name, 'token' => token)
+    assert_status(303)
+    fb = Factbase.new
+    fb.insert.foo = 'a' * (11 * 1024 * 1024)
+    Tempfile.open do |f|
+      File.binwrite(f.path, fb.export)
+      post(
+        '/push',
+        'name' => test_name,
+        'token' => token,
+        'factbase' => Rack::Test::UploadedFile.new(f.path, 'application/zip')
+      )
+    end
+    assert_status(413)
+  end
+
+  def test_starts_job_via_put
+    app.settings.pipeline.start(0)
+    token = make_valid_token
+    fb = Factbase.new
+    (0..100).each do |i|
+      fb.insert.foo = "booom \x01\x02\x03 #{i}"
+    end
+    header('X-Zerocracy-Token', token)
+    header('User-Agent', 'something')
+    name = test_name
+    put("/push/#{name}", fb.export)
+    assert_status(200)
+    id = last_response.body.to_i
+    assert(id.positive?)
+    get("/jobs/#{id}")
+    assert_status(200)
+    get("/jobs/#{id}/input.html")
+    assert_status(200)
+    get("/recent/#{name}.txt")
+    assert_status(200)
+    rid = last_response.body.to_i
+    cycles = 0
+    loop do
+      get("/finished/#{rid}")
+      assert_status(200)
+      break if last_response.body == 'yes'
+      sleep 0.1
+      cycles += 1
+      break if cycles > 10
+    end
+    get("/pull/#{rid}.fb")
+    assert_status(200)
+    get("/inspect/#{id}.fb")
+    assert_status(200)
+    fb.query('(always)').delete!
+    fb.import(last_response.body)
+    assert(fb.query('(exists foo)').each.to_a[0].foo.start_with?('booom'))
+    get("/stdout/#{rid}.txt")
+    assert_status(200)
+    get("/jobs/#{id}/output.html")
+    assert_status(200)
+    get("/jobs/#{rid}/expire")
+    assert_status(302)
+    app.settings.pipeline.stop
+  end
+
+  def test_rejects_duplicate_puts
+    token = make_valid_token
+    fb = Factbase.new
+    fb.insert.foo = 42
+    header('X-Zerocracy-Token', token)
+    name = test_name
+    header('User-Agent', 'something')
+    put("/push/#{name}", fb.export)
+    assert_status(200)
+    header('User-Agent', 'something')
+    put("/push/#{name}", fb.export)
+    assert_status(303)
+  end
+
+  private
+
+  def make_valid_token
+    uname = test_name
+    login('yegor256')
+    post('/gift', "human=#{uname}&zents=555555&summary=no")
+    login(uname)
+    get('/tokens')
+    post('/tokens/add', 'name=foo')
+    id = last_response.headers['X-Zerocracy-TokenId'].to_i
+    get("/tokens/#{id}.json")
+    JSON.parse(last_response.body)['text']
+  end
+
+  def assert_status(code)
+    assert_equal(
+      code, last_response.status,
+      "#{last_request.url}:\n#{last_response.headers}\n#{last_response.body}"
+    )
+  end
+
+  def login(name = test_name)
+    enc = GLogin::Cookie::Open.new(
+      { 'login' => name, 'id' => app.humans.ensure(name).id.to_s },
+      ''
+    ).to_s
+    set_cookie("auth=#{enc}")
+  end
+end
