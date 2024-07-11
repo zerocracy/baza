@@ -270,6 +270,11 @@ class Baza::AppTest < Minitest::Test
     assert_status(200)
   end
 
+  def test_telegram_auth
+    get('/tauth?secret=wrong')
+    assert_status(302)
+  end
+
   private
 
   def make_valid_token
