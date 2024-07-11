@@ -29,19 +29,7 @@ require_relative '../test__helper'
 require_relative '../../objects/baza'
 require_relative '../../baza'
 
-module Rack
-  module Test
-    class Session
-      def default_env
-        { 'REMOTE_ADDR' => '127.0.0.1', 'HTTPS' => 'on' }.merge(headers_for_env)
-      end
-    end
-  end
-end
-
 class Baza::FrontPushTest < Minitest::Test
-  include Rack::Test::Methods
-
   def app
     Sinatra::Application
   end
@@ -182,20 +170,5 @@ class Baza::FrontPushTest < Minitest::Test
     id = last_response.headers['X-Zerocracy-TokenId'].to_i
     get("/tokens/#{id}.json")
     JSON.parse(last_response.body)['text']
-  end
-
-  def assert_status(code)
-    assert_equal(
-      code, last_response.status,
-      "#{last_request.url}:\n#{last_response.headers}\n#{last_response.body}"
-    )
-  end
-
-  def login(name = test_name)
-    enc = GLogin::Cookie::Open.new(
-      { 'login' => name, 'id' => app.humans.ensure(name).id.to_s },
-      ''
-    ).to_s
-    set_cookie("auth=#{enc}")
   end
 end

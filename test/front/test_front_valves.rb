@@ -22,24 +22,20 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-get '/valves' do
-  assemble(
-    :valves,
-    :default,
-    title: '/valves',
-    valves: the_human.valves,
-    offset: (params[:offset] || '0').to_i
-  )
-end
+require 'minitest/autorun'
+require 'factbase'
+require_relative '../test__helper'
+require_relative '../../objects/baza'
+require_relative '../../baza'
 
-post('/valve-add') do
-  the_human.valves.enter(params[:name], params[:badge], why: params[:why]) { params[:result] }
-  flash(iri.cut('/valves'), "The valve '#{params[:badge]}' has been added for '#{params[:name]}'")
-end
+class Baza::FrontPushTest < Minitest::Test
+  def app
+    Sinatra::Application
+  end
 
-get(%r{/valves/([a-z0-9]+)/([a-z_A-Z0-9-]+)/remove}) do
-  n = params['captures'].first
-  badge = params['captures'][1]
-  the_human.valves.remove(n, badge)
-  flash(iri.cut('/valves'), "The valve '#{badge}' just removed for '#{n}'")
+  def test_add
+    login
+    post('/valve-add', 'name=hi&badge=abc&why=nothing')
+    assert_status(302)
+  end
 end

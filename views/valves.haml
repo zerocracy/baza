@@ -1,3 +1,12 @@
+- if the_human.admin?
+  %form{method: 'post', action: iri.cut('/valve-add')}
+    %fieldset
+      %input{ type: 'text', name: 'name', tabindex: 1, placeholder: 'Job name', size: 14, maxlength: 32, required: true }
+      %input{ type: 'text', name: 'badge', tabindex: 2, placeholder: 'Badge', size: 20, maxlength: 64, required: true }
+      %input{ type: 'text', name: 'result', tabindex: 3, placeholder: 'Result', size: 5, required: true }
+      %input{ type: 'text', name: 'why', tabindex: 4, placeholder: 'Why', size: 50, required: true }
+      %input{ type: 'submit', tabindex: 5, value: 'Add' }
+
 - if valves.empty?
   %p
     There are no valves yet.

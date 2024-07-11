@@ -35,20 +35,47 @@ require 'minitest/autorun'
 require 'pgtk/pool'
 require 'loog'
 require 'securerandom'
+require 'rack/test'
+require 'glogin/cookie'
 
-module Minitest
-  class Test
-    def test_pgsql
-      # rubocop:disable Style/ClassVars
-      @@test_pgsql ||= Pgtk::Pool.new(
-        Pgtk::Wire::Yaml.new(File.join(__dir__, '../target/pgsql-config.yml')),
-        log: Loog::NULL
-      ).start
-      # rubocop:enable Style/ClassVars
+module Rack
+  module Test
+    class Session
+      def default_env
+        { 'REMOTE_ADDR' => '127.0.0.1', 'HTTPS' => 'on' }.merge(headers_for_env)
+      end
     end
+  end
+end
 
-    def test_name
-      "jeff#{SecureRandom.hex(8)}"
-    end
+class Minitest::Test
+  include Rack::Test::Methods
+
+  def test_pgsql
+    # rubocop:disable Style/ClassVars
+    @@test_pgsql ||= Pgtk::Pool.new(
+      Pgtk::Wire::Yaml.new(File.join(__dir__, '../target/pgsql-config.yml')),
+      log: Loog::NULL
+    ).start
+    # rubocop:enable Style/ClassVars
+  end
+
+  def test_name
+    "jeff#{SecureRandom.hex(8)}"
+  end
+
+  def login(name = test_name)
+    enc = GLogin::Cookie::Open.new(
+      { 'login' => name, 'id' => app.humans.ensure(name).id.to_s },
+      ''
+    ).to_s
+    set_cookie("auth=#{enc}")
+  end
+
+  def assert_status(code)
+    assert_equal(
+      code, last_response.status,
+      "#{last_request.url}:\n#{last_response.headers}\n#{last_response.body}"
+    )
   end
 end
