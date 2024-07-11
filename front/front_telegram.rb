@@ -24,5 +24,5 @@
 
 get '/tauth' do
   id = settings.tbot.auth(the_human, params[:secret])
-  flash(iri.cut('/'), "You have been authenticated in the chat ##{id}")
+  flash(iri.cut('/dash'), "You have been authenticated in the chat ##{id}")
 end

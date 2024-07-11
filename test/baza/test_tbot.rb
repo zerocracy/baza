@@ -49,6 +49,16 @@ class Baza::TbotTest < Minitest::Test
     assert_raises(Baza::Urror) { tbot.auth(human, 'wrong-secret') }
   end
 
+  def test_double_auth
+    tbot = Baza::Tbot.new(test_pgsql, '', loog: Loog::VERBOSE)
+    secret = tbot.entry(55)
+    humans = Baza::Humans.new(test_pgsql)
+    first = humans.ensure(test_name)
+    tbot.auth(first, secret)
+    second = humans.ensure(test_name)
+    assert_raises(Baza::Urror) { tbot.auth(second, secret) }
+  end
+
   def test_auth_right
     tbot = Baza::Tbot.new(test_pgsql, '', loog: Loog::VERBOSE)
     secret = tbot.entry(42)
