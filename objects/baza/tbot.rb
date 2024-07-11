@@ -113,7 +113,7 @@ class Baza::Tbot
   # Authentical the user and return his chat ID in Telegram.
   # @return [Integer] Chat ID in TG
   def auth(human, secret)
-    unless @pgsql.exec('SELECT id FROM telechat WHERE human != $1 AND secret = $2', [human.id, secret]).empty?
+    unless @pgsql.exec('SELECT id FROM telechat WHERE human = $1', [human.id]).empty?
       raise Baza::Urror, 'Most probably you are already using another Telegram chat'
     end
     rows = @pgsql.exec('UPDATE telechat SET human = $1 WHERE secret = $2 RETURNING id', [human.id, secret])

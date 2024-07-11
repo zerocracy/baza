@@ -56,7 +56,7 @@ class Baza::TbotTest < Minitest::Test
     first = humans.ensure(test_name)
     tbot.auth(first, secret)
     second = humans.ensure(test_name)
-    assert_raises(Baza::Urror) { tbot.auth(second, secret) }
+    assert_raises(Baza::Urror) { tbot.auth(second, 'another secret') }
   end
 
   def test_auth_right
