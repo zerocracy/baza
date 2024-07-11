@@ -22,11 +22,19 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 -->
-<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd" logicalFilePath="021-secret-lower-unique.xml">
-  <changeSet id="021" author="yegor256">
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd" logicalFilePath="020-unique-lower.xml">
+  <changeSet id="020" author="yegor256">
+    <sql>
+      DROP INDEX idx_human1;
+      CREATE UNIQUE INDEX idx_human_github ON human(LOWER(github));
+    </sql>
     <sql>
       DROP INDEX idx_secret1;
       CREATE UNIQUE INDEX idx_secret_name_key ON secret(human, LOWER(name), LOWER(key));
+    </sql>
+    <sql>
+      DROP INDEX idx_lock1;
+      CREATE INDEX idx_lock_name_owner ON lock(human, LOWER(name), owner);
     </sql>
   </changeSet>
 </databaseChangeLog>

@@ -57,7 +57,7 @@ class Baza::Locks
           'VALUES ($1, $2, $3) ',
           'ON CONFLICT (human, name, owner) DO UPDATE SET owner = lock.owner'
         ],
-        [@human.id, name, owner]
+        [@human.id, name.downcase, owner]
       )
     rescue PG::UniqueViolation
       raise Baza::Urror, "The '#{name}' lock is occupied by another owner, '#{owner}' can't get it now"
@@ -67,7 +67,7 @@ class Baza::Locks
   def unlock(name, owner)
     pgsql.exec(
       'DELETE FROM lock WHERE human = $1 AND owner = $3 AND name = $2',
-      [@human.id, name, owner]
+      [@human.id, name.downcase, owner]
     )
   end
 end
