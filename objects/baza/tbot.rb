@@ -71,6 +71,10 @@ class Baza::Tbot
     @always.to_s
   end
 
+  def backtraces
+    @always.backtraces
+  end
+
   def start
     @always.start do
       @tp.run do |_client, message|
@@ -125,7 +129,8 @@ class Baza::Tbot
   def notify(human, *lines)
     row = @pgsql.exec('SELECT id FROM telechat WHERE human = $1', [human.id])[0]
     return if row.nil?
-    @tp.post(row['chat'].to_i, lines.join(' '))
+    chat = row['id'].to_i
+    @tp.post(chat, *lines)
   end
 
   # Authentical the user and return his chat ID in Telegram.

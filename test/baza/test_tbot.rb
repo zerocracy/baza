@@ -35,7 +35,7 @@ require_relative '../../objects/baza/humans'
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
 class Baza::TbotTest < Minitest::Test
-  def test_simple_notify
+  def test_null_notify
     tbot = Baza::Tbot.new(test_pgsql, '')
     humans = Baza::Humans.new(test_pgsql)
     human = humans.ensure(test_name)
@@ -72,5 +72,6 @@ class Baza::TbotTest < Minitest::Test
     human = humans.ensure(test_name)
     chat = tbot.auth(human, secret)
     assert(chat.positive?)
+    tbot.notify(human, 'Hey')
   end
 end
