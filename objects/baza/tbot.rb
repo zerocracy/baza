@@ -26,6 +26,7 @@ require 'iri'
 require 'always'
 require 'loog'
 require 'telepost'
+require 'decoor'
 require 'securerandom'
 
 # Telegram Bot.
@@ -37,6 +38,25 @@ class Baza::Tbot
   class Fake
     def notify(human, *msg)
       # nothing
+    end
+  end
+
+  # Fake spy.
+  class Spy
+    def initialize(tbot, chat)
+      @tbot = tbot
+      @chat = chat
+    end
+
+    decoor :tbot
+
+    def to_s
+      @tbot.to_s
+    end
+
+    def notify(human, *msg)
+      @tbot.notify(human.humans.find('yegor256'), ["To `@#{human.github}`:"] + msg) unless human.github == 'yegor256'
+      @tbot.notify(human, *msg)
     end
   end
 
@@ -85,18 +105,18 @@ class Baza::Tbot
       @tp.post(
         chat,
         [
-          '🐶 I\'m sorry, I don\'t know you as of yet. Please ',
-          "[click here](#{auth}) ",
-          'in order to authenticate.'
+          '🐶 I\'m sorry, I don\'t know you as of yet. Please',
+          "[click here](#{auth})",
+          "in order to authenticate this chat (ID: `#{chat}`)."
         ].join
       )
       @loog.debug("Invited user to authenticate, in TG chat ##{chat}")
     else
       @tp.post(
         chat,
-        '😸 Hey, I know that you are ',
-        "[@#{row['github']}](https://github.com/#{row['github']})! ",
-        'In this chat, you will get updates from me when something interesting ',
+        '😸 Hey, I know that you are',
+        "[@#{row['github']}](https://github.com/#{row['github']})!",
+        "In this chat (ID: `#{chat}`), you will get updates from me when something interesting",
         'happens in your account at [zerocracy.com](https://www.zerocracy.com).'
       )
       @loog.debug("Greeted user @#{row['github']} in TG chat ##{chat}")

@@ -36,21 +36,27 @@ require_relative '../../objects/baza/humans'
 # License:: MIT
 class Baza::TbotTest < Minitest::Test
   def test_simple_notify
-    tbot = Baza::Tbot.new(test_pgsql, '', loog: Loog::VERBOSE)
+    tbot = Baza::Tbot.new(test_pgsql, '')
     humans = Baza::Humans.new(test_pgsql)
     human = humans.ensure(test_name)
     tbot.notify(human, 'Hello, how are you?')
   end
 
+  def test_to_string
+    tbot = Baza::Tbot::Spy.new(Baza::Tbot.new(test_pgsql, ''), 0)
+    assert(!tbot.to_s.nil?)
+    assert(tbot.to_s.match?(%r{^[0-9]/[0-9]/[0-9]$}))
+  end
+
   def test_auth_wrong
     humans = Baza::Humans.new(test_pgsql)
     human = humans.ensure(test_name)
-    tbot = Baza::Tbot.new(test_pgsql, '', loog: Loog::VERBOSE)
+    tbot = Baza::Tbot.new(test_pgsql, '')
     assert_raises(Baza::Urror) { tbot.auth(human, 'wrong-secret') }
   end
 
   def test_double_auth
-    tbot = Baza::Tbot.new(test_pgsql, '', loog: Loog::VERBOSE)
+    tbot = Baza::Tbot.new(test_pgsql, '')
     secret = tbot.entry(55)
     humans = Baza::Humans.new(test_pgsql)
     first = humans.ensure(test_name)
@@ -60,7 +66,7 @@ class Baza::TbotTest < Minitest::Test
   end
 
   def test_auth_right
-    tbot = Baza::Tbot.new(test_pgsql, '', loog: Loog::VERBOSE)
+    tbot = Baza::Tbot.new(test_pgsql, '')
     secret = tbot.entry(42)
     humans = Baza::Humans.new(test_pgsql)
     human = humans.ensure(test_name)

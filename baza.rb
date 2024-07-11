@@ -63,7 +63,10 @@ end
 configure do
   config = {
     'sentry' => '',
-    'tg_token' => '',
+    'tg' => {
+      'token' => '',
+      'admin_chat' => ''
+    },
     's3' => {
       'key' => '',
       'secret' => '',
@@ -122,7 +125,14 @@ end
 # Telegram client:
 configure do
   require_relative 'objects/baza/tbot'
-  set :tbot, Baza::Tbot.new(settings.pgsql, settings.config['tg_token'], loog: settings.loog)
+  set :tbot, Baza::Tbot::Spy.new(
+    Baza::Tbot.new(
+      settings.pgsql,
+      settings.config['tg']['token'],
+      loog: settings.loog
+    ),
+    settings.config['tg']['admin_chat']
+  )
   settings.tbot.start unless ENV['RACK_ENV'] == 'test'
 end
 

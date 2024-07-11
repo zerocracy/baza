@@ -67,8 +67,11 @@ helpers do
     end
   end
 
-  def footer_status(title, always)
-    a, b, c = always.to_s.split('/').map(&:to_i)
+  def footer_status(title)
+    always = settings.send(title)
+    s = always.to_s
+    a, b, c = s.split('/').map(&:to_i)
+    return "#{title}:#{s[0..40].inspect}" if c.nil?
     if c.positive?
       c =
         "<a href='#{iri.cut('/footer/status').add(badge: title)}'>" \
