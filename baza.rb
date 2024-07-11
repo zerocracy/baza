@@ -122,7 +122,7 @@ end
 # Telegram client:
 configure do
   require_relative 'objects/baza/tbot'
-  set :tbot, Baza::Tbot.new(settings.pgsql, settings.config['tg_token'])
+  set :tbot, Baza::Tbot.new(settings.pgsql, settings.config['tg_token'], loog: settings.loog)
   settings.tbot.start unless ENV['RACK_ENV'] == 'test'
 end
 

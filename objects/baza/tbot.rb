@@ -47,7 +47,8 @@ class Baza::Tbot
 
   def start
     Thread.start do
-      @tp.run do |chat, _message|
+      @tp.run do |chat, message|
+        @loog.debug("TG incoming message in chat ##{chat.id}: #{message.inspect}")
         entry(chat.id)
       end
     end
