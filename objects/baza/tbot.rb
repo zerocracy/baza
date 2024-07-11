@@ -90,13 +90,13 @@ class Baza::Tbot
           'in order to authenticate.'
         ].join
       )
-      @loog.debug("Invited user to authenticat, in TG chat ##{chat}")
+      @loog.debug("Invited user to authenticate, in TG chat ##{chat}")
     else
       @tp.post(
         chat,
         '😸 Hey, I know that you are ',
-        "[`@#{row['github']}`](https://github.com/#{row['github']})! ",
-        'In this chat you will get updates from me, when something intersting ',
+        "[@#{row['github']}](https://github.com/#{row['github']})! ",
+        'In this chat, you will get updates from me when something interesting ',
         'happens in your account at [zerocracy.com](https://www.zerocracy.com).'
       )
       @loog.debug("Greeted user @#{row['github']} in TG chat ##{chat}")
