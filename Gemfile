@@ -40,7 +40,7 @@ gem 'judges'
 gem 'loog'
 gem 'minitest', '5.24.1', require: false
 gem 'pgtk'
-gem 'rack', '3.1.6'
+gem 'rack', '3.1.7'
 gem 'rack-ssl', '1.4.1'
 gem 'rack-test', '2.1.0'
 gem 'rake', '13.2.1', require: false
