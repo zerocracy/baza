@@ -34,6 +34,26 @@ def user_agent
   agent
 end
 
+# @param [Baza::Token] token The token to start at
+# @param [File] file The file with a factbase
+# @param [String] name The name of the job
+# @return [Baza::Job] The job just started
+def job_start(token, file, name)
+  fb = Factbase.new
+  begin
+    fb.import(File.binread(file.path)) # just to check that it's readable
+  rescue StandardError => e
+    raise Baza::Urror, "Cannot parse the data, try to upload again: #{e.message}"
+  end
+  fid = settings.fbs.save(file.path)
+  token.start(
+    name, fid,
+    File.size(file.path),
+    Baza::Errors.new(file.path).count,
+    user_agent
+  )
+end
+
 get '/push' do
   assemble(
     :push,
@@ -62,13 +82,7 @@ post '/push' do
       FileUtils.copy(tfile[:tempfile], f.path)
       File.delete(tfile[:tempfile])
     end
-    fid = settings.fbs.save(f.path)
-    job = token.start(
-      name, fid,
-      File.size(f.path),
-      Baza::Errors.new(f.path).count,
-      user_agent
-    )
+    job = job_start(token, f, name)
     settings.loog.info("New push arrived via HTTP POST, job ID is ##{job.id}")
     flash(iri.cut('/jobs'), "New job ##{job.id} started")
   end
@@ -84,13 +98,7 @@ put(%r{/push/([a-z0-9-]+)}) do
   Tempfile.open do |f|
     request.body.rewind
     File.binwrite(f, request.body.read)
-    fid = settings.fbs.save(f.path)
-    job = token.start(
-      name, fid,
-      File.size(f.path),
-      Baza::Errors.new(f.path).count,
-      user_agent
-    )
+    job = job_start(token, f, name)
     settings.loog.info("New push arrived via HTTP PUT, job ID is #{job.id}")
     job.id.to_s
   end
