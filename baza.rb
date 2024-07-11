@@ -192,13 +192,8 @@ configure do
   end
 end
 
-# Login and others:
+# Others:
 configure do
-  set :glogin, GLogin::Auth.new(
-    settings.config['github']['id'],
-    settings.config['github']['secret'],
-    'https://www.zerocracy.com/github-callback'
-  )
   set :zache, Zache.new
 end
 

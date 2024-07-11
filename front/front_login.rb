@@ -25,6 +25,14 @@
 require 'unpiercable'
 require_relative '../objects/baza/human'
 
+configure do
+  set :glogin, GLogin::Auth.new(
+    settings.config['github']['id'],
+    settings.config['github']['secret'],
+    'https://www.zerocracy.com/github-callback'
+  )
+end
+
 before '/*' do
   cookies[:auth] = params[:auth] if params[:auth]
   if cookies[:auth]
