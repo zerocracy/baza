@@ -104,11 +104,9 @@ class Baza::Tbot
         .add(secret: row['secret'])
       @tp.post(
         chat,
-        [
-          '🐶 I\'m sorry, I don\'t know you as of yet. Please',
-          "[click here](#{auth})",
-          "in order to authenticate this chat (ID: `#{chat}`)."
-        ].join
+        '🐶 I\'m sorry, I don\'t know you as of yet. Please',
+        "[click here](#{auth})",
+        "in order to authenticate this chat (ID: `#{chat}`)."
       )
       @loog.debug("Invited user to authenticate, in TG chat ##{chat}")
     else
