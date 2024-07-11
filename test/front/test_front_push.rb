@@ -99,7 +99,7 @@ class Baza::FrontPushTest < Minitest::Test
         'factbase' => Rack::Test::UploadedFile.new(f.path, 'application/zip')
       )
     end
-    assert_status(413)
+    assert_status(303)
   end
 
   def test_starts_job_via_put
