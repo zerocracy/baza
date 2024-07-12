@@ -155,6 +155,10 @@ class Baza::Job
     to_json[:size]
   end
 
+  def metas
+    to_json[:metas]
+  end
+
   def errors
     to_json[:errors]
   end
@@ -168,17 +172,21 @@ class Baza::Job
   def to_json(*_args)
     @to_json ||=
       begin
+        sep = ' -===&62la(o$3s===- '
         row = @jobs.pgsql.exec(
           [
             'SELECT job.*, result.id AS rid, ',
-            'lock.created AS when_locked, lock.owner AS lock_owner',
+            'lock.created AS when_locked, lock.owner AS lock_owner,',
+            'STRING_AGG(meta.text, $2) AS metas',
             'FROM job',
             'JOIN token ON token.id = job.token',
+            'LEFT JOIN meta ON meta.job = job.id',
             'LEFT JOIN result ON result.job = job.id',
             'LEFT JOIN lock ON lock.name = job.name AND lock.human = token.human',
-            'WHERE job.id = $1'
+            'WHERE job.id = $1',
+            'GROUP BY job.id, result.id, lock.id'
           ],
-          [@id]
+          [@id, sep]
         ).first
         {
           id: @id,
@@ -190,6 +198,7 @@ class Baza::Job
           when_locked: row['when_locked'].nil? ? nil : Time.parse(row['when_locked']),
           lock_owner: row['lock_owner'],
           size: row['size'].to_i,
+          metas: (row['metas'] || '').split(sep),
           errors: row['errors'].to_i,
           agent: row['agent'],
           finished: !row['rid'].nil?,

@@ -36,7 +36,7 @@ class Baza::JobTest < Minitest::Test
   def test_starts
     human = Baza::Humans.new(test_pgsql).ensure(test_name)
     token = human.tokens.add(test_name)
-    id = token.start(test_name, test_name, 1, 0, 'n/a', []).id
+    id = token.start(test_name, test_name, 1, 0, 'n/a', ['hello, dude!', 'пока!']).id
     job = human.jobs.get(id)
     assert(job.id.positive?)
     assert_equal(id, job.id)
@@ -45,6 +45,8 @@ class Baza::JobTest < Minitest::Test
     assert(!job.agent.nil?)
     assert(!job.size.nil?)
     assert(!job.errors.nil?)
+    assert_equal('hello, dude!', job.metas[0])
+    assert_equal('пока!', job.metas[1])
   end
 
   def test_cant_finish_twice
