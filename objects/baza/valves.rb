@@ -70,7 +70,7 @@ class Baza::Valves
     end
   end
 
-  def enter(name, badge, why: '')
+  def enter(name, badge, why)
     raise 'A block is required by the enter()' unless block_given?
     raise Baza::Urror, 'The name cannot be empty' if name.empty?
     raise Baza::Urror, 'The name is not valid' unless name.match?(/^[a-z0-9]+$/)

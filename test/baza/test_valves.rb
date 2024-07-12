@@ -37,7 +37,7 @@ class Baza::ValveTest < Minitest::Test
     valves = human.valves
     n = test_name
     b = test_name
-    x = valves.enter(n, b) { 42 }
+    x = valves.enter(n, b, 'why') { 42 }
     assert_equal(42, x)
     assert(valves.each.to_a.first[:id].positive?)
     assert(!valves.each.to_a.first[:created].nil?)
@@ -45,8 +45,8 @@ class Baza::ValveTest < Minitest::Test
     assert_equal(n, v[:name])
     assert_equal(b, v[:badge])
     assert_equal(42, v[:result])
-    assert_equal('', v[:why])
-    y = valves.enter(n, b) { 55 }
+    assert_equal('why', v[:why])
+    y = valves.enter(n, b, 'why') { 55 }
     assert_equal(42, y)
     valves.remove(n, b)
     assert(valves.each.to_a.empty?)
@@ -57,8 +57,8 @@ class Baza::ValveTest < Minitest::Test
     valves = human.valves
     n = test_name
     b = test_name
-    assert_raises { valves.enter(n, b) { raise 'intentional' } }
-    assert_equal(42, valves.enter(n, b) { 42 })
+    assert_raises { valves.enter(n, b, 'why') { raise 'intentional' } }
+    assert_equal(42, valves.enter(n, b, 'why') { 42 })
   end
 
   def test_with_two_threads
@@ -68,13 +68,13 @@ class Baza::ValveTest < Minitest::Test
     b = test_name
     entered = false
     Thread.new do
-      valves.enter(n, b) do
+      valves.enter(n, b, 'no reason') do
         entered = true
         sleep 0.05
         42
       end
     end
     loop { break if entered }
-    assert_equal(42, valves.enter(n, b) { 55 })
+    assert_equal(42, valves.enter(n, b, 'why') { 55 })
   end
 end

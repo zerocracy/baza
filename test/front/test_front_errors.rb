@@ -23,100 +23,58 @@
 # SOFTWARE.
 
 require 'minitest/autorun'
-require 'factbase'
-require_relative 'test__helper'
-require_relative '../baza'
+require_relative '../test__helper'
+require_relative '../../baza'
 
 class Baza::AppTest < Minitest::Test
   def app
     Sinatra::Application
   end
 
-  def test_renders_public_pages
+  def test_not_found
     pages = [
-      '/version',
-      '/robots.txt',
-      '/',
-      '/svg/logo.svg',
-      '/png/logo-white.png',
-      '/css/main.css'
+      '/unknown_path',
+      '/js/x/y/z/not-found.js',
+      '/svg/not-found.svg',
+      '/png/a/b/cdd/not-found.png',
+      '/css/a/b/c/not-found.css'
     ]
     pages.each do |p|
       get(p)
-      assert_status(200)
+      assert_status(404)
+      assert_equal('text/html;charset=utf-8', last_response.content_type)
     end
   end
 
-  def test_renders_css
-    get('/css/main.css')
-    assert_status(200)
-    assert(last_response.body.include?('.logo'))
+  def test_fatal_error
+    get('/error')
+    assert_status(503)
+    assert(last_response.body.include?('intentional'))
   end
 
-  def test_renders_private_pages
+  def test_protected_pages
     pages = [
-      '/dash',
-      '/tokens',
-      '/jobs',
-      '/locks',
-      '/secrets',
-      '/valves',
-      '/account'
+      '/sql', '/push', '/gift',
+      '/dash', '/tokens', '/jobs', '/account'
     ]
-    login
     pages.each do |p|
       get(p)
-      assert_status(200)
+      assert_status(302)
     end
   end
 
-  def test_renders_admin_pages
+  def test_non_admin_pages
     pages = [
       '/sql',
-      '/gift'
+      '/gift',
+      '/footer/status?badge=gc',
+      '/footer/status?badge=pipeline',
+      '/footer/status?badge=donations'
     ]
     login('yegor256')
     pages.each do |p|
       get(p)
       assert_status(200)
     end
-  end
-
-  def test_creates_and_deletes_token
-    login
-    get('/tokens')
-    post('/tokens/add', 'name=foo')
-    assert_status(302)
-    id = last_response.headers['X-Zerocracy-TokenId'].to_i
-    assert(id.positive?)
-    get("/tokens/#{id}/deactivate")
-    assert_status(302)
-  end
-
-  def test_valves
-    uname = 'tester'
-    login(uname)
-    get('/valves')
-    assert_status(200)
-    human = app.humans.ensure(uname)
-    human.valves.enter('foo', 'boom', 'why') do
-      # nothing
-    end
-    get('/valves')
-    assert_status(200)
-  end
-
-  def test_lock_unlock
-    login(test_name)
-    name = test_name
-    owner = test_name
-    get("/lock/#{name}?owner=#{owner}")
-    assert_status(302)
-    get("/unlock/#{name}?owner=#{owner}")
-    assert_status(302)
-    get("/lock/#{name}?owner=#{test_name}")
-    assert_status(302)
-    get('/locks')
-    assert_status(200)
   end
 end

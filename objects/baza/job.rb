@@ -204,8 +204,8 @@ class Baza::Job
       @job = job
     end
 
-    def enter(badge, why: '', &)
-      @job.jobs.human.valves.enter(@job.name, badge, why:, &)
+    def enter(badge, why, &)
+      @job.jobs.human.valves.enter(@job.name, badge, why, &)
     end
   end
 end

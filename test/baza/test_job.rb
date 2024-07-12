@@ -86,8 +86,8 @@ class Baza::JobTest < Minitest::Test
     token = human.tokens.add(test_name)
     job = token.start(test_name, test_name, 1, 0, 'n/a')
     b = test_name
-    x = job.valve.enter(b) { 42 }
+    x = job.valve.enter(b, 'no reason') { 42 }
     assert_equal(42, x)
-    assert_equal(42, job.valve.enter(b) { 55 })
+    assert_equal(42, job.valve.enter(b, 'another reason') { 55 })
   end
 end

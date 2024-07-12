@@ -45,7 +45,7 @@ class Baza::PipelineTest < Minitest::Test
         File.join(lib, 'judges/foo/foo.rb'),
         '
         if $fb.query("(exists foo)").each.to_a.empty?
-          $valve.enter("boom") do
+          $valve.enter("boom", "the reason") do
             $fb.insert.foo = 42
           end
         end
