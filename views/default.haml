@@ -26,7 +26,7 @@
                 = "@#{the_human.github}"
             %li
               %a{href: 'https://t.me/zerocrat_bot'}
-                %i.fa-brands.fa-telegram.fa-lg{class: ('gray' unless telegram?)}
+                %i.fa-brands.fa-telegram.fa-lg{class: ('gray' unless telegram?), title: (telegram? ? 'You are connected already' : 'Click to connect to our Telegram bot')}
             != menu('/tokens', 'Tokens')
             != menu('/jobs', 'Jobs')
             != menu('/secrets', 'Secrets')
