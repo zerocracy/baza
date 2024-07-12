@@ -25,7 +25,7 @@
 get %r{/svg/([a-z0-9-]+.svg)} do
   n = params['captures'].first
   content_type 'image/svg+xml'
-  file = "./assets/svg/#{n}"
+  file = File.join(File.absolute_path('./assets/svg/'), n)
   error 404 unless File.exist?(file)
   File.read(file)
 end
@@ -33,7 +33,7 @@ end
 get %r{/png/([a-z0-9-]+.png)} do
   n = params['captures'].first
   content_type 'image/png'
-  file = "./assets/png/#{n}"
+  file = File.join(File.absolute_path('./assets/png/'), n)
   error 404 unless File.exist?(file)
   File.read(file)
 end
