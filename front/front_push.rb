@@ -57,7 +57,7 @@ def job_start(token, file, name)
     File.size(file.path),
     Baza::Errors.new(file.path).count,
     user_agent,
-    (request.env['HTTP_X_ZEROCRACY_META'] || []).map { |v| Base64.decode64(v) }
+    (request.env['HTTP_X_ZEROCRACY_META'] || '').split(';').map { |v| Base64.decode64(v) }
   )
 end
 

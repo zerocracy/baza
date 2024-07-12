@@ -37,7 +37,7 @@ class Baza::JobsTest < Minitest::Test
     human = Baza::Humans.new(test_pgsql).ensure(test_name)
     token = human.tokens.add(test_name)
     n = "#{test_name}abc"
-    id = token.start(n, test_name, 1, 0, 'n/a', ['boom']).id
+    id = token.start(n, test_name, 1, 0, 'n/a', %w[boom привет]).id
     job = human.jobs.get(id)
     assert_equal(id, job.id)
     assert(!job.name.nil?)

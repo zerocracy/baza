@@ -23,8 +23,8 @@
 # SOFTWARE.
 
 require 'minitest/autorun'
-require 'rack/test'
 require 'factbase'
+require 'base64'
 require_relative '../test__helper'
 require_relative '../../objects/baza'
 require_relative '../../baza'
@@ -107,6 +107,7 @@ class Baza::FrontPushTest < Minitest::Test
     end
     header('X-Zerocracy-Token', token)
     header('User-Agent', 'something')
+    header('X-Zerocracy-Meta', Base64.encode64('pages_url:https://zerocracy.com'))
     name = test_name
     put("/push/#{name}", fb.export)
     assert_status(200)
