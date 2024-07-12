@@ -100,11 +100,12 @@ class Baza::Pipeline
         code.zero? ? Baza::Errors.new(input).count : nil
       )
       if code.zero?
-        unless Baza::Errors.new(input).count.zero?
+        errs = Baza::Errors.new(input).count
+        unless errs.zero?
           @tbot.notify(
             job.jobs.human,
             "⚠️ The job [##{job.id}](https://www.zerocracy.com/jobs/#{job.id})",
-            'finished with errors. You better pay attention to it ASAP,',
+            "finished with #{errs} error(s). You better pay attention to it ASAP,",
             'before it gets too late.'
           )
         end
