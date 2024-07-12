@@ -79,7 +79,7 @@
         %td.ff
           %a{href: iri.over(name: j.name)}
             = j.name
-          - m = j.metas.find? { |m| m.start_with?('pages_url:') }
+          - m = j.metas.find { |m| m.start_with?('pages_url:') }
           - unless m.nil?
             %a.ico{href: m.split('pages_url:', 2)[1], title: "Click here to open the published summary"}
               %i.fa-solid.fa-list
