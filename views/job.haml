@@ -37,6 +37,14 @@
       = job.agent
 
   %p
+    Meta:
+    %br
+    - job.metas.each do |m|
+      %span.ff
+        %i.fa-solid.fa-thumbtack
+        = m
+
+  %p
     Taken:
     %br
     - if job.taken.nil?
