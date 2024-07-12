@@ -60,7 +60,8 @@
     - if job.when_locked.nil?
       None
     - else
-      %i.fa-solid.fa-lock
+      %a.ico{href: iri.cut('/locks'), title: "The job was locked #{job.when_locked.ago} ago, click to unlock"}
+        %i.fa-solid.fa-lock
       != ago(job.when_locked)
       - if job.lock_owner.start_with?('http')
         %a{href: job.lock_owner}
