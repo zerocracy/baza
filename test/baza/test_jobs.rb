@@ -122,4 +122,12 @@ class Baza::JobsTest < Minitest::Test
     job.expire!(Baza::Factbases.new('', ''))
     token.start(name, test_name, 1, 0, 'n/a', [])
   end
+
+  def test_reverts_if_metas_are_broken
+    human = Baza::Humans.new(test_pgsql).ensure(test_name)
+    token = human.tokens.add(test_name)
+    assert(human.jobs.empty?)
+    assert_raises { token.start(test_name, test_name, 1, 0, 'n/a', ["\u0000"]) }
+    assert(human.jobs.empty?)
+  end
 end

@@ -93,13 +93,20 @@ class Baza::Valves
               ],
               [@human.id, name.downcase, badge, why]
             )[0]
-            return dec(row['result']) unless row['result'].nil?
-            throw :rollback unless row['owner'] == '1'
+            unless row['result'].nil?
+              t.exec('ROLLBACK')
+              return dec(row['result'])
+            end
+            unless row['owner'] == '1'
+              t.exec('ROLLBACK')
+              throw :rollback
+            end
             @tbot.notify(
               human,
               '🍒 A new [valve](https://www.zerocracy.com/valves)',
               "just entered for '`#{name}`': #{why.inspect}."
             )
+            t.exec('COMMIT')
             throw :stop
           end
         end
