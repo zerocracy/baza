@@ -68,23 +68,27 @@ class Baza::Jobs
   end
 
   def each(name: nil, offset: 0)
+    sep = ' -===&62la(o$3s===- '
     sql =
       'SELECT job.id, job.created, job.name, job.uri1, job.expired, job.size, job.errors, job.agent, ' \
       'token.id AS tid, token.name AS token_name, ' \
       'lock.id AS lid, lock.created AS when_locked, lock.owner AS lock_owner, ' \
       'result.id AS rid, result.uri2, result.stdout, result.exit, result.msec, ' \
       'result.size AS rsize, result.errors AS rerrors, ' \
-      'ROW_NUMBER() OVER (PARTITION BY job.name ORDER BY job.created DESC) AS row ' \
+      'ROW_NUMBER() OVER (PARTITION BY job.name ORDER BY job.created DESC) AS row, ' \
+      'STRING_AGG(meta.text, $2) AS metas ' \
       'FROM job ' \
       'JOIN token ON token.id = job.token ' \
       'LEFT JOIN lock ON lock.human = token.human AND lock.name = job.name ' \
       'LEFT JOIN result ON result.job = job.id ' \
+      'LEFT JOIN meta ON meta.job = job.id ' \
       'WHERE token.human = $1 ' \
-      "AND #{name.nil? ? 'job.expired IS NULL' : 'job.name = $2'} " \
+      "AND #{name.nil? ? 'job.expired IS NULL' : 'job.name = $3'} " \
+      'GROUP BY job.id, result.id, lock.id, token.id ' \
       'ORDER BY created DESC'
     sql = "SELECT t.* FROM (#{sql}) AS t WHERE t.row = 1" if name.nil?
     sql += " OFFSET #{offset.to_i}"
-    args = [@human.id]
+    args = [@human.id, sep]
     args << name unless name.nil?
     pgsql.exec(sql, args).each do |row|
       yield Veil.new(
@@ -97,6 +101,7 @@ class Baza::Jobs
         size: row['size'].to_i,
         taken: row['taken'],
         errors: row['errors'].to_i,
+        metas: (row['metas'] || '').split(sep),
         when_locked: row['when_locked'].nil? ? nil : Time.parse(row['when_locked']),
         lock_owner: row['lock_owner'],
         finished?: !row['rid'].nil?,

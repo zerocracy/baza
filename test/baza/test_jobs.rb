@@ -37,7 +37,7 @@ class Baza::JobsTest < Minitest::Test
     human = Baza::Humans.new(test_pgsql).ensure(test_name)
     token = human.tokens.add(test_name)
     n = "#{test_name}abc"
-    id = token.start(n, test_name, 1, 0, 'n/a', []).id
+    id = token.start(n, test_name, 1, 0, 'n/a', ['boom']).id
     job = human.jobs.get(id)
     assert_equal(id, job.id)
     assert(!job.name.nil?)
@@ -46,6 +46,7 @@ class Baza::JobsTest < Minitest::Test
     assert(!job.agent.nil?)
     assert(!job.size.nil?)
     assert(!job.errors.nil?)
+    assert_equal('boom', job.metas.first)
   end
 
   def test_emptiness_checks
