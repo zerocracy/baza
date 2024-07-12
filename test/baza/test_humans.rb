@@ -62,4 +62,16 @@ class Baza::HumansTest < Minitest::Test
     humans.donate
     assert_equal(b, human.account.balance)
   end
+
+  def test_passes_tbot_further
+    passed = []
+    tbot = others { |*args| passed << args }
+    humans = Baza::Humans.new(test_pgsql, tbot:)
+    human = humans.ensure(test_name)
+    token = human.tokens.add(test_name)
+    id = token.start(test_name, test_name, 1, 0, 'n/a').id
+    job = human.jobs.get(id)
+    job.valve.enter('badge', 'why') { 42 }
+    assert_equal(1, passed.size)
+  end
 end

@@ -72,10 +72,13 @@ class Baza::Valves
 
   def enter(name, badge, why)
     raise 'A block is required by the enter()' unless block_given?
+    raise Baza::Urror, 'The name cannot be nil' if name.nil?
     raise Baza::Urror, 'The name cannot be empty' if name.empty?
     raise Baza::Urror, 'The name is not valid' unless name.match?(/^[a-z0-9]+$/)
+    raise Baza::Urror, 'The badge cannot be nil' if badge.nil?
     raise Baza::Urror, 'The badge cannot be empty' if badge.empty?
     raise Baza::Urror, "The badge '#{badge}' is not valid" unless badge.match?(/^[a-zA-Z0-9_-]+$/)
+    raise Baza::Urror, 'The reason cannot be empty' if why.empty?
     start = Time.now
     catch :stop do
       loop do
@@ -94,7 +97,7 @@ class Baza::Valves
             throw :rollback unless row['owner'] == '1'
             @tbot.notify(
               human,
-              '🍒 A new [valve](https://www.zerocracy.com/valves) ',
+              '🍒 A new [valve](https://www.zerocracy.com/valves)',
               "just entered for '`#{name}`': #{why.inspect}."
             )
             throw :stop

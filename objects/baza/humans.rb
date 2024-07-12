@@ -45,7 +45,7 @@ class Baza::Humans
 
   def get(id)
     raise 'Human ID must be an integer' unless id.is_a?(Integer)
-    Baza::Human.new(self, id)
+    Baza::Human.new(self, id, tbot: @tbot)
   end
 
   def exists?(login)
