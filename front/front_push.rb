@@ -24,6 +24,7 @@
 
 require 'fileutils'
 require 'factbase'
+require 'base64'
 require_relative '../objects/baza/urror'
 require_relative '../objects/baza/errors'
 
@@ -55,7 +56,8 @@ def job_start(token, file, name)
     name, fid,
     File.size(file.path),
     Baza::Errors.new(file.path).count,
-    user_agent
+    user_agent,
+    (request.env['HTTP_X_ZEROCRACY_META'] || []).map { |v| Base64.decode64(v) }
   )
 end
 

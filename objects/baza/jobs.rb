@@ -46,16 +46,25 @@ class Baza::Jobs
     ).empty?
   end
 
-  def start(token, name, uri1, size, errors, agent)
+  def start(token, name, uri1, size, errors, agent, meta)
     raise Baza::Urror, "The name '#{name}' is not valid, make it low-case" unless name.match?(/^[a-z0-9-]+$/)
     raise Baza::Urror, "The size '#{size}' is not positive" unless size.positive?
     raise Baza::Urror, 'The agent is empty' if agent.empty?
-    get(
-      pgsql.exec(
+    raise Baza::Urror, 'The meta is nil' if meta.nil?
+    id = pgsql.transaction do |t|
+      jid = t.exec(
         'INSERT INTO job (token, name, uri1, size, errors, agent) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
         [token, name.downcase, uri1, size, errors, agent]
       )[0]['id'].to_i
-    )
+      meta.each do |m|
+        t.exec(
+          'INSERT INTO meta (job, text) VALUES ($1, $2)',
+          [jid, m]
+        )
+      end
+      jid
+    end
+    get(id)
   end
 
   def each(name: nil, offset: 0)

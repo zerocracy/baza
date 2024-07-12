@@ -45,7 +45,7 @@ class Baza::HumansTest < Minitest::Test
     humans = Baza::Humans.new(test_pgsql)
     human = humans.ensure(test_name)
     token = human.tokens.add(test_name)
-    job = token.start(test_name, test_name, 1, 0, 'n/a')
+    job = token.start(test_name, test_name, 1, 0, 'n/a', [])
     job.finish!(test_name, 'stdout', 0, 544, 111, 0)
     assert(!human.account.balance.positive?)
     humans.donate(amount: 100_000, days: 0)
@@ -69,7 +69,7 @@ class Baza::HumansTest < Minitest::Test
     humans = Baza::Humans.new(test_pgsql, tbot:)
     human = humans.ensure(test_name)
     token = human.tokens.add(test_name)
-    id = token.start(test_name, test_name, 1, 0, 'n/a').id
+    id = token.start(test_name, test_name, 1, 0, 'n/a', []).id
     job = human.jobs.get(id)
     job.valve.enter('badge', 'why') { 42 }
     assert_equal(1, passed.size)

@@ -90,7 +90,7 @@ class Baza::Human
       'SELECT github FROM human WHERE id = $1',
       [@id]
     )
-    raise Baza::Urror, "Human ##{@id} not found" if rows.empty?
+    raise Baza::Urror, "Human ##{@id} not found, can't find his GitHub name" if rows.empty?
     rows[0]['github']
   end
 
