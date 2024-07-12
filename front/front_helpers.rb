@@ -79,4 +79,10 @@ helpers do
     end
     "#{title}:#{a}/#{b}/#{c}"
   end
+
+  def telegram?
+    id = the_human.id
+    settings.telegramers[id] = the_human.telegram? if settings.telegramers[id].nil?
+    settings.telegramers[id]
+  end
 end

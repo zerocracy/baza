@@ -131,6 +131,7 @@ configure do
     settings.config['tg']['admin_chat']
   )
   settings.tbot.start unless ENV['RACK_ENV'] == 'test'
+  set :telegramers, {}
 end
 
 # Humans:

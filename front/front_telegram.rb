@@ -24,5 +24,6 @@
 
 get '/tauth' do
   id = settings.tbot.auth(the_human, params[:secret])
+  settings.telegramers[the_human.id] = true
   flash(iri.cut('/dash'), "You have been authenticated in the chat ##{id}")
 end

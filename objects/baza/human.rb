@@ -78,6 +78,13 @@ class Baza::Human
     Baza::Account.new(self)
   end
 
+  def telegram?
+    !@humans.pgsql.exec(
+      'SELECT id FROM telechat WHERE human = $1',
+      [@id]
+    ).empty?
+  end
+
   def github
     rows = @humans.pgsql.exec(
       'SELECT github FROM human WHERE id = $1',
