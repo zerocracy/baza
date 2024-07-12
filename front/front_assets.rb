@@ -22,24 +22,26 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-get '/svg/{name}' do
+get %r{/svg/([a-z0-9-]+.svg)} do
+  n = params['captures'].first
   content_type 'image/svg+xml'
-  file = "./assets/svg/#{params[:name]}"
+  file = "./assets/svg/#{n}"
   error 404 unless File.exist?(file)
   File.read(file)
 end
 
-get '/png/{name}' do
+get %r{/png/([a-z0-9-]+.png)} do
+  n = params['captures'].first
   content_type 'image/png'
-  file = "./assets/png/#{params[:name]}"
+  file = "./assets/png/#{n}"
   error 404 unless File.exist?(file)
   File.read(file)
 end
 
-get '/css/*.css' do
+get %r{/css/([a-z0-9-]+).css} do
   content_type 'text/css', charset: 'utf-8'
-  file = params[:splat].first
-  template = File.join(File.absolute_path('./assets/scss/'), "#{file}.scss")
+  n = params['captures'].first
+  template = File.join(File.absolute_path('./assets/scss/'), "#{n}.scss")
   error 404 unless File.exist?(template)
   require 'sass-embedded'
   Sass.compile(template, style: :compressed).css

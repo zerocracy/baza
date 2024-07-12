@@ -37,7 +37,7 @@ not_found do
 end
 
 configure do
-  if ENV['RACK_ENV'] != 'test'
+  unless ENV['RACK_ENV'] == 'test'
     require 'raven'
     Raven.configure do |c|
       c.dsn = settings.config['sentry']
