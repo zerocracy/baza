@@ -113,6 +113,8 @@ class Baza::FrontPushTest < Minitest::Test
     assert_status(200)
     id = last_response.body.to_i
     assert(id.positive?)
+    get('/jobs')
+    assert_status(200)
     get("/jobs/#{id}")
     assert_status(200)
     get("/jobs/#{id}/input.html")

@@ -39,10 +39,13 @@
   %p
     Meta:
     %br
-    - job.metas.each do |m|
-      %span.ff
-        %i.fa-solid.fa-thumbtack
-        = m
+    - if job.metas.empty?
+      None
+    - else
+      - job.metas.each do |m|
+        %span.ff
+          %i.fa-solid.fa-thumbtack
+          = m
 
   %p
     Taken:
