@@ -89,7 +89,7 @@ configure do
         'RACK_ENV=test ruby baza.app -p 8888'
     end
     config = YAML.safe_load(File.open(f))
-    File.rm(f)
+    File.delete(f)
   end
   set :config, config
 end
