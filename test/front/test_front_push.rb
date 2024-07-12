@@ -107,7 +107,13 @@ class Baza::FrontPushTest < Minitest::Test
     end
     header('X-Zerocracy-Token', token)
     header('User-Agent', 'something')
-    header('X-Zerocracy-Meta', Base64.encode64('pages_url:https://zerocracy.com'))
+    header(
+      'X-Zerocracy-Meta',
+      [
+        Base64.encode64('pages_url:https://zerocracy.com'),
+        Base64.encode64('how are you, друг?')
+      ].join('  ')
+    )
     name = test_name
     put("/push/#{name}", fb.export)
     assert_status(200)
