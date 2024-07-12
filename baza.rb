@@ -189,7 +189,7 @@ configure do
   end
 end
 
-# Others:
+# Global in-memory cache.
 configure do
   set :zache, Zache.new
 end

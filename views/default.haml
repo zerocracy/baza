@@ -61,7 +61,7 @@
             %li{title: 'The version of Ruby on the server'}
               = "rb:#{RUBY_VERSION}"
             %li{title: 'The version of PostgreSQL server and the size of the DB'}
-              = "pg:#{settings.pgsql.version}/#{db_size}"
+              = "pg:#{pgsql_version}/#{db_size}"
             %li{title: 'Your visible IP address'}
               = request.ip
           - if the_human.admin?

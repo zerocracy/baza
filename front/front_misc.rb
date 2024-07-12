@@ -33,6 +33,9 @@ before '/*' do
       settings.pgsql.exec(
         'SELECT pg_size_pretty(pg_database_size(current_database())) AS s'
       )[0]['s'].gsub(' ', '')
+    end,
+    pgsql_version: settings.zache.get(:pgsql_version, lifetime: 30 * 60) do
+      settings.pgsql.version
     end
   }
 end
