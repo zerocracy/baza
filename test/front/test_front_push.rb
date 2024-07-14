@@ -25,6 +25,7 @@
 require 'minitest/autorun'
 require 'factbase'
 require 'base64'
+require 'zlib'
 require_relative '../test__helper'
 require_relative '../../objects/baza'
 require_relative '../../baza'
