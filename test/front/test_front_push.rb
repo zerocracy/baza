@@ -90,6 +90,36 @@ class Baza::FrontPushTest < Minitest::Test
     assert_status(303)
   end
 
+  def test_pushes_gzip_file
+    uname = test_name
+    login('yegor256')
+    post('/gift', "human=#{uname}&zents=9999&summary=no")
+    login(uname)
+    get('/tokens')
+    post('/tokens/add', 'name=foo')
+    id = last_response.headers['X-Zerocracy-TokenId'].to_i
+    get("/tokens/#{id}.json")
+    token = JSON.parse(last_response.body)['text']
+    get('/push')
+    header('User-Agent', 'something')
+
+    fb = Factbase.new
+    fb.insert.foo = 'booom \x01\x02\x03'
+    Tempfile.open do |f|
+      Zlib::GzipWriter.open(f.path) do |gz|
+        gz.write fb.export
+      end
+      header('Content-Encoding', 'gzip')
+      post(
+        '/push',
+        'name' => test_name,
+        'token' => token,
+        'factbase' => Rack::Test::UploadedFile.new(f.path, 'application/gzip')
+      )
+    end
+    assert_status(302)
+  end
+
   def test_rejects_broken_file_format
     token = make_valid_token
     header('X-Zerocracy-Token', token)
