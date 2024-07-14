@@ -104,7 +104,7 @@ class Baza::Valves
             @tbot.notify(
               human,
               '🍒 A new [valve](https://www.zerocracy.com/valves)',
-              "just entered for '`#{name}`': #{why.inspect}."
+              "just entered for `#{name}`: #{why.inspect}."
             )
             t.exec('COMMIT')
             throw :stop

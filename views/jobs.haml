@@ -77,8 +77,7 @@
             %span{title: "#{j.errors} error(s) in the 'judges-summary' fact"}
               %i.fa-solid.fa-triangle-exclamation.darkred
         %td.ff
-          %a{href: iri.over(name: j.name)}
-            = j.name
+          %a{href: iri.over(name: j.name)}= j.name
           - m = j.metas.find { |m| m.start_with?('pages_url:') }
           - unless m.nil?
             %a.ico{href: m.split('pages_url:', 2)[1], title: "Click here to open the published summary"}
