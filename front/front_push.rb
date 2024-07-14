@@ -25,6 +25,7 @@
 require 'fileutils'
 require 'factbase'
 require 'base64'
+require 'zlib'
 require_relative '../objects/baza/urror'
 require_relative '../objects/baza/errors'
 
@@ -61,6 +62,19 @@ def job_start(token, file, name)
   )
 end
 
+# @param [Sinatra::IndifferentHash] uploaded_file The uploaded file data
+# @param [File] file The file that accepts the uploaded data
+# @param [String] content_encoding The file content encoding
+def save_uploaded_file(uploaded_file, file, content_encoding)
+  if content_encoding == 'gzip'
+    Zlib::GzipReader.open(uploaded_file[:tempfile]) do |gz|
+      File.binwrite(file.path, gz.read)
+    end
+  else
+    FileUtils.copy(uploaded_file[:tempfile], file.path)
+  end
+end
+
 get '/push' do
   assemble(
     :push,
@@ -81,7 +95,7 @@ post '/push' do
     if tfile.nil?
       File.binwrite(f.path, Factbase.new.export)
     else
-      FileUtils.copy(tfile[:tempfile], f.path)
+      save_uploaded_file(tfile, f, request.env['HTTP_CONTENT_ENCODING'])
       File.delete(tfile[:tempfile])
     end
     job = job_start(token, f, name)
