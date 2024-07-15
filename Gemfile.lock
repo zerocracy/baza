@@ -115,7 +115,7 @@ GEM
     ffi (1.17.0-x86_64-linux-gnu)
     ffi (1.17.0-x86_64-linux-musl)
     gli (2.21.1)
-    glogin (0.16.2)
+    glogin (0.16.4)
       base58 (>= 0.2)
       openssl (>= 2.0)
     google-protobuf (4.27.2)
