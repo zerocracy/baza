@@ -47,12 +47,6 @@ class Baza::AppTest < Minitest::Test
     end
   end
 
-  def test_renders_css
-    get('/css/main.css')
-    assert_status(200)
-    assert(last_response.body.include?('.logo'))
-  end
-
   def test_renders_private_pages
     pages = [
       '/dash',

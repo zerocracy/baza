@@ -22,45 +22,25 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-source 'https://rubygems.org'
-ruby '~>3.2'
+require 'minitest/autorun'
+require_relative '../test__helper'
+require_relative '../../objects/baza'
+require_relative '../../baza'
 
-gem 'always', '~>0'
-gem 'aws-sdk-core', '3.201.1'
-gem 'aws-sdk-s3', '1.156.0'
-gem 'backtrace', '~>0'
-gem 'concurrent-ruby', '1.3.3'
-gem 'factbase', '~>0'
-gem 'faraday'
-gem 'glogin', '~>0'
-gem 'haml', '6.3.0'
-gem 'iri', '~>0'
-gem 'j', path: 'j' if File.exist?('j')
-gem 'judges', '~>0'
-gem 'loog', '~>0'
-gem 'minitest', '5.24.1', require: false
-gem 'pgtk', '~>0'
-gem 'rack', '3.1.7'
-gem 'rack-ssl', '1.4.1'
-gem 'rack-test', '2.1.0'
-gem 'rake', '13.2.1', require: false
-gem 'redcarpet', '~>3.5'
-gem 'rerun', '0.14.0', require: false
-gem 'retries', '~>0'
-gem 'rspec-rails', '6.1.3', require: false
-gem 'rubocop', '1.65.0', require: false
-gem 'rubocop-rspec', '3.0.3', require: false
-gem 'sass-embedded', '1.77.8'
-gem 'scss_lint', '0.60.0', require: false
-gem 'sentry-raven', '3.1.2'
-gem 'simplecov', '0.22.0'
-gem 'simplecov-cobertura', '~> 2.1'
-gem 'sinatra', '4.0.0'
-gem 'sinatra-contrib', '4.0.0'
-gem 'sprockets', '4.2.1'
-gem 'tago', '~>0'
-gem 'telepost', '~>0'
-gem 'truncate', '0.1.0'
-gem 'veils', '~>0'
-gem 'xcop', '~>0'
-gem 'zache', '~>0'
+class Baza::FrontPushTest < Minitest::Test
+  def app
+    Sinatra::Application
+  end
+
+  def test_renders_css
+    get('/css/main.css')
+    assert_status(200)
+    assert(last_response.body.include?('.logo'))
+  end
+
+  def test_renders_terms
+    get('/terms')
+    assert_status(200)
+    assert(last_response.body.include?('Terms'))
+  end
+end

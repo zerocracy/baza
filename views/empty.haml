@@ -9,4 +9,13 @@
     %link{href: iri.cut('/css/empty.css'), rel: 'stylesheet'}
   %body
     %section
-      != yield
+      %article
+        %p
+          %a{href: iri.cut('/')}
+            Back home
+        != yield
+        %p
+          &copy;
+          != '2009' + '&ndash;' + Time.now.strftime('%Y')
+          %a{href: iri.cut('/')}
+            Zerocracy

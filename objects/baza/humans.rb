@@ -117,9 +117,11 @@ class Baza::Humans
       [amount]
     )
     rows.each do |row|
+      human = get(row['human'].to_i)
       @tbot.notify(
-        get(row['human'].to_i),
+        human,
         "🍎 We topped up your account by #{format('%+0.2f', amount.to_f / 100_000)}.",
+        "Now, the balance is #{format('%+0.2f', human.account.balance / 100_000)}",
         "We do this automatically every #{days} days, if your account doesn't",
         'have enough funds.'
       )

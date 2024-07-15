@@ -22,6 +22,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+require 'redcarpet'
+
 get %r{/svg/([a-z0-9-]+.svg)} do
   n = params['captures'].first
   content_type 'image/svg+xml'
@@ -45,4 +47,17 @@ get %r{/css/([a-z0-9-]+).css} do
   error 404 unless File.exist?(template)
   require 'sass-embedded'
   Sass.compile(template, style: :compressed).css
+end
+
+get(%r{/(terms)}) do
+  n = params['captures'].first
+  f = File.join(File.absolute_path('./assets/markdown/'), "#{n}.md")
+  html = Redcarpet::Markdown.new(Redcarpet::Render::HTML).render(File.read(f))
+  assemble(
+    :markdown,
+    :empty,
+    title: "/#{n}",
+    header: n.capitalize,
+    html:
+  )
 end

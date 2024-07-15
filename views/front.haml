@@ -31,13 +31,16 @@
               %nav
                 %ul
                   %li
-                    %a{href: github_login_link}
+                    %a{href: ENV['RACK_ENV'] == 'test' ? iri.cut('/fake-login') : github_login_link}
                       Start
               %nav
                 %ul.smaller
                   %li
                     &copy;
                     != '2009' + '&ndash;' + Time.now.strftime('%Y')
+                  %li
+                    %a{href: iri.cut('/terms')}
+                      Terms
                   %li
                     %a{href: 'mailto:team@zerocracy.com'}
                       team@zerocracy.com
