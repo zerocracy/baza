@@ -57,7 +57,6 @@ get(%r{/(terms)}) do
     :markdown,
     :empty,
     title: "/#{n}",
-    header: n.capitalize,
     html:
   )
 end
