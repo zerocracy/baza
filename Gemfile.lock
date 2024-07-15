@@ -29,6 +29,7 @@ GEM
       tzinfo (~> 2.0)
     always (0.0.5)
       concurrent-ruby (~> 1.1)
+    ansi (1.5.0)
     ast (2.4.2)
     aws-eventstream (1.3.0)
     aws-partitions (1.955.0)
@@ -172,6 +173,11 @@ GEM
       nokogiri (>= 1.12.0)
     loog (0.5.2)
     minitest (5.24.1)
+    minitest-reporters (1.6.1)
+      ansi
+      builder
+      minitest (>= 5.0)
+      ruby-progressbar
     moments (0.3.0)
     multi_json (1.15.0)
     multipart-post (2.4.1)
@@ -404,6 +410,7 @@ DEPENDENCIES
   judges (~> 0)
   loog (~> 0)
   minitest (= 5.24.1)
+  minitest-reporters (= 1.6.1)
   pgtk (~> 0)
   rack (= 3.1.7)
   rack-ssl (= 1.4.1)

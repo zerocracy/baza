@@ -39,6 +39,7 @@ gem 'j', path: 'j' if File.exist?('j')
 gem 'judges', '~>0'
 gem 'loog', '~>0'
 gem 'minitest', '5.24.1', require: false
+gem 'minitest-reporters', '1.6.1', require: false
 gem 'pgtk', '~>0'
 gem 'rack', '3.1.7'
 gem 'rack-ssl', '1.4.1'
