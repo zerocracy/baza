@@ -33,7 +33,7 @@ require_relative '../../objects/baza/humans'
 # License:: MIT
 class Baza::TokensTest < Minitest::Test
   def test_generates_token_text
-    human = Baza::Humans.new(test_pgsql).ensure(fake_name)
+    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
     tokens = human.tokens
     token = tokens.add(fake_name)
     assert_equal(36, token.text.length)

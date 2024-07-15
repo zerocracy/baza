@@ -34,7 +34,7 @@ require_relative '../../objects/baza/factbases'
 # License:: MIT
 class Baza::JobsTest < Minitest::Test
   def test_all_fields
-    human = Baza::Humans.new(test_pgsql).ensure(fake_name)
+    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
     token = human.tokens.add(fake_name)
     n = "#{fake_name}abc"
     id = token.start(n, fake_name, 1, 0, 'n/a', %w[boom привет]).id
@@ -50,13 +50,13 @@ class Baza::JobsTest < Minitest::Test
   end
 
   def test_emptiness_checks
-    human = Baza::Humans.new(test_pgsql).ensure(fake_name)
+    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
     jobs = human.jobs
     assert(jobs.empty?)
   end
 
   def test_start_and_finish
-    human = Baza::Humans.new(test_pgsql).ensure(fake_name)
+    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
     token = human.tokens.add(fake_name)
     job = token.start(fake_name, fake_name, 1, 0, 'n/a', [])
     assert(!human.jobs.get(job.id).finished?)
@@ -72,7 +72,7 @@ class Baza::JobsTest < Minitest::Test
   end
 
   def test_iterates_with_offset
-    human = Baza::Humans.new(test_pgsql).ensure(fake_name)
+    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
     token = human.tokens.add(fake_name)
     token.start(fake_name, fake_name, 1, 0, 'n/a', [])
     found = 0
@@ -83,7 +83,7 @@ class Baza::JobsTest < Minitest::Test
   end
 
   def test_finds_recent_job
-    human = Baza::Humans.new(test_pgsql).ensure(fake_name)
+    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
     token = human.tokens.add(fake_name)
     name = "#{fake_name}-a"
     j = token.start(name, fake_name, 1, 0, 'n/a', [])
@@ -95,7 +95,7 @@ class Baza::JobsTest < Minitest::Test
   end
 
   def test_is_job_busy
-    human = Baza::Humans.new(test_pgsql).ensure(fake_name)
+    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
     token = human.tokens.add(fake_name)
     name = "#{fake_name}-a"
     job = token.start(name, fake_name, 1, 0, 'n/a', [])
@@ -105,7 +105,7 @@ class Baza::JobsTest < Minitest::Test
   end
 
   def test_prohibits_more_than_one_running_job
-    human = Baza::Humans.new(test_pgsql).ensure(fake_name)
+    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
     token = human.tokens.add(fake_name)
     name = fake_name
     token.start(name, fake_name, 1, 0, 'n/a', [])
@@ -115,7 +115,7 @@ class Baza::JobsTest < Minitest::Test
   end
 
   def test_allows_more_than_one_running_job_when_expired
-    human = Baza::Humans.new(test_pgsql).ensure(fake_name)
+    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
     token = human.tokens.add(fake_name)
     name = fake_name
     job = token.start(name, fake_name, 1, 0, 'n/a', [])
@@ -124,7 +124,7 @@ class Baza::JobsTest < Minitest::Test
   end
 
   def test_reverts_if_metas_are_broken
-    human = Baza::Humans.new(test_pgsql).ensure(fake_name)
+    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
     token = human.tokens.add(fake_name)
     assert(human.jobs.empty?)
     assert_raises { token.start(fake_name, fake_name, 1, 0, 'n/a', ["\u0000"]) }

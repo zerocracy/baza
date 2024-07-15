@@ -33,7 +33,7 @@ require_relative '../../objects/baza/humans'
 # License:: MIT
 class Baza::AccountTest < Minitest::Test
   def test_simple_receipt
-    human = Baza::Humans.new(test_pgsql).ensure(fake_name)
+    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
     acc = human.account
     assert_equal(0, acc.balance)
     acc.top_up(42, 'nothing')
@@ -44,7 +44,7 @@ class Baza::AccountTest < Minitest::Test
   end
 
   def test_fetch_bars
-    human = Baza::Humans.new(test_pgsql).ensure(fake_name)
+    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
     acc = human.account
     (-10..0).each do |week|
       created = Time.now - (week * 7 * 24 * 60 * 60)

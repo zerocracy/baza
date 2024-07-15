@@ -34,7 +34,7 @@ require_relative '../../objects/baza/factbases'
 # License:: MIT
 class Baza::ResultTest < Minitest::Test
   def test_keeps_data
-    human = Baza::Humans.new(test_pgsql).ensure(fake_name)
+    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
     token = human.tokens.add(fake_name)
     job = token.start(fake_name, fake_name, 1, 0, 'n/a', [])
     Tempfile.open do |f|

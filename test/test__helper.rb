@@ -54,9 +54,9 @@ end
 class Minitest::Test
   include Rack::Test::Methods
 
-  def test_pgsql
+  def fake_pgsql
     # rubocop:disable Style/ClassVars
-    @@test_pgsql ||= Pgtk::Pool.new(
+    @@fake_pgsql ||= Pgtk::Pool.new(
       Pgtk::Wire::Yaml.new(File.join(__dir__, '../target/pgsql-config.yml')),
       log: Loog::NULL
     ).start

@@ -33,7 +33,7 @@ require_relative '../../objects/baza/humans'
 # License:: MIT
 class Baza::HumanTest < Minitest::Test
   def test_login_checking
-    humans = Baza::Humans.new(test_pgsql)
+    humans = Baza::Humans.new(fake_pgsql)
     login = fake_name
     human = humans.ensure(login)
     assert_equal(human.github, login)

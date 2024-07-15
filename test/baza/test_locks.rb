@@ -33,7 +33,7 @@ require_relative '../../objects/baza/humans'
 # License:: MIT
 class Baza::LocksTest < Minitest::Test
   def test_simple_locking_scenario
-    human = Baza::Humans.new(test_pgsql).ensure(fake_name)
+    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
     locks = human.locks
     owner = "#{fake_name} #{fake_name} #{fake_name} --"
     n = fake_name

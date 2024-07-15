@@ -33,7 +33,7 @@ require_relative '../../objects/baza/humans'
 # License:: MIT
 class Baza::SecretsTest < Minitest::Test
   def test_simple_scenario
-    human = Baza::Humans.new(test_pgsql).ensure(fake_name)
+    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
     secrets = human.secrets
     n = fake_name
     k = fake_name

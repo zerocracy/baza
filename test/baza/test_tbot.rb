@@ -36,29 +36,29 @@ require_relative '../../objects/baza/humans'
 # License:: MIT
 class Baza::TbotTest < Minitest::Test
   def test_null_notify
-    tbot = Baza::Tbot.new(test_pgsql, '')
-    humans = Baza::Humans.new(test_pgsql)
+    tbot = Baza::Tbot.new(fake_pgsql, '')
+    humans = Baza::Humans.new(fake_pgsql)
     human = humans.ensure(fake_name)
     tbot.notify(human, 'Hello, how are you?')
   end
 
   def test_to_string
-    tbot = Baza::Tbot::Spy.new(Baza::Tbot.new(test_pgsql, ''), 0)
+    tbot = Baza::Tbot::Spy.new(Baza::Tbot.new(fake_pgsql, ''), 0)
     assert(!tbot.to_s.nil?)
     assert(tbot.to_s.match?(%r{^[0-9]/[0-9]/[0-9]$}))
   end
 
   def test_auth_wrong
-    humans = Baza::Humans.new(test_pgsql)
+    humans = Baza::Humans.new(fake_pgsql)
     human = humans.ensure(fake_name)
-    tbot = Baza::Tbot.new(test_pgsql, '')
+    tbot = Baza::Tbot.new(fake_pgsql, '')
     assert_raises(Baza::Urror) { tbot.auth(human, 'wrong-secret') }
   end
 
   def test_double_auth
-    tbot = Baza::Tbot.new(test_pgsql, '')
+    tbot = Baza::Tbot.new(fake_pgsql, '')
     secret = tbot.entry(55)
-    humans = Baza::Humans.new(test_pgsql)
+    humans = Baza::Humans.new(fake_pgsql)
     first = humans.ensure(fake_name)
     tbot.auth(first, secret)
     second = humans.ensure(fake_name)
@@ -66,9 +66,9 @@ class Baza::TbotTest < Minitest::Test
   end
 
   def test_auth_right
-    tbot = Baza::Tbot.new(test_pgsql, '')
+    tbot = Baza::Tbot.new(fake_pgsql, '')
     secret = tbot.entry(42)
-    humans = Baza::Humans.new(test_pgsql)
+    humans = Baza::Humans.new(fake_pgsql)
     human = humans.ensure(fake_name)
     chat = tbot.auth(human, secret)
     assert(chat.positive?)

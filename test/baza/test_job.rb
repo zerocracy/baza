@@ -34,7 +34,7 @@ require_relative '../../objects/baza/factbases'
 # License:: MIT
 class Baza::JobTest < Minitest::Test
   def test_starts
-    human = Baza::Humans.new(test_pgsql).ensure(fake_name)
+    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
     token = human.tokens.add(fake_name)
     id = token.start(fake_name, fake_name, 1, 0, 'n/a', ['hello, dude!', 'пока!']).id
     job = human.jobs.get(id)
@@ -50,7 +50,7 @@ class Baza::JobTest < Minitest::Test
   end
 
   def test_cant_finish_twice
-    human = Baza::Humans.new(test_pgsql).ensure(fake_name)
+    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
     token = human.tokens.add(fake_name)
     job = token.start(fake_name, fake_name, 1, 0, 'n/a', [])
     assert(!job.finished?)
@@ -61,7 +61,7 @@ class Baza::JobTest < Minitest::Test
   end
 
   def test_expires_once
-    human = Baza::Humans.new(test_pgsql).ensure(fake_name)
+    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
     token = human.tokens.add(fake_name)
     job = token.start(fake_name, fake_name, 1, 0, 'n/a', [])
     assert(!job.expired?)
@@ -73,7 +73,7 @@ class Baza::JobTest < Minitest::Test
   end
 
   def test_job_secrets
-    human = Baza::Humans.new(test_pgsql).ensure(fake_name)
+    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
     n = fake_name
     human.secrets.add(n, 'k', 'v')
     human.secrets.add(fake_name, 'k', 'v')
@@ -84,7 +84,7 @@ class Baza::JobTest < Minitest::Test
   end
 
   def test_valve
-    human = Baza::Humans.new(test_pgsql).ensure(fake_name)
+    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
     token = human.tokens.add(fake_name)
     job = token.start(fake_name, fake_name, 1, 0, 'n/a', [])
     b = fake_name

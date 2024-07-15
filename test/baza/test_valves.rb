@@ -33,7 +33,7 @@ require_relative '../../objects/baza/humans'
 # License:: MIT
 class Baza::ValveTest < Minitest::Test
   def test_simple_scenario
-    human = Baza::Humans.new(test_pgsql).ensure(fake_name)
+    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
     valves = human.valves
     n = fake_name
     b = fake_name
@@ -54,7 +54,7 @@ class Baza::ValveTest < Minitest::Test
   end
 
   def test_with_exception
-    human = Baza::Humans.new(test_pgsql).ensure(fake_name)
+    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
     valves = human.valves
     n = fake_name
     b = fake_name
@@ -63,7 +63,7 @@ class Baza::ValveTest < Minitest::Test
   end
 
   def test_with_two_threads
-    human = Baza::Humans.new(test_pgsql).ensure(fake_name)
+    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
     valves = human.valves
     n = fake_name
     b = fake_name

@@ -33,13 +33,13 @@ require_relative '../../objects/baza/humans'
 # License:: MIT
 class Baza::TokensTest < Minitest::Test
   def test_emptiness_checks
-    human = Baza::Humans.new(test_pgsql).ensure(fake_name)
+    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
     tokens = human.tokens
     assert(tokens.empty?)
   end
 
   def test_creates_token
-    human = Baza::Humans.new(test_pgsql).ensure(fake_name)
+    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
     tokens = human.tokens
     name = fake_name
     token = tokens.add(name)
@@ -48,7 +48,7 @@ class Baza::TokensTest < Minitest::Test
   end
 
   def test_deactivates_token
-    human = Baza::Humans.new(test_pgsql).ensure(fake_name)
+    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
     tokens = human.tokens
     name = fake_name
     assert_equal(0, tokens.size)
@@ -61,7 +61,7 @@ class Baza::TokensTest < Minitest::Test
   end
 
   def test_finds_token
-    human = Baza::Humans.new(test_pgsql).ensure(fake_name)
+    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
     tokens = human.tokens
     name = fake_name
     token = tokens.add(name)

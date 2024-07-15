@@ -37,7 +37,7 @@ require_relative '../../objects/baza/factbases'
 class Baza::PipelineTest < Minitest::Test
   def test_simple_processing
     loog = Loog::NULL
-    humans = Baza::Humans.new(test_pgsql)
+    humans = Baza::Humans.new(fake_pgsql)
     fbs = Baza::Factbases.new('', '', loog:)
     Dir.mktmpdir do |lib|
       %w[judges/foo lib].each { |d| FileUtils.mkdir_p(File.join(lib, d)) }

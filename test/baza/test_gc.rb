@@ -34,7 +34,7 @@ require_relative '../../objects/baza/factbases'
 # License:: MIT
 class Baza::GcTest < Minitest::Test
   def test_finds_too_old
-    humans = Baza::Humans.new(test_pgsql)
+    humans = Baza::Humans.new(fake_pgsql)
     humans.gc.ready_to_expire(0) do |j|
       j.expire!(Baza::Factbases.new('', ''))
     end
@@ -51,7 +51,7 @@ class Baza::GcTest < Minitest::Test
   end
 
   def test_finds_stuck
-    humans = Baza::Humans.new(test_pgsql)
+    humans = Baza::Humans.new(fake_pgsql)
     humans.gc.stuck(0) do |j|
       j.expire!(Baza::Factbases.new('', ''))
     end
