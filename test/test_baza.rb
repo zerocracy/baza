@@ -101,14 +101,14 @@ class Baza::AppTest < Minitest::Test
   end
 
   def test_lock_unlock
-    login(test_name)
-    name = test_name
-    owner = test_name
+    login(fake_name)
+    name = fake_name
+    owner = fake_name
     get("/lock/#{name}?owner=#{owner}")
     assert_status(302)
     get("/unlock/#{name}?owner=#{owner}")
     assert_status(302)
-    get("/lock/#{name}?owner=#{test_name}")
+    get("/lock/#{name}?owner=#{fake_name}")
     assert_status(302)
     get('/locks')
     assert_status(200)

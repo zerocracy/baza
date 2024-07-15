@@ -33,13 +33,13 @@ require_relative '../../objects/baza/humans'
 # License:: MIT
 class Baza::LocksTest < Minitest::Test
   def test_simple_locking_scenario
-    human = Baza::Humans.new(test_pgsql).ensure(test_name)
+    human = Baza::Humans.new(test_pgsql).ensure(fake_name)
     locks = human.locks
-    owner = "#{test_name} #{test_name} #{test_name} --"
-    n = test_name
+    owner = "#{fake_name} #{fake_name} #{fake_name} --"
+    n = fake_name
     locks.lock(n, owner)
     locks.lock(n, owner)
-    e = assert_raises(Baza::Urror) { locks.lock(n, test_name) }
+    e = assert_raises(Baza::Urror) { locks.lock(n, fake_name) }
     assert(e.message.include?('is occupied by another owner'), e.message)
     locks.lock(n, owner)
     locks.unlock(n, owner)

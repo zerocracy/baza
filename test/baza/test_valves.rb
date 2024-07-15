@@ -33,10 +33,10 @@ require_relative '../../objects/baza/humans'
 # License:: MIT
 class Baza::ValveTest < Minitest::Test
   def test_simple_scenario
-    human = Baza::Humans.new(test_pgsql).ensure(test_name)
+    human = Baza::Humans.new(test_pgsql).ensure(fake_name)
     valves = human.valves
-    n = test_name
-    b = test_name
+    n = fake_name
+    b = fake_name
     x = valves.enter(n, b, 'why') { 42 }
     assert_equal(42, x)
     assert(!valves.empty?)
@@ -54,19 +54,19 @@ class Baza::ValveTest < Minitest::Test
   end
 
   def test_with_exception
-    human = Baza::Humans.new(test_pgsql).ensure(test_name)
+    human = Baza::Humans.new(test_pgsql).ensure(fake_name)
     valves = human.valves
-    n = test_name
-    b = test_name
+    n = fake_name
+    b = fake_name
     assert_raises { valves.enter(n, b, 'why') { raise 'intentional' } }
     assert_equal(42, valves.enter(n, b, 'why') { 42 })
   end
 
   def test_with_two_threads
-    human = Baza::Humans.new(test_pgsql).ensure(test_name)
+    human = Baza::Humans.new(test_pgsql).ensure(fake_name)
     valves = human.valves
-    n = test_name
-    b = test_name
+    n = fake_name
+    b = fake_name
     entered = false
     Thread.new do
       valves.enter(n, b, 'no reason') do

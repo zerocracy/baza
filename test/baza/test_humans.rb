@@ -34,7 +34,7 @@ require_relative '../../objects/baza/humans'
 class Baza::HumansTest < Minitest::Test
   def test_simple_fetching
     humans = Baza::Humans.new(test_pgsql)
-    login = test_name
+    login = fake_name
     human = humans.ensure("#{login}_ABC")
     assert(humans.exists?("#{login}_aBc"))
     assert_equal(human.github, "#{login}_abc")
@@ -43,10 +43,10 @@ class Baza::HumansTest < Minitest::Test
 
   def test_donate_when_small
     humans = Baza::Humans.new(test_pgsql)
-    human = humans.ensure(test_name)
-    token = human.tokens.add(test_name)
-    job = token.start(test_name, test_name, 1, 0, 'n/a', [])
-    job.finish!(test_name, 'stdout', 0, 544, 111, 0)
+    human = humans.ensure(fake_name)
+    token = human.tokens.add(fake_name)
+    job = token.start(fake_name, fake_name, 1, 0, 'n/a', [])
+    job.finish!(fake_name, 'stdout', 0, 544, 111, 0)
     assert(!human.account.balance.positive?)
     humans.donate(amount: 100_000, days: 0)
     assert(human.account.balance.positive?)
@@ -54,7 +54,7 @@ class Baza::HumansTest < Minitest::Test
 
   def test_donate_even_empty
     humans = Baza::Humans.new(test_pgsql)
-    human = humans.ensure(test_name)
+    human = humans.ensure(fake_name)
     assert(human.account.balance.zero?)
     humans.donate
     b = human.account.balance
@@ -67,9 +67,9 @@ class Baza::HumansTest < Minitest::Test
     passed = []
     tbot = others { |*args| passed << args }
     humans = Baza::Humans.new(test_pgsql, tbot:)
-    human = humans.ensure(test_name)
-    token = human.tokens.add(test_name)
-    id = token.start(test_name, test_name, 1, 0, 'n/a', []).id
+    human = humans.ensure(fake_name)
+    token = human.tokens.add(fake_name)
+    id = token.start(fake_name, fake_name, 1, 0, 'n/a', []).id
     job = human.jobs.get(id)
     job.valve.enter('badge', 'why') { 42 }
     assert_equal(1, passed.size)

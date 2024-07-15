@@ -38,7 +38,7 @@ class Baza::TbotTest < Minitest::Test
   def test_null_notify
     tbot = Baza::Tbot.new(test_pgsql, '')
     humans = Baza::Humans.new(test_pgsql)
-    human = humans.ensure(test_name)
+    human = humans.ensure(fake_name)
     tbot.notify(human, 'Hello, how are you?')
   end
 
@@ -50,7 +50,7 @@ class Baza::TbotTest < Minitest::Test
 
   def test_auth_wrong
     humans = Baza::Humans.new(test_pgsql)
-    human = humans.ensure(test_name)
+    human = humans.ensure(fake_name)
     tbot = Baza::Tbot.new(test_pgsql, '')
     assert_raises(Baza::Urror) { tbot.auth(human, 'wrong-secret') }
   end
@@ -59,9 +59,9 @@ class Baza::TbotTest < Minitest::Test
     tbot = Baza::Tbot.new(test_pgsql, '')
     secret = tbot.entry(55)
     humans = Baza::Humans.new(test_pgsql)
-    first = humans.ensure(test_name)
+    first = humans.ensure(fake_name)
     tbot.auth(first, secret)
-    second = humans.ensure(test_name)
+    second = humans.ensure(fake_name)
     assert_raises(Baza::Urror) { tbot.auth(second, 'another secret') }
   end
 
@@ -69,7 +69,7 @@ class Baza::TbotTest < Minitest::Test
     tbot = Baza::Tbot.new(test_pgsql, '')
     secret = tbot.entry(42)
     humans = Baza::Humans.new(test_pgsql)
-    human = humans.ensure(test_name)
+    human = humans.ensure(fake_name)
     chat = tbot.auth(human, secret)
     assert(chat.positive?)
     tbot.notify(human, 'Hey')

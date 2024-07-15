@@ -34,7 +34,7 @@ require_relative '../../objects/baza/humans'
 class Baza::HumanTest < Minitest::Test
   def test_login_checking
     humans = Baza::Humans.new(test_pgsql)
-    login = test_name
+    login = fake_name
     human = humans.ensure(login)
     assert_equal(human.github, login)
   end

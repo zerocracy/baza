@@ -63,11 +63,11 @@ class Minitest::Test
     # rubocop:enable Style/ClassVars
   end
 
-  def test_name
+  def fake_name
     "jeff#{SecureRandom.hex(8)}"
   end
 
-  def login(name = test_name)
+  def login(name = fake_name)
     enc = GLogin::Cookie::Open.new(
       { 'login' => name, 'id' => app.humans.ensure(name).id.to_s },
       ''

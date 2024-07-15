@@ -36,7 +36,7 @@ class Baza::FrontPushTest < Minitest::Test
   end
 
   def test_starts_job_via_post
-    uname = test_name
+    uname = fake_name
     login('yegor256')
     post('/gift', "human=#{uname}&zents=9999&summary=no")
     login(uname)
@@ -47,7 +47,7 @@ class Baza::FrontPushTest < Minitest::Test
     token = JSON.parse(last_response.body)['text']
     get('/push')
     header('User-Agent', 'something')
-    post('/push', 'name' => test_name, 'token' => token)
+    post('/push', 'name' => fake_name, 'token' => token)
     assert_status(302)
     fb = Factbase.new
     fb.insert.foo = 'booom \x01\x02\x03'
@@ -56,7 +56,7 @@ class Baza::FrontPushTest < Minitest::Test
       File.binwrite(f.path, fb.export)
       post(
         '/push',
-        'name' => test_name,
+        'name' => fake_name,
         'token' => token,
         'factbase' => Rack::Test::UploadedFile.new(f.path, 'application/zip')
       )
@@ -65,7 +65,7 @@ class Baza::FrontPushTest < Minitest::Test
   end
 
   def test_rejects_file_upload
-    uname = test_name
+    uname = fake_name
     login('yegor256')
     post('/gift', "human=#{uname}&zents=9999&summary=no")
     login(uname)
@@ -75,7 +75,7 @@ class Baza::FrontPushTest < Minitest::Test
     get("/tokens/#{id}.json")
     token = JSON.parse(last_response.body)['text']
     get('/push')
-    post('/push', 'name' => test_name, 'token' => token)
+    post('/push', 'name' => fake_name, 'token' => token)
     assert_status(303)
     fb = Factbase.new
     fb.insert.foo = 'a' * (11 * 1024 * 1024)
@@ -83,7 +83,7 @@ class Baza::FrontPushTest < Minitest::Test
       File.binwrite(f.path, fb.export)
       post(
         '/push',
-        'name' => test_name,
+        'name' => fake_name,
         'token' => token,
         'factbase' => Rack::Test::UploadedFile.new(f.path, 'application/zip')
       )
@@ -92,7 +92,7 @@ class Baza::FrontPushTest < Minitest::Test
   end
 
   def test_pushes_gzip_file
-    uname = test_name
+    uname = fake_name
     login('yegor256')
     post('/gift', "human=#{uname}&zents=9999&summary=no")
     login(uname)
@@ -113,7 +113,7 @@ class Baza::FrontPushTest < Minitest::Test
       header('Content-Encoding', 'gzip')
       post(
         '/push',
-        'name' => test_name,
+        'name' => fake_name,
         'token' => token,
         'factbase' => Rack::Test::UploadedFile.new(f.path, 'application/gzip')
       )
@@ -125,7 +125,7 @@ class Baza::FrontPushTest < Minitest::Test
     token = make_valid_token
     header('X-Zerocracy-Token', token)
     header('User-Agent', 'something')
-    put("/push/#{test_name}", 'some broken content')
+    put("/push/#{fake_name}", 'some broken content')
     assert_status(303)
   end
 
@@ -145,7 +145,7 @@ class Baza::FrontPushTest < Minitest::Test
         Base64.encode64('how are you, друг?')
       ].join('  ')
     )
-    name = test_name
+    name = fake_name
     put("/push/#{name}", fb.export)
     assert_status(200)
     id = last_response.body.to_i
@@ -189,7 +189,7 @@ class Baza::FrontPushTest < Minitest::Test
     fb = Factbase.new
     fb.insert.foo = 42
     header('X-Zerocracy-Token', token)
-    name = test_name
+    name = fake_name
     header('User-Agent', 'something')
     put("/push/#{name}", fb.export)
     assert_status(200)
@@ -201,7 +201,7 @@ class Baza::FrontPushTest < Minitest::Test
   private
 
   def make_valid_token
-    uname = test_name
+    uname = fake_name
     login('yegor256')
     post('/gift', "human=#{uname}&zents=555555&summary=no")
     login(uname)

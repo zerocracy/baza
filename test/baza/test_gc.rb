@@ -39,12 +39,12 @@ class Baza::GcTest < Minitest::Test
       j.expire!(Baza::Factbases.new('', ''))
     end
     assert_equal(0, humans.gc.ready_to_expire(0).to_a.size)
-    human = humans.ensure(test_name)
-    token = human.tokens.add(test_name)
-    name = test_name
+    human = humans.ensure(fake_name)
+    token = human.tokens.add(fake_name)
+    name = fake_name
     (0..4).each do |i|
-      j = token.start(name, test_name, 1, 0, 'n/a', [])
-      j.finish!(test_name, 'stdout', i, i, 433, 0)
+      j = token.start(name, fake_name, 1, 0, 'n/a', [])
+      j.finish!(fake_name, 'stdout', i, i, 433, 0)
     end
     assert_equal(0, humans.gc.ready_to_expire(1).to_a.size)
     assert_equal(4, humans.gc.ready_to_expire(0).to_a.size)
@@ -55,9 +55,9 @@ class Baza::GcTest < Minitest::Test
     humans.gc.stuck(0) do |j|
       j.expire!(Baza::Factbases.new('', ''))
     end
-    human = humans.ensure(test_name)
-    token = human.tokens.add(test_name)
-    job = token.start(test_name, test_name, 1, 0, 'n/a', [])
+    human = humans.ensure(fake_name)
+    token = human.tokens.add(fake_name)
+    job = token.start(fake_name, fake_name, 1, 0, 'n/a', [])
     humans.pgsql.exec("UPDATE job SET taken = 'yes' WHERE id = $1", [job.id])
     assert_equal(1, humans.gc.stuck(0).to_a.size)
   end

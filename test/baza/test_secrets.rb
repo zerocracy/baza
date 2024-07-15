@@ -33,11 +33,11 @@ require_relative '../../objects/baza/humans'
 # License:: MIT
 class Baza::SecretsTest < Minitest::Test
   def test_simple_scenario
-    human = Baza::Humans.new(test_pgsql).ensure(test_name)
+    human = Baza::Humans.new(test_pgsql).ensure(fake_name)
     secrets = human.secrets
-    n = test_name
-    k = test_name
-    v = test_name * 10
+    n = fake_name
+    k = fake_name
+    v = fake_name * 10
     secrets.add(n, k, v)
     assert_equal(n, secrets.each.to_a.first['name'])
     assert_equal(k, secrets.each.to_a.first['key'])

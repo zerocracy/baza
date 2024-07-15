@@ -53,13 +53,13 @@ class Baza::PipelineTest < Minitest::Test
       )
       pipeline = Baza::Pipeline.new(lib, humans, fbs, loog)
       pipeline.start(0.1)
-      human = humans.ensure(test_name)
-      token = human.tokens.add(test_name)
+      human = humans.ensure(fake_name)
+      token = human.tokens.add(fake_name)
       uuid = Tempfile.open do |f|
         File.binwrite(f, Factbase.new.export)
         uuid = fbs.save(f.path)
       end
-      job = token.start(test_name, uuid, 1, 0, 'n/a', [])
+      job = token.start(fake_name, uuid, 1, 0, 'n/a', [])
       assert(!human.jobs.get(job.id).finished?)
       loop do
         j = human.jobs.get(job.id)
