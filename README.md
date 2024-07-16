@@ -29,3 +29,11 @@ bundle exec rake
 ```
 
 If it's clean and you don't see any error messages, submit your pull request.
+
+You can also run the website locally:
+
+```bash
+bundle exec rake run
+```
+
+Then, you should be able to open it at `http://localhost:4567/`.
