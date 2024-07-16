@@ -104,9 +104,9 @@ class Baza::Pipeline
         unless errs.zero?
           @tbot.notify(
             job.jobs.human,
-            "⚠️ The job [##{job.id}](https://www.zerocracy.com/jobs/#{job.id})",
-            "finished with #{errs} error(s). You better pay attention to it ASAP,",
-            'before it gets too late.'
+            "⚠️ The job [##{job.id}](https://www.zerocracy.com/jobs/#{job.id}) (#{job.name})",
+            "finished with #{errs} error#{errs == 1 ? '' : 's'}.",
+            'You better pay attention to it ASAP, before it gets too late.'
           )
         end
       else

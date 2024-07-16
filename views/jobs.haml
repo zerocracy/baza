@@ -84,7 +84,7 @@
               %i.fa-solid.fa-list
           - m = j.metas.find { |m| m.start_with?('duration:') }
           - unless m.nil?
-            %span{title: 'How long it took to update the factbase'}
+            %span.gray{title: 'How long it took to update the factbase'}
               = "#{m.split('duration:', 2)[1]}s"
         %td.ff
           - unless j.when_locked.nil?
