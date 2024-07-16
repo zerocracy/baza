@@ -25,6 +25,7 @@
 require_relative 'tbot'
 require_relative 'human'
 require_relative 'urror'
+require_relative 'zents'
 
 # All humans.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -118,10 +119,9 @@ class Baza::Humans
     )
     rows.each do |row|
       human = get(row['human'].to_i)
-      @tbot.notify(
-        human,
-        "🍎 We topped up your account by #{format('%+0.2f', amount.to_f / 100_000)}.",
-        "Now, the balance is #{format('%+0.2f', human.account.balance / 100_000)}",
+      human.notify(
+        "🍎 We topped up your account by #{amount.zents}.",
+        "Now, the balance is #{human.account.balance.zents}",
         "We do this automatically every #{days} days, if your account doesn't",
         'have enough funds.'
       )

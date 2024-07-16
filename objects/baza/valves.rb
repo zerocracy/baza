@@ -101,8 +101,7 @@ class Baza::Valves
               t.exec('ROLLBACK')
               throw :rollback
             end
-            @tbot.notify(
-              human,
+            human.notify(
               '🍒 A new [valve](https://www.zerocracy.com/valves)',
               "just entered for `#{name}`: #{why.inspect}."
             )

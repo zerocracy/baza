@@ -94,6 +94,11 @@ class Baza::Human
     rows[0]['github']
   end
 
+  # Notify this user via telegram.
+  def notify(*lines)
+    @tbot.notify(self, *lines)
+  end
+
   # An admin.
   module Admin
     def admin?

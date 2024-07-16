@@ -110,8 +110,7 @@ class Baza::Pipeline
           )
         end
       else
-        @tbot.notify(
-          job.jobs.human,
+        job.jobs.human.notify(
           "💔 The job [##{job.id}](https://www.zerocracy.com/jobs/#{job.id}) has failed :(",
           'This most probably means that there is an internal error on our server.',
           'Please, report this situation to us by ',

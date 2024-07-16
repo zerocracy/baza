@@ -23,6 +23,7 @@
 # SOFTWARE.
 
 require_relative 'result'
+require_relative 'zents'
 
 # One job.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -94,6 +95,13 @@ class Baza::Job
           ],
           [id, uri2, stdout, exit, msec, size, errors]
         )[0]['id'].to_i
+      )
+    end
+    balance = @jobs.human.account.balance
+    if balance.negative?
+      @jobs.human.notify(
+        "🌶 You account balance is negative: #{balance.zents}.",
+        'Get in touch with us in @zerocracy chat, we will try to top it up.'
       )
     end
     @to_json = nil
