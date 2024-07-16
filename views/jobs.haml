@@ -82,6 +82,10 @@
           - unless m.nil?
             %a.ico{href: m.split('pages_url:', 2)[1], title: "Click here to open the published summary"}
               %i.fa-solid.fa-list
+          - m = j.metas.find { |m| m.start_with?('duration:') }
+          - unless m.nil?
+            %span{title: 'How long it took to update the factbase'}
+              = "#{m.split('duration:', 2)[1]}s"
         %td.ff
           - unless j.when_locked.nil?
             %a.ico{href: iri.cut('/locks'), title: "The job was locked #{j.when_locked.ago} ago, click to unlock"}
