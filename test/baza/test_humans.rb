@@ -33,7 +33,7 @@ require_relative '../../objects/baza/humans'
 # License:: MIT
 class Baza::HumansTest < Minitest::Test
   def test_simple_fetching
-    humans = Baza::Humans.new(fake_pgsql)
+    humans = Baza::Humans.new(fake_pgsql, tbot: Baza::Tbot::Fake.new(Loog::NULL))
     login = fake_name
     human = humans.ensure("#{login}_ABC")
     assert(humans.exists?("#{login}_aBc"))
@@ -42,7 +42,7 @@ class Baza::HumansTest < Minitest::Test
   end
 
   def test_donate_when_small
-    humans = Baza::Humans.new(fake_pgsql)
+    humans = Baza::Humans.new(fake_pgsql, tbot: Baza::Tbot::Fake.new(Loog::NULL))
     human = humans.ensure(fake_name)
     token = human.tokens.add(fake_name)
     job = token.start(fake_name, fake_name, 1, 0, 'n/a', [])
@@ -53,7 +53,7 @@ class Baza::HumansTest < Minitest::Test
   end
 
   def test_donate_even_empty
-    humans = Baza::Humans.new(fake_pgsql)
+    humans = Baza::Humans.new(fake_pgsql, tbot: Baza::Tbot::Fake.new(Loog::NULL))
     human = humans.ensure(fake_name)
     assert(human.account.balance.zero?)
     humans.donate
@@ -64,7 +64,7 @@ class Baza::HumansTest < Minitest::Test
   end
 
   def test_donate_only_once
-    humans = Baza::Humans.new(fake_pgsql, tbot: Baza::Tbot::Fake.new(Loog::VERBOSE))
+    humans = Baza::Humans.new(fake_pgsql, tbot: Baza::Tbot::Fake.new(Loog::NULL))
     human = humans.ensure(fake_name)
     token = human.tokens.add(fake_name)
     token.start(fake_name, fake_name, 1, 0, 'x', []).finish!(fake_name, 'x', 0, 544, 111, 0)
