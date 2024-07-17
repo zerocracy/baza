@@ -63,6 +63,20 @@ class Baza::HumansTest < Minitest::Test
     assert_equal(b, human.account.balance)
   end
 
+  def test_donate_only_once
+    humans = Baza::Humans.new(fake_pgsql, tbot: Baza::Tbot::Fake.new(Loog::VERBOSE))
+    human = humans.ensure(fake_name)
+    token = human.tokens.add(fake_name)
+    token.start(fake_name, fake_name, 1, 0, 'x', []).finish!(fake_name, 'x', 0, 544, 111, 0)
+    assert(!human.account.balance.positive?)
+    humans.donate(amount: 1000, days: 0)
+    assert(human.account.balance.positive?)
+    token.start(fake_name, fake_name, 1, 0, 'x', []).finish!(fake_name, 'x', 0, 544, 111, 0)
+    assert(!human.account.balance.positive?)
+    humans.donate(amount: 1000, days: 10)
+    assert(!human.account.balance.positive?)
+  end
+
   def test_passes_tbot_further
     passed = []
     tbot = others { |*args| passed << args }

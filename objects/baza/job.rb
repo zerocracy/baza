@@ -100,7 +100,7 @@ class Baza::Job
     balance = @jobs.human.account.balance
     if balance.negative?
       @jobs.human.notify(
-        "🌶 You account balance is negative: #{balance.zents}.",
+        "🌶  You account balance is negative: #{balance.zents}.",
         'Get in touch with us in @zerocracy chat, we will try to top it up.'
       )
     end

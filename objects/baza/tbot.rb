@@ -36,8 +36,12 @@ require 'securerandom'
 class Baza::Tbot
   # Fake tbot.
   class Fake
+    def initialize(loog = Loog::NULL)
+      @loog = loog
+    end
+
     def notify(human, *msg)
-      # nothing
+      @loog.debug("Notified @#{human.github}: #{msg.join(' ')}")
     end
   end
 

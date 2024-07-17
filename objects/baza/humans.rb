@@ -101,21 +101,23 @@ class Baza::Humans
 
   # Donate to all accounts that are not funded enough (and eligible for donation).
   def donate(amount: 8, days: 30)
+    summary = 'Donation'
     rows = @pgsql.exec(
       [
         'INSERT INTO receipt(human, zents, summary)',
-        "SELECT human, #{amount.to_i} AS zents, 'Donation' AS summary FROM",
-        '(SELECT human.id AS human, SUM(a.zents) AS balance FROM human',
-        'LEFT JOIN receipt AS a ON a.human = human.id',
-        'LEFT JOIN receipt AS b ON b.human = human.id',
-        "AND b.created > NOW() - INTERVAL '#{days.to_i} DAYS'",
-        'AND b.summary LIKE \'Donation%"\'',
-        'WHERE b.id IS NULL',
-        'GROUP BY human.id) AS x',
+        "SELECT human, #{amount.to_i} AS zents, $2 AS summary FROM",
+        '  (SELECT human.id AS human, SUM(a.zents) AS balance FROM human',
+        '  LEFT JOIN receipt AS a ON a.human = human.id',
+        '  LEFT JOIN receipt AS b ON b.human = human.id',
+        "    AND b.created > NOW() - INTERVAL '#{days.to_i} DAYS'",
+        "    AND b.summary LIKE CONCAT('#{summary}', '%')",
+        '    AND b.zents > 0',
+        '  WHERE b.id IS NULL',
+        '  GROUP BY human.id) AS x',
         'WHERE x.balance < $1 OR x.balance IS NULL',
         'RETURNING human'
       ],
-      [amount]
+      [amount, summary]
     )
     rows.each do |row|
       human = get(row['human'].to_i)
