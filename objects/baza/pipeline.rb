@@ -139,7 +139,7 @@ class Baza::Pipeline
         'quiet' => true,
         'summary' => true,
         'max-cycles' => 3, # it will stop on the first cycle if no changes are made
-        'log' => true,
+        'log' => false,
         'verbose' => true,
         'option' => job.secrets.map { |s| "#{s['key']}=#{s['value']}" },
         'lib' => File.join(@jdir, 'lib')
