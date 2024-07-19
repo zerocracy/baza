@@ -141,7 +141,7 @@ class Baza::Pipeline
         'max-cycles' => 3, # it will stop on the first cycle if no changes are made
         'log' => false,
         'verbose' => true,
-        'option' => job.secrets.map { |s| "#{s['key']}=#{s['value']}" },
+        'option' => options(job).map { |k, v| "#{k}=#{v}" },
         'lib' => File.join(@jdir, 'lib')
       },
       [File.join(@jdir, 'judges'), input]
@@ -150,6 +150,13 @@ class Baza::Pipeline
   rescue StandardError => e
     stdout.error(Backtrace.new(e))
     1
+  end
+
+  # Create list of options for the job.
+  # @param [Baza::Job] job The job
+  # @return [Hash] Option/value pairs
+  def options(job)
+    job.secrets.to_h { |s| [s['key'], s['value']] }
   end
 
   # Replace all secrets in the text with *****
