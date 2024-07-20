@@ -23,6 +23,7 @@
 # SOFTWARE.
 
 require 'veil'
+require_relative 'zents'
 
 # Account of a human.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -82,11 +83,20 @@ class Baza::Account
   end
 
   # Add a new receipt for a human, not attached to a job.
-  def top_up(zents, summary, created: Time.now)
-    pgsql.exec(
+  # @param [Integer] amount How many zents to add to the account
+  # @param [String] summary The description of the transaction
+  # @param [Time] created The time of the transaction
+  # @return [Integer] The ID of the transaction
+  def top_up(amount, summary, created: Time.now)
+    id = pgsql.exec(
       'INSERT INTO receipt (human, zents, summary, created) VALUES ($1, $2, $3, $4) RETURNING id',
-      [@human.id, zents, summary, created]
-    ).empty?
+      [@human.id, amount, summary, created]
+    )[0]['id']
+    @human.notify(
+      "🍏 We topped up your account by #{amount.zents}.",
+      "Now, the balance is #{balance.zents}."
+    )
+    id
   end
 
   # Get a single receipt by ID.
