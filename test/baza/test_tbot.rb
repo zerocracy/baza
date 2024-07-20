@@ -39,7 +39,7 @@ class Baza::TbotTest < Minitest::Test
     tbot = Baza::Tbot.new(fake_pgsql, '')
     humans = Baza::Humans.new(fake_pgsql)
     human = humans.ensure(fake_name)
-    tbot.notify(human, 'Hello, how are you?')
+    tbot.notify(human, 'Hello, look: foo/foo#444')
   end
 
   def test_to_string

@@ -36,7 +36,7 @@ require_relative '../../objects/baza/factbases'
 # License:: MIT
 class Baza::PipelineTest < Minitest::Test
   def test_simple_processing
-    loog = Loog::NULL
+    loog = Loog::Buffer.new
     humans = Baza::Humans.new(fake_pgsql)
     fbs = Baza::Factbases.new('', '', loog:)
     Dir.mktmpdir do |lib|
@@ -59,8 +59,9 @@ class Baza::PipelineTest < Minitest::Test
         File.binwrite(f, Factbase.new.export)
         uuid = fbs.save(f.path)
       end
-      job = token.start(fake_name, uuid, 1, 0, 'n/a', [])
+      job = token.start(fake_name, uuid, 1, 0, 'n/a', ['pages_url:abc'])
       assert(!human.jobs.get(job.id).finished?)
+      human.secrets.add(job.name, 'ppp', 'swordfish')
       loop do
         j = human.jobs.get(job.id)
         next unless j.finished?
@@ -68,11 +69,21 @@ class Baza::PipelineTest < Minitest::Test
         break
       end
       pipeline.stop
+      stdout = loog.to_s
+      [
+        'Pipeline started',
+        'Running foo (#0)',
+        'The following options provided',
+        'PPP → "swor*****"',
+        'PAGES_URL → "abc"',
+        'Update finished in 2 cycle(s), modified 1/0 fact(s)',
+        'Pipeline stopped'
+      ].each { |t| assert(stdout.include?(t), "Can't find '#{t}' in #{stdout}") }
       Tempfile.open do |f|
         fbs.load(job.result.uri2, f.path)
         fb = Factbase.new
         fb.import(File.binread(f))
-        assert_equal(2, fb.query('(always)').each.to_a.size)
+        assert_equal(2, fb.size)
         assert_equal(42, fb.query('(exists foo)').each.to_a.first.foo)
       end
     end

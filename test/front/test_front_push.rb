@@ -166,8 +166,11 @@ class Baza::FrontPushTest < Minitest::Test
       break if last_response.body == 'yes'
       sleep 0.1
       cycles += 1
-      break if cycles > 10
+      break if cycles > 20
     end
+    stdout = get("/stdout/#{rid}.txt").body
+    assert_status(200)
+    assert(stdout.include?('HOW ARE YOU, ДРУГ'), stdout)
     get("/pull/#{rid}.fb")
     assert_status(200)
     get("/inspect/#{id}.fb")
@@ -175,8 +178,6 @@ class Baza::FrontPushTest < Minitest::Test
     fb.query('(always)').delete!
     fb.import(last_response.body)
     assert(fb.query('(exists foo)').each.to_a[0].foo.start_with?('booom'))
-    get("/stdout/#{rid}.txt")
-    assert_status(200)
     get("/jobs/#{id}/output.html")
     assert_status(200)
     get("/jobs/#{rid}/expire")
