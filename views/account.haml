@@ -18,7 +18,7 @@
   - max = bars.map { |b| b[:max] }.max
   %p
     Currently, we charge
-    != zents(the_human.price)
+    != zents(the_human.price * 1000)
     per second of our server time.
     This is how much you spend, per week (YY.WW):
   %p
