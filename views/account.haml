@@ -17,6 +17,9 @@
   - bars.each { |b| b[:max] = b[:debit] > b[:credit] ? b[:debit] : b[:credit] }
   - max = bars.map { |b| b[:max] }.max
   %p
+    Currently, we charge
+    != zents(the_human.price)
+    per second of our server time.
     This is how much you spend, per week (YY.WW):
   %p
     %div.bars

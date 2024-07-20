@@ -71,7 +71,7 @@ class Baza::HumansTest < Minitest::Test
     assert(!human.account.balance.positive?)
     humans.donate(amount: 1000, days: 0)
     assert(human.account.balance.positive?)
-    token.start(fake_name, fake_name, 1, 0, 'x', []).finish!(fake_name, 'x', 0, 544, 111, 0)
+    token.start(fake_name, fake_name, 1, 0, 'x', []).finish!(fake_name, 'x', 0, 8440, 111, 0)
     assert(!human.account.balance.positive?)
     humans.donate(amount: 1000, days: 10)
     assert(!human.account.balance.positive?)

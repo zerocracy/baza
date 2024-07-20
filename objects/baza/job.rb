@@ -85,7 +85,7 @@ class Baza::Job
     @jobs.pgsql.transaction do |t|
       t.exec(
         'INSERT INTO receipt (human, zents, summary, job) VALUES ($1, $2, $3, $4) RETURNING id',
-        [@jobs.human.id, -msec, summary, id]
+        [@jobs.human.id, -(@jobs.human.price * msec).to_i, summary, id]
       )[0]['id'].to_i
       @jobs.human.results.get(
         t.exec(

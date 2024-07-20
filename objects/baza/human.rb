@@ -39,6 +39,12 @@ class Baza::Human
     @tbot = tbot
   end
 
+  # How much zents to charge per millisecond of server time.
+  # @return [Float] Number of zents per millisecond
+  def price
+    0.16
+  end
+
   def pgsql
     @humans.pgsql
   end
