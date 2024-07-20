@@ -26,7 +26,7 @@
       - bars.each do |b|
         %div.week
           %div.both
-            %div.credit{style: "height: #{100 * b[:credit] / max}%", title: usd(b[:credit])}
+            %div.credit{style: "height: #{100 * b[:credit] / max}%", title: usd(-b[:credit])}
               != '&nbsp;'
             %div.debit{style: "height: #{100 * b[:debit] / max}%", title: usd(b[:debit])}
               != '&nbsp;'
