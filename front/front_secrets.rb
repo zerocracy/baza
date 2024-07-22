@@ -31,11 +31,10 @@ get '/secrets' do
   )
 end
 
-get(%r{/secrets/([a-z0-9]+)/([a-z_A-Z0-9]+)/remove}) do
-  n = params['captures'].first
-  key = params['captures'][1]
-  the_human.secrets.remove(n, key)
-  flash(iri.cut('/secrets'), "The secret '#{key}' just removed for '#{n}'")
+get(%r{/secrets/([0-9]+)/remove}) do
+  id = params['captures'].first.to_i
+  the_human.secrets.remove(id)
+  flash(iri.cut('/secrets'), "The secret ##{id} just removed")
 end
 
 post('/secrets/add') do

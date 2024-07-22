@@ -44,7 +44,7 @@ class Baza::SecretsTest < Minitest::Test
     assert_equal(k, s[:key])
     assert_equal(v, s[:value])
     assert_equal(0, s[:jobs])
-    secrets.remove(n, k)
+    secrets.remove(s[:id])
     assert(secrets.each.to_a.empty?)
   end
 end
