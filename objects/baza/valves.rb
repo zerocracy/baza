@@ -52,10 +52,13 @@ class Baza::Valves
     return to_enum(__method__, offset:) unless block_given?
     pgsql.exec(
       [
-        'SELECT * FROM valve WHERE human = $1 ',
-        'ORDER BY created DESC ',
+        'SELECT valve.*, COUNT(job.id) AS jobs FROM valve',
+        'LEFT JOIN job ON job.name = valve.name',
+        'WHERE human = $1',
+        'GROUP BY valve.id',
+        'ORDER BY valve.created DESC',
         "OFFSET #{offset.to_i}"
-      ].join,
+      ],
       [@human.id]
     ).each do |row|
       v = {
@@ -64,7 +67,8 @@ class Baza::Valves
         name: row['name'],
         badge: row['badge'],
         result: dec(row['result']),
-        why: row['why']
+        why: row['why'],
+        jobs: row['jobs'].to_i
       }
       yield v
     end

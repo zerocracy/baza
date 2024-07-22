@@ -47,6 +47,7 @@ class Baza::ValveTest < Minitest::Test
     assert_equal(b, v[:badge])
     assert_equal(42, v[:result])
     assert_equal('why', v[:why])
+    assert_equal(0, v[:jobs])
     y = valves.enter(n, b, 'why') { 55 }
     assert_equal(42, y)
     valves.remove(n, b)

@@ -54,7 +54,11 @@
         %td.ff
           = "##{s[:id]}"
         %td.ff
-          = s[:name]
+          - if s[:jobs].zero?
+            = s[:name]
+            %i.fa-solid.fa-triangle-exclamation.darkred{title: 'There is no job by this name, maybe a spelling error?'}
+          - else
+            %a{href: iri.over(name: s[:name])}= s[:name]
         %td.ff
           = s[:badge]
         %td
