@@ -1,13 +1,13 @@
 %p
   Your balance:
-  != zents(account.balance)
+  != zents(account.balance, digits: 2)
 
 %p
   At the moment, it's impossible to add funds to the account,
   because the system is running in an experimental mode.
   Don't worry, we won't let you down:
   we will automatically top up your account by
-  != zents(settings.donation_amount)
+  != zents(settings.donation_amount, digits: 2)
   when it runs out of funds (we will do it only once every
   = settings.donation_period
   days).
@@ -18,8 +18,8 @@
   - max = bars.map { |b| b[:max] }.max
   %p
     Currently, we charge
-    != zents(the_human.price * 1000)
-    per second of our server time.
+    != zents(the_human.price * 1000 * 60 * 60, digits: 2)
+    per hour of our server time, prorated to the millisecond.
     This is how much you've spent, per week (YY.WW):
   %p
     %div.bars

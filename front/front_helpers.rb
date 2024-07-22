@@ -29,13 +29,14 @@ helpers do
     "<span title='#{time.utc.iso8601}'>#{time.ago} ago</span>"
   end
 
-  def usd(num)
-    format('%.5f', num.to_f / (1000 * 100))
+  def usd(num, digits: 4)
+    format("%+.#{digits}f", num.to_f / (1000 * 100))
   end
 
-  def zents(num)
-    usd = usd(num)
-    num.positive? ? "<span style='color:darkgreen'>+#{usd}</span>" : "<span style='color:firebrick'>#{usd}</span>"
+  def zents(num, digits: 4)
+    usd = usd(num, digits:)
+    color = num.positive? ? 'darkgreen' : 'firebrick'
+    "<span style='color:#{color}' title='#{usd(num, digits: 6)}'>#{usd}</span>"
   end
 
   def msec(msec)
