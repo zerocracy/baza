@@ -40,6 +40,8 @@ require 'loog'
 require 'securerandom'
 require 'rack/test'
 require 'glogin/cookie'
+require 'capybara'
+require 'capybara/dsl'
 
 module Rack
   module Test
@@ -53,6 +55,12 @@ end
 
 class Minitest::Test
   include Rack::Test::Methods
+
+  include Capybara::DSL
+
+  def setup
+    Capybara.app = Sinatra::Application.new
+  end
 
   def fake_pgsql
     # rubocop:disable Style/ClassVars
@@ -80,5 +88,10 @@ class Minitest::Test
       code, last_response.status,
       "#{last_request.url}:\n#{last_response.headers}\n#{last_response.body}"
     )
+  end
+
+  def integration_login
+    visit '/dash'
+    click_link 'Start'
   end
 end
