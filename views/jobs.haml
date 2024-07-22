@@ -74,7 +74,7 @@
             %a.ico{href: iri.cut('/inspect').append("#{j.id}.fb"), title: "Click here to download the binary Factbase file (#{bytes(j.size)})"}
               %i.fa-solid.fa-box-archive
           - if j.errors.positive?
-            %span{title: "#{j.errors} error(s) in the 'judges-summary' fact"}
+            %span{title: "#{j.errors} error(s) in the 'judges-summary' fact, before processing"}
               %i.fa-solid.fa-triangle-exclamation.darkred
         %td.ff
           %a{href: iri.over(name: j.name)}= j.name
@@ -121,7 +121,7 @@
                 %a.ico{href: iri.cut('/pull').append("#{j.id}.fb"), title: "Click here to download the binary Factbase file (#{bytes(j.result.size)})"}
                   %i.fa-solid.fa-box-archive
               - if j.result.errors&.positive?
-                %span{title: "#{j.errors} error(s) in the 'judges-summary' fact"}
+                %span{title: "#{j.result.errors} error(s) in the 'judges-summary' fact, after processing"}
                   %i.fa-solid.fa-triangle-exclamation.darkred
         - elsif j.expired?
           %td.center.orange{colspan: 5}
