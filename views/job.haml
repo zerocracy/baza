@@ -5,7 +5,7 @@
         %a{href: iri.cut('/jobs').append(job.id).append('expire'), onclick: "return confirm('If you expire this job, there will no way to return its data back. Are you sure want to proceed?')"}
           Expire!
 
-%div{'style' => 'column-count:3'}
+%div.columns
   %p
     ID:
     %br
