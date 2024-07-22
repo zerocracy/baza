@@ -37,9 +37,8 @@ post('/valve-add') do
   flash(iri.cut('/valves'), "The valve '#{params[:badge]}' has been added for '#{params[:name]}'")
 end
 
-get(%r{/valves/([a-z0-9]+)/([a-z_A-Z0-9-]+)/remove}) do
-  n = params['captures'].first
-  badge = params['captures'][1]
-  the_human.valves.remove(n, badge)
-  flash(iri.cut('/valves'), "The valve '#{badge}' just removed for '#{n}'")
+get(%r{/valves/([0-9]+)/remove}) do
+  id = params['captures'].first.to_i
+  the_human.valves.remove(id)
+  flash(iri.cut('/valves'), "The valve ##{id}' just removed")
 end

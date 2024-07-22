@@ -132,10 +132,10 @@ class Baza::Valves
     end
   end
 
-  def remove(name, badge)
+  def remove(id)
     pgsql.exec(
-      'DELETE FROM valve WHERE human = $1 AND name = $2 AND badge = $3',
-      [@human.id, name.downcase, badge]
+      'DELETE FROM valve WHERE id = $1',
+      [id]
     )
   end
 

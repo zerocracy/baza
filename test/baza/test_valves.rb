@@ -50,7 +50,7 @@ class Baza::ValveTest < Minitest::Test
     assert_equal(0, v[:jobs])
     y = valves.enter(n, b, 'why') { 55 }
     assert_equal(42, y)
-    valves.remove(n, b)
+    valves.remove(v[:id])
     assert(valves.each.to_a.empty?)
   end
 
