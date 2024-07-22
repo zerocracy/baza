@@ -39,9 +39,11 @@ class Baza::SecretsTest < Minitest::Test
     k = fake_name
     v = fake_name * 10
     secrets.add(n, k, v)
-    assert_equal(n, secrets.each.to_a.first['name'])
-    assert_equal(k, secrets.each.to_a.first['key'])
-    assert_equal(v, secrets.each.to_a.first['value'])
+    s = secrets.each.to_a.first
+    assert_equal(n, s[:name])
+    assert_equal(k, s[:key])
+    assert_equal(v, s[:value])
+    assert_equal(0, s[:jobs])
     secrets.remove(n, k)
     assert(secrets.each.to_a.empty?)
   end

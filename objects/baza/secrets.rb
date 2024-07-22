@@ -44,8 +44,28 @@ class Baza::Secrets
     ).empty?
   end
 
-  def each(&)
-    pgsql.exec('SELECT * FROM secret WHERE human = $1', [@human.id]).each(&)
+  def each
+    return to_enum(__method__) unless block_given?
+    rows = pgsql.exec(
+      [
+        'SELECT secret.*, COUNT(job.id) AS jobs FROM secret',
+        'LEFT JOIN job ON job.name = secret.name',
+        'WHERE human = $1',
+        'GROUP BY secret.id'
+      ],
+      [@human.id]
+    )
+    rows.each do |row|
+      s = {
+        id: row['id'].to_i,
+        name: row['name'],
+        key: row['key'],
+        value: row['value'],
+        created: Time.parse(row['created']),
+        jobs: row['jobs'].to_i
+      }
+      yield s
+    end
   end
 
   def add(name, key, value)
