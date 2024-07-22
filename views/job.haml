@@ -34,7 +34,7 @@
     User-Agent:
     %br
     %span.ff
-      = job.agent
+      != largetext(job.agent)
 
   %p
     Meta:
@@ -55,7 +55,7 @@
         Not yet
     - else
       %span.ff
-        = job.taken
+        != largetext(job.taken)
 
   %p
     Lock:
