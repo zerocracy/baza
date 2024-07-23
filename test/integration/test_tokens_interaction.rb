@@ -53,6 +53,15 @@ class Baza::TokensInteractionTest < Minitest::Test
     assert_current_path '/dash'
   end
 
+  def test_does_not_add_token_with_invalid_name
+    integration_login
+    click_link 'Tokens'
+    token_name = '12345'
+    fill_in 'Unique token name', with: token_name
+    click_button 'Add'
+    assert_current_path '/dash'
+  end
+
   def test_deactivates_token
     human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
     tokens = human.tokens
