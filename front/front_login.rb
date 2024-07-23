@@ -64,7 +64,7 @@ get '/fake-login' do
       'login' => login,
       'avatar_url' => 'none'
     },
-    ''
+    settings.config['github']['encryption_secret']
   ).to_s
   flash(iri.cut('/'), "@#{login} has been logged in (FAKE!)")
 end
