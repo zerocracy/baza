@@ -23,55 +23,29 @@
 # SOFTWARE.
 
 require 'minitest/autorun'
-require 'factbase'
-require_relative 'test__helper'
-require_relative '../baza'
+require_relative '../test__helper'
+require_relative '../../baza'
 
-class Baza::AppTest < Minitest::Test
+class Baza::FrontAdminTest < Minitest::Test
   def app
     Sinatra::Application
   end
 
-  def test_renders_public_pages
+  def test_renders_admin_pages
     pages = [
-      '/version',
-      '/robots.txt',
-      '/',
-      '/svg/logo.svg',
-      '/png/logo-white.png',
-      '/css/main.css'
+      '/sql',
+      '/gift'
     ]
+    login('yegor256')
     pages.each do |p|
       get(p)
       assert_status(200)
     end
   end
 
-  def test_renders_private_pages
-    pages = [
-      '/dash',
-      '/tokens',
-      '/jobs',
-      '/locks',
-      '/secrets',
-      '/valves',
-      '/account'
-    ]
-    login
-    pages.each do |p|
-      get(p)
-      assert_status(200)
-    end
-  end
-
-  def test_creates_and_deletes_token
-    login
-    get('/tokens')
-    post('/tokens/add', 'name=foo')
-    assert_status(302)
-    id = last_response.headers['X-Zerocracy-TokenId'].to_i
-    assert(id.positive?)
-    get("/tokens/#{id}/deactivate")
+  def test_force_login
+    login('yegor256')
+    get('/force-login?u=tester')
     assert_status(302)
   end
 end
