@@ -106,8 +106,8 @@ class Baza::Valves
               throw :rollback
             end
             human.notify(
-              '🍒 A new [valve](https://www.zerocracy.com/valves)',
-              "just entered for `#{name}`: #{why.inspect}."
+              "🍒 A new [valve](https://www.zerocracy.com/valves) ##{row['id']}",
+              "just entered for the `#{name}` job: #{why.inspect}."
             )
             t.exec('COMMIT')
             throw :stop
