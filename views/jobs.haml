@@ -78,8 +78,8 @@
               %i.fa-solid.fa-triangle-exclamation.darkred
         %td.ff
           %a{href: iri.over(name: j.name)}= j.name
-          - if_meta(j, 'pages_url') do |url|
-            %a.ico{href: url, title: "Click here to open the published summary"}
+          - if_meta(j, 'vitals_url') do |url|
+            %a.ico{href: url, title: "Click here to open the published vitals report"}
               %i.fa-solid.fa-list
           - if_meta(j, 'workflow_url') do |url|
             %a.ico{href: url, title: "Click here to see the workflow in GitHub"}

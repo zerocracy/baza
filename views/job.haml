@@ -44,6 +44,11 @@
       %a.ico{href: url, title: "Click here to see the workflow in GitHub"}
         %i.fa-brands.fa-github
 
+  - if_meta(job, 'vitals_url') do |url|
+    %p
+      Vitals:
+      %a.ico{href: url, title: "Click here to open the published vitals report"}
+        %i.fa-solid.fa-list
   %p
     Meta:
     %br
@@ -135,7 +140,7 @@
       Exit code:
       %br
       - if r.exit.zero?
-        %i.fa-regular.fa-thumbs-up
+        %i.fa-regular.fa-thumbs-up.darkgreen
       %span.ff
         = r.exit
     %p
