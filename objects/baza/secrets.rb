@@ -83,8 +83,8 @@ class Baza::Secrets
 
   def remove(id)
     pgsql.exec(
-      'DELETE FROM secret WHERE id = $1',
-      [id]
+      'DELETE FROM secret WHERE id = $1 AND human = $2',
+      [id, @human.id]
     )
   end
 end

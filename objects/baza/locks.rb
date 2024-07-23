@@ -92,8 +92,8 @@ class Baza::Locks
 
   def delete(id)
     pgsql.exec(
-      'DELETE FROM lock WHERE id = $1',
-      [id]
+      'DELETE FROM lock WHERE id = $1 AND human = $2',
+      [id, @human.id]
     )
   end
 end
