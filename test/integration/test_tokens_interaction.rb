@@ -50,7 +50,7 @@ class Baza::TokensInteractionTest < Minitest::Test
 
     fill_in 'Unique token name', with: token_name
     click_button 'Add'
-    assert_current_path('/dash')
+    assert_current_path '/dash'
   end
 
   def test_deactivates_token
