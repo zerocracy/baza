@@ -45,7 +45,26 @@ class Baza::Locks
   end
 
   def each(&)
-    pgsql.exec('SELECT * FROM lock WHERE human = $1 ORDER BY created DESC', [@human.id]).each(&)
+    return to_enum(__method__, offset:) unless block_given?
+    pgsql.exec(
+      [
+        'SELECT lock.*, COUNT(job.id) AS jobs FROM lock',
+        'LEFT JOIN job ON job.name = lock.name',
+        'WHERE human = $1',
+        'GROUP BY lock.id',
+        'ORDER BY lock.created DESC'
+      ],
+      [@human.id]
+    ).each do |row|
+      lk = {
+        id: row['id'].to_i,
+        created: Time.parse(row['created']),
+        name: row['name'],
+        owner: row['owner'],
+        jobs: row['jobs'].to_i
+      }
+      yield lk
+    end
   end
 
   def lock(name, owner)
@@ -68,6 +87,13 @@ class Baza::Locks
     pgsql.exec(
       'DELETE FROM lock WHERE human = $1 AND owner = $3 AND name = $2',
       [@human.id, name.downcase, owner]
+    )
+  end
+
+  def delete(id)
+    pgsql.exec(
+      'DELETE FROM lock WHERE id = $1',
+      [id]
     )
   end
 end
