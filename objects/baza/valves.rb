@@ -93,7 +93,7 @@ class Baza::Valves
                 'INSERT INTO valve (human, name, badge, owner, why) ',
                 'VALUES ($1, $2, $3, 1, $4) ',
                 'ON CONFLICT(human, name, badge) DO UPDATE SET owner = valve.owner + 1 ',
-                'RETURNING owner, result'
+                'RETURNING id, owner, result'
               ],
               [@human.id, name.downcase, badge, why]
             )[0]
