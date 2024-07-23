@@ -38,7 +38,7 @@
 
   - if_meta(job, 'workflow_url') do |url|
     %p
-      GitHub workflow:
+      GitHub Workflow:
       %br
       %span.ff= url.split('/')[-1]
       %a.ico{href: url, title: "Click here to see the workflow in GitHub"}
@@ -47,7 +47,9 @@
   - if_meta(job, 'vitals_url') do |url|
     %p
       Vitals:
+      %br
       %a.ico{href: url, title: "Click here to open the published vitals report"}
+        Here
         %i.fa-solid.fa-list
   %p
     Meta:
@@ -92,7 +94,7 @@
           %i.fa-solid.fa-link
 
   %p
-    Errors:
+    Input Errors:
     %br
     - if job.errors.zero?
       %span.darkgreen
@@ -112,7 +114,7 @@
         - else
           Still running
     - else
-      Nope
+      Not yet
 
   - unless job.finished?
     %p
@@ -123,7 +125,7 @@
 
   - unless job.expired?
     %p
-      Input:
+      Input Factbase:
       %br
       %a{href: iri.cut('/inspect').append("#{job.id}.fb")}= 'Download'
       != "(#{bytes(job.size)})"
@@ -137,7 +139,7 @@
       %br
       != ago(r.created)
     %p
-      Exit code:
+      Exit Code:
       %br
       - if r.exit.zero?
         %i.fa-regular.fa-thumbs-up.darkgreen
@@ -149,7 +151,7 @@
       = "#{r.msec}ms"
     - if r.exit.zero? && !job.expired?
       %p
-        Output:
+        Output Factbase:
         %br
         %a{href: iri.cut('/pull').append("#{job.id}.fb")}= 'Download'
         != "(#{bytes(r.size)})"
@@ -167,7 +169,6 @@
             = r.errors
 
 - if job.finished?
-  %p
+  %h2
     Stdout:
-    %br
-    %pre= r.stdout
+  %pre= r.stdout
