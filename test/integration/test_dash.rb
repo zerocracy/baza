@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative '../test__helper'
 
 class Baza::DashTest < Minitest::Test
