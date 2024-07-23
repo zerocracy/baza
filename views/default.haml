@@ -33,10 +33,6 @@
             != menu('/valves', 'Valves')
             != menu('/account', 'Account')
             != menu('/locks', 'Locks')
-            - if the_human.admin?
-              != menu('/push', 'Push')
-              != menu('/sql', 'SQL')
-              != menu('/gift', 'Gift')
             != menu('/logout', 'Logout')
       %article
         - if defined?(flash_msg) && !flash_msg.empty?
@@ -84,3 +80,7 @@
               %li
                 %span{title: 'Telegram bot status'}
                   != footer_status('tbot')
+            %ul
+              != menu('/push', 'Push')
+              != menu('/sql', 'SQL')
+              != menu('/gift', 'Gift')
