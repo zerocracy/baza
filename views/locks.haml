@@ -42,6 +42,8 @@
           != largetext(lk[:owner])
         %td
           != ago(lk[:created])
+          - if lk[:created] < Time.now - 2 * 60 * 60
+            %i.fa-solid.fa-triangle-exclamation.darkred{title: 'The lock is too old, something is wrong (probably, you better delete it)'}
         %td
           %a.ico{href: iri.cut('/lock').append(lk[:id]).append('delete'), title: "Unlock (remove lock ##{lk[:id]})", onclick: "return confirm('Are you sure you want to remove lock ##{lk[:id]}?')"}
             %i.fa-solid.fa-unlock
