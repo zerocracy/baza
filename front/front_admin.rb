@@ -37,7 +37,7 @@ get '/force-login' do
       'login' => login,
       'avatar_url' => 'none'
     },
-    ''
+    settings.config['github']['encryption_secret']
   ).to_s
   flash(iri.cut('/dash'), "You have been logged in as @#{login} (be careful!)")
 end
