@@ -113,9 +113,9 @@ class Baza::Job
         'SELECT secret.* FROM secret ',
         'JOIN token ON secret.human = token.human ',
         'JOIN job ON token.id = job.token ',
-        'WHERE secret.name = $1'
+        'WHERE secret.name = $1 AND token.human = $2'
       ],
-      [name.downcase]
+      [name.downcase, @jobs.human.id]
     ).each.to_a
   end
 
@@ -191,10 +191,10 @@ class Baza::Job
             'LEFT JOIN meta ON meta.job = job.id',
             'LEFT JOIN result ON result.job = job.id',
             'LEFT JOIN lock ON lock.name = job.name AND lock.human = token.human',
-            'WHERE job.id = $1',
+            'WHERE job.id = $1 AND token.human = $3',
             'GROUP BY job.id, result.id, lock.id'
           ],
-          [@id, sep]
+          [@id, sep, @jobs.human.id]
         ).first
         {
           id: @id,
