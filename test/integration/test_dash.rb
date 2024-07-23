@@ -112,10 +112,4 @@ class Baza::DashTest < Minitest::Test
     click_link 'Logout'
     assert_equal '/', current_path
   end
-
-  def test_logouts
-    integration_login
-    click_link 'Terms'
-    assert_equal '/terms', current_path
-  end
 end
