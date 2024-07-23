@@ -36,6 +36,16 @@
     %span.ff
       != largetext(job.agent)
 
+  - m = job.metas.find { |m| m.start_with?('workflow_url:') }
+  - unless m.nil?
+    %p
+      GitHub workflow:
+      %br
+      - workflow_url = m.split('workflow_url:', 2)[1]
+      = workflow_url.split('/')[-1]
+      %a.ico{href: workflow_url, title: "Click here to see the workflow in GitHub"}
+        %i.fa-brands.fa-github
+
   %p
     Meta:
     %br

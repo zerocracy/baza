@@ -82,6 +82,10 @@
           - unless m.nil?
             %a.ico{href: m.split('pages_url:', 2)[1], title: "Click here to open the published summary"}
               %i.fa-solid.fa-list
+          - m = j.metas.find { |m| m.start_with?('workflow_url:') }
+          - unless m.nil?
+            %a.ico{href: m.split('workflow_url:', 2)[1], title: "Click here to see the workflow in GitHub"}
+              %i.fa-brands.fa-github
           - m = j.metas.find { |m| m.start_with?('duration:') }
           - unless m.nil?
             %span.gray{title: 'How long it took to update the factbase'}
