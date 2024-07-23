@@ -26,6 +26,15 @@ require 'tago'
 require 'cgi'
 
 helpers do
+  def if_meta(job, name)
+    meta = job.metas.find { |m| m.start_with?("#{name}:") }
+    if meta.nil?
+      ''
+    else
+      yield meta.split("#{name}:", 2)[1]
+    end
+  end
+
   def largetext(text)
     span = "<span style='display:inline-block;'>"
     body = CGI.escapeHTML(text)
