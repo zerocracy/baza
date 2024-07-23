@@ -32,7 +32,7 @@ class Baza::TokensInteractionTest < Minitest::Test
   def test_adds_token
     integration_login
     click_link 'Tokens'
-    token_name = 'hello'
+    token_name = fake_name
     fill_in 'Unique token name', with: token_name
     click_button 'Add'
     assert page.has_content?(token_name)
@@ -42,7 +42,7 @@ class Baza::TokensInteractionTest < Minitest::Test
   def test_does_not_add_repetitive_token
     integration_login
     click_link 'Tokens'
-    token_name = 'token'
+    token_name = fake_name
     fill_in 'Unique token name', with: token_name
     click_button 'Add'
     assert page.has_content?(token_name)
