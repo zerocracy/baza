@@ -53,9 +53,17 @@
       None
     - else
       - job.metas.each do |m|
-        %span.ff
+        - (k, v) = m.split(':', 2)
+        %span.ff{style: 'margin-right: 2em;'}
           %i.fa-solid.fa-thumbtack
-          != largetext(m)
+          - if v.nil?
+            != largetext(m)
+          - else
+            %span.teal<>
+              != largetext(k)
+            %span<> :
+            %span<>
+            != largetext(v)
 
   %p
     Taken:
