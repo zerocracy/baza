@@ -52,4 +52,18 @@ class Baza::TokensInteractionTest < Minitest::Test
     click_button 'Add'
     assert_current_path('/dash')
   end
+
+  def test_deactivates_token
+    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
+    tokens = human.tokens
+    name = fake_name
+    assert_equal(0, tokens.size)
+    token = tokens.add(name)
+    assert(token.active?)
+    integration_login
+    visit "/tokens/#{token.id}/deactivate"
+    page.has_text?("##{token.id}")
+    tokens.get(token.id)
+    assert(!token.active?)
+  end
 end
