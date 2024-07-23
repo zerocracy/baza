@@ -196,6 +196,7 @@ class Baza::Job
           ],
           [@id, sep, @jobs.human.id]
         ).first
+        raise Baza::Urror, "There is no job ##{@id}" if row.nil?
         {
           id: @id,
           name: row['name'].downcase,
