@@ -59,6 +59,7 @@ class Minitest::Test
 
   def setup
     Capybara.app = Sinatra::Application.new
+    page.driver.header 'User-Agent', 'Capybara'
   end
 
   def fake_pgsql
