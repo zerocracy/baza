@@ -48,8 +48,9 @@
     %p
       Vitals:
       %br
-      %a.ico{href: url, title: "Click here to open the published vitals report"}
+      %a{href: url}<
         Here
+      %a.ico{href: url, title: "Click here to open the published vitals report"}
         %i.fa-solid.fa-list
   %p
     Meta:
@@ -103,6 +104,10 @@
       %i.fa-solid.fa-triangle-exclamation.bad{title: 'Find the "judges-summary" fact in the HTML, the error are there'}
       %span.bad
         = job.errors
+      (
+      %a{href: iri.cut('/jobs').append(job.id).append('input.html')}<>
+        see input HTML
+      )
 
   %p
     Expired:
@@ -128,10 +133,12 @@
     %p
       Input Factbase:
       %br
-      %a{href: iri.cut('/inspect').append("#{job.id}.fb")}= 'Download'
+      %a{href: iri.cut('/inspect').append("#{job.id}.fb")}<
+        Download
       != "(#{bytes(job.size)})"
       = '|'
-      %a{href: iri.cut('/jobs').append(job.id).append('input.html')}= 'HTML'
+      %a{href: iri.cut('/jobs').append(job.id).append('input.html')}<
+        HTML
 
   - if job.finished?
     - r = job.result
@@ -154,10 +161,12 @@
       %p
         Output Factbase:
         %br
-        %a{href: iri.cut('/pull').append("#{job.id}.fb")}= 'Download'
+        %a{href: iri.cut('/pull').append("#{job.id}.fb")}<
+          Download
         != "(#{bytes(r.size)})"
         = '|'
-        %a{href: iri.cut('/jobs').append(job.id).append('output.html')}= 'HTML'
+        %a{href: iri.cut('/jobs').append(job.id).append('output.html')}<
+          HTML
       %p
         Output Errors:
         %br
@@ -168,6 +177,10 @@
           %i.fa-solid.fa-triangle-exclamation.bad{title: 'Find the "judges-summary" fact in the HTML, the error are there'}
           %span.bad
             = r.errors
+          (
+          %a{href: iri.cut('/jobs').append(job.id).append('output.html')}<>
+            see ouput HTML
+          )
 
 - if job.finished?
   %h2

@@ -58,7 +58,8 @@
             = v[:name]
             %i.fa-solid.fa-triangle-exclamation.bad{title: 'There is no job by this name, maybe a spelling error?'}
           - else
-            %a{href: iri.cut('/jobs').over(name: v[:name])}= v[:name]
+            %a{href: iri.cut('/jobs').over(name: v[:name])}<
+              = v[:name]
         %td.ff
           = v[:badge]
         %td

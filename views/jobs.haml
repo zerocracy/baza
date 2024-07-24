@@ -77,7 +77,8 @@
             %span{title: "#{j.errors} error(s) in the 'judges-summary' fact, before processing"}
               %i.fa-solid.fa-triangle-exclamation.bad
         %td.ff
-          %a{href: iri.over(name: j.name)}= j.name
+          %a{href: iri.over(name: j.name)}<
+            = j.name
           - if_meta(j, 'vitals_url') do |url|
             %a.ico{href: url, title: "Click here to open the published vitals report"}
               %i.fa-solid.fa-list

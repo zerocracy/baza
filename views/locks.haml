@@ -37,7 +37,8 @@
             = lk[:name]
             %i.fa-solid.fa-triangle-exclamation.bad{title: 'There is no job by this name, maybe a spelling error?'}
           - else
-            %a{href: iri.cut('/jobs').over(name: lk[:name])}= lk[:name]
+            %a{href: iri.cut('/jobs').over(name: lk[:name])}<
+              = lk[:name]
         %td.ff
           != largetext(lk[:owner])
         %td
