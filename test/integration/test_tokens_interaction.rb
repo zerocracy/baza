@@ -36,7 +36,7 @@ class Baza::TokensInteractionTest < Minitest::Test
     fill_in 'Unique token name', with: token_name
     click_button 'Add'
     assert page.has_content?(token_name)
-    page.has_text?(/New token #\d+ added/)
+    assert page.has_text?(/New token #\d+ added/)
   end
 
   def test_does_not_add_repetitive_token
@@ -46,7 +46,7 @@ class Baza::TokensInteractionTest < Minitest::Test
     fill_in 'Unique token name', with: token_name
     click_button 'Add'
     assert page.has_content?(token_name)
-    page.has_text?(/New token #\d+ added/)
+    assert page.has_text?(/New token #\d+ added/)
 
     fill_in 'Unique token name', with: token_name
     click_button 'Add'
@@ -71,7 +71,7 @@ class Baza::TokensInteractionTest < Minitest::Test
     assert(token.active?)
     integration_login
     visit "/tokens/#{token.id}/deactivate"
-    page.has_text?("##{token.id}")
+    assert page.has_text?("##{token.id}")
     tokens.get(token.id)
     assert(!token.active?)
   end
