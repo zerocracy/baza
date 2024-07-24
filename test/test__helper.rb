@@ -90,6 +90,10 @@ class Minitest::Test
     )
   end
 
+  def tester_human
+    app.humans.ensure('tester')
+  end
+
   def integration_login
     login('tester')
     visit '/dash'

@@ -64,7 +64,7 @@ class Baza::TokensInteractionTest < Minitest::Test
 
   def test_deactivates_token
     integration_login
-    human = app.humans.ensure('tester')
+    human = tester_human
     tokens = human.tokens
     name = fake_name
     token = tokens.add(name)
