@@ -21,6 +21,8 @@
 // SOFTWARE.
 
 $gray: #808080;
+$good: #006400;
+$bad: #8b0000;
 
 section {
   margin: 0;
@@ -59,6 +61,14 @@ footer {
 
 .ff {
   font-family: monospace;
+}
+
+.good {
+  color: $good;
+}
+
+.bad {
+  color: $bad;
 }
 
 .ico {

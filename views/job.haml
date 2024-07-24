@@ -74,7 +74,7 @@
     Taken:
     %br
     - if job.taken.nil?
-      %span.darkred
+      %span.bad
         Not yet
     - else
       %span.ff
@@ -97,11 +97,11 @@
     Input Errors:
     %br
     - if job.errors.zero?
-      %span.darkgreen
+      %span.good
         None
     - else
-      %i.fa-solid.fa-triangle-exclamation.darkred{title: 'Find the "judges-summary" fact in the HTML, the error are there'}
-      %span.darkred
+      %i.fa-solid.fa-triangle-exclamation.bad{title: 'Find the "judges-summary" fact in the HTML, the error are there'}
+      %span.bad
         = job.errors
 
   %p
@@ -114,13 +114,14 @@
         - else
           Still running
     - else
+      %span.good
       Not yet
 
   - unless job.finished?
     %p
       Finished:
       %br
-      %span.darkred
+      %span.bad
         Not yet
 
   - unless job.expired?
@@ -142,7 +143,7 @@
       Exit Code:
       %br
       - if r.exit.zero?
-        %i.fa-regular.fa-thumbs-up.darkgreen
+        %i.fa-regular.fa-thumbs-up.good
       %span.ff
         = r.exit
     %p
@@ -161,11 +162,11 @@
         Output Errors:
         %br
         - if r.errors.zero?
-          %span.darkgreen
+          %span.good
             None
         - else
-          %i.fa-solid.fa-triangle-exclamation.darkred{title: 'Find the "judges-summary" fact in the HTML, the error are there'}
-          %span.darkred
+          %i.fa-solid.fa-triangle-exclamation.bad{title: 'Find the "judges-summary" fact in the HTML, the error are there'}
+          %span.bad
             = r.errors
 
 - if job.finished?

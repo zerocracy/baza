@@ -75,7 +75,7 @@
               %i.fa-solid.fa-box-archive
           - if j.errors.positive?
             %span{title: "#{j.errors} error(s) in the 'judges-summary' fact, before processing"}
-              %i.fa-solid.fa-triangle-exclamation.darkred
+              %i.fa-solid.fa-triangle-exclamation.bad
         %td.ff
           %a{href: iri.over(name: j.name)}= j.name
           - if_meta(j, 'vitals_url') do |url|
@@ -93,7 +93,7 @@
               %i.fa-solid.fa-lock
             - if j.when_locked < Time.now - (60 * 60)
               %span{title: 'It is locked for too long, something is wrong'}
-                %i.fa-solid.fa-triangle-exclamation.darkred
+                %i.fa-solid.fa-triangle-exclamation.bad
             - if j.lock_owner.start_with?('http')
               %a{href: j.lock_owner}
                 %i.fa-solid.fa-link
@@ -106,7 +106,7 @@
             - if j.result.exit.zero?
               %i.fa-regular.fa-thumbs-up
             - else
-              %span.darkred
+              %span.bad
                 = format('%03d', j.result.exit)
           %td.right.ff
             = msec(j.result.msec)
@@ -123,7 +123,7 @@
                   %i.fa-solid.fa-box-archive
               - if j.result.errors&.positive?
                 %span{title: "#{j.result.errors} error(s) in the 'judges-summary' fact, after processing"}
-                  %i.fa-solid.fa-triangle-exclamation.darkred
+                  %i.fa-solid.fa-triangle-exclamation.bad
         - elsif j.expired?
           %td.center.orange{colspan: 5}
             Never finished

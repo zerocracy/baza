@@ -57,7 +57,7 @@ helpers do
 
   def zents(num, digits: 4)
     usd = usd(num, digits:)
-    color = num.positive? ? 'darkgreen' : 'firebrick'
+    color = num.positive? ? 'good' : 'firebrick'
     "<span style='color:#{color}' title='#{usd(num, digits: 6)}'>#{usd}</span>"
   end
 
