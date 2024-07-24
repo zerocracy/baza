@@ -26,6 +26,11 @@ require 'tago'
 require 'cgi'
 
 helpers do
+  def succeed(txt)
+    r = yield
+    "#{r}#{txt} "
+  end
+
   def if_meta(job, name)
     meta = job.metas.find { |m| m.start_with?("#{name}:") }
     if meta.nil?

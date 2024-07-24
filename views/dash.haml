@@ -1,10 +1,13 @@
 %p
   %i.fa-solid.fa-circle-exclamation.bad.fa-3x{style: 'float: left; margin-right: .2em;'}
   This system is currently in
-  %span.bad<
-    active development
-  = '.'
-  We advise against using it unless you are fully aware of the potential risks and implications.
+  != succeed '.' do
+    %span.bad<>
+      active development
+  We advise against using it unless you are fully aware of the potential
+  != succeed '.' do
+    %a{href: iri.cut('/terms')}<>
+      risks and implications
   Upon public release, we will make an official announcement in our Telegram group:
   %a{href: 'https://t.me/zerocracy'}<
     @zerocracy
