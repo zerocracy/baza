@@ -94,7 +94,7 @@ class Minitest::Test
     app.humans.ensure('tester')
   end
 
-  def integration_login
+  def start_as_tester
     login('tester')
     visit '/dash'
     click_link 'Start'

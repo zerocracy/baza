@@ -54,61 +54,61 @@ class Baza::DashTest < Minitest::Test
   end
 
   def test_opens_jobs
-    integration_login
+    start_as_tester
     click_link 'Jobs'
     assert_current_path '/jobs'
   end
 
   def test_opens_tokens
-    integration_login
+    start_as_tester
     click_link 'Tokens'
     assert_current_path '/tokens'
   end
 
   def test_opens_secrets
-    integration_login
+    start_as_tester
     click_link 'Secrets'
     assert_current_path '/secrets'
   end
 
   def test_opens_valves
-    integration_login
+    start_as_tester
     click_link 'Valves'
     assert_current_path '/valves'
   end
 
   def test_opens_account
-    integration_login
+    start_as_tester
     click_link 'Account'
     assert_current_path '/account'
   end
 
   def test_opens_locks
-    integration_login
+    start_as_tester
     click_link 'Locks'
     assert_current_path '/locks'
   end
 
   def test_opens_push
-    integration_login
+    start_as_tester
     click_link 'Push'
     assert_current_path '/push'
   end
 
   def test_opens_sql
-    integration_login
+    start_as_tester
     click_link 'SQL'
     assert_current_path '/sql'
   end
 
   def test_opens_gift
-    integration_login
+    start_as_tester
     click_link 'Gift'
     assert_current_path '/gift'
   end
 
   def test_logouts
-    integration_login
+    start_as_tester
     click_link 'Logout'
     assert_current_path '/'
   end

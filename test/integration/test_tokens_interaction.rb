@@ -30,7 +30,7 @@ class Baza::TokensInteractionTest < Minitest::Test
   end
 
   def test_adds_token
-    integration_login
+    start_as_tester
     click_link 'Tokens'
     token_name = fake_name
     fill_in 'Unique token name', with: token_name
@@ -40,7 +40,7 @@ class Baza::TokensInteractionTest < Minitest::Test
   end
 
   def test_does_not_add_repetitive_token
-    integration_login
+    start_as_tester
     click_link 'Tokens'
     token_name = fake_name
     fill_in 'Unique token name', with: token_name
@@ -54,7 +54,7 @@ class Baza::TokensInteractionTest < Minitest::Test
   end
 
   def test_does_not_add_token_with_invalid_name
-    integration_login
+    start_as_tester
     click_link 'Tokens'
     token_name = '12345'
     fill_in 'Unique token name', with: token_name
@@ -63,7 +63,7 @@ class Baza::TokensInteractionTest < Minitest::Test
   end
 
   def test_deactivates_token
-    integration_login
+    start_as_tester
     human = tester_human
     tokens = human.tokens
     name = fake_name
