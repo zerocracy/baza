@@ -55,7 +55,6 @@ end
 
 class Minitest::Test
   include Rack::Test::Methods
-
   include Capybara::DSL
 
   def setup
@@ -91,6 +90,7 @@ class Minitest::Test
   end
 
   def integration_login
+    login('tester')
     visit '/dash'
     click_link 'Start'
   end
