@@ -51,7 +51,8 @@ class Baza::Secrets
         'SELECT secret.*, COUNT(job.id) AS jobs FROM secret',
         'LEFT JOIN job ON job.name = secret.name',
         'WHERE human = $1',
-        'GROUP BY secret.id'
+        'GROUP BY secret.id',
+        'ORDER BY secret.key'
       ],
       [@human.id]
     )
