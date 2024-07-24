@@ -135,8 +135,8 @@
             In progress...
   %p
     - unless offset.zero?
-      %a{href: iri.del(:offset)}
+      %a{href: iri.del(:offset)}<
         Back
     - if total > max
-      %a{href: iri.over(offset: offset + max)}
+      %a{href: iri.over(offset: offset + max)}<
         More
