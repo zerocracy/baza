@@ -61,7 +61,7 @@
       - job.metas.each do |m|
         - (k, v) = m.split(':', 2)
         %span.ff{style: 'margin-right: 2em;'}
-          %i.fa-solid.fa-thumbtack
+          %i.fa-solid.fa-thumbtack.teal
           - if v.nil?
             != largetext(m)
           - else
@@ -120,7 +120,7 @@
           Still running
     - else
       %span.good
-      Not yet
+        Not yet
 
   - unless job.finished?
     %p
