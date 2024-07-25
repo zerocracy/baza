@@ -40,7 +40,7 @@ class Baza::QueriesConsoleTest < Minitest::Test
     visit '/sql'
     fill_in 'query', with: 'SELECT * from human LIMIT 1'
     click_button 'Query'
-    assert !page.has_text?('Empty result.')
+    assert page.has_no_text?('Empty result.')
   end
 
   def test_executes_query_with_empty_result

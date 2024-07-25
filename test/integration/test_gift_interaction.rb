@@ -68,8 +68,8 @@ class Baza::GiftInteractionTest < Minitest::Test
     click_button 'Add'
     assert_current_path '/gift'
     visit '/account'
-    assert !page.has_text?(summary)
-    assert !page.has_text?("+#{format('%.4f', zents / 100_000)}")
+    assert page.has_no_text?(summary)
+    assert page.has_no_text?("+#{format('%.4f', zents / 100_000)}")
   end
 
   def test_add_gift_to_other_human
@@ -84,7 +84,7 @@ class Baza::GiftInteractionTest < Minitest::Test
     fill_in 'summary', with: summary
     click_button 'Add'
     assert_current_path '/account'
-    assert !page.has_text?(summary)
-    assert !page.has_text?("+#{format('%.4f', zents / 100_000)}")
+    assert page.has_no_text?(summary)
+    assert page.has_no_text?("+#{format('%.4f', zents / 100_000)}")
   end
 end
