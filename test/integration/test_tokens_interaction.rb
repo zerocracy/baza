@@ -35,6 +35,7 @@ class Baza::TokensInteractionTest < Minitest::Test
     token_name = fake_name
     fill_in 'Unique token name', with: token_name
     click_button 'Add'
+    assert tester_human.tokens.exists?(token_name)
     assert page.has_content?(token_name)
     assert page.has_text?(/New token #\d+ added/)
   end
