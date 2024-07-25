@@ -66,6 +66,7 @@ class Baza::TokensInteractionTest < Minitest::Test
     start_as_tester
     human = tester_human
     tokens = human.tokens
+    tokens.each(&:deactivate!)
     name = fake_name
     token = tokens.add(name)
     assert(token.active?)
