@@ -72,7 +72,7 @@ class Baza::GiftInteractionTest < Minitest::Test
     assert page.has_no_text?("+#{format('%.4f', zents / 100_000)}")
   end
 
-  def test_add_gift_to_other_human
+  def test_adds_gift_to_other_human
     start_as_tester
     human_name = fake_name
     Baza::Humans.new(fake_pgsql).ensure(human_name)
