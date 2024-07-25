@@ -58,7 +58,7 @@ class Baza::SecretsInteractionTest < Minitest::Test
     assert page.has_text?(job_name)
     assert page.has_no_selector?('i[title="There is no job by this name, maybe a spelling error?"]')
     assert page.has_text?(key)
-    assert page.has_text?("#{value.bytesize} bytes")
+    assert page.has_text?(value[0..3])
   end
 
   def test_adds_secret_without_job
@@ -75,7 +75,7 @@ class Baza::SecretsInteractionTest < Minitest::Test
     assert page.has_text?(job_name)
     assert page.has_selector?('i[title="There is no job by this name, maybe a spelling error?"]')
     assert page.has_text?(key)
-    assert page.has_text?("#{value.bytesize} bytes")
+    assert page.has_text?(value[0..3])
   end
 
   def test_removes_secret
