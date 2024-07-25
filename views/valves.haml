@@ -56,16 +56,17 @@
         %td.ff
           - if v[:jobs].zero?
             = v[:name]
-            %i.fa-solid.fa-triangle-exclamation.darkred{title: 'There is no job by this name, maybe a spelling error?'}
+            %i.fa-solid.fa-triangle-exclamation.bad{title: 'There is no job by this name, maybe a spelling error?'}
           - else
-            %a{href: iri.cut('/jobs').over(name: v[:name])}= v[:name]
+            %a{href: iri.cut('/jobs').over(name: v[:name])}<
+              = v[:name]
         %td.ff
           = v[:badge]
         %td
           = v[:why]
         %td.ff
           - if v[:result].nil?
-            %span.darkred
+            %span.bad
               NULL
           - elsif v[:result].is_a?(String)
             = v[:result].truncate.inspect

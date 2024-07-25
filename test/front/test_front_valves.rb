@@ -28,7 +28,7 @@ require_relative '../test__helper'
 require_relative '../../objects/baza'
 require_relative '../../baza'
 
-class Baza::FrontPushTest < Minitest::Test
+class Baza::FrontValvesTest < Minitest::Test
   def app
     Sinatra::Application
   end
@@ -37,5 +37,18 @@ class Baza::FrontPushTest < Minitest::Test
     login
     post('/valve-add', 'name=hi&badge=abc&why=nothing')
     assert_status(302)
+  end
+
+  def test_valves
+    uname = 'tester'
+    login(uname)
+    get('/valves')
+    assert_status(200)
+    human = app.humans.ensure(uname)
+    human.valves.enter('foo', 'boom', 'why') do
+      # nothing
+    end
+    get('/valves')
+    assert_status(200)
   end
 end

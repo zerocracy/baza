@@ -48,6 +48,8 @@ disable :method_override
 use Rack::RewindableInput::Middleware
 use Rack::MethodOverride
 
+Haml::Template.options[:escape_html] = true
+
 unless ENV['RACK_ENV'] == 'test'
   require 'rack/ssl'
   use Rack::SSL

@@ -61,7 +61,7 @@ def merged(hash)
     out[:flash_msg] = cookies[:flash_msg]
     cookies.delete(:flash_msg)
   end
-  out[:flash_color] = cookies[:flash_color] || 'darkgreen'
+  out[:flash_color] = cookies[:flash_color] || 'good'
   cookies.delete(:flash_color)
   out
 end

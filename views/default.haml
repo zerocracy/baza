@@ -33,14 +33,10 @@
             != menu('/valves', 'Valves')
             != menu('/account', 'Account')
             != menu('/locks', 'Locks')
-            - if the_human.admin?
-              != menu('/push', 'Push')
-              != menu('/sql', 'SQL')
-              != menu('/gift', 'Gift')
             != menu('/logout', 'Logout')
       %article
         - if defined?(flash_msg) && !flash_msg.empty?
-          %p{style: 'background-color:' + flash_color + ';color:white;padding:.1em .5em;border-radius:4px;width:100%;'}
+          %p.flash{style: "background-color:#{flash_color}"}
             = flash_msg
         - balance = the_human.account.balance
         - if balance.negative?
@@ -49,8 +45,8 @@
             != "(#{zents(balance)})"
             no more jobs will be accepted.
             Please, contact us
-            = ' '
-            %a{href: 'https://t.me/zerocracy'}>= 'in Telegram'
+            %a{href: 'https://t.me/zerocracy'}<
+              in Telegram
             , we'll find a way to give you some funds.
         != yield
       %footer
@@ -84,3 +80,7 @@
               %li
                 %span{title: 'Telegram bot status'}
                   != footer_status('tbot')
+            %ul
+              != menu('/push', 'Push')
+              != menu('/sql', 'SQL')
+              != menu('/gift', 'Gift')

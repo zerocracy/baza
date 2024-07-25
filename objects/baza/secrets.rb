@@ -51,7 +51,8 @@ class Baza::Secrets
         'SELECT secret.*, COUNT(job.id) AS jobs FROM secret',
         'LEFT JOIN job ON job.name = secret.name',
         'WHERE human = $1',
-        'GROUP BY secret.id'
+        'GROUP BY secret.id',
+        'ORDER BY secret.key'
       ],
       [@human.id]
     )
@@ -68,6 +69,13 @@ class Baza::Secrets
     end
   end
 
+  def exists?(name, key)
+    !pgsql.exec(
+      'SELECT id FROM secret WHERE human = $1 AND name = $2 AND key = $3',
+      [@human.id, name.downcase, key]
+    ).empty?
+  end
+
   def add(name, key, value)
     raise Baza::Urror, 'The name cannot be empty' if name.empty?
     raise Baza::Urror, 'The name is not valid' unless name.match?(/^[a-z0-9]+$/)
@@ -75,6 +83,7 @@ class Baza::Secrets
     raise Baza::Urror, 'The key is not valid' unless key.match?(/^[a-zA-Z0-9_]+$/)
     raise Baza::Urror, 'The value cannot be empty' if value.empty?
     raise Baza::Urror, 'The value is not ASCII' unless value.ascii_only?
+    raise Baza::Urror, 'A secret with these name+key already exists' if exists?(name, key)
     pgsql.exec(
       'INSERT INTO secret (human, name, key, value) VALUES ($1, $2, $3, $4)',
       [@human.id, name.downcase, key, value]
@@ -83,8 +92,8 @@ class Baza::Secrets
 
   def remove(id)
     pgsql.exec(
-      'DELETE FROM secret WHERE id = $1',
-      [id]
+      'DELETE FROM secret WHERE id = $1 AND human = $2',
+      [id, @human.id]
     )
   end
 end

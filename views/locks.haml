@@ -31,14 +31,20 @@
     - locks.each do |lk|
       %tr
         %td.ff
-          = "##{lk['id']}"
+          = "##{lk[:id]}"
         %td.ff
-          %a{href: iri.cut('/jobs').over(name: lk['name'])}
-            = lk['name']
+          - if lk[:jobs].zero?
+            = lk[:name]
+            %i.fa-solid.fa-triangle-exclamation.bad{title: 'There is no job by this name, maybe a spelling error?'}
+          - else
+            %a{href: iri.cut('/jobs').over(name: lk[:name])}<
+              = lk[:name]
         %td.ff
-          = lk['owner']
+          != largetext(lk[:owner])
         %td
-          != ago(Time.parse(lk['created']))
+          != ago(lk[:created])
+          - if lk[:created] < Time.now - 2 * 60 * 60
+            %i.fa-solid.fa-triangle-exclamation.bad{title: 'The lock is too old, something is wrong (probably, you better delete it)'}
         %td
-          %a.ico{href: iri.cut('/unlock').append(lk['name']).add(owner: lk['owner']), title: 'Unlock (remove this lock)', onclick: "return confirm('Are you sure you want to remove this lock?')"}
+          %a.ico{href: iri.cut('/lock').append(lk[:id]).append('delete'), title: "Unlock (remove lock ##{lk[:id]})", onclick: "return confirm('Are you sure you want to remove lock ##{lk[:id]}?')"}
             %i.fa-solid.fa-unlock

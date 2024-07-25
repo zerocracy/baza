@@ -28,6 +28,20 @@ def admin_only
   raise Baza::Urror, 'You are not allowed to see this' unless the_human.admin?
 end
 
+get '/force-login' do
+  admin_only
+  login = params[:u]
+  cookies[:auth] = GLogin::Cookie::Open.new(
+    {
+      'id' => settings.humans.ensure(login).id.to_s,
+      'login' => login,
+      'avatar_url' => 'none'
+    },
+    settings.config['github']['encryption_secret']
+  ).to_s
+  flash(iri.cut('/dash'), "You have been logged in as @#{login} (be careful!)")
+end
+
 get '/sql' do
   admin_only
   query = params[:query] || 'SELECT * FROM human LIMIT 5'

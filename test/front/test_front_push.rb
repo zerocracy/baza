@@ -141,7 +141,7 @@ class Baza::FrontPushTest < Minitest::Test
     header(
       'X-Zerocracy-Meta',
       [
-        Base64.encode64('pages_url:https://zerocracy.com'),
+        Base64.encode64('vitals_url:https://zerocracy.com'),
         Base64.encode64('how are you, друг?')
       ].join('  ')
     )

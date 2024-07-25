@@ -93,7 +93,7 @@ class Baza::Valves
                 'INSERT INTO valve (human, name, badge, owner, why) ',
                 'VALUES ($1, $2, $3, 1, $4) ',
                 'ON CONFLICT(human, name, badge) DO UPDATE SET owner = valve.owner + 1 ',
-                'RETURNING owner, result'
+                'RETURNING id, owner, result'
               ],
               [@human.id, name.downcase, badge, why]
             )[0]
@@ -105,10 +105,6 @@ class Baza::Valves
               t.exec('ROLLBACK')
               throw :rollback
             end
-            human.notify(
-              '🍒 A new [valve](https://www.zerocracy.com/valves)',
-              "just entered for `#{name}`: #{why.inspect}."
-            )
             t.exec('COMMIT')
             throw :stop
           end
@@ -118,9 +114,14 @@ class Baza::Valves
     end
     begin
       r = yield
-      pgsql.exec(
-        'UPDATE valve SET result = $1 WHERE human = $2 AND name = $3 AND badge = $4',
+      row = pgsql.exec(
+        'UPDATE valve SET result = $1 WHERE human = $2 AND name = $3 AND badge = $4 RETURNING id',
         [enc(r), @human.id, name.downcase, badge]
+      ).first
+      human.notify(
+        "🍒 A new [valve](https://www.zerocracy.com/valves) ##{row['id']}",
+        "just entered for the `#{name}` job: #{why.inspect}.",
+        "The result is `#{r.is_a?(Integer) ? r : r.class}`."
       )
       r
     rescue StandardError => e
@@ -134,8 +135,8 @@ class Baza::Valves
 
   def remove(id)
     pgsql.exec(
-      'DELETE FROM valve WHERE id = $1',
-      [id]
+      'DELETE FROM valve WHERE id = $1 AND human = $2',
+      [id, @human.id]
     )
   end
 

@@ -20,67 +20,18 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-$white: #fff;
-$gray: #808080;
-$good: #006400;
-$bad: #8b0000;
-
-section {
-  margin: 0;
-  width: 100%;
+.columns {
+  column-count: 3;
 }
 
-article {
-  border: 0;
-}
-
-article,
-header,
-footer {
-  padding: 0;
-}
-
-header nav ul,
-footer nav ul {
-  text-align: left;
-}
-
-footer {
-  color: $gray;
-  font-size: .9em;
-  padding-top: 2em;
-
-  > nav ul {
-    margin-bottom: 0;
+@media (max-width: 1280px) {
+  .columns {
+    column-count: 2;
   }
 }
 
-.logo {
-  height: 64px;
-  width: 64px;
-}
-
-.flash {
-  border-radius: 4px;
-  color: $white;
-  padding: .1em .5em;
-  width: 100%;
-}
-
-.ff {
-  font-family: monospace;
-}
-
-.good {
-  color: $good;
-}
-
-.bad {
-  color: $bad;
-}
-
-.ico {
-  &:hover {
-    text-decoration: none;
+@media (max-width: 768px) {
+  .columns {
+    column-count: 1;
   }
 }

@@ -22,38 +22,30 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-get '/locks' do
-  assemble(
-    :locks,
-    :default,
-    title: '/locks',
-    locks: the_human.locks
-  )
-end
+require 'minitest/autorun'
+require_relative '../test__helper'
+require_relative '../../baza'
 
-# Lock the name of the job.
-get(%r{/lock/([a-z0-9-]+)}) do
-  n = params['captures'].first
-  owner = params[:owner]
-  raise Baza::Urror, 'The "owner" is a mandatory query param' if owner.nil?
-  raise Baza::Urror, 'The "owner" can\'t be empty' if owner.empty?
-  the_human.locks.lock(n, owner)
-  flash(iri.cut('/locks'), "The name '#{n}' just locked for '#{owner}'")
-end
+class Baza::FrontAdminTest < Minitest::Test
+  def app
+    Sinatra::Application
+  end
 
-# Unlock the name of the job.
-get(%r{/unlock/([a-z0-9-]+)}) do
-  n = params['captures'].first
-  owner = params[:owner]
-  raise Baza::Urror, 'The "owner" is a mandatory query param' if owner.nil?
-  raise Baza::Urror, 'The "owner" can\'t be empty' if owner.empty?
-  the_human.locks.unlock(n, owner)
-  flash(iri.cut('/locks'), "The name '#{n}' just unlocked for '#{owner}'")
-end
+  def test_renders_admin_pages
+    pages = [
+      '/sql',
+      '/gift'
+    ]
+    login('yegor256')
+    pages.each do |p|
+      get(p)
+      assert_status(200)
+    end
+  end
 
-# Delete the lock.
-get(%r{/lock/([0-9]+)/delete}) do
-  id = params['captures'].first.to_i
-  the_human.locks.delete(id)
-  flash(iri.cut('/locks'), "The lock ##{id} was removed")
+  def test_force_login
+    login('yegor256')
+    get('/force-login?u=tester')
+    assert_status(302)
+  end
 end

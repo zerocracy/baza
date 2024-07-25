@@ -64,18 +64,6 @@ class Baza::AppTest < Minitest::Test
     end
   end
 
-  def test_renders_admin_pages
-    pages = [
-      '/sql',
-      '/gift'
-    ]
-    login('yegor256')
-    pages.each do |p|
-      get(p)
-      assert_status(200)
-    end
-  end
-
   def test_creates_and_deletes_token
     login
     get('/tokens')
@@ -85,32 +73,5 @@ class Baza::AppTest < Minitest::Test
     assert(id.positive?)
     get("/tokens/#{id}/deactivate")
     assert_status(302)
-  end
-
-  def test_valves
-    uname = 'tester'
-    login(uname)
-    get('/valves')
-    assert_status(200)
-    human = app.humans.ensure(uname)
-    human.valves.enter('foo', 'boom', 'why') do
-      # nothing
-    end
-    get('/valves')
-    assert_status(200)
-  end
-
-  def test_lock_unlock
-    login(fake_name)
-    name = fake_name
-    owner = fake_name
-    get("/lock/#{name}?owner=#{owner}")
-    assert_status(302)
-    get("/unlock/#{name}?owner=#{owner}")
-    assert_status(302)
-    get("/lock/#{name}?owner=#{fake_name}")
-    assert_status(302)
-    get('/locks')
-    assert_status(200)
   end
 end

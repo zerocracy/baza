@@ -1,11 +1,12 @@
-%nav
-  %ul{style: 'text-align: left'}
-    - unless job.expired?
-      %li
-        %a{href: iri.cut('/jobs').append(job.id).append('expire'), onclick: "return confirm('If you expire this job, there will no way to return its data back. Are you sure want to proceed?')"}
-          Expire!
+- if the_human.admin?
+  %nav
+    %ul{style: 'text-align: left'}
+      - unless job.expired?
+        %li
+          %a{href: iri.cut('/jobs').append(job.id).append('expire'), onclick: "return confirm('If you expire this job, there will no way to return its data back. Are you sure want to proceed?')"}
+            Expire!
 
-%div{'style' => 'column-count:3'}
+%div.columns
   %p
     ID:
     %br
@@ -34,8 +35,24 @@
     User-Agent:
     %br
     %span.ff
-      = job.agent
+      != largetext(job.agent)
 
+  - if_meta(job, 'workflow_url') do |url|
+    %p
+      GitHub Workflow:
+      %br
+      %span.ff= url.split('/')[-1]
+      %a.ico{href: url, title: "Click here to see the workflow in GitHub"}
+        %i.fa-brands.fa-github
+
+  - if_meta(job, 'vitals_url') do |url|
+    %p
+      Vitals:
+      %br
+      %a{href: url}<
+        Here
+      %a.ico{href: url, title: "Click here to open the published vitals report"}
+        %i.fa-solid.fa-list
   %p
     Meta:
     %br
@@ -43,19 +60,27 @@
       None
     - else
       - job.metas.each do |m|
-        %span.ff
-          %i.fa-solid.fa-thumbtack
-          = m
+        - (k, v) = m.split(':', 2)
+        %span.ff{style: 'margin-right: 2em;'}
+          %i.fa-solid.fa-thumbtack.teal
+          - if v.nil?
+            != largetext(m)
+          - else
+            %span.teal<>
+              != largetext(k)
+            %span<> :
+            %span<>
+            != largetext(v)
 
   %p
     Taken:
     %br
     - if job.taken.nil?
-      %span.darkred
+      %span.bad
         Not yet
     - else
       %span.ff
-        = job.taken
+        != largetext(job.taken)
 
   %p
     Lock:
@@ -71,15 +96,19 @@
           %i.fa-solid.fa-link
 
   %p
-    Errors:
+    Input Errors:
     %br
     - if job.errors.zero?
-      %span.darkgreen
+      %span.good
         None
     - else
-      %i.fa-solid.fa-triangle-exclamation.darkred{title: 'Find the "judges-summary" fact in the HTML, the error are there'}
-      %span.darkred
+      %i.fa-solid.fa-triangle-exclamation.bad{title: 'Find the "judges-summary" fact in the HTML, the error are there'}
+      %span.bad
         = job.errors
+      (
+      %a{href: iri.cut('/jobs').append(job.id).append('input.html')}<>
+        see input HTML
+      )
 
   %p
     Expired:
@@ -91,23 +120,26 @@
         - else
           Still running
     - else
-      Nope
+      %span.good
+        Not yet
 
   - unless job.finished?
     %p
       Finished:
       %br
-      %span.darkred
+      %span.bad
         Not yet
 
   - unless job.expired?
     %p
-      Input:
+      Input Factbase:
       %br
-      %a{href: iri.cut('/inspect').append("#{job.id}.fb")}= 'Download'
+      %a{href: iri.cut('/inspect').append("#{job.id}.fb")}<
+        Download
       != "(#{bytes(job.size)})"
       = '|'
-      %a{href: iri.cut('/jobs').append(job.id).append('input.html')}= 'HTML'
+      %a{href: iri.cut('/jobs').append(job.id).append('input.html')}<
+        HTML
 
   - if job.finished?
     - r = job.result
@@ -116,10 +148,10 @@
       %br
       != ago(r.created)
     %p
-      Exit code:
+      Exit Code:
       %br
       - if r.exit.zero?
-        %i.fa-regular.fa-thumbs-up
+        %i.fa-regular.fa-thumbs-up.good
       %span.ff
         = r.exit
     %p
@@ -128,25 +160,30 @@
       = "#{r.msec}ms"
     - if r.exit.zero? && !job.expired?
       %p
-        Output:
+        Output Factbase:
         %br
-        %a{href: iri.cut('/pull').append("#{job.id}.fb")}= 'Download'
+        %a{href: iri.cut('/pull').append("#{job.id}.fb")}<
+          Download
         != "(#{bytes(r.size)})"
         = '|'
-        %a{href: iri.cut('/jobs').append(job.id).append('output.html')}= 'HTML'
+        %a{href: iri.cut('/jobs').append(job.id).append('output.html')}<
+          HTML
       %p
         Output Errors:
         %br
         - if r.errors.zero?
-          %span.darkgreen
+          %span.good
             None
         - else
-          %i.fa-solid.fa-triangle-exclamation.darkred{title: 'Find the "judges-summary" fact in the HTML, the error are there'}
-          %span.darkred
+          %i.fa-solid.fa-triangle-exclamation.bad{title: 'Find the "judges-summary" fact in the HTML, the error are there'}
+          %span.bad
             = r.errors
+          (
+          %a{href: iri.cut('/jobs').append(job.id).append('output.html')}<>
+            see output HTML
+          )
 
 - if job.finished?
-  %p
+  %h2
     Stdout:
-    %br
-    %pre= r.stdout
+  %pre= r.stdout

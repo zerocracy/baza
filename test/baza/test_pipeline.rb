@@ -59,7 +59,7 @@ class Baza::PipelineTest < Minitest::Test
         File.binwrite(f, Factbase.new.export)
         uuid = fbs.save(f.path)
       end
-      job = token.start(fake_name, uuid, 1, 0, 'n/a', ['pages_url:abc'])
+      job = token.start(fake_name, uuid, 1, 0, 'n/a', ['vitals_url:abc'])
       assert(!human.jobs.get(job.id).finished?)
       human.secrets.add(job.name, 'ppp', 'swordfish')
       loop do
@@ -75,7 +75,7 @@ class Baza::PipelineTest < Minitest::Test
         'Running foo (#0)',
         'The following options provided',
         'PPP → "swor*****"',
-        'PAGES_URL → "abc"',
+        'VITALS_URL → "abc"',
         'Update finished in 2 cycle(s), modified 1/0 fact(s)',
         'Pipeline stopped'
       ].each { |t| assert(stdout.include?(t), "Can't find '#{t}' in #{stdout}") }

@@ -57,7 +57,7 @@ error do
   status 503
   e = env['sinatra.error']
   if e.is_a?(Baza::Urror)
-    flash(@locals[:human] ? iri.cut('/dash') : iri.cut('/'), e.message, color: 'darkred', code: 303)
+    flash(@locals[:human] ? iri.cut('/dash') : iri.cut('/'), e.message, alert: true, code: 303)
   else
     require 'raven'
     Raven.capture_exception(e)
@@ -68,10 +68,10 @@ error do
   end
 end
 
-def flash(uri, msg = '', color: 'darkgreen', code: 302)
+def flash(uri, msg = '', alert: false, code: 302)
   raise "Multi-line message is a mistake: #{msg.inspect}" if /[\r\n]/ =~ msg
   cookies[:flash_msg] = msg
-  cookies[:flash_color] = color
+  cookies[:flash_color] = alert ? 'darkred' : 'darkgreen'
   response.headers['X-Zerocracy-Requested'] = request.url
   response.headers['X-Zerocracy-Flash'] = msg
   redirect(uri, code)

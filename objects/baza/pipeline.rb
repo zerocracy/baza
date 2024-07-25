@@ -62,7 +62,9 @@ class Baza::Pipeline
       next if job.nil?
       begin
         process_it(job)
-      rescue StandardError => e
+      # rubocop:disable Lint/RescueException
+      rescue Exception => e
+        # rubocop:enable Lint/RescueException
         @humans.pgsql.exec('UPDATE job SET taken = $1 WHERE id = $2', [e.message[0..255], job.id])
         raise e
       end
@@ -147,7 +149,9 @@ class Baza::Pipeline
       [File.join(@jdir, 'judges'), input]
     )
     0
-  rescue StandardError => e
+  # rubocop:disable Lint/RescueException
+  rescue Exception => e
+    # rubocop:enable Lint/RescueException
     stdout.error(Backtrace.new(e))
     1
   end
