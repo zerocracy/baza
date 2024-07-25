@@ -98,5 +98,6 @@ class Minitest::Test
     login('tester')
     visit '/dash'
     click_link 'Start'
+    tester_human.tokens.each(&:deactivate!)
   end
 end
