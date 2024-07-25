@@ -45,11 +45,67 @@ class Baza::PushJobsTest < Minitest::Test
     assert_current_path '/jobs'
   end
 
+  def test_runs_job_with_factbase
+    start_as_tester
+    human = tester_human
+    tokens = human.tokens
+    token_name = fake_name
+    token = tokens.add(token_name)
+    visit '/push'
+    fb = Factbase.new
+    fb.insert.foo = 'booom \x01\x02\x03'
+    Tempfile.open do |f|
+      File.binwrite(f.path, fb.export)
+      fill_in 'token', with: token.text
+      job_name = fake_name
+      fill_in 'name', with: job_name
+      file = Rack::Test::UploadedFile.new(f.path, 'application/zip')
+      attach_file('factbase', file.path)
+      click_button 'Start'
+      assert human.jobs.name_exists?(job_name)
+      assert human.jobs.busy?(job_name)
+      assert_current_path '/jobs'
+    end
+  end
+
+  def test_does_not_run_job_with_invalid_file
+    start_as_tester
+    human = tester_human
+    tokens = human.tokens
+    token_name = fake_name
+    token = tokens.add(token_name)
+    visit '/push'
+    Tempfile.open(['tempfile', '.txt']) do |f|
+      File.binwrite(f.path, 'Plain text')
+      fill_in 'token', with: token.text
+      job_name = fake_name
+      fill_in 'name', with: job_name
+      file = Rack::Test::UploadedFile.new(f.path, 'text/plain')
+      attach_file('factbase', file.path)
+      click_button 'Start'
+      assert !human.jobs.name_exists?(job_name)
+      assert_current_path '/dash'
+    end
+  end
+
   def test_does_not_run_job_without_token
     start_as_tester
     human = tester_human
     visit '/push'
     fill_in 'token', with: ''
+    job_name = fake_name
+    fill_in 'name', with: job_name
+    click_button 'Start'
+    assert !human.jobs.name_exists?(job_name)
+    assert !human.jobs.busy?(job_name)
+    assert_current_path '/dash'
+  end
+
+  def test_does_not_run_job_with_non_existent_token
+    start_as_tester
+    human = tester_human
+    visit '/push'
+    fill_in 'token', with: fake_name
     job_name = fake_name
     fill_in 'name', with: job_name
     click_button 'Start'
@@ -71,7 +127,7 @@ class Baza::PushJobsTest < Minitest::Test
     assert_current_path '/dash'
   end
 
-  def test_does_not_run_job_without_invalid_name
+  def test_does_not_run_job_with_invalid_name
     start_as_tester
     human = tester_human
     tokens = human.tokens
