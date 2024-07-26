@@ -62,8 +62,8 @@ helpers do
 
   def zents(num, digits: 4)
     usd = usd(num, digits:)
-    color = num.positive? ? 'good' : 'firebrick'
-    "<span style='color:#{color}' title='#{usd(num, digits: 6)}'>#{usd}</span>"
+    cls = num.positive? ? 'good' : 'bad'
+    "<span class='#{cls}' title='#{usd(num, digits: 6)}'>#{usd}</span>"
   end
 
   def msec(msec)
