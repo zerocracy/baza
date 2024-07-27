@@ -40,7 +40,7 @@
             %a{href: iri.cut('/jobs').over(name: lk[:name])}<
               = lk[:name]
         %td.ff
-          != largetext(lk[:owner])
+          != large_text(lk[:owner])
         %td
           != ago(lk[:created])
           - if lk[:created] < Time.now - 2 * 60 * 60

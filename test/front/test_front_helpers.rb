@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # MIT License
 #
 # Copyright (c) 2009-2024 Zerocracy
@@ -19,51 +21,22 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
----
-AllCops:
-  Exclude:
-    - 'bin/**/*'
-    - 'assets/**/*'
-    - 'vendor/**/*'
-    - 'j/**/*'
-  DisplayCopNames: true
-  TargetRubyVersion: 3.2
-  NewCops: enable
-  SuggestExtensions: false
 
-Layout/RescueEnsureAlignment:
-  Enabled: false
-Metrics/CyclomaticComplexity:
-  Enabled: false
-Metrics/ClassLength:
-  Enabled: false
-Style/MultilineTernaryOperator:
-  Enabled: false
-Layout/MultilineMethodCallIndentation:
-  Enabled: false
-Layout/EndOfLine:
-  EnforcedStyle: lf
-Layout/ParameterAlignment:
-  Enabled: false
-Metrics/PerceivedComplexity:
-  Enabled: false
-Metrics/ModuleLength:
-  Enabled: false
-Layout/LineLength:
-  Max: 120
-Style/MultilineBlockChain:
-  Enabled: false
-Layout/MultilineOperationIndentation:
-  Enabled: false
-Layout/EmptyLineAfterGuardClause:
-  Enabled: false
-Style/ClassAndModuleChildren:
-  Enabled: false
-Metrics/BlockLength:
-  Enabled: false
-Metrics/MethodLength:
-  Enabled: false
-Metrics/AbcSize:
-  Enabled: false
-Metrics/ParameterLists:
-  Enabled: false
+require 'minitest/autorun'
+require_relative '../test__helper'
+require_relative '../../baza'
+
+class Baza::FrontHelpersTest < Minitest::Test
+  include Baza::Helpers
+
+  def test_large_text
+    t = large_text('hello, world!')
+    assert_equal(10, t.scan('span').count, t)
+  end
+
+  def test_html_tag
+    assert_equal('<i>hello!</i>', html_tag('i') { 'hello!' })
+    assert_equal('<i class="x">hello!</i>', html_tag('i', class: 'x') { 'hello!' })
+    assert_equal('<i class="x" data="1">hello!</i>', html_tag('i', class: 'x', data: 1) { 'hello!' })
+  end
+end

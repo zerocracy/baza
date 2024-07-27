@@ -35,7 +35,7 @@
     User-Agent:
     %br
     %span.ff
-      != largetext(job.agent)
+      != large_text(job.agent)
 
   - if_meta(job, 'workflow_url') do |url|
     %p
@@ -64,13 +64,13 @@
         %span.ff{style: 'margin-right: 2em;'}
           %i.fa-solid.fa-thumbtack.teal
           - if v.nil?
-            != largetext(m)
+            != large_text(m)
           - else
             %span.teal<>
-              != largetext(k)
+              != large_text(k)
             %span<> :
             %span<>
-            != largetext(v)
+            != large_text(v)
 
   %p
     Taken:
@@ -80,7 +80,7 @@
         Not yet
     - else
       %span.ff
-        != largetext(job.taken)
+        != large_text(job.taken)
 
   %p
     Lock:

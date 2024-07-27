@@ -24,8 +24,55 @@
 
 require 'tago'
 require 'cgi'
+require 'securerandom'
 
-helpers do
+# Front helpers.
+# Author:: Yegor Bugayenko (yegor256@gmail.com)
+# Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
+# License:: MIT
+module Baza::Helpers
+  def html_tag(tag, attrs = {})
+    html = block_given? ? yield : ''
+    a = attrs.map { |k, v| "#{k}=\"#{CGI.escapeHTML(v.to_s)}\"" }.join(' ')
+    "<#{tag}#{a.empty? ? '' : " #{a}"}>#{html}</#{tag}>"
+  end
+
+  def secret(txt)
+    uuid = SecureRandom.uuid
+    js = [
+      "$('##{CGI.escapeHTML(uuid)} span').html('#{large_text(txt)}');",
+      "$('##{uuid} a').hide();",
+      'return false;'
+    ].join
+    html_tag('span', id: uuid) do
+      [
+        html_tag('span', id: uuid) do
+          if txt.size > 20
+            [
+              html_tag('span') { txt[0..4] },
+              html_tag('span', class: 'gray') { "***#{txt.size - 14}***" },
+              html_tag('span') { txt[-5..] }
+            ].join
+          elsif txt.size < 5
+            html_tag('span', class: 'gray') { ('*' * txt.size).to_s }
+          else
+            [
+              html_tag('span') { txt[0..3] },
+              html_tag('span', class: 'gray') { ('*' * (txt.size - 4)).to_s }
+            ].join
+          end
+        end,
+        ' ',
+        html_tag(
+          'a',
+          href: '',
+          title: 'Show the secret',
+          onclick: js
+        ) { html_tag('i', class: 'fa-regular fa-eye') }
+      ].join
+    end
+  end
+
   def succeed(txt)
     r = yield
     "#{r}#{txt} "
@@ -40,20 +87,20 @@ helpers do
     end
   end
 
-  def largetext(text)
-    span = "<span style='display:inline-block;'>"
-    body = CGI.escapeHTML(text)
-      .tr("\n", '↵')
-      .split(/(.{4})/)
-      .map { |i| i.gsub(' ', "<span class='lightgray'>&#x2423;</span>") }
-      .join("</span>#{span}")
-      .chars.map { |c| c.ord > 0x7f ? "<span class='firebrick'>\\x#{format('%x', c.ord)}</span>" : c }
+  def large_text(text)
+    text
+      .chars
+      .map { |c| c.ord > 0x7f ? "<span class='firebrick'>\\x#{format('%x', c.ord)}</span>" : c }
       .join
-    "#{span}#{body}</span>"
+      .tr("\n", '↵')
+      .scan(/.{1,4}/)
+      .map { |t| t.gsub(' ', html_tag('span', class: 'lightgray') { '&#x2423;' }) }
+      .map { |t| html_tag('span', style: 'display:inline-block;') { t } }
+      .join
   end
 
   def ago(time)
-    "<span title='#{time.utc.iso8601}'>#{time.ago} ago</span>"
+    html_tag('span', title: time.utc.iso8601) { "#{time.ago} ago" }
   end
 
   def usd(num, digits: 4)
@@ -62,8 +109,11 @@ helpers do
 
   def zents(num, digits: 4)
     usd = usd(num, digits:)
-    cls = num.positive? ? 'good' : 'bad'
-    "<span class='#{cls}' title='#{usd(num, digits: 6)}'>#{usd}</span>"
+    html_tag(
+      'span',
+      class: num.positive? ? 'good' : 'bad',
+      title: usd(num, digits: 6)
+    ) { usd }
   end
 
   def msec(msec)
@@ -93,9 +143,9 @@ helpers do
   def menu(cut, name)
     href = iri.cut(cut)
     if iri.to_s == href.to_s
-      "<li>#{name}</li>"
+      html_tag('li') { name }
     else
-      "<li><a href='#{iri.cut(cut)}'>#{name}</a></li>"
+      html_tag('li') { html_tag('a', href: iri.cut(cut).to_s) { name } }
     end
   end
 
@@ -117,4 +167,8 @@ helpers do
     settings.telegramers[id] = the_human.telegram? if settings.telegramers[id].nil?
     settings.telegramers[id]
   end
+end
+
+helpers do
+  include Baza::Helpers
 end
