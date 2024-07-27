@@ -39,4 +39,12 @@ class Baza::FrontHelpersTest < Minitest::Test
     assert_equal('<i class="x">hello!</i>', html_tag('i', class: 'x') { 'hello!' })
     assert_equal('<i class="x" data="1">hello!</i>', html_tag('i', class: 'x', data: 1) { 'hello!' })
   end
+
+  def test_secret
+    assert(secret('swordfish').include?('<span>swor</span>'))
+  end
+
+  def test_secret_without_an_eye
+    assert_equal('<span>swor</span><span class="gray">*****</span>', secret('swordfish', eye: false))
+  end
 end

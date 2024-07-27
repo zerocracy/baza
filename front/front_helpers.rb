@@ -37,7 +37,23 @@ module Baza::Helpers
     "<#{tag}#{a.empty? ? '' : " #{a}"}>#{html}</#{tag}>"
   end
 
-  def secret(txt)
+  def secret(txt, eye: true)
+    body =
+      if txt.size > 20
+        [
+          html_tag('span') { txt[0..4] },
+          html_tag('span', class: 'gray') { "***#{txt.size - 14}***" },
+          html_tag('span') { txt[-5..] }
+        ].join
+      elsif txt.size < 5
+        html_tag('span', class: 'gray') { ('*' * txt.size).to_s }
+      else
+        [
+          html_tag('span') { txt[0..3] },
+          html_tag('span', class: 'gray') { ('*' * (txt.size - 4)).to_s }
+        ].join
+      end
+    return body unless eye
     uuid = SecureRandom.uuid
     js = [
       "$('##{CGI.escapeHTML(uuid)} span').html('#{large_text(txt)}');",
@@ -46,22 +62,7 @@ module Baza::Helpers
     ].join
     html_tag('span', id: uuid) do
       [
-        html_tag('span', id: uuid) do
-          if txt.size > 20
-            [
-              html_tag('span') { txt[0..4] },
-              html_tag('span', class: 'gray') { "***#{txt.size - 14}***" },
-              html_tag('span') { txt[-5..] }
-            ].join
-          elsif txt.size < 5
-            html_tag('span', class: 'gray') { ('*' * txt.size).to_s }
-          else
-            [
-              html_tag('span') { txt[0..3] },
-              html_tag('span', class: 'gray') { ('*' * (txt.size - 4)).to_s }
-            ].join
-          end
-        end,
+        html_tag('span', id: uuid) { body },
         ' ',
         html_tag(
           'a',
