@@ -151,7 +151,11 @@ class Baza::Tbot
     end
     rows = @pgsql.exec('UPDATE telechat SET human = $1 WHERE secret = $2 RETURNING id', [human.id, secret])
     raise Baza::Urror, 'There is no user by this authentication code' if rows.empty?
-    human.notify("🍉 Now I know that you are @#{human.github}!")
+    human.notify(
+      "🍉 Now I know that you are `@#{human.github}`!",
+      'Thanks for authorizing your account.',
+      'Now, you will receive all important notifications here.'
+    )
     rows.first['id'].to_i
   end
 end
