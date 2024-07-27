@@ -70,7 +70,10 @@
               != large_text(k)
             %span<> :
             %span<>
-            != large_text(v)
+            - if k == 'github_token'
+              != secret(v)
+            - else
+              != large_text(v)
 
   %p
     Taken:
