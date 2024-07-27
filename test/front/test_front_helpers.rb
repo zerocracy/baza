@@ -40,6 +40,23 @@ class Baza::FrontHelpersTest < Minitest::Test
     assert_equal('<i class="x" data="1">hello!</i>', html_tag('i', class: 'x', data: 1) { 'hello!' })
   end
 
+  def test_bytes
+    assert_equal('42B', bytes(42))
+    assert_equal('42kB', bytes(42_000))
+    assert_equal('42MB', bytes(42_000_000))
+  end
+
+  def test_zents
+    assert(zents(42_000).include?('+0.4200'))
+    assert(zents(123_000).start_with?('<span class="good"'))
+    assert(zents(-10_000).start_with?('<span class="bad"'))
+  end
+
+  def test_ago
+    assert(ago(Time.now).start_with?('<span title='))
+    assert(ago(Time.now - 5 * 60).include?('5m0s ago'))
+  end
+
   def test_secret
     assert(secret('swordfish').include?('<span>swor</span>'))
   end
