@@ -47,6 +47,14 @@ class Baza::Job
     raise Baza::Urror, 'The job is already expired' if expired?
     @jobs.pgsql.transaction do |t|
       t.exec('UPDATE job SET expired = now() WHERE id = $1', [@id])
+      t.exec(
+        [
+          'INSERT INTO result (job, uri2, stdout, exit, msec, size, errors)',
+          'SELECT $1, $2, $3, $4, $5, $6, $7',
+          'WHERE NOT EXISTS (SELECT id FROM result WHERE job = $1)'
+        ],
+        [id, nil, 'Internal error', 1, 1, 0, 0]
+      )
       t.exec('UPDATE result SET expired = now() WHERE job = $1', [@id])
       t.exec('UPDATE result SET stdout = \'The stdout has been removed\' WHERE job = $1', [@id])
     end

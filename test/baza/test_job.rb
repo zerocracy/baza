@@ -72,6 +72,14 @@ class Baza::JobTest < Minitest::Test
     end
   end
 
+  def test_expires_job_without_result
+    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
+    token = human.tokens.add(fake_name)
+    job = token.start(fake_name, fake_name, 1, 0, 'n/a', [])
+    job.expire!(Baza::Factbases.new('', ''))
+    assert(!job.result.stdout.nil?)
+  end
+
   def test_job_secrets
     human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
     n = fake_name
