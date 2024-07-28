@@ -33,7 +33,7 @@ get '/valves' do
 end
 
 post('/valve-add') do
-  the_human.valves.enter(params[:name], params[:badge], why: params[:why]) { params[:result] }
+  the_human.valves.enter(params[:name], params[:badge], params[:why]) { params[:result] }
   flash(iri.cut('/valves'), "The valve '#{params[:badge]}' has been added for '#{params[:name]}'")
 end
 
