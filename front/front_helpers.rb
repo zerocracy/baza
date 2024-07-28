@@ -87,7 +87,7 @@ module Baza::Helpers
           style: 'display: none',
           onclick: js_copy
         ) { html_tag('i', class: 'fa-regular fa-copy') }
-      ].join(' ')
+      ].join('&nbsp;')
     end
   end
 

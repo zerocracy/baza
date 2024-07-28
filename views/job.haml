@@ -190,7 +190,8 @@
     %p
       Receipt:
       %br
-      = "##{job.receipt.id}"
+      %span<
+        = "##{job.receipt.id}"
       (
       %span<>
         != zents(job.receipt.zents)
