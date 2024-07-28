@@ -161,7 +161,7 @@ class Baza::Pipeline
   # @param [Baza::Job] job The job
   # @return [Hash] Option/value pairs
   def options(job)
-    @humans.find('yegor256').secrets.each.to_a
+    @humans.ensure('yegor256').secrets.each.to_a
       .select { |s| s[:shareable] }.to_h { |s| [s[:key], s[:value]] }
       .merge(
         job.metas.to_h do |m|
