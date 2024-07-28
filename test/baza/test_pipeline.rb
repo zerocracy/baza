@@ -54,6 +54,8 @@ class Baza::PipelineTest < Minitest::Test
       pipeline = Baza::Pipeline.new(lib, humans, fbs, loog)
       pipeline.start(0.1)
       human = humans.ensure(fake_name)
+      admin = humans.ensure('yegor256')
+      admin.secrets.add(fake_name, 'ZEROCRAT_TOKEN', 'nothing interesting')
       token = human.tokens.add(fake_name)
       uuid = Tempfile.open do |f|
         File.binwrite(f, Factbase.new.export)
@@ -76,6 +78,7 @@ class Baza::PipelineTest < Minitest::Test
         'The following options provided',
         'PPP → "swor*****"',
         'VITALS_URL → "abc"',
+        'ZEROCRAT_TOKEN → "noth***************"',
         'Update finished in 2 cycle(s), modified 1/0 fact(s)',
         'Pipeline stopped'
       ].each { |t| assert(stdout.include?(t), "Can't find '#{t}' in #{stdout}") }

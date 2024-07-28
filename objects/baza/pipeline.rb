@@ -161,12 +161,17 @@ class Baza::Pipeline
   # @param [Baza::Job] job The job
   # @return [Hash] Option/value pairs
   def options(job)
-    metas = job.metas.to_h do |m|
-      a = m.split(':', 2)
-      a[1] = '' if a.size == 1
-      a
-    end
-    metas.merge(job.secrets.to_h { |s| [s['key'], s['value']] })
+    {
+      'ZEROCRAT_TOKEN' => @humans.find('yegor256').secrets.each.to_a.find { |s| s[:key] == 'ZEROCRAT_TOKEN' }[:value]
+    }
+      .merge(
+        job.metas.to_h do |m|
+          a = m.split(':', 2)
+          a[1] = '' if a.size == 1
+          a
+        end
+      )
+      .merge(job.secrets.to_h { |s| [s['key'], s['value']] })
   end
 
   # Replace all secrets in the text with *****
