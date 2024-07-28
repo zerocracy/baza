@@ -31,6 +31,10 @@ require 'securerandom'
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
 module Baza::Helpers
+  def escape(txt)
+    CGI.escape(txt).gsub('+', '%20')
+  end
+
   def html_tag(tag, attrs = {})
     html = block_given? ? yield : ''
     a = attrs.map { |k, v| "#{k}=\"#{CGI.escapeHTML(v.to_s)}\"" }.join(' ')
@@ -56,13 +60,13 @@ module Baza::Helpers
     return body unless eye
     uuid = SecureRandom.uuid
     js_eye = [
-      "$('##{CGI.escapeHTML(uuid)} span').html(decodeURIComponent('#{CGI.escape(large_text(txt))}'));",
+      "$('##{CGI.escapeHTML(uuid)} span').html(decodeURIComponent('#{escape(large_text(txt))}'));",
       "$('##{uuid} a.eye').hide();",
       "$('##{uuid} a.copy').show();",
       'return false;'
     ].join
     js_copy = [
-      "navigator.clipboard.writeText(decodeURIComponent('#{CGI.escape(txt)}'));",
+      "navigator.clipboard.writeText(decodeURIComponent('#{escape(txt)}'));",
       'return false;'
     ].join
     html_tag('span', id: uuid) do
@@ -105,8 +109,11 @@ module Baza::Helpers
     text
       .tr("\n", '↵')
       .scan(/.{1,4}/)
-      .map { |t| t.gsub(' ', html_tag('span', class: 'lightgray') { '&#x2423;' }) }
-      .map { |t| html_tag('span', style: 'display:inline-block;') { CGI.escapeHTML(t) } }
+      .map do |t|
+        html_tag('span', style: 'display:inline-block;') do
+          CGI.escapeHTML(t).gsub(' ', html_tag('span', class: 'lightgray') { '&#x2423;' })
+        end
+      end
       .join
       .chars
       .map { |c| c.ord > 0x7f ? "<span class='firebrick'>\\x#{format('%x', c.ord)}</span>" : c }
