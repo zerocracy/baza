@@ -113,12 +113,12 @@ put(%r{/push/([a-z0-9-]+)}) do
   name = params['captures'].first
   Tempfile.open do |f|
     request.body.rewind
-    readable_source = if request.env['HTTP_CONTENT_ENCODING'] == 'gzip' || request.env['HTTP_CONTENT_TYPE'] == 'application/zip'
-      Zlib::GzipReader.new(request.body)
-    else
-      request.body
-    end
-    File.binwrite(f, readable_source.read)
+    source = if request.env['HTTP_CONTENT_ENCODING'] == 'gzip' || request.env['HTTP_CONTENT_TYPE'] == 'application/zip'
+               Zlib::GzipReader.new(request.body)
+             else
+               request.body
+             end
+    File.binwrite(f, source.read)
     job = job_start(token, f, name, ['push:put'])
     settings.loog.info("New push arrived via HTTP PUT, job ID is #{job.id}")
     job.id.to_s
