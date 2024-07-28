@@ -145,12 +145,12 @@ class Baza::Valves
   # Make it suitable for Telegram (where they expect Markdown).
   def escape(txt)
     txt
-      .gsub(%r{([a-zA-Z0-9_-]+/[a-zA-Z0-9_-]+)#([0-9]+)}) do |s|
-        "[#{s}](https://github.com/#{Regexp.last_match[1]}/issues/#{Regexp.last_match[2]})"
-      end
       .gsub('[', '\[')
       .gsub(']', '\]')
       .gsub(/(@[a-zA-Z0-9-_]+)/, '`\1`')
+      .gsub(%r{([a-zA-Z0-9_-]+/[a-zA-Z0-9_-]+)#([0-9]+)}) do |s|
+        "[#{s}](https://github.com/#{Regexp.last_match[1]}/issues/#{Regexp.last_match[2]})"
+      end
   end
 
   def enc(obj)

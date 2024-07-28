@@ -86,11 +86,12 @@ class Baza::ValveTest < Minitest::Test
     valves = human.valves
     n = fake_name
     b = fake_name
-    valves.enter(n, b, 'you @jeff-lebowski is [awesome]') { 42 }
+    valves.enter(n, b, 'you @jeff-lebowski is [awesome] in foo/foo#42') { 42 }
     post = loog.to_s
     [
       'A new [valve](https://www.zerocracy.com/valves)',
-      '"you `@jeff-lebowski` is \[awesome\]"',
+      '"you `@jeff-lebowski` is \[awesome\]',
+      'in [foo/foo#42](https://github.com/foo/foo/issues/42)',
       'The result is `42`'
     ].each { |t| assert(post.include?(t), post) }
   end
