@@ -5,12 +5,9 @@
     %span.bad<>
       active development
   We advise against using it unless you are fully aware of the potential
-  != succeed '.' do
-    %a{href: iri.cut('/terms')}<>
-      risks and implications
+  != href(iri.cut('/terms'), 'risks and implications', dot: true)
   Upon public release, we will make an official announcement in our Telegram group:
-  %a{href: 'https://t.me/zerocracy'}<
-    @zerocracy
+  != href('https://t.me/zerocracy', '@zerocracy')
   (please, join).
 
 %p
