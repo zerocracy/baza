@@ -76,19 +76,6 @@ def save_uploaded_file(uploaded_file, file, content_encoding)
   end
 end
 
-# @param [IO] io The source of the content
-# @param [String] target_path The file path to write content to
-# @param [String] content_encoding The file content encoding
-# @param [String] content_type The file content type
-def save_content(io, target_path, content_encoding, content_type)
-  readable_source = content_compressed?(content_encoding, content_type) ? Zlib::GzipReader.new(io) : io
-  File.binwrite(target_path, readable_source.read)
-end
-
-def content_compressed?(content_encoding, content_type)
-  content_encoding == 'gzip' || content_type == 'application/zip'
-end
-
 get '/push' do
   assemble(
     :push,
@@ -126,7 +113,12 @@ put(%r{/push/([a-z0-9-]+)}) do
   name = params['captures'].first
   Tempfile.open do |f|
     request.body.rewind
-    save_content(request.body, f.path, request.env['HTTP_CONTENT_ENCODING'], request.env['HTTP_CONTENT_TYPE'])
+    readable_source = if request.env['HTTP_CONTENT_ENCODING'] == 'gzip' || request.env['HTTP_CONTENT_TYPE'] == 'application/zip'
+      Zlib::GzipReader.new(request.body)
+    else
+      request.body
+    end
+    File.binwrite(f, readable_source.read)
     job = job_start(token, f, name, ['push:put'])
     settings.loog.info("New push arrived via HTTP PUT, job ID is #{job.id}")
     job.id.to_s
