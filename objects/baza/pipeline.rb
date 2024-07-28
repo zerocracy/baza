@@ -165,9 +165,7 @@ class Baza::Pipeline
       a[1] = '' if a.size == 1
       a
     end
-    job.secrets
-      .to_h { |s| [s['key'], s['value']] }
-      .merge(metas)
+    metas.merge(job.secrets.to_h { |s| [s['key'], s['value']] })
   end
 
   # Replace all secrets in the text with *****

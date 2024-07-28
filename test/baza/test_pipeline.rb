@@ -59,7 +59,7 @@ class Baza::PipelineTest < Minitest::Test
         File.binwrite(f, Factbase.new.export)
         uuid = fbs.save(f.path)
       end
-      job = token.start(fake_name, uuid, 1, 0, 'n/a', ['vitals_url:abc'])
+      job = token.start(fake_name, uuid, 1, 0, 'n/a', ['vitals_url:abc', 'ppp:hello'])
       assert(!human.jobs.get(job.id).finished?)
       human.secrets.add(job.name, 'ppp', 'swordfish')
       loop do
