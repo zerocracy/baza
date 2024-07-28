@@ -54,7 +54,7 @@ class Baza::FrontHelpersTest < Minitest::Test
 
   def test_ago
     assert(ago(Time.now).start_with?('<span title='))
-    assert(ago(Time.now - 5 * 60).include?('5m0s ago'))
+    assert(ago(Time.now - (5 * 60)).include?('5m0s ago'))
   end
 
   def test_secret

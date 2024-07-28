@@ -93,8 +93,8 @@ class Baza::Account
       [@human.id, amount, summary, created]
     )[0]['id']
     @human.notify(
-      "🍏 We topped up your account by #{amount.zents}.",
-      "Now, the balance is #{balance.zents}."
+      "🍏 Because we love you, we topped up your account by #{amount.zents}.",
+      "Now, the balance is #{balance.zents}. Thanks for using Zerocracy!"
     )
     id
   end
