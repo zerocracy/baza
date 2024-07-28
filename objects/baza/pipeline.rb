@@ -29,6 +29,7 @@ require 'backtrace'
 require 'judges/commands/update'
 require_relative 'tbot'
 require_relative 'humans'
+require_relative 'human'
 require_relative 'urror'
 require_relative 'errors'
 
@@ -142,7 +143,7 @@ class Baza::Pipeline
         'summary' => true,
         'max-cycles' => 3, # it will stop on the first cycle if no changes are made
         'log' => false,
-        'verbose' => true,
+        'verbose' => job.jobs.human.extend(Baza::Human::Admin).admin?,
         'option' => options(job).map { |k, v| "#{k}=#{v}" },
         'lib' => File.join(@jdir, 'lib')
       },
