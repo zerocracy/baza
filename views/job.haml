@@ -186,6 +186,16 @@
             see output HTML
           )
 
+  - unless job.receipt.nil?
+    %p
+      Receipt:
+      %br
+      = "##{job.receipt.id}"
+      (
+      %span<>
+        != zents(job.receipt.zents)
+      )
+
 - if job.finished?
   %h2
     Stdout:

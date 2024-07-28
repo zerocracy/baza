@@ -80,6 +80,7 @@ class Baza::PipelineTest < Minitest::Test
         'Pipeline stopped'
       ].each { |t| assert(stdout.include?(t), "Can't find '#{t}' in #{stdout}") }
       Tempfile.open do |f|
+        job = human.jobs.get(job.id)
         fbs.load(job.result.uri2, f.path)
         fb = Factbase.new
         fb.import(File.binread(f))

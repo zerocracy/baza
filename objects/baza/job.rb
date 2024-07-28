@@ -26,6 +26,7 @@ require_relative 'result'
 require_relative 'zents'
 
 # One job.
+#
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
@@ -159,6 +160,10 @@ class Baza::Job
     to_json[:taken]
   end
 
+  def receipt
+    to_json[:receipt]
+  end
+
   def token
     @jobs.human.tokens.get(to_json[:token])
   end
@@ -180,9 +185,7 @@ class Baza::Job
   end
 
   def result
-    rows = @jobs.pgsql.exec('SELECT id FROM result WHERE job = $1', [@id])
-    raise Baza::Urror, 'There is no result yet' if rows.empty?
-    @jobs.human.results.get(rows[0]['id'].to_i)
+    to_json[:result]
   end
 
   def to_json(*_args)
@@ -191,16 +194,17 @@ class Baza::Job
         sep = ' -===&62la(o$3s===- '
         row = @jobs.pgsql.exec(
           [
-            'SELECT job.*, result.id AS rid, ',
+            'SELECT job.*, result.id AS rid, receipt.id AS tid, ',
             'lock.created AS when_locked, lock.owner AS lock_owner,',
             'STRING_AGG(meta.text, $2) AS metas',
             'FROM job',
             'JOIN token ON token.id = job.token',
             'LEFT JOIN meta ON meta.job = job.id',
             'LEFT JOIN result ON result.job = job.id',
+            'LEFT JOIN receipt ON receipt.job = job.id',
             'LEFT JOIN lock ON lock.name = job.name AND lock.human = token.human',
             'WHERE job.id = $1 AND token.human = $3',
-            'GROUP BY job.id, result.id, lock.id'
+            'GROUP BY job.id, result.id, receipt.id, lock.id'
           ],
           [@id, sep, @jobs.human.id]
         ).first
@@ -219,7 +223,9 @@ class Baza::Job
           errors: row['errors'].to_i,
           agent: row['agent'],
           finished: !row['rid'].nil?,
-          expired: !row['expired'].nil?
+          expired: !row['expired'].nil?,
+          result: row['rid'].nil? ? nil : @jobs.human.results.get(row['rid'].to_i),
+          receipt: row['tid'].nil? ? nil : @jobs.human.account.get(row['tid'].to_i)
         }
       end
   end

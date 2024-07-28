@@ -58,6 +58,7 @@ class Minitest::Test
   include Capybara::DSL
 
   def setup
+    require 'sinatra'
     Capybara.app = Sinatra::Application.new
     page.driver.header 'User-Agent', 'Capybara'
   end

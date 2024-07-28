@@ -22,7 +22,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# Account of a human.
+# A single receipt.
+#
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
@@ -35,33 +36,41 @@ class Baza::Receipt
   end
 
   def job_id
-    id = @account.pgsql.exec(
-      'SELECT job FROM receipt WHERE id = $1',
-      [@id]
-    )[0]['job']
-    return nil if id.nil?
-    id.to_i
+    to_json[:job_id]
   end
 
   def zents
-    @account.pgsql.exec(
-      'SELECT zents FROM receipt WHERE id = $1',
-      [@id]
-    )[0]['zents'].to_i
+    to_json[:zents]
   end
 
   def summary
-    @account.pgsql.exec(
-      'SELECT summary FROM receipt WHERE id = $1',
-      [@id]
-    )[0]['summary']
+    to_json[:summary]
   end
 
   def created
-    time = @account.pgsql.exec(
-      'SELECT created FROM receipt WHERE id = $1',
-      [@id]
-    )[0]['created']
-    Time.parse(time)
+    to_json[:created]
+  end
+
+  private
+
+  def to_json(*_args)
+    @to_json ||=
+      begin
+        row = @account.pgsql.exec(
+          [
+            'SELECT receipt.* FROM receipt',
+            'WHERE id = $1 AND human = $2'
+          ],
+          [@id, @account.human.id]
+        ).first
+        raise Baza::Urror, "There is no receipt ##{@id}" if row.nil?
+        {
+          id: @id,
+          zents: row['zents'].to_i,
+          created: Time.parse(row['created']),
+          summary: row['summary'],
+          job_id: row['job']&.to_i
+        }
+      end
   end
 end

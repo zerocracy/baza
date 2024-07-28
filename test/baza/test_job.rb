@@ -45,6 +45,8 @@ class Baza::JobTest < Minitest::Test
     assert(!job.agent.nil?)
     assert(!job.size.nil?)
     assert(!job.errors.nil?)
+    assert_nil(job.result)
+    assert_nil(job.receipt)
     assert_equal('hello, dude!', job.metas[0])
     assert_equal('пока!', job.metas[1])
   end
@@ -58,6 +60,19 @@ class Baza::JobTest < Minitest::Test
     assert_raises do
       job.finish!(fake_name, 'another stdout', 0, 11)
     end
+  end
+
+  def test_finishes_and_saves_result
+    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
+    token = human.tokens.add(fake_name)
+    job = token.start(fake_name, fake_name, 1, 0, 'n/a', [])
+    assert_nil(job.result)
+    job.finish!(fake_name, 'stdout', 0, 544, 111, 0)
+    assert(!job.result.nil?)
+    assert(!job.result.uri2.nil?)
+    assert(!job.result.stdout.nil?)
+    assert(!job.result.size.nil?)
+    assert(!job.result.errors.nil?)
   end
 
   def test_expires_once
