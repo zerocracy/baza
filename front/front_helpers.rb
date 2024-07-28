@@ -55,22 +55,35 @@ module Baza::Helpers
       end
     return body unless eye
     uuid = SecureRandom.uuid
-    js = [
-      "$('##{CGI.escapeHTML(uuid)} span').html('#{large_text(txt)}');",
-      "$('##{uuid} a').hide();",
+    js_eye = [
+      "$('##{CGI.escapeHTML(uuid)} span').html(decodeURIComponent('#{CGI.escape(large_text(txt))}'));",
+      "$('##{uuid} a.eye').hide();",
+      "$('##{uuid} a.copy').show();",
+      'return false;'
+    ].join
+    js_copy = [
+      "navigator.clipboard.writeText(decodeURIComponent('#{CGI.escape(txt)}'));",
       'return false;'
     ].join
     html_tag('span', id: uuid) do
       [
         html_tag('span', id: uuid) { body },
-        ' ',
         html_tag(
           'a',
           href: '',
           title: 'Show the secret',
-          onclick: js
-        ) { html_tag('i', class: 'fa-regular fa-eye') }
-      ].join
+          class: 'eye',
+          onclick: js_eye
+        ) { html_tag('i', class: 'fa-regular fa-eye') },
+        html_tag(
+          'a',
+          href: '',
+          title: 'Copy the secret',
+          class: 'copy',
+          style: 'display: none',
+          onclick: js_copy
+        ) { html_tag('i', class: 'fa-regular fa-copy') }
+      ].join(' ')
     end
   end
 
@@ -90,13 +103,13 @@ module Baza::Helpers
 
   def large_text(text)
     text
-      .chars
-      .map { |c| c.ord > 0x7f ? "<span class='firebrick'>\\x#{format('%x', c.ord)}</span>" : c }
-      .join
       .tr("\n", '↵')
       .scan(/.{1,4}/)
       .map { |t| t.gsub(' ', html_tag('span', class: 'lightgray') { '&#x2423;' }) }
-      .map { |t| html_tag('span', style: 'display:inline-block;') { t } }
+      .map { |t| html_tag('span', style: 'display:inline-block;') { CGI.escapeHTML(t) } }
+      .join
+      .chars
+      .map { |c| c.ord > 0x7f ? "<span class='firebrick'>\\x#{format('%x', c.ord)}</span>" : c }
       .join
   end
 
