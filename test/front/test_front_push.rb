@@ -185,6 +185,32 @@ class Baza::FrontPushTest < Minitest::Test
     app.settings.pipeline.stop
   end
 
+  def test_pushes_gzipped_file_via_put
+    token = make_valid_token
+    fb = Factbase.new
+    (0..100).each do |i|
+      fb.insert.foo = "booom \x01\x02\x03 #{i}"
+    end
+    header('X-Zerocracy-Token', token)
+    header('User-Agent', 'something')
+    header('Content-Encoding', 'gzip')
+    header('Content-Type', 'application/zip')
+    header(
+      'X-Zerocracy-Meta',
+      [
+        Base64.encode64('vitals_url:https://zerocracy.com'),
+        Base64.encode64('how are you, друг?')
+      ].join('  ')
+    )
+    name = fake_name
+    payload = ''.dup
+    gz = Zlib::GzipWriter.new(StringIO.new(payload))
+    gz.write(fb.export)
+    gz.close
+    put("/push/#{name}", payload)
+    assert_status(200)
+  end
+
   def test_rejects_duplicate_puts
     token = make_valid_token
     fb = Factbase.new
