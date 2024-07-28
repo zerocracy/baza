@@ -120,7 +120,7 @@ class Baza::Valves
       ).first
       human.notify(
         "🍒 A new [valve](https://www.zerocracy.com/valves) ##{row['id']}",
-        "just entered for the `#{name}` job: #{why.inspect}.",
+        "just entered for the `#{name}` job: #{escape(why.inspect)}.",
         "The result is `#{r.is_a?(Integer) ? r : r.class}`."
       )
       r
@@ -141,6 +141,17 @@ class Baza::Valves
   end
 
   private
+
+  # Make it suitable for Telegram (where they expect Markdown).
+  def escape(txt)
+    txt
+      .gsub(%r{([a-zA-Z0-9_-]+/[a-zA-Z0-9_-]+)#([0-9]+)}) do |s|
+        "[#{s}](https://github.com/#{Regexp.last_match[1]}/issues/#{Regexp.last_match[2]})"
+      end
+      .gsub('[', '\[')
+      .gsub(']', '\]')
+      .gsub(/(@[a-zA-Z0-9-_]+)/, '`\1`')
+  end
 
   def enc(obj)
     Base64.encode64(Marshal.dump(obj))

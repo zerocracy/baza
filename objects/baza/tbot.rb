@@ -137,9 +137,6 @@ class Baza::Tbot
     return if row.nil?
     chat = row['id'].to_i
     msg = lines.join(' ')
-    msg.gsub!(%r{([a-zA-Z0-9_-]+/[a-zA-Z0-9_-]+)#([0-9]+)}) do |s|
-      "[#{s}](https://github.com/#{Regexp.last_match[1]}/issues/#{Regexp.last_match[2]})"
-    end
     @tp.post(chat, msg)
   end
 
