@@ -45,6 +45,7 @@ class Baza::SecretsTest < Minitest::Test
     assert_equal(k, s[:key])
     assert_equal(v, s[:value])
     assert_equal(0, s[:jobs])
+    assert(!s[:shareable])
     secrets.remove(s[:id])
     assert(!secrets.exists?(n, k))
     assert(secrets.each.to_a.empty?)

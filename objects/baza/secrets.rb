@@ -29,6 +29,8 @@
 class Baza::Secrets
   attr_reader :human
 
+  SHAREABLE = ['ZEROCRAT_TOKEN'].freeze
+
   def initialize(human)
     @human = human
   end
@@ -63,7 +65,8 @@ class Baza::Secrets
         key: row['key'],
         value: row['value'],
         created: Time.parse(row['created']),
-        jobs: row['jobs'].to_i
+        jobs: row['jobs'].to_i,
+        shareable: SHAREABLE.include?(row['key'].upcase)
       }
       yield s
     end
