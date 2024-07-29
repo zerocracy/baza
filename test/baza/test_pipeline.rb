@@ -76,9 +76,9 @@ class Baza::PipelineTest < Minitest::Test
         'Pipeline started',
         'Running foo (#0)',
         'The following options provided',
-        'PPP → "swor*****"',
+        'PPP → "swor*fish"',
         'VITALS_URL → "abc"',
-        'ZEROCRAT_TOKEN → "noth***************"',
+        'ZEROCRAT_TOKEN → "noth***********ting"',
         'Update finished in 2 cycle(s), modified 1/0 fact(s)',
         'Pipeline stopped'
       ].each { |t| assert(stdout.include?(t), "Can't find '#{t}' in #{stdout}") }
