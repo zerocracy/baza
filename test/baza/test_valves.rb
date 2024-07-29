@@ -90,7 +90,7 @@ class Baza::ValveTest < Minitest::Test
     post = loog.to_s
     [
       'A new [valve](https://www.zerocracy.com/valves)',
-      '"you `@jeff-lebowski` is \[awesome\]',
+      '"you [@jeff-lebowski](https://github.com/jeff-lebowski) is \[awesome\]',
       'in [foo/foo#42](https://github.com/foo/foo/issues/42)',
       'The result is `42`'
     ].each { |t| assert(post.include?(t), post) }
