@@ -57,6 +57,7 @@ class Baza::Account
   end
 
   def each(offset: 0)
+    return to_enum(__method__, offset:) unless block_given?
     q = [
       'SELECT receipt.*, job.name AS jname FROM receipt',
       'LEFT JOIN job ON receipt.job = job.id',
@@ -69,7 +70,7 @@ class Baza::Account
         get(row['id'].to_i),
         id: row['id'].to_i,
         job_id: row['job']&.to_i,
-        job_name: row['jname']&.to_i,
+        job_name: row['jname'],
         zents: row['zents'].to_i,
         summary: row['summary'],
         created: Time.parse(row['created'])

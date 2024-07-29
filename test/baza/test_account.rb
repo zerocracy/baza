@@ -43,6 +43,19 @@ class Baza::AccountTest < Minitest::Test
     assert_equal(0, acc.balance)
   end
 
+  def test_fetch_receipts
+    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
+    token = human.tokens.add(fake_name)
+    job = token.start(fake_name, fake_name, 1, 0, 'n/a', [])
+    job.finish!(fake_name, 'stdout', 0, 544, 111, 0)
+    r = human.account.each.to_a.first
+    assert(!r.id.nil?)
+    assert(!r.summary.nil?)
+    assert(!r.zents.nil?)
+    assert_equal(job.id, r.job_id)
+    assert_equal(job.name, r.job_name)
+  end
+
   def test_fetch_bars
     human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
     acc = human.account
