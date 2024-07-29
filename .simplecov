@@ -23,15 +23,16 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-SimpleCov.formatter = if Gem.win_platform?
-                        SimpleCov::Formatter::MultiFormatter[
-                          SimpleCov::Formatter::HTMLFormatter
-                        ]
-                      else
-                        SimpleCov::Formatter::MultiFormatter.new(
-                          [SimpleCov::Formatter::HTMLFormatter]
-                        )
-                      end
+SimpleCov.formatter =
+  if Gem.win_platform?
+    SimpleCov::Formatter::MultiFormatter[
+      SimpleCov::Formatter::HTMLFormatter
+    ]
+  else
+    SimpleCov::Formatter::MultiFormatter.new(
+      [SimpleCov::Formatter::HTMLFormatter]
+    )
+  end
 SimpleCov.start do
   add_filter '/test/'
   add_filter '/features/'
