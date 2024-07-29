@@ -177,6 +177,10 @@ configure do
       j.expire!(settings.fbs)
       settings.loog.debug("Job ##{j.id} was stuck, expired")
     end
+    settings.humans.gc.tests(4 * 60) do |j|
+      j.expire!(settings.fbs)
+      settings.loog.debug("Job ##{j.id} was a test, expired")
+    end
   end
 end
 

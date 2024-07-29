@@ -37,6 +37,19 @@ class Baza::Gc
     @humans.pgsql
   end
 
+  # Iterate jobs that are tests (from 00000-0000-0000-00000 token).
+  def tests(minutes = 2 * 60)
+    return to_enum(__method__, minutes) unless block_given?
+    tid = @humans.his_token('00000000-0000-0000-0000-000000000000').id
+    q =
+      'SELECT job.id FROM job WHERE token = $1 ' \
+      'AND job.expired IS NULL ' \
+      "AND job.created < NOW() - INTERVAL '#{minutes.to_i} MINUTES'"
+    pgsql.exec(q, [tid]).each do |row|
+      yield @humans.job_by_id(row['id'].to_i)
+    end
+  end
+
   # Iterate jobs that are stuck: taken too long time ago but don't have results.
   def stuck(minutes = 2 * 60)
     return to_enum(__method__, minutes) unless block_given?
