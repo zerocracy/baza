@@ -57,12 +57,7 @@ class Baza::PipelineTest < Minitest::Test
       admin = humans.ensure('yegor256')
       admin.secrets.add(fake_name, 'ZEROCRAT_TOKEN', 'nothing interesting')
       token = human.tokens.add(fake_name)
-      uuid =
-        Tempfile.open do |f|
-          File.binwrite(f, Factbase.new.export)
-          uuid = fbs.save(f.path)
-        end
-      job = token.start(fake_name, uuid, 1, 0, 'n/a', ['vitals_url:abc', 'ppp:hello'])
+      job = token.start(fake_name, uri(fbs), 1, 0, 'n/a', ['vitals_url:abc', 'ppp:hello'])
       assert(!human.jobs.get(job.id).finished?)
       human.secrets.add(job.name, 'ppp', 'swordfish')
       loop do
@@ -91,6 +86,32 @@ class Baza::PipelineTest < Minitest::Test
         assert_equal(2, fb.size)
         assert_equal(42, fb.query('(exists foo)').each.to_a.first.foo)
       end
+    end
+  end
+
+  def test_picks_all_of_them
+    humans = Baza::Humans.new(fake_pgsql)
+    fbs = Baza::Factbases.new('', '', loog: Loog::NULL)
+    Dir.mktmpdir do |lib|
+      pipeline = Baza::Pipeline.new(lib, humans, fbs, Loog::NULL)
+      pipeline.start(0.1)
+      human = humans.ensure(fake_name)
+      token = human.tokens.add(fake_name)
+      first = token.start(fake_name, uri(fbs), 1, 0, 'n/a', [])
+      second = token.start(fake_name, uri(fbs), 1, 0, 'n/a', [])
+      loop do
+        break if human.jobs.get(first.id).finished? && human.jobs.get(second.id).finished?
+      end
+      pipeline.stop
+    end
+  end
+
+  private
+
+  def uri(fbs)
+    Tempfile.open do |f|
+      File.binwrite(f, Factbase.new.export)
+      fbs.save(f.path)
     end
   end
 end

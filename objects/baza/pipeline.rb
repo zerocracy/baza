@@ -128,7 +128,14 @@ class Baza::Pipeline
   def pop
     require_relative '../../version'
     me = "baza #{Baza::VERSION} #{Time.now.utc.iso8601}"
-    rows = @humans.pgsql.exec('UPDATE job SET taken = $1 WHERE taken IS NULL RETURNING id', [me])
+    rows = @humans.pgsql.exec(
+      [
+        'UPDATE job SET taken = $1 WHERE id =',
+        '(SELECT id FROM job WHERE taken IS NULL LIMIT 1)',
+        'RETURNING id'
+      ],
+      [me]
+    )
     return nil if rows.empty?
     @humans.job_by_id(rows[0]['id'].to_i)
   end
