@@ -41,6 +41,8 @@
     %col{style: 'width: 4em;'}
     -# Job
     %col{style: 'width: 4em;'}
+    -# Name
+    %col{style: 'width: 8em;'}
     -# USD
     %col{style: 'width: 9em;'}
     -# Summary
@@ -53,6 +55,8 @@
         = '#'
       %th
         Job
+      %th
+        Name
       %th.right
         USD
       %th
@@ -66,15 +70,19 @@
     - total += 1
     - break if total > max
     %tr
+      - j = r.job_id
       %td
         = "##{r.id}"
       %td
-        - j = r.job_id
         - if j.nil?
           = '—'
         - else
           %a{href: iri.cut('/jobs').append(j)}
             = "##{j}"
+      %td.ff
+        - unless j.nil?
+          %a{href: iri.cut('/jobs').over(name: r.job_name)}<
+            = r.job_name
       %td.right.ff
         != zents(r.zents)
       %td

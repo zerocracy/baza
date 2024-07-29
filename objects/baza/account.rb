@@ -57,16 +57,19 @@ class Baza::Account
   end
 
   def each(offset: 0)
-    q =
-      'SELECT * FROM receipt ' \
-      'WHERE human = $1 ' \
-      'ORDER BY created DESC ' \
+    q = [
+      'SELECT receipt.*, job.name AS jname FROM receipt',
+      'LEFT JOIN job ON receipt.job = job.id',
+      'WHERE receipt.human = $1',
+      'ORDER BY receipt.created DESC',
       "OFFSET #{offset.to_i}"
+    ]
     pgsql.exec(q, [@human.id]).each do |row|
       yield Veil.new(
         get(row['id'].to_i),
         id: row['id'].to_i,
         job_id: row['job']&.to_i,
+        job_name: row['jname']&.to_i,
         zents: row['zents'].to_i,
         summary: row['summary'],
         created: Time.parse(row['created'])
