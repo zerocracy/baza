@@ -23,6 +23,7 @@
 # SOFTWARE.
 
 require 'minitest/autorun'
+require 'factbase'
 require_relative '../test__helper'
 require_relative '../../objects/baza'
 require_relative '../../objects/baza/humans'
@@ -37,7 +38,7 @@ class Baza::AlterationsTest < Minitest::Test
     alterations = human.alterations
     n = fake_name
     script = 'puts "Hello, world!"'
-    alterations.add(n, script)
+    alterations.add(n, 'ruby', script:)
     a = alterations.each.to_a.first
     assert_equal(n, a[:name])
     assert_equal(script, a[:script])
@@ -45,4 +46,38 @@ class Baza::AlterationsTest < Minitest::Test
     alterations.remove(a[:id])
     assert(alterations.each.to_a.empty?)
   end
+
+  def test_with_template
+    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
+    alterations = human.alterations
+    n = fake_name
+    alterations.add(n, 'pmp', { area: 'quality', param: 'qos_interval', value: '4' })
+    a = alterations.each.to_a.first
+    assert(!a[:script].nil?)
+  end
+
+  # rubocop:disable Style/GlobalVars
+  def test_pmp_template
+    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
+    alterations = human.alterations
+    n = fake_name
+    alterations.add(n, 'pmp', { area: 'quality', param: 'qos_interval', value: '42' })
+    ruby = alterations.each.to_a.first[:script]
+    $fb = Factbase.new
+    f = $fb.insert
+    f.what = 'pmp'
+    f.area = 'quality'
+    f.qos_interval = 7
+    f.other = 33
+    # rubocop:disable Security/Eval
+    eval(ruby) # full script here
+    # rubocop:enable Security/Eval
+    assert_equal(1, $fb.size)
+    f = $fb.query('(always)').each.to_a.first
+    assert_equal('pmp', f.what)
+    assert_equal('quality', f.area)
+    assert_equal(33, f.other)
+    assert_equal(42, f.qos_interval)
+  end
+  # rubocop:enable Style/GlobalVars
 end

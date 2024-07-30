@@ -22,6 +22,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+require 'liquid'
+
 # Alterations of a human.
 #
 # Every alteration is a Ruby script that is supposed to be executed
@@ -73,11 +75,16 @@ class Baza::Alterations
     end
   end
 
-  def add(name, script)
+  def add(name, template, params)
     raise Baza::Urror, 'The name cannot be empty' if name.empty?
     raise Baza::Urror, 'The name is not valid' unless name.match?(/^[a-z0-9]+$/)
-    raise Baza::Urror, 'The script cannot be empty' if script.empty?
-    raise Baza::Urror, 'The script is not ASCII' unless script.ascii_only?
+    script =
+      if template == 'ruby'
+        raise Baza::Urror, 'You cannot do this' unless @human.extend(Baza::Human::Admin).admin?
+        params[:script]
+      else
+        script(template, params)
+      end
     pgsql.exec(
       'INSERT INTO alteration (human, name, script) VALUES ($1, $2, $3) RETURNING id',
       [@human.id, name.downcase, script]
@@ -95,6 +102,21 @@ class Baza::Alterations
     pgsql.exec(
       'DELETE FROM alteration WHERE id = $1 AND human = $2',
       [id, @human.id]
+    )
+  end
+
+  private
+
+  def script(template, params)
+    raise Baza::Urror, 'Wrong template name' unless template =~ /^[a-z0-9-]+$/
+    file = File.join(__dir__, "../../assets/alterations/#{template}.liquid")
+    Liquid::Template.parse(File.read(file)).render(
+      params
+        .transform_keys do |k|
+          raise Baza::Urror, "Wrong param name '#{k}'" unless k =~ /^[a-z0-9-]+$/
+          k.to_s
+        end
+        .transform_values { |v| v.gsub(/['"]/, ' ') }
     )
   end
 end

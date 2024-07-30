@@ -23,6 +23,7 @@
 # SOFTWARE.
 
 get '/alterations' do
+  admin_only
   assemble(
     :alterations,
     :default,
@@ -33,14 +34,16 @@ get '/alterations' do
 end
 
 get(%r{/alterations/([0-9]+)/remove}) do
+  admin_only
   id = params['captures'].first.to_i
   the_human.alterations.remove(id)
   flash(iri.cut('/alterations'), "The alteration ##{id} just removed")
 end
 
 post('/alterations/add') do
+  admin_only
   n = params[:name]
-  script = params[:script]
-  id = the_human.alterations.add(n, script)
-  flash(iri.cut('/alterations'), "The alteration ##{id} just added for '#{n}'")
+  t = params[:template]
+  id = the_human.alterations.add(n, t, params)
+  flash(iri.cut('/alterations'), "The alteration ##{id} ('#{t}') just added for '#{n}'")
 end

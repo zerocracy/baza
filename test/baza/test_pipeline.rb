@@ -129,8 +129,8 @@ class Baza::PipelineTest < Minitest::Test
       pipeline.start(0.1)
       human = humans.ensure(fake_name)
       n = fake_name
-      human.alterations.add(n, '$fb.insert.foo = 42')
-      human.alterations.add(n, '$fb.insert.bar = 7')
+      human.alterations.add(n, 'ruby', script: '$fb.insert.foo = 42')
+      human.alterations.add(n, 'ruby', script: '$fb.insert.bar = 7')
       token = human.tokens.add(fake_name)
       job = token.start(n, uri(fbs), 1, 0, 'n/a', [])
       wait_for(2) { human.jobs.get(job.id).finished? }
