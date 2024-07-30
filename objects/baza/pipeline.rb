@@ -153,6 +153,7 @@ class Baza::Pipeline
       rescue Baza::Locks::Busy
         next
       end
+      @humans.pgsql.exec('UPDATE job SET taken = $1 WHERE id = $2', [owner, job.id])
       return job
     end
     nil
