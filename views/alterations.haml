@@ -1,0 +1,56 @@
+%p
+  - if alterations.empty?
+    There are no alterations yet.
+
+- unless alterations.empty?
+  %table
+    %colgroup
+      -# ID
+      %col{style: 'width: 3em;'}
+      -# Name
+      %col{style: 'width: 16em;'}
+      -# Script
+      %col
+      -# Created
+      %col{style: 'width: 10em;'}
+      -# Commands
+      %col{style: 'width: 6em;'}
+    %thead
+      %tr
+        %th
+          = '#'
+        %th
+          Name
+        %th
+          Script
+        %th
+          Created
+        %th
+    %tbody
+    - alterations.each do |s|
+      %tr
+        %td.ff
+          = "##{s[:id]}"
+        %td.ff
+          - if s[:jobs].zero?
+            = s[:name]
+            %i.fa-solid.fa-triangle-exclamation.bad{title: 'There is no job by this name, maybe a spelling error?'}
+          - else
+            %a{href: iri.cut('/jobs').over(name: s[:name])}<
+              = s[:name]
+        %td.ff
+          %pre= s[:script]
+        %td
+          != ago(s[:created])
+        %td
+          %a.ico{href: iri.cut('/alterations').append(s[:id]).append('remove'), title: "Remove alteration ##{s[:id]}", onclick: "return confirm('Are you sure you want to remove the alteration ##{s[:id]}?')"}
+            %i.fa-regular.fa-trash-can
+
+%form{method: 'post', action: iri.cut('/alterations/add')}
+  %fieldset
+    %input{ type: 'text', name: 'name', tabindex: 1, placeholder: 'Job name', size: 14, maxlength: 32, required: true }
+    %br
+    %textarea{ class: 'ff', name: 'script', tabindex: 2, placeholder: 'Ruby script', rows: '10', cols: '70', required: true }
+    %br
+    %input{ type: 'submit', tabindex: 3, value: 'Add' }
+

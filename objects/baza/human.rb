@@ -69,6 +69,11 @@ class Baza::Human
     Baza::Secrets.new(self)
   end
 
+  def alterations
+    require_relative 'alterations'
+    Baza::Alterations.new(self)
+  end
+
   def valves
     require_relative 'valves'
     Baza::Valves.new(self, tbot: @tbot)
