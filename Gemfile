@@ -38,7 +38,7 @@ gem 'haml', '6.3.0'
 gem 'iri', '~>0'
 gem 'j', path: 'j' if File.exist?('j')
 gem 'judges', '~>0'
-gem 'liquid', '5.5.0'
+gem 'liquid', '5.5.1'
 gem 'loog', '~>0'
 gem 'minitest', '5.24.1', require: false
 gem 'minitest-reporters', '1.7.1', require: false
