@@ -3,6 +3,7 @@ if f.nil?
   f = $fb.insert
   f.what = 'pmp'
   f.area = '{{ area }}'
+  f.send("{{ param }}=", "{{ value }}".to_i)
 else
   before = {}
   f.all_properties.each do |p|

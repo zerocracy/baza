@@ -191,7 +191,7 @@ class Baza::Pipeline
         File.write(File.join(dir, "alternation-#{a[:id]}/alternation-#{a[:id]}.rb"), a[:script])
         Judges::Update.new(stdout).run(
           {
-            'quiet' => true,
+            'quiet' => false,
             'summary' => false,
             'max-cycles' => 1,
             'log' => false,
