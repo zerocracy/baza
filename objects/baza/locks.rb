@@ -29,6 +29,8 @@
 class Baza::Locks
   attr_reader :human
 
+  class Busy < Baza::Urror; end
+
   def initialize(human)
     @human = human
   end
@@ -79,7 +81,7 @@ class Baza::Locks
         [@human.id, name.downcase, owner]
       )
     rescue PG::UniqueViolation
-      raise Baza::Urror, "The '#{name}' lock is occupied by another owner, '#{owner}' can't get it now"
+      raise Busy, "The '#{name}' lock is occupied by another owner, '#{owner}' can't get it now"
     end
   end
 

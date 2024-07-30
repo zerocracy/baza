@@ -55,7 +55,8 @@ class Baza::Alterations
         'SELECT alteration.*, COUNT(job.id) AS jobs FROM alteration',
         'LEFT JOIN job ON job.name = alteration.name',
         'WHERE alteration.human = $1',
-        'GROUP BY alteration.id'
+        'GROUP BY alteration.id',
+        'ORDER BY alteration.created DESC'
       ],
       [@human.id]
     )

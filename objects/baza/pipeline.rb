@@ -40,8 +40,8 @@ require_relative 'errors'
 class Baza::Pipeline
   attr_reader :pgsql
 
-  def initialize(jdir, humans, fbs, loog, tbot: Baza::Tbot::Fake.new)
-    @jdir = jdir
+  def initialize(home, humans, fbs, loog, tbot: Baza::Tbot::Fake.new)
+    @home = home
     @humans = humans
     @fbs = fbs
     @loog = loog
@@ -141,6 +141,7 @@ class Baza::Pipeline
   end
 
   def run(job, input, stdout)
+    alterations(job, input, stdout)
     # rubocop:disable Style/GlobalVars
     $valve = job.valve
     # rubocop:enable Style/GlobalVars
@@ -152,9 +153,9 @@ class Baza::Pipeline
         'log' => false,
         'verbose' => job.jobs.human.extend(Baza::Human::Admin).admin?,
         'option' => options(job).map { |k, v| "#{k}=#{v}" },
-        'lib' => File.join(@jdir, 'lib')
+        'lib' => File.join(@home, 'lib')
       },
-      [File.join(@jdir, 'judges'), input]
+      [File.join(@home, 'judges'), input]
     )
     0
   # rubocop:disable Lint/RescueException
@@ -162,6 +163,33 @@ class Baza::Pipeline
     # rubocop:enable Lint/RescueException
     stdout.error(Backtrace.new(e))
     1
+  end
+
+  def alterations(job, input, stdout)
+    Dir.mktmpdir do |dir|
+      alts = job.jobs.human.alterations
+      alts.each do |a|
+        next if a[:name] != job.name
+        FileUtils.mkdir_p(File.join(dir, a[:id].to_s))
+        File.write(File.join(dir, "#{a[:id]}/#{a[:id]}.rb"), a[:script])
+        Judges::Update.new(stdout).run(
+          {
+            'quiet' => true,
+            'summary' => false,
+            'max-cycles' => 1,
+            'log' => false,
+            'verbose' => true,
+            'option' => []
+          },
+          [dir, input]
+        )
+        job.jobs.human.notify(
+          "🍊 We successfully applied the alteration ##{a[:id]} to the job `#{job.name}`,",
+          'you may see the log [here](https://www.zerocracy.com/alterations).'
+        )
+        alts.remove(a[:id])
+      end
+    end
   end
 
   # Create list of options for the job.
