@@ -71,7 +71,7 @@ class Baza::Alterations
         script: row['script'],
         created: Time.parse(row['created']),
         jobs: row['jobs'].to_i,
-        applied: row['applied'].to_i
+        applied: row['applied']&.to_i
       }
       yield s
     end

@@ -67,7 +67,10 @@ class Baza::Pipeline
       rescue Exception => e
         # rubocop:enable Lint/RescueException
         @humans.pgsql.transaction do |t|
-          t.exec('INSERT INTO result (job, stdout, exit, msec) VALUES ($1, $2, 1, 1)', [job.id, Backtrace.new(e).to_s])
+          t.exec(
+            'INSERT INTO result (job, stdout, exit, msec) VALUES ($1, $2, 1, 1) ON CONFLICT DO NOTHING',
+            [job.id, Backtrace.new(e).to_s]
+          )
           t.exec('UPDATE job SET taken = $1 WHERE id = $2', [e.message[0..255], job.id])
         end
         raise e
@@ -100,7 +103,7 @@ class Baza::Pipeline
         code.zero? ? File.size(input) : nil,
         code.zero? ? Baza::Errors.new(input).count : nil
       )
-      job.human.locks.unlock(job.name)
+      job.jobs.human.locks.unlock(job.name)
       if code.zero?
         errs = Baza::Errors.new(input).count
         unless errs.zero?
@@ -175,8 +178,8 @@ class Baza::Pipeline
       alts = job.jobs.human.alterations
       alts.each(pending: true) do |a|
         next if a[:name] != job.name
-        FileUtils.mkdir_p(File.join(dir, a[:id].to_s))
-        File.write(File.join(dir, "#{a[:id]}/#{a[:id]}.rb"), a[:script])
+        FileUtils.mkdir_p(File.join(dir, "alternation-#{a[:id]}"))
+        File.write(File.join(dir, "alternation-#{a[:id]}/alternation-#{a[:id]}.rb"), a[:script])
         Judges::Update.new(stdout).run(
           {
             'quiet' => true,

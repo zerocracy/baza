@@ -48,6 +48,8 @@ class Baza::Gc
     pgsql.exec(q, [tid]).each do |row|
       yield @humans.job_by_id(row['id'].to_i)
     end
+  rescue Baza::Humans::TokenNotFound
+    # ignore it
   end
 
   # Iterate jobs that are stuck: don't have results for a long time.
