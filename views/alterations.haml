@@ -1,0 +1,94 @@
+:javascript
+  $(function() { $('#tabs').tabs(); });
+%div#tabs
+  %ul
+    %li
+      %a{href: '#ruby'}= 'Ruby script'
+    %li
+      %a{href: '#pmp'}= 'PMP area-param'
+  %div#ruby
+    %form{method: 'post', action: iri.cut('/alterations/add')}
+      %fieldset
+        %input{ type: 'hidden', name: 'template', value: 'ruby' }
+        %label
+          Job name:
+        %input{ type: 'text', name: 'name', tabindex: 1, placeholder: 'Job name', size: 14, maxlength: 32, required: true, autofocus: true }
+        %label
+          Ruby:
+        %textarea{ class: 'ff', name: 'script', tabindex: 2, placeholder: "Put your Ruby script here.\nYou can $fb variable, which is an instance of Factbase.\nIt is highly recommended one of the templates provided.", rows: '10', cols: '70', required: true }
+        %label
+        %input{ type: 'submit', tabindex: 5, value: 'Add' }
+  %div#pmp
+    %form{method: 'post', action: iri.cut('/alterations/add')}
+      %fieldset
+        %input{ type: 'hidden', name: 'template', value: 'pmp' }
+        %label
+          Job name:
+        %input{ type: 'text', name: 'name', tabindex: 1, placeholder: 'Job name', size: 14, maxlength: 32, required: true, autofocus: true }
+        %label
+          PMP area:
+        %input{ type: 'text', name: 'area', tabindex: 2, placeholder: "e.g., scope or quality", size: 20, required: true }
+        %label
+          Parameter:
+        %input{ type: 'text', name: 'param', tabindex: 3, size: 30, placeholder: "e.g., qos_interval", required: true }
+        %label
+          Value:
+        %input{ type: 'text', name: 'value', tabindex: 4, size: 10, placeholder: "e.g., 28", required: true }
+        %label
+        %input{ type: 'submit', tabindex: 5, value: 'Add' }
+
+%p
+  - if alterations.empty?
+    There are no alterations yet.
+
+- unless alterations.empty?
+  %table
+    %colgroup
+      -# ID
+      %col{style: 'width: 3em;'}
+      -# Name
+      %col{style: 'width: 16em;'}
+      -# Script
+      %col
+      -# Created
+      %col{style: 'width: 10em;'}
+      -# Applied
+      %col{style: 'width: 10em;'}
+      -# Commands
+      %col{style: 'width: 6em;'}
+    %thead
+      %tr
+        %th
+          = '#'
+        %th
+          Name
+        %th
+          Script
+        %th
+          Created
+        %th
+          Applied
+        %th
+    %tbody
+    - alterations.each do |s|
+      %tr
+        %td.ff
+          = "##{s[:id]}"
+        %td.ff
+          - if s[:jobs].zero?
+            = s[:name]
+            %i.fa-solid.fa-triangle-exclamation.bad{title: 'There is no job by this name, maybe a spelling error?'}
+          - else
+            %a{href: iri.cut('/jobs').over(name: s[:name])}<
+              = s[:name]
+        %td.ff
+          %pre= s[:script]
+        %td
+          != ago(s[:created])
+        %td
+          - unless s[:applied].nil?
+            %a{href: iri.cut('/jobs').append(s[:applied])}
+              = "##{s[:applied]}"
+        %td
+          %a.ico{href: iri.cut('/alterations').append(s[:id]).append('remove'), title: "Remove alteration ##{s[:id]}", onclick: "return confirm('Are you sure you want to remove the alteration ##{s[:id]}?')"}
+            %i.fa-regular.fa-trash-can

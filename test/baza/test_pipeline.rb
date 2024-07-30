@@ -25,6 +25,7 @@
 require 'minitest/autorun'
 require 'loog'
 require 'factbase'
+require 'wait_for'
 require_relative '../test__helper'
 require_relative '../../objects/baza'
 require_relative '../../objects/baza/pipeline'
@@ -39,10 +40,10 @@ class Baza::PipelineTest < Minitest::Test
     loog = Loog::Buffer.new
     humans = Baza::Humans.new(fake_pgsql)
     fbs = Baza::Factbases.new('', '', loog:)
-    Dir.mktmpdir do |lib|
-      %w[judges/foo lib].each { |d| FileUtils.mkdir_p(File.join(lib, d)) }
+    Dir.mktmpdir do |home|
+      %w[judges/foo lib].each { |d| FileUtils.mkdir_p(File.join(home, d)) }
       File.write(
-        File.join(lib, 'judges/foo/foo.rb'),
+        File.join(home, 'judges/foo/foo.rb'),
         '
         if $fb.query("(exists foo)").each.to_a.empty?
           $valve.enter("boom", "the reason") do
@@ -51,7 +52,7 @@ class Baza::PipelineTest < Minitest::Test
         end
         '
       )
-      pipeline = Baza::Pipeline.new(lib, humans, fbs, loog)
+      pipeline = Baza::Pipeline.new(home, humans, fbs, loog)
       pipeline.start(0.1)
       human = humans.ensure(fake_name)
       admin = humans.ensure('yegor256')
@@ -60,12 +61,7 @@ class Baza::PipelineTest < Minitest::Test
       job = token.start(fake_name, uri(fbs), 1, 0, 'n/a', ['vitals_url:abc', 'ppp:hello'])
       assert(!human.jobs.get(job.id).finished?)
       human.secrets.add(job.name, 'ppp', 'swordfish')
-      loop do
-        j = human.jobs.get(job.id)
-        next unless j.finished?
-        assert(!j.result.empty?)
-        break
-      end
+      wait_for(2) { human.jobs.get(job.id).finished? }
       pipeline.stop
       stdout = loog.to_s
       [
@@ -80,29 +76,79 @@ class Baza::PipelineTest < Minitest::Test
       ].each { |t| assert(stdout.include?(t), "Can't find '#{t}' in #{stdout}") }
       Tempfile.open do |f|
         job = human.jobs.get(job.id)
+        assert(!job.result.empty?)
         fbs.load(job.result.uri2, f.path)
         fb = Factbase.new
         fb.import(File.binread(f))
         assert_equal(2, fb.size)
         assert_equal(42, fb.query('(exists foo)').each.to_a.first.foo)
       end
+      assert(!human.locks.locked?(job.name))
     end
   end
 
   def test_picks_all_of_them
     humans = Baza::Humans.new(fake_pgsql)
     fbs = Baza::Factbases.new('', '', loog: Loog::NULL)
-    Dir.mktmpdir do |lib|
-      pipeline = Baza::Pipeline.new(lib, humans, fbs, Loog::NULL)
+    Dir.mktmpdir do |home|
+      pipeline = Baza::Pipeline.new(home, humans, fbs, Loog::NULL)
       pipeline.start(0.1)
       human = humans.ensure(fake_name)
       token = human.tokens.add(fake_name)
       first = token.start(fake_name, uri(fbs), 1, 0, 'n/a', [])
       second = token.start(fake_name, uri(fbs), 1, 0, 'n/a', [])
-      loop do
-        break if human.jobs.get(first.id).finished? && human.jobs.get(second.id).finished?
-      end
+      wait_for(2) { human.jobs.get(first.id).finished? && human.jobs.get(second.id).finished? }
       pipeline.stop
+    end
+  end
+
+  def test_with_fatal_error
+    humans = Baza::Humans.new(fake_pgsql)
+    fbs = Baza::Factbases.new('', '', loog: Loog::NULL)
+    Dir.mktmpdir do |home|
+      pipeline = Baza::Pipeline.new(home, humans, fbs, Loog::NULL)
+      pipeline.start(0.1)
+      human = humans.ensure(fake_name)
+      token = human.tokens.add(fake_name)
+      job = token.start(fake_name, fake_name, 1, 0, 'n/a', [])
+      wait_for(2) { human.jobs.get(job.id).finished? }
+      pipeline.stop
+      job = human.jobs.get(job.id)
+      assert(!job.result.nil?)
+      assert(!job.result.exit.zero?)
+      assert(job.result.stdout.include?('No such file or directory'), job.result.stdout)
+      assert(!human.locks.locked?(job.name))
+    end
+  end
+
+  def test_with_two_alterations
+    humans = Baza::Humans.new(fake_pgsql)
+    fbs = Baza::Factbases.new('', '', loog: Loog::NULL)
+    Dir.mktmpdir do |home|
+      FileUtils.mkdir_p(File.join(home, 'lib'))
+      FileUtils.mkdir_p(File.join(home, 'judges/foo'))
+      File.write(File.join(home, 'judges/foo/foo.rb'), 'x = 42')
+      pipeline = Baza::Pipeline.new(home, humans, fbs, Loog::NULL)
+      pipeline.start(0.1)
+      human = humans.ensure(fake_name)
+      n = fake_name
+      human.alterations.add(n, 'ruby', script: '$fb.insert.foo = 42')
+      human.alterations.add(n, 'ruby', script: '$fb.insert.bar = 7')
+      token = human.tokens.add(fake_name)
+      job = token.start(n, uri(fbs), 1, 0, 'n/a', [])
+      wait_for(2) { human.jobs.get(job.id).finished? }
+      pipeline.stop
+      Tempfile.open do |f|
+        job = human.jobs.get(job.id)
+        assert_equal(0, job.result.exit, job.result.stdout)
+        fbs.load(job.result.uri2, f.path)
+        fb = Factbase.new
+        fb.import(File.binread(f))
+        assert_equal(3, fb.size)
+        { foo: 42, bar: 7 }.each do |k, v|
+          assert_equal(v, fb.query("(exists #{k})").each.to_a.first[k.to_s].first)
+        end
+      end
     end
   end
 

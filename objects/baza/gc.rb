@@ -48,9 +48,11 @@ class Baza::Gc
     pgsql.exec(q, [tid]).each do |row|
       yield @humans.job_by_id(row['id'].to_i)
     end
+  rescue Baza::Humans::TokenNotFound
+    # ignore it
   end
 
-  # Iterate jobs that are stuck: taken too long time ago but don't have results.
+  # Iterate jobs that are stuck: don't have results for a long time.
   def stuck(minutes = 2 * 60)
     return to_enum(__method__, minutes) unless block_given?
     q =

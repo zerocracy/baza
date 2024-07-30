@@ -38,6 +38,7 @@ gem 'haml', '6.3.0'
 gem 'iri', '~>0'
 gem 'j', path: 'j' if File.exist?('j')
 gem 'judges', '~>0'
+gem 'liquid', '5.5.0'
 gem 'loog', '~>0'
 gem 'minitest', '5.24.1', require: false
 gem 'minitest-reporters', '1.7.1', require: false
@@ -64,5 +65,6 @@ gem 'tago', '~>0'
 gem 'telepost', '~>0'
 gem 'truncate', '0.1.0'
 gem 'veils', '~>0'
+gem 'wait_for', '~>0', require: false
 gem 'xcop', '~>0'
 gem 'zache', '~>0'

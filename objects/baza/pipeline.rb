@@ -32,6 +32,7 @@ require_relative 'humans'
 require_relative 'human'
 require_relative 'urror'
 require_relative 'errors'
+require_relative '../../version'
 
 # Pipeline of jobs.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -40,8 +41,8 @@ require_relative 'errors'
 class Baza::Pipeline
   attr_reader :pgsql
 
-  def initialize(jdir, humans, fbs, loog, tbot: Baza::Tbot::Fake.new)
-    @jdir = jdir
+  def initialize(home, humans, fbs, loog, tbot: Baza::Tbot::Fake.new)
+    @home = home
     @humans = humans
     @fbs = fbs
     @loog = loog
@@ -59,15 +60,31 @@ class Baza::Pipeline
 
   def start(pause = 15)
     @always.start(pause) do
-      job = pop
+      owner = "baza #{Baza::VERSION} #{Time.now.utc.iso8601}"
+      job = pop(owner)
       next if job.nil?
       begin
         process_it(job)
       # rubocop:disable Lint/RescueException
       rescue Exception => e
         # rubocop:enable Lint/RescueException
-        @humans.pgsql.exec('UPDATE job SET taken = $1 WHERE id = $2', [e.message[0..255], job.id])
+        @humans.pgsql.transaction do |t|
+          if t.exec('SELECT id FROM result WHERE job = $1', [job.id]).empty?
+            t.exec(
+              'INSERT INTO result (job, stdout, exit, msec) VALUES ($1, $2, 1, 1)',
+              [job.id, Backtrace.new(e).to_s]
+            )
+          else
+            t.exec(
+              'UPDATE result SET exit = 1, stdout = CONCAT($2, stdout) WHERE job = $1',
+              [job.id, Backtrace.new(e).to_s]
+            )
+          end
+          t.exec('UPDATE job SET taken = $1 WHERE id = $2', [e.message[0..255], job.id])
+        end
         raise e
+      ensure
+        job.jobs.human.locks.unlock(job.name, owner)
       end
     end
     @loog.info('Pipeline started')
@@ -76,11 +93,6 @@ class Baza::Pipeline
   def stop
     @always.stop
     @loog.info('Pipeline stopped')
-  end
-
-  # Is it empty? Nothing to process any more?
-  def empty?
-    humans.pgsql.exec('SELECT id FROM job WHERE taken IS NULL').empty?
   end
 
   private
@@ -125,22 +137,28 @@ class Baza::Pipeline
     end
   end
 
-  def pop
-    require_relative '../../version'
-    me = "baza #{Baza::VERSION} #{Time.now.utc.iso8601}"
+  def pop(owner)
     rows = @humans.pgsql.exec(
       [
-        'UPDATE job SET taken = $1 WHERE id =',
-        '(SELECT id FROM job WHERE taken IS NULL LIMIT 1)',
-        'RETURNING id'
-      ],
-      [me]
+        'SELECT job.id FROM job',
+        'LEFT JOIN result ON result.job = job.id',
+        'WHERE result.id IS NULL'
+      ]
     )
-    return nil if rows.empty?
-    @humans.job_by_id(rows[0]['id'].to_i)
+    rows.each do |row|
+      job = @humans.job_by_id(row['id'].to_i)
+      begin
+        job.jobs.human.locks.lock(job.name, owner)
+      rescue Baza::Locks::Busy
+        next
+      end
+      return job
+    end
+    nil
   end
 
   def run(job, input, stdout)
+    alterations(job, input, stdout)
     # rubocop:disable Style/GlobalVars
     $valve = job.valve
     # rubocop:enable Style/GlobalVars
@@ -152,9 +170,9 @@ class Baza::Pipeline
         'log' => false,
         'verbose' => job.jobs.human.extend(Baza::Human::Admin).admin?,
         'option' => options(job).map { |k, v| "#{k}=#{v}" },
-        'lib' => File.join(@jdir, 'lib')
+        'lib' => File.join(@home, 'lib')
       },
-      [File.join(@jdir, 'judges'), input]
+      [File.join(@home, 'judges'), input]
     )
     0
   # rubocop:disable Lint/RescueException
@@ -162,6 +180,34 @@ class Baza::Pipeline
     # rubocop:enable Lint/RescueException
     stdout.error(Backtrace.new(e))
     1
+  end
+
+  def alterations(job, input, stdout)
+    Dir.mktmpdir do |dir|
+      alts = job.jobs.human.alterations
+      alts.each(pending: true) do |a|
+        next if a[:name] != job.name
+        FileUtils.mkdir_p(File.join(dir, "alternation-#{a[:id]}"))
+        File.write(File.join(dir, "alternation-#{a[:id]}/alternation-#{a[:id]}.rb"), a[:script])
+        Judges::Update.new(stdout).run(
+          {
+            'quiet' => false,
+            'summary' => false,
+            'max-cycles' => 1,
+            'log' => false,
+            'verbose' => true,
+            'option' => []
+          },
+          [dir, input]
+        )
+        job.jobs.human.notify(
+          "🍊 We have successfully applied the alteration ##{a[:id]}",
+          "to the job `#{job.name}` (##{job.id}),",
+          "you can see the log [here](https://www.zerocracy.com/jobs/#{job.id})."
+        )
+        alts.complete(a[:id], job.id)
+      end
+    end
   end
 
   # Create list of options for the job.

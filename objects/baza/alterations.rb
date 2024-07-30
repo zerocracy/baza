@@ -22,14 +22,18 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# Locks of a human.
+require 'liquid'
+
+# Alterations of a human.
+#
+# Every alteration is a Ruby script that is supposed to be executed
+# as a judge on a Factbase of the job.
+#
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class Baza::Secrets
+class Baza::Alterations
   attr_reader :human
-
-  SHAREABLE = ['ZEROCRAT_TOKEN'].freeze
 
   def initialize(human)
     @human = human
@@ -41,20 +45,22 @@ class Baza::Secrets
 
   def empty?
     pgsql.exec(
-      'SELECT id FROM secret WHERE human = $1',
+      'SELECT id FROM alteration WHERE human = $1',
       [@human.id]
     ).empty?
   end
 
-  def each
-    return to_enum(__method__) unless block_given?
+  def each(pending: false)
+    return to_enum(__method__, pending:) unless block_given?
     rows = pgsql.exec(
       [
-        'SELECT secret.*, COUNT(job.id) AS jobs FROM secret',
-        'LEFT JOIN job ON job.name = secret.name',
-        'WHERE human = $1',
-        'GROUP BY secret.id',
-        'ORDER BY secret.key'
+        'SELECT alteration.*, b.id AS applied, COUNT(a.id) AS jobs FROM alteration',
+        'LEFT JOIN job AS a ON a.name = alteration.name',
+        'LEFT JOIN job AS b ON b.id = alteration.job',
+        'WHERE alteration.human = $1',
+        (pending ? 'AND job IS NULL' : ''),
+        'GROUP BY alteration.id, b.id',
+        'ORDER BY alteration.created DESC'
       ],
       [@human.id]
     )
@@ -62,41 +68,57 @@ class Baza::Secrets
       s = {
         id: row['id'].to_i,
         name: row['name'],
-        key: row['key'],
-        value: row['value'],
+        script: row['script'],
         created: Time.parse(row['created']),
         jobs: row['jobs'].to_i,
-        shareable: SHAREABLE.include?(row['key'].upcase)
+        applied: row['applied']&.to_i
       }
       yield s
     end
   end
 
-  def exists?(name, key)
-    !pgsql.exec(
-      'SELECT id FROM secret WHERE human = $1 AND name = $2 AND key = $3',
-      [@human.id, name.downcase, key]
-    ).empty?
-  end
-
-  def add(name, key, value)
+  def add(name, template, params)
     raise Baza::Urror, 'The name cannot be empty' if name.empty?
     raise Baza::Urror, 'The name is not valid' unless name.match?(/^[a-z0-9]+$/)
-    raise Baza::Urror, 'The key cannot be empty' if key.empty?
-    raise Baza::Urror, 'The key is not valid' unless key.match?(/^[a-zA-Z0-9_]+$/)
-    raise Baza::Urror, 'The value cannot be empty' if value.empty?
-    raise Baza::Urror, 'The value is not ASCII' unless value.ascii_only?
-    raise Baza::Urror, 'A secret with these name+key already exists' if exists?(name, key)
+    script =
+      if template == 'ruby'
+        raise Baza::Urror, 'You cannot do this' unless @human.extend(Baza::Human::Admin).admin?
+        params[:script]
+      else
+        script(template, params)
+      end
     pgsql.exec(
-      'INSERT INTO secret (human, name, key, value) VALUES ($1, $2, $3, $4) RETURNING id',
-      [@human.id, name.downcase, key, value]
+      'INSERT INTO alteration (human, name, script) VALUES ($1, $2, $3) RETURNING id',
+      [@human.id, name.downcase, script]
     )[0]['id'].to_i
+  end
+
+  def complete(id, job)
+    pgsql.exec(
+      'UPDATE alteration SET job = $1 WHERE id = $2 AND human = $3',
+      [job, id, @human.id]
+    )
   end
 
   def remove(id)
     pgsql.exec(
-      'DELETE FROM secret WHERE id = $1 AND human = $2',
+      'DELETE FROM alteration WHERE id = $1 AND human = $2',
       [id, @human.id]
+    )
+  end
+
+  private
+
+  def script(template, params)
+    raise Baza::Urror, 'Wrong template name' unless template =~ /^[a-z0-9-]+$/
+    file = File.join(__dir__, "../../assets/alterations/#{template}.liquid")
+    Liquid::Template.parse(File.read(file)).render(
+      params
+        .transform_keys do |k|
+          raise Baza::Urror, "Wrong param name '#{k}'" unless k =~ /^[a-z0-9-]+$/
+          k.to_s
+        end
+        .transform_values { |v| v.gsub(/['"]/, ' ') }
     )
   end
 end

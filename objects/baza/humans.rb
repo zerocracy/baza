@@ -34,6 +34,8 @@ require_relative 'zents'
 class Baza::Humans
   attr_reader :pgsql
 
+  class TokenNotFound < Baza::Urror; end
+
   def initialize(pgsql, tbot: Baza::Tbot::Fake.new)
     @pgsql = pgsql
     @tbot = tbot
@@ -85,7 +87,7 @@ class Baza::Humans
       'SELECT id, human FROM token WHERE text = $1',
       [text]
     )
-    raise Baza::Urror, "Token #{text} not found" if rows.empty?
+    raise TokenNotFound, "Token #{text} not found" if rows.empty?
     row = rows[0]
     get(row['human'].to_i).tokens.get(row['id'].to_i)
   end

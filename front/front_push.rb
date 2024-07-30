@@ -143,6 +143,7 @@ get(%r{/stdout/([0-9]+).txt}) do
   the_human.locks.lock(params[:owner]) unless params[:owner].nil?
   j = the_human.jobs.get(params['captures'].first.to_i)
   r = j.result
+  raise Baza::Urror, 'There is no result yes' if r.nil?
   content_type('text/plain')
   r.stdout
 end
