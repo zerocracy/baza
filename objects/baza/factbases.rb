@@ -77,12 +77,16 @@ class Baza::Factbases
       @loog.debug("Fake loaded #{uuid} into #{file} (#{File.size(file)} bytes)")
     else
       key = oname(uuid)
-      with_retries do
-        aws.get_object(
-          response_target: file,
-          bucket: @bucket,
-          key:
-        )
+      begin
+        with_retries do
+          aws.get_object(
+            response_target: file,
+            bucket: @bucket,
+            key:
+          )
+        end
+      rescue StandardException => e
+        raise "Can't read S3 object '#{key}': #{e.message}"
       end
       @loog.info("Loaded from S3: #{key} (#{File.size(file)} bytes)")
     end
@@ -96,11 +100,15 @@ class Baza::Factbases
       FileUtils.rm_f(fake(uuid))
     else
       key = oname(uuid)
-      with_retries do
-        aws.delete_object(
-          bucket: @bucket,
-          key:
-        )
+      begin
+        with_retries do
+          aws.delete_object(
+            bucket: @bucket,
+            key:
+          )
+        end
+      rescue StandardException => e
+        raise "Can't delete S3 object '#{key}': #{e.message}"
       end
       @loog.info("Deleted in S3: #{key}")
     end
