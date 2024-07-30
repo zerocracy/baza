@@ -69,6 +69,13 @@ class Baza::Locks
     end
   end
 
+  def locked?(name)
+    !pgsql.exec(
+      'SELECT id FROM lock WHERE human = $1 AND name = $2',
+      [@human.id, name.downcase]
+    ).empty?
+  end
+
   def lock(name, owner)
     raise Baza::Urror, 'The balance is negative' unless @human.account.balance.positive? || ENV['RACK_ENV'] == 'test'
     begin

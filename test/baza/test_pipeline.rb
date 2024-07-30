@@ -83,6 +83,7 @@ class Baza::PipelineTest < Minitest::Test
         assert_equal(2, fb.size)
         assert_equal(42, fb.query('(exists foo)').each.to_a.first.foo)
       end
+      assert(!human.locks.locked?(job.name))
     end
   end
 
@@ -114,7 +115,9 @@ class Baza::PipelineTest < Minitest::Test
       pipeline.stop
       job = human.jobs.get(job.id)
       assert(!job.result.nil?)
+      assert(!job.result.exit.zero?)
       assert(job.result.stdout.include?('No such file or directory'), job.result.stdout)
+      assert(!human.locks.locked?(job.name))
     end
   end
 

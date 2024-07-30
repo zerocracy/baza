@@ -32,6 +32,7 @@ require_relative 'humans'
 require_relative 'human'
 require_relative 'urror'
 require_relative 'errors'
+require_relative '../../version'
 
 # Pipeline of jobs.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -59,7 +60,8 @@ class Baza::Pipeline
 
   def start(pause = 15)
     @always.start(pause) do
-      job = pop
+      owner = "baza #{Baza::VERSION} #{Time.now.utc.iso8601}"
+      job = pop(owner)
       next if job.nil?
       begin
         process_it(job)
@@ -67,13 +69,22 @@ class Baza::Pipeline
       rescue Exception => e
         # rubocop:enable Lint/RescueException
         @humans.pgsql.transaction do |t|
-          t.exec(
-            'INSERT INTO result (job, stdout, exit, msec) VALUES ($1, $2, 1, 1) ON CONFLICT DO NOTHING',
-            [job.id, Backtrace.new(e).to_s]
-          )
+          if t.exec('SELECT id FROM result WHERE job = $1', [job.id]).empty?
+            t.exec(
+              'INSERT INTO result (job, stdout, exit, msec) VALUES ($1, $2, 1, 1)',
+              [job.id, Backtrace.new(e).to_s]
+            )
+          else
+            t.exec(
+              'UPDATE result SET exit = 1, stdout = CONCAT($2, stdout) WHERE job = $1',
+              [job.id, Backtrace.new(e).to_s]
+            )
+          end
           t.exec('UPDATE job SET taken = $1 WHERE id = $2', [e.message[0..255], job.id])
         end
         raise e
+      ensure
+        job.jobs.human.locks.unlock(job.name, owner)
       end
     end
     @loog.info('Pipeline started')
@@ -103,7 +114,6 @@ class Baza::Pipeline
         code.zero? ? File.size(input) : nil,
         code.zero? ? Baza::Errors.new(input).count : nil
       )
-      job.jobs.human.locks.unlock(job.name)
       if code.zero?
         errs = Baza::Errors.new(input).count
         unless errs.zero?
@@ -127,8 +137,7 @@ class Baza::Pipeline
     end
   end
 
-  def pop
-    require_relative '../../version'
+  def pop(owner)
     rows = @humans.pgsql.exec(
       [
         'SELECT job.id FROM job',
@@ -139,7 +148,7 @@ class Baza::Pipeline
     rows.each do |row|
       job = @humans.job_by_id(row['id'].to_i)
       begin
-        job.jobs.human.locks.lock(job.name, "baza #{Baza::VERSION} #{Time.now.utc.iso8601}")
+        job.jobs.human.locks.lock(job.name, owner)
       rescue Baza::Locks::Busy
         next
       end
