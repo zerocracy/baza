@@ -168,7 +168,7 @@ class Baza::Pipeline
   def alterations(job, input, stdout)
     Dir.mktmpdir do |dir|
       alts = job.jobs.human.alterations
-      alts.each do |a|
+      alts.each(pending: true) do |a|
         next if a[:name] != job.name
         FileUtils.mkdir_p(File.join(dir, a[:id].to_s))
         File.write(File.join(dir, "#{a[:id]}/#{a[:id]}.rb"), a[:script])
@@ -184,10 +184,11 @@ class Baza::Pipeline
           [dir, input]
         )
         job.jobs.human.notify(
-          "🍊 We successfully applied the alteration ##{a[:id]} to the job `#{job.name}`,",
-          'you may see the log [here](https://www.zerocracy.com/alterations).'
+          "🍊 We have successfully applied the alteration ##{a[:id]}",
+          "to the job `#{job.name}` (##{job.id}),",
+          "you can see the log [here](https://www.zerocracy.com/jobs/#{job.id})."
         )
-        alts.remove(a[:id])
+        alts.complete(a[:id], job.id)
       end
     end
   end

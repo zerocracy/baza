@@ -30,6 +30,7 @@ SOFTWARE.
         human INT NOT NULL REFERENCES human(id),
         name VARCHAR(32) NOT NULL,
         script TEXT NOT NULL,
+        job INT REFERENCES job(id),
         created TIMESTAMPTZ DEFAULT now() NOT NULL
       );
     </sql>

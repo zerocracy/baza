@@ -48,13 +48,14 @@ class Baza::Alterations
     ).empty?
   end
 
-  def each
-    return to_enum(__method__) unless block_given?
+  def each(pending: false)
+    return to_enum(__method__, pending:) unless block_given?
     rows = pgsql.exec(
       [
         'SELECT alteration.*, COUNT(job.id) AS jobs FROM alteration',
         'LEFT JOIN job ON job.name = alteration.name',
         'WHERE alteration.human = $1',
+        (pending ? 'AND job IS NULL' : ''),
         'GROUP BY alteration.id',
         'ORDER BY alteration.created DESC'
       ],
@@ -81,6 +82,13 @@ class Baza::Alterations
       'INSERT INTO alteration (human, name, script) VALUES ($1, $2, $3) RETURNING id',
       [@human.id, name.downcase, script]
     )[0]['id'].to_i
+  end
+
+  def complete(id, job)
+    pgsql.exec(
+      'UPDATE alteration SET job = $1 WHERE id = $2 AND human = $3',
+      [job, id, @human.id]
+    )
   end
 
   def remove(id)

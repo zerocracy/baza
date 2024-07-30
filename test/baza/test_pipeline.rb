@@ -112,7 +112,7 @@ class Baza::PipelineTest < Minitest::Test
     Dir.mktmpdir do |home|
       FileUtils.mkdir_p(File.join(home, 'lib'))
       FileUtils.mkdir_p(File.join(home, 'judges/foo'))
-      File.write(File.join(home, 'judges/foo/foo.rb'), 'puts "Hello!"')
+      File.write(File.join(home, 'judges/foo/foo.rb'), 'x = 42')
       pipeline = Baza::Pipeline.new(home, humans, fbs, Loog::NULL)
       pipeline.start(0.1)
       human = humans.ensure(fake_name)
