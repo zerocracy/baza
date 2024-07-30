@@ -66,8 +66,10 @@ class Baza::Pipeline
       # rubocop:disable Lint/RescueException
       rescue Exception => e
         # rubocop:enable Lint/RescueException
-        @humans.pgsql.exec('INSERT INTO result (job, stdout, exit) VALUES ($1, $2, 1)', [job.id, Backtrace.new(e).to_s])
-        @humans.pgsql.exec('UPDATE job SET taken = $1 WHERE id = $2', [e.message[0..255], job.id])
+        @humans.pgsql.transaction do |t|
+          t.exec('INSERT INTO result (job, stdout, exit, msec) VALUES ($1, $2, 1, 1)', [job.id, Backtrace.new(e).to_s])
+          t.exec('UPDATE job SET taken = $1 WHERE id = $2', [e.message[0..255], job.id])
+        end
         raise e
       end
     end
