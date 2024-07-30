@@ -64,6 +64,7 @@ class Baza::AlterationsTest < Minitest::Test
     alterations.add(n, 'pmp', { area: 'quality', param: 'qos_interval', value: '42' })
     ruby = alterations.each.to_a.first[:script]
     $fb = Factbase.new
+    $fb.insert.foo = 42
     f = $fb.insert
     f.what = 'pmp'
     f.area = 'quality'
@@ -72,8 +73,8 @@ class Baza::AlterationsTest < Minitest::Test
     # rubocop:disable Security/Eval
     eval(ruby) # full script here
     # rubocop:enable Security/Eval
-    assert_equal(1, $fb.size)
-    f = $fb.query('(always)').each.to_a.first
+    assert_equal(2, $fb.size)
+    f = $fb.query('(eq what "pmp")').each.to_a.first
     assert_equal('pmp', f.what)
     assert_equal('quality', f.area)
     assert_equal(33, f.other)
