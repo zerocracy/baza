@@ -81,8 +81,11 @@
           - else
             %a{href: iri.cut('/jobs').over(name: s[:name])}<
               = s[:name]
-        %td.ff
-          %pre= s[:script]
+        %td.ff{onclick: "$(this).find('span').hide(); $(this).find('pre').show();"}
+          %span{style: 'cursor: pointer;', title: 'Click here to see the full Ruby script'}<>
+            = s[:script].split("\n")[0]
+          %pre{style: 'display: none;'}<>
+            = s[:script]
         %td
           != ago(s[:created])
         %td
