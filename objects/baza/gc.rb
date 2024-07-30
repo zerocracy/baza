@@ -50,7 +50,7 @@ class Baza::Gc
     end
   end
 
-  # Iterate jobs that are stuck: taken too long time ago but don't have results.
+  # Iterate jobs that are stuck: don't have results for a long time.
   def stuck(minutes = 2 * 60)
     return to_enum(__method__, minutes) unless block_given?
     q =

@@ -25,6 +25,7 @@
 require 'minitest/autorun'
 require 'loog'
 require 'factbase'
+require 'wait_for'
 require_relative '../test__helper'
 require_relative '../../objects/baza'
 require_relative '../../objects/baza/pipeline'
@@ -60,12 +61,7 @@ class Baza::PipelineTest < Minitest::Test
       job = token.start(fake_name, uri(fbs), 1, 0, 'n/a', ['vitals_url:abc', 'ppp:hello'])
       assert(!human.jobs.get(job.id).finished?)
       human.secrets.add(job.name, 'ppp', 'swordfish')
-      loop do
-        j = human.jobs.get(job.id)
-        next unless j.finished?
-        assert(!j.result.empty?)
-        break
-      end
+      wait_for(2) { human.jobs.get(job.id).finished? }
       pipeline.stop
       stdout = loog.to_s
       [
@@ -80,6 +76,7 @@ class Baza::PipelineTest < Minitest::Test
       ].each { |t| assert(stdout.include?(t), "Can't find '#{t}' in #{stdout}") }
       Tempfile.open do |f|
         job = human.jobs.get(job.id)
+        assert(!job.result.empty?)
         fbs.load(job.result.uri2, f.path)
         fb = Factbase.new
         fb.import(File.binread(f))
@@ -99,9 +96,7 @@ class Baza::PipelineTest < Minitest::Test
       token = human.tokens.add(fake_name)
       first = token.start(fake_name, uri(fbs), 1, 0, 'n/a', [])
       second = token.start(fake_name, uri(fbs), 1, 0, 'n/a', [])
-      loop do
-        break if human.jobs.get(first.id).finished? && human.jobs.get(second.id).finished?
-      end
+      wait_for(2) { human.jobs.get(first.id).finished? && human.jobs.get(second.id).finished? }
       pipeline.stop
     end
   end
@@ -121,9 +116,7 @@ class Baza::PipelineTest < Minitest::Test
       human.alterations.add(n, '$fb.insert.bar = 7')
       token = human.tokens.add(fake_name)
       job = token.start(n, uri(fbs), 1, 0, 'n/a', [])
-      loop do
-        break if human.jobs.get(job.id).finished?
-      end
+      wait_for(2) { human.jobs.get(job.id).finished? }
       pipeline.stop
       Tempfile.open do |f|
         job = human.jobs.get(job.id)

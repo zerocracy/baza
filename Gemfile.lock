@@ -382,6 +382,7 @@ GEM
       axiom-types (~> 0.1)
       coercible (~> 1.0)
       descendants_tracker (~> 0.0, >= 0.0.3)
+    wait_for (0.1.1)
     webrick (1.8.1)
     xcop (0.7.1)
       differ (~> 0.1.2)
@@ -451,6 +452,7 @@ DEPENDENCIES
   telepost (~> 0)
   truncate (= 0.1.0)
   veils (~> 0)
+  wait_for (~> 0)
   xcop (~> 0)
   zache (~> 0)
 

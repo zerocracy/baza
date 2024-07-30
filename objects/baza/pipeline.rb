@@ -66,6 +66,7 @@ class Baza::Pipeline
       # rubocop:disable Lint/RescueException
       rescue Exception => e
         # rubocop:enable Lint/RescueException
+        @humans.pgsql.exec('INSERT INTO result (job, stdout, exit) VALUES ($1, $2, 1)', [job.id, Backtrace.new(e).to_s])
         @humans.pgsql.exec('UPDATE job SET taken = $1 WHERE id = $2', [e.message[0..255], job.id])
         raise e
       end
@@ -76,11 +77,6 @@ class Baza::Pipeline
   def stop
     @always.stop
     @loog.info('Pipeline stopped')
-  end
-
-  # Is it empty? Nothing to process any more?
-  def empty?
-    humans.pgsql.exec('SELECT id FROM job WHERE taken IS NULL').empty?
   end
 
   private
@@ -102,6 +98,7 @@ class Baza::Pipeline
         code.zero? ? File.size(input) : nil,
         code.zero? ? Baza::Errors.new(input).count : nil
       )
+      job.human.locks.unlock(job.name)
       if code.zero?
         errs = Baza::Errors.new(input).count
         unless errs.zero?
@@ -127,17 +124,23 @@ class Baza::Pipeline
 
   def pop
     require_relative '../../version'
-    me = "baza #{Baza::VERSION} #{Time.now.utc.iso8601}"
     rows = @humans.pgsql.exec(
       [
-        'UPDATE job SET taken = $1 WHERE id =',
-        '(SELECT id FROM job WHERE taken IS NULL LIMIT 1)',
-        'RETURNING id'
-      ],
-      [me]
+        'SELECT job.id FROM job',
+        'LEFT JOIN result ON result.job = job.id',
+        'WHERE result.id IS NULL'
+      ]
     )
-    return nil if rows.empty?
-    @humans.job_by_id(rows[0]['id'].to_i)
+    rows.each do |row|
+      job = @humans.job_by_id(row['id'].to_i)
+      begin
+        job.jobs.human.locks.lock(job.name, "baza #{Baza::VERSION} #{Time.now.utc.iso8601}")
+      rescue Baza::Locks::Busy
+        next
+      end
+      return job
+    end
+    nil
   end
 
   def run(job, input, stdout)

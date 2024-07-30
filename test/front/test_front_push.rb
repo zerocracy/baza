@@ -26,6 +26,7 @@ require 'minitest/autorun'
 require 'factbase'
 require 'base64'
 require 'zlib'
+require 'wait_for'
 require_relative '../test__helper'
 require_relative '../../objects/baza'
 require_relative '../../baza'
@@ -159,14 +160,10 @@ class Baza::FrontPushTest < Minitest::Test
     get("/recent/#{name}.txt")
     assert_status(200)
     rid = last_response.body.to_i
-    cycles = 0
-    loop do
+    wait_for(10) do
       get("/finished/#{rid}")
       assert_status(200)
-      break if last_response.body == 'yes'
-      sleep 0.1
-      cycles += 1
-      break if cycles > 20
+      last_response.body == 'yes'
     end
     stdout = get("/stdout/#{rid}.txt").body
     assert_status(200)
