@@ -46,11 +46,42 @@
           %a.ico{href: iri.cut('/alterations').append(s[:id]).append('remove'), title: "Remove alteration ##{s[:id]}", onclick: "return confirm('Are you sure you want to remove the alteration ##{s[:id]}?')"}
             %i.fa-regular.fa-trash-can
 
-%form{method: 'post', action: iri.cut('/alterations/add')}
-  %fieldset
-    %input{ type: 'text', name: 'name', tabindex: 1, placeholder: 'Job name', size: 14, maxlength: 32, required: true }
-    %br
-    %textarea{ class: 'ff', name: 'script', tabindex: 2, placeholder: 'Ruby script', rows: '10', cols: '70', required: true }
-    %br
-    %input{ type: 'submit', tabindex: 3, value: 'Add' }
+:javascript
+  $(function() { $('#tabs').tabs(); });
+%div#tabs
+  %ul
+    %li
+      %a{href: '#ruby'}= 'Ruby script'
+    %li
+      %a{href: '#pmp'}= 'PMP area-param'
+  %div#ruby
+    %form{method: 'post', action: iri.cut('/alterations/add')}
+      %fieldset
+        %input{ type: 'hidden', name: 'template', value: 'ruby' }
+        %label
+          Job name:
+        %input{ type: 'text', name: 'name', tabindex: 1, placeholder: 'Job name', size: 14, maxlength: 32, required: true, autofocus: true }
+        %label
+          Ruby:
+        %textarea{ class: 'ff', name: 'script', tabindex: 2, placeholder: "Put your Ruby script here.\nYou can $fb variable, which is an instance of Factbase.\nIt is highly recommended one of the templates provided.", rows: '10', cols: '70', required: true }
+        %label
+        %input{ type: 'submit', tabindex: 5, value: 'Add' }
+  %div#pmp
+    %form{method: 'post', action: iri.cut('/alterations/add')}
+      %fieldset
+        %input{ type: 'hidden', name: 'template', value: 'pmp' }
+        %label
+          Job name:
+        %input{ type: 'text', name: 'name', tabindex: 1, placeholder: 'Job name', size: 14, maxlength: 32, required: true, autofocus: true }
+        %label
+          PMP area:
+        %input{ type: 'text', name: 'area', tabindex: 2, placeholder: "e.g., scope or quality", size: 20, required: true }
+        %label
+          Parameter:
+        %input{ type: 'text', name: 'param', tabindex: 3, size: 30, placeholder: "e.g., qos_interval", required: true }
+        %label
+          Value:
+        %input{ type: 'text', name: 'value', tabindex: 4, size: 10, placeholder: "e.g., 28", required: true }
+        %label
+        %input{ type: 'submit', tabindex: 5, value: 'Add' }
 

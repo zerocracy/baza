@@ -27,7 +27,8 @@ get '/alterations' do
     :alterations,
     :default,
     title: '/alterations',
-    alterations: the_human.alterations
+    alterations: the_human.alterations,
+    css: 'alterations'
   )
 end
 
