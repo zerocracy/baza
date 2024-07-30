@@ -54,11 +54,12 @@ class Baza::Alterations
     return to_enum(__method__, pending:) unless block_given?
     rows = pgsql.exec(
       [
-        'SELECT alteration.*, COUNT(job.id) AS jobs FROM alteration',
-        'LEFT JOIN job ON job.name = alteration.name',
+        'SELECT alteration.*, b.id AS applied, COUNT(a.id) AS jobs FROM alteration',
+        'LEFT JOIN job AS a ON a.name = alteration.name',
+        'LEFT JOIN job AS b ON b.id = alteration.job',
         'WHERE alteration.human = $1',
         (pending ? 'AND job IS NULL' : ''),
-        'GROUP BY alteration.id',
+        'GROUP BY alteration.id, b.id',
         'ORDER BY alteration.created DESC'
       ],
       [@human.id]
@@ -69,7 +70,8 @@ class Baza::Alterations
         name: row['name'],
         script: row['script'],
         created: Time.parse(row['created']),
-        jobs: row['jobs'].to_i
+        jobs: row['jobs'].to_i,
+        applied: row['applied'].to_i
       }
       yield s
     end
