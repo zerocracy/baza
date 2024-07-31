@@ -222,6 +222,61 @@ class Baza::FrontPushTest < Minitest::Test
     assert_status(303)
   end
 
+  def test_sends_ip_via_post
+    uname = fake_name
+    login('yegor256')
+    post('/gift', "human=#{uname}&zents=9999&summary=no")
+    login(uname)
+    get('/tokens')
+    post('/tokens/add', 'name=foo')
+    id = last_response.headers['X-Zerocracy-TokenId'].to_i
+    get("/tokens/#{id}.json")
+    token = JSON.parse(last_response.body)['text']
+    get('/push')
+    header('User-Agent', 'something')
+    name = fake_name
+    ip = '192.168.0.1'
+    post('/push', { 'name' => name, 'token' => token }, 'REMOTE_ADDR' => ip)
+    assert_status(302)
+    human = app.humans.find(uname)
+    job = human.jobs.recent(name)
+    assert_equal(ip, job.ip)
+  end
+
+  def test_sends_ip_via_put
+    uname = fake_name
+    login('yegor256')
+    post('/gift', "human=#{uname}&zents=9999&summary=no")
+    login(uname)
+    get('/tokens')
+    post('/tokens/add', 'name=foo')
+    id = last_response.headers['X-Zerocracy-TokenId'].to_i
+    get("/tokens/#{id}.json")
+    token = JSON.parse(last_response.body)['text']
+    fb = Factbase.new
+    (0..100).each do |i|
+      fb.insert.foo = "booom \x01\x02\x03 #{i}"
+    end
+    header('X-Zerocracy-Token', token)
+    header('User-Agent', 'something')
+    header('Content-Type', 'application/zip')
+    header(
+      'X-Zerocracy-Meta',
+      [
+        Base64.encode64('vitals_url:https://zerocracy.com'),
+        Base64.encode64('how are you, друг?')
+      ].join('  ')
+    )
+    name = fake_name
+    ip = '192.168.0.1'
+    put("/push/#{name}", fb.export, 'REMOTE_ADDR' => ip)
+    assert_status(200)
+
+    human = app.humans.find(uname)
+    job = human.jobs.recent(name)
+    assert_equal(ip, job.ip)
+  end
+
   private
 
   def make_valid_token
