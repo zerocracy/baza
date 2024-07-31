@@ -69,6 +69,7 @@ class Baza::Jobs
   end
 
   def each(name: nil, offset: 0)
+    return to_enum(__method__, name:, offset:) unless block_given?
     sep = ' -===&62la(o$3s===- '
     sql =
       'SELECT job.id, job.created, job.name, job.uri1, job.expired, job.size, job.errors, job.agent, ' \

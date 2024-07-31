@@ -10,7 +10,7 @@
   %fieldset
     %label
       Job name:
-    %input{ type: 'text', name: 'name', tabindex: 1, placeholder: 'Job name', size: 14, maxlength: 32, required: true, autofocus: true }
+    %input{ type: 'text', name: 'name', tabindex: 1, placeholder: "e.g. #{the_human.jobs.each.to_a.first.name}", size: 14, maxlength: 32, required: true, autofocus: true }
     %input{ id: 'hidden',  type: 'hidden', name: 'template', value: 'pmp' }
     %div#tabs
       %label

@@ -24,6 +24,7 @@
 
 get '/alterations' do
   admin_only
+  flash(iri.cut('/dash'), 'You have no jobs yet, nothing to alter') if the_human.jobs.empty?
   assemble(
     :alterations,
     :default,
