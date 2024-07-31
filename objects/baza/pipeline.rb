@@ -102,6 +102,13 @@ class Baza::Pipeline
     Dir.mktmpdir do |dir|
       input = File.join(dir, 'input.fb')
       @fbs.load(job.uri1, input)
+      unless Baza::Errors.new(input).count.zero?
+        @tbot.notify(
+          job.jobs.human,
+          "⚠️ The job [##{job.id}](//jobs/#{job.id}) (`#{job.name}`)",
+          'arrived with errors. You better look at it now, before it gets too late.'
+        )
+      end
       start = Time.now
       stdout = Loog::Buffer.new
       code = run(job, input, Loog::Tee.new(stdout, @loog))
