@@ -1,0 +1,40 @@
+# Register a new payout for a programmer
+
+# Who did we pay to?
+who = '{{ who }}'.to_i
+
+# How much we just paid?
+payout = '{{ payout }}'.to_i
+
+# This is the previous reconciliation fact, or NIL (we immediately delete it):
+q = "(and (eq what 'reconciliation') (eq who #{who}))"
+f = Fbe.fb.query(q).each.to_a.first
+Fbe.fb.query(q).delete!
+
+# This is how much the total award was at the previous payout:
+before = f.nil? ? 0 : f.awarded
+
+days = 56
+border = Time.now - (days * 24 * 60 * 60)
+
+# This is the moment when the previous award calculation started:
+since = f.nil? ? border : f.since
+
+# This is how much is the total award is now:
+after = Fbe.fb.query(
+  "(and (exists award) (eq who #{who}) (gt when #{since.utc.iso8601}))"
+).each.to_a.map { |f| f.award }.inject(&:+) || 0
+
+# This is how much we should pay now:
+payable = after - before + (f.nil? ? 0 : f.balance)
+
+f = Fbe.fb.insert
+f.what = 'reconciliation'
+f.who = who
+f.when = Time.now
+f.since = border
+f.payout = payout
+f.balance = payable - payout
+f.awarded = Fbe.fb.query(
+  "(and (exists award) (eq who #{who}) (gt when #{border.utc.iso8601}))"
+).each.to_a.map { |f| f.award }.inject(&:+) || 0

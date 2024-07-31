@@ -68,6 +68,7 @@ class Baza::AlterationsTest < Minitest::Test
     n = fake_name
     alterations.add(n, 'pmp', { area: 'quality', param: 'qos_interval', value: '42' })
     ruby = alterations.each.to_a.first[:script]
+    Fbe.fb.query('(always)').delete!
     Fbe.fb.insert.foo = 42
     f = Fbe.fb.insert
     f.what = 'pmp'
@@ -85,12 +86,42 @@ class Baza::AlterationsTest < Minitest::Test
     assert_equal(42, f.qos_interval)
   end
 
+  def test_payout_template
+    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
+    alterations = human.alterations
+    n = fake_name
+    alterations.add(n, 'payout', { who: '444', payout: '100' })
+    ruby = alterations.each.to_a.first[:script]
+    Fbe.fb.query('(always)').delete!
+    f = Fbe.fb.insert
+    f.what = 'resolved-bug-was-rewarded'
+    f.award = 15
+    f.who = 444
+    f.when = Time.now - (5 * 24 * 60 * 60)
+    # rubocop:disable Security/Eval
+    eval(ruby) # full script here
+    # rubocop:enable Security/Eval
+    assert_equal(2, Fbe.fb.size)
+    r = Fbe.fb.query('(eq what "reconciliation")').each.to_a.first
+    assert_equal(-85, r.balance)
+    assert_equal(15, r.awarded)
+    assert_equal(100, r.payout)
+    # rubocop:disable Security/Eval
+    eval(ruby) # full script here
+    # rubocop:enable Security/Eval
+    assert_equal(2, Fbe.fb.size)
+    r = Fbe.fb.query('(eq what "reconciliation")').each.to_a.first
+    assert_equal(-185, r.balance)
+    assert_equal(15, r.awarded)
+    assert_equal(100, r.payout)
+  end
+
   def test_all_variable_leakage
     human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
     alterations = human.alterations
     n = fake_name
     %w[pmp payout].each do |t|
-      alterations.add(n, t, %w[area param value who payout].to_h { |k| [k.to_sym, '#{exit}'] })
+      alterations.add(n, t, %w[area param value who payout].to_h { |k| [k.to_sym, "\u0023{exit}"] })
     end
     alterations.each do |a|
       # rubocop:disable Security/Eval
