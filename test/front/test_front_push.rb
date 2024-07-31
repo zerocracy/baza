@@ -271,7 +271,6 @@ class Baza::FrontPushTest < Minitest::Test
     ip = '192.168.0.1'
     put("/push/#{name}", fb.export, 'REMOTE_ADDR' => ip)
     assert_status(200)
-
     human = app.humans.find(uname)
     job = human.jobs.recent(name)
     assert_equal(ip, job.ip)
