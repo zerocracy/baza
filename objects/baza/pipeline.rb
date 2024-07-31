@@ -197,7 +197,13 @@ class Baza::Pipeline
       alts.each(pending: true) do |a|
         next if a[:name] != job.name
         FileUtils.mkdir_p(File.join(dir, "alternation-#{a[:id]}"))
-        File.write(File.join(dir, "alternation-#{a[:id]}/alternation-#{a[:id]}.rb"), a[:script])
+        File.write(
+          File.join(dir, "alternation-#{a[:id]}/alternation-#{a[:id]}.rb"),
+          [
+            ENV['RACK_ENV'] == 'test' ? '' : 'require "fbe/fb"',
+            a[:script]
+          ].join("\n")
+        )
         Judges::Update.new(stdout).run(
           {
             'quiet' => false,
