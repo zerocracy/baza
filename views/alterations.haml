@@ -10,7 +10,7 @@
   %fieldset
     %label
       Job name:
-    %input{ type: 'text', name: 'name', tabindex: 1, placeholder: 'Job name', size: 14, maxlength: 32, required: true, autofocus: true }
+    %input{ type: 'text', name: 'name', tabindex: 1, placeholder: "e.g. #{the_human.jobs.each.to_a.first.name}", size: 14, maxlength: 32, required: true, autofocus: true }
     %input{ id: 'hidden',  type: 'hidden', name: 'template', value: 'pmp' }
     %div#tabs
       %label
@@ -44,7 +44,7 @@
           Ruby:
         %textarea{ class: 'ff', name: 'script', tabindex: 2, placeholder: "Put your Ruby script here.\nYou can $fb variable, which is an instance of Factbase.\nIt is highly recommended one of the templates provided.", rows: '10', cols: '70' }
     %label
-    %input{ type: 'submit', tabindex: 5, value: 'Add' }
+    %input{ type: 'submit', tabindex: 5, value: 'Create' }
 
 %p
   - if alterations.empty?

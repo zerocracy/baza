@@ -20,6 +20,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+$subline: #d3d3d3;
+
 .ui-tabs-nav {
   display: inline;
   margin-left: 1em;
@@ -28,5 +30,13 @@
     display: inline;
     list-style: none;
     margin-right: 1em;
+
+    a:hover {
+      text-decoration: none;
+    }
+
+    &.ui-tabs-active {
+      border-bottom: 1px solid $subline;
+    }
   }
 }
