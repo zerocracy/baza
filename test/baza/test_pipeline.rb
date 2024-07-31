@@ -58,7 +58,7 @@ class Baza::PipelineTest < Minitest::Test
       admin = humans.ensure('yegor256')
       admin.secrets.add(fake_name, 'ZEROCRAT_TOKEN', 'nothing interesting')
       token = human.tokens.add(fake_name)
-      job = token.start(fake_name, uri(fbs), 1, 0, 'n/a', ['vitals_url:abc', 'ppp:hello'])
+      job = token.start(fake_name, uri(fbs), 1, 0, 'n/a', ['vitals_url:abc', 'ppp:hello'], '192.168.1.1')
       assert(!human.jobs.get(job.id).finished?)
       human.secrets.add(job.name, 'ppp', 'swordfish')
       wait_for(2) { human.jobs.get(job.id).finished? }
@@ -95,8 +95,8 @@ class Baza::PipelineTest < Minitest::Test
       pipeline.start(0.1)
       human = humans.ensure(fake_name)
       token = human.tokens.add(fake_name)
-      first = token.start(fake_name, uri(fbs), 1, 0, 'n/a', [])
-      second = token.start(fake_name, uri(fbs), 1, 0, 'n/a', [])
+      first = token.start(fake_name, uri(fbs), 1, 0, 'n/a', [], '192.168.1.1')
+      second = token.start(fake_name, uri(fbs), 1, 0, 'n/a', [], '192.168.1.1')
       wait_for(2) { human.jobs.get(first.id).finished? && human.jobs.get(second.id).finished? }
       pipeline.stop
     end
@@ -110,7 +110,7 @@ class Baza::PipelineTest < Minitest::Test
       pipeline.start(0.1)
       human = humans.ensure(fake_name)
       token = human.tokens.add(fake_name)
-      job = token.start(fake_name, fake_name, 1, 0, 'n/a', [])
+      job = token.start(fake_name, fake_name, 1, 0, 'n/a', [], '192.168.1.1')
       wait_for(2) { human.jobs.get(job.id).finished? }
       pipeline.stop
       job = human.jobs.get(job.id)
@@ -135,7 +135,7 @@ class Baza::PipelineTest < Minitest::Test
       human.alterations.add(n, 'ruby', script: '$fb.insert.foo = 42')
       human.alterations.add(n, 'ruby', script: '$fb.insert.bar = 7')
       token = human.tokens.add(fake_name)
-      job = token.start(n, uri(fbs), 1, 0, 'n/a', [])
+      job = token.start(n, uri(fbs), 1, 0, 'n/a', [], '192.168.1.1')
       wait_for(2) { human.jobs.get(job.id).finished? }
       pipeline.stop
       Tempfile.open do |f|

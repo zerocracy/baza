@@ -188,6 +188,10 @@ class Baza::Job
     to_json[:result]
   end
 
+  def ip
+    to_json[:ip]
+  end
+
   def to_json(*_args)
     @to_json ||=
       begin
@@ -225,7 +229,8 @@ class Baza::Job
           finished: !row['rid'].nil?,
           expired: !row['expired'].nil?,
           result: row['rid'].nil? ? nil : @jobs.human.results.get(row['rid'].to_i),
-          receipt: row['tid'].nil? ? nil : @jobs.human.account.get(row['tid'].to_i)
+          receipt: row['tid'].nil? ? nil : @jobs.human.account.get(row['tid'].to_i),
+          ip: row['ip']
         }
       end
   end

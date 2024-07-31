@@ -36,7 +36,8 @@ class Baza::JobTest < Minitest::Test
   def test_starts
     human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
     token = human.tokens.add(fake_name)
-    id = token.start(fake_name, fake_name, 1, 0, 'n/a', ['hello, dude!', 'пока!']).id
+    ip = '192.168.1.1'
+    id = token.start(fake_name, fake_name, 1, 0, 'n/a', ['hello, dude!', 'пока!'], ip).id
     job = human.jobs.get(id)
     assert(job.id.positive?)
     assert_equal(id, job.id)
@@ -45,16 +46,18 @@ class Baza::JobTest < Minitest::Test
     assert(!job.agent.nil?)
     assert(!job.size.nil?)
     assert(!job.errors.nil?)
+    assert(!job.ip.nil?)
     assert_nil(job.result)
     assert_nil(job.receipt)
     assert_equal('hello, dude!', job.metas[0])
     assert_equal('пока!', job.metas[1])
+    assert_equal(ip, job.ip)
   end
 
   def test_cant_finish_twice
     human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
     token = human.tokens.add(fake_name)
-    job = token.start(fake_name, fake_name, 1, 0, 'n/a', [])
+    job = token.start(fake_name, fake_name, 1, 0, 'n/a', [], '192.168.1.1')
     assert(!job.finished?)
     job.finish!(fake_name, 'stdout', 0, 544, 111, 0)
     assert_raises do
@@ -65,7 +68,7 @@ class Baza::JobTest < Minitest::Test
   def test_finishes_and_saves_result
     human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
     token = human.tokens.add(fake_name)
-    job = token.start(fake_name, fake_name, 1, 0, 'n/a', [])
+    job = token.start(fake_name, fake_name, 1, 0, 'n/a', [], '192.168.1.1')
     assert_nil(job.result)
     job.finish!(fake_name, 'stdout', 0, 544, 111, 0)
     assert(!job.result.nil?)
@@ -78,7 +81,7 @@ class Baza::JobTest < Minitest::Test
   def test_expires_once
     human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
     token = human.tokens.add(fake_name)
-    job = token.start(fake_name, fake_name, 1, 0, 'n/a', [])
+    job = token.start(fake_name, fake_name, 1, 0, 'n/a', [], '192.168.1.1')
     assert(!job.expired?)
     job.expire!(Baza::Factbases.new('', ''))
     assert(job.expired?)
@@ -90,7 +93,7 @@ class Baza::JobTest < Minitest::Test
   def test_expires_job_without_result
     human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
     token = human.tokens.add(fake_name)
-    job = token.start(fake_name, fake_name, 1, 0, 'n/a', [])
+    job = token.start(fake_name, fake_name, 1, 0, 'n/a', [], '192.168.1.1')
     job.expire!(Baza::Factbases.new('', ''))
     assert(!job.result.stdout.nil?)
   end
@@ -101,7 +104,7 @@ class Baza::JobTest < Minitest::Test
     human.secrets.add(n, 'k', 'v')
     human.secrets.add(fake_name, 'k', 'v')
     token = human.tokens.add(fake_name)
-    job = token.start(n, fake_name, 1, 0, 'n/a', [])
+    job = token.start(n, fake_name, 1, 0, 'n/a', [], '192.168.1.1')
     assert_equal(1, job.secrets.size)
     assert_equal('k', job.secrets.first['key'])
   end
@@ -109,7 +112,7 @@ class Baza::JobTest < Minitest::Test
   def test_valve
     human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
     token = human.tokens.add(fake_name)
-    job = token.start(fake_name, fake_name, 1, 0, 'n/a', [])
+    job = token.start(fake_name, fake_name, 1, 0, 'n/a', [], '192.168.1.1')
     b = fake_name
     x = job.valve.enter(b, 'no reason') { 42 }
     assert_equal(42, x)

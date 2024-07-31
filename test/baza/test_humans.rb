@@ -45,7 +45,7 @@ class Baza::HumansTest < Minitest::Test
     humans = Baza::Humans.new(fake_pgsql, tbot: Baza::Tbot::Fake.new(Loog::NULL))
     human = humans.ensure(fake_name)
     token = human.tokens.add(fake_name)
-    job = token.start(fake_name, fake_name, 1, 0, 'n/a', [])
+    job = token.start(fake_name, fake_name, 1, 0, 'n/a', [], '192.168.1.1')
     job.finish!(fake_name, 'stdout', 0, 544, 111, 0)
     assert(!human.account.balance.positive?)
     humans.donate(amount: 100_000, days: 0)
@@ -67,11 +67,11 @@ class Baza::HumansTest < Minitest::Test
     humans = Baza::Humans.new(fake_pgsql, tbot: Baza::Tbot::Fake.new(Loog::NULL))
     human = humans.ensure(fake_name)
     token = human.tokens.add(fake_name)
-    token.start(fake_name, fake_name, 1, 0, 'x', []).finish!(fake_name, 'x', 0, 544, 111, 0)
+    token.start(fake_name, fake_name, 1, 0, 'x', [], '192.168.1.1').finish!(fake_name, 'x', 0, 544, 111, 0)
     assert(!human.account.balance.positive?)
     humans.donate(amount: 1000, days: 0)
     assert(human.account.balance.positive?)
-    token.start(fake_name, fake_name, 1, 0, 'x', []).finish!(fake_name, 'x', 0, 8440, 111, 0)
+    token.start(fake_name, fake_name, 1, 0, 'x', [], '192.168.1.1').finish!(fake_name, 'x', 0, 8440, 111, 0)
     assert(!human.account.balance.positive?)
     humans.donate(amount: 1000, days: 10)
     assert(!human.account.balance.positive?)
@@ -83,7 +83,7 @@ class Baza::HumansTest < Minitest::Test
     humans = Baza::Humans.new(fake_pgsql, tbot:)
     human = humans.ensure(fake_name)
     token = human.tokens.add(fake_name)
-    id = token.start(fake_name, fake_name, 1, 0, 'n/a', []).id
+    id = token.start(fake_name, fake_name, 1, 0, 'n/a', [], '192.168.1.1').id
     job = human.jobs.get(id)
     job.valve.enter('badge', 'why') { 42 }
     assert_equal(1, passed.size)

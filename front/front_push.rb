@@ -40,8 +40,9 @@ end
 # @param [File] file The file with a factbase
 # @param [String] name The name of the job
 # @param [Array<String>] metas List of metas to add
+# @param [String] ip the IP of a sender
 # @return [Baza::Job] The job just started
-def job_start(token, file, name, metas)
+def job_start(token, file, name, metas, ip)
   max_file_size = 10 * 1024 * 1024
   if file.size > max_file_size
     raise Baza::Urror, "The uploaded file exceeds the maximum allowed size of #{max_file_size} bytes"
@@ -59,7 +60,8 @@ def job_start(token, file, name, metas)
     File.size(file.path),
     Baza::Errors.new(file.path).count,
     user_agent,
-    (request.env['HTTP_X_ZEROCRACY_META'] || '').split(/\s+/).map { |v| Base64.decode64(v) } + metas
+    (request.env['HTTP_X_ZEROCRACY_META'] || '').split(/\s+/).map { |v| Base64.decode64(v) } + metas,
+    ip
   )
 end
 
@@ -99,7 +101,7 @@ post '/push' do
       save_uploaded_file(tfile, f, request.env['HTTP_CONTENT_ENCODING'])
       File.delete(tfile[:tempfile])
     end
-    job = job_start(token, f, name, ['push:post'])
+    job = job_start(token, f, name, ['push:post'], request.ip)
     settings.loog.info("New push arrived via HTTP POST, job ID is ##{job.id}")
     flash(iri.cut('/jobs'), "New job ##{job.id} started")
   end
@@ -120,7 +122,7 @@ put(%r{/push/([a-z0-9-]+)}) do
         request.body
       end
     File.binwrite(f, source.read)
-    job = job_start(token, f, name, ['push:put'])
+    job = job_start(token, f, name, ['push:put'], request.ip)
     settings.loog.info("New push arrived via HTTP PUT, job ID is #{job.id}")
     job.id.to_s
   end

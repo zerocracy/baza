@@ -37,7 +37,7 @@ class Baza::JobsTest < Minitest::Test
     human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
     token = human.tokens.add(fake_name)
     n = "#{fake_name}abc"
-    id = token.start(n, fake_name, 1, 0, 'n/a', %w[boom привет]).id
+    id = token.start(n, fake_name, 1, 0, 'n/a', %w[boom привет], '192.168.1.1').id
     job = human.jobs.get(id)
     assert_equal(id, job.id)
     assert(!job.name.nil?)
@@ -46,6 +46,7 @@ class Baza::JobsTest < Minitest::Test
     assert(!job.agent.nil?)
     assert(!job.size.nil?)
     assert(!job.errors.nil?)
+    assert(!job.ip.nil?)
     assert_equal('boom', job.metas.first)
   end
 
@@ -58,7 +59,7 @@ class Baza::JobsTest < Minitest::Test
   def test_start_and_finish
     human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
     token = human.tokens.add(fake_name)
-    job = token.start(fake_name, fake_name, 1, 0, 'n/a', [])
+    job = token.start(fake_name, fake_name, 1, 0, 'n/a', [], '192.168.1.1')
     assert(!human.jobs.get(job.id).finished?)
     job.finish!(fake_name, 'stdout', 0, 544, 111, 0)
     assert(human.jobs.get(job.id).finished?)
@@ -74,7 +75,7 @@ class Baza::JobsTest < Minitest::Test
   def test_iterates_with_offset
     human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
     token = human.tokens.add(fake_name)
-    token.start(fake_name, fake_name, 1, 0, 'n/a', [])
+    token.start(fake_name, fake_name, 1, 0, 'n/a', [], '192.168.1.1')
     found = 0
     human.jobs.each(offset: 1) do |_|
       found += 1
@@ -86,11 +87,11 @@ class Baza::JobsTest < Minitest::Test
     human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
     token = human.tokens.add(fake_name)
     name = "#{fake_name}-a"
-    first = token.start(name, fake_name, 1, 0, 'n/a', [])
+    first = token.start(name, fake_name, 1, 0, 'n/a', [], '192.168.1.1')
     first.finish!(fake_name, 'stdout', 0, 100, 1024, 0)
-    second = token.start("#{fake_name}-b", fake_name, 1, 0, 'n/a', [])
+    second = token.start("#{fake_name}-b", fake_name, 1, 0, 'n/a', [], '192.168.1.1')
     second.finish!(fake_name, 'stdout', 1, 100)
-    third = token.start(name, fake_name, 1, 0, 'n/a', [])
+    third = token.start(name, fake_name, 1, 0, 'n/a', [], '192.168.1.1')
     assert(human.jobs.name_exists?(name))
     assert_equal(third.id, human.jobs.recent(name).id)
   end
@@ -99,7 +100,7 @@ class Baza::JobsTest < Minitest::Test
     human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
     token = human.tokens.add(fake_name)
     name = "#{fake_name}-a"
-    job = token.start(name, fake_name, 1, 0, 'n/a', [])
+    job = token.start(name, fake_name, 1, 0, 'n/a', [], '192.168.1.1')
     assert(human.jobs.busy?(name))
     job.finish!(fake_name, 'stdout', 0, 544, 1, 0)
     assert(!human.jobs.busy?(name))
@@ -109,9 +110,9 @@ class Baza::JobsTest < Minitest::Test
     human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
     token = human.tokens.add(fake_name)
     name = fake_name
-    token.start(name, fake_name, 1, 0, 'n/a', [])
+    token.start(name, fake_name, 1, 0, 'n/a', [], '192.168.1.1')
     assert_raises do
-      token.start(name, fake_name, 1, 0, 'n/a', [])
+      token.start(name, fake_name, 1, 0, 'n/a', [], '192.168.1.1')
     end
   end
 
@@ -119,16 +120,16 @@ class Baza::JobsTest < Minitest::Test
     human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
     token = human.tokens.add(fake_name)
     name = fake_name
-    job = token.start(name, fake_name, 1, 0, 'n/a', [])
+    job = token.start(name, fake_name, 1, 0, 'n/a', [], '192.168.1.1')
     job.expire!(Baza::Factbases.new('', ''))
-    token.start(name, fake_name, 1, 0, 'n/a', [])
+    token.start(name, fake_name, 1, 0, 'n/a', [], '192.168.1.1')
   end
 
   def test_reverts_if_metas_are_broken
     human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
     token = human.tokens.add(fake_name)
     assert(human.jobs.empty?)
-    assert_raises { token.start(fake_name, fake_name, 1, 0, 'n/a', ["\u0000"]) }
+    assert_raises { token.start(fake_name, fake_name, 1, 0, 'n/a', ["\u0000"], '192.168.1.1') }
     assert(human.jobs.empty?)
   end
 end
