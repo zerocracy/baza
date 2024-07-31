@@ -60,7 +60,7 @@ class Baza::Job
       t.exec('UPDATE result SET stdout = \'The stdout has been removed\' WHERE job = $1', [@id])
     end
     fbs.delete(uri1)
-    fbs.delete(result.uri2) if finished?
+    fbs.delete(result.uri2) if finished? && !result.uri2.nil?
     @to_json = nil
   end
 
