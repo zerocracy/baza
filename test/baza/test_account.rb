@@ -46,7 +46,7 @@ class Baza::AccountTest < Minitest::Test
   def test_fetch_receipts
     human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
     token = human.tokens.add(fake_name)
-    job = token.start(fake_name, fake_name, 1, 0, 'n/a', [])
+    job = token.start(fake_name, fake_name, 1, 0, 'n/a', [], '192.168.1.1')
     job.finish!(fake_name, 'stdout', 0, 544, 111, 0)
     r = human.account.each.to_a.first
     assert(!r.id.nil?)

@@ -43,7 +43,7 @@ class Baza::GcTest < Minitest::Test
     token = human.tokens.add(fake_name)
     name = fake_name
     (0..4).each do |i|
-      j = token.start(name, fake_name, 1, 0, 'n/a', [])
+      j = token.start(name, fake_name, 1, 0, 'n/a', [], '192.168.1.1')
       j.finish!(fake_name, 'stdout', i, i, 433, 0)
     end
     assert_equal(0, humans.gc.ready_to_expire(1).to_a.size)
@@ -57,7 +57,7 @@ class Baza::GcTest < Minitest::Test
     end
     human = humans.ensure(fake_name)
     token = human.tokens.add(fake_name)
-    job = token.start(fake_name, fake_name, 1, 0, 'n/a', [])
+    job = token.start(fake_name, fake_name, 1, 0, 'n/a', [], '192.168.1.1')
     humans.pgsql.exec("UPDATE job SET taken = 'yes' WHERE id = $1", [job.id])
     assert_equal(1, humans.gc.stuck(0).to_a.size)
   end
@@ -68,7 +68,7 @@ class Baza::GcTest < Minitest::Test
     key = '00000000-0000-0000-0000-000000000000'
     humans.pgsql.exec('INSERT INTO token (human, name, text) VALUES ($1, $2, $3)', [human.id, fake_name, key])
     token = human.tokens.find(key)
-    token.start(fake_name, fake_name, 1, 0, 'n/a', [])
+    token.start(fake_name, fake_name, 1, 0, 'n/a', [], '192.168.1.1')
     humans.gc.tests(0) do |j|
       j.expire!(Baza::Factbases.new('', ''))
     end
