@@ -1,8 +1,8 @@
 # Insert or replace a PMP area/param value
 
-f = $fb.query('(and (eq what "pmp") (eq area "{{ area }}"))').each.to_a.first
+f = Fbe.fb.query('(and (eq what "pmp") (eq area "{{ area }}"))').each.to_a.first
 if f.nil?
-  f = $fb.insert
+  f = Fbe.fb.insert
   f.what = 'pmp'
   f.area = '{{ area }}'
   f.send('{{ param }}=', '{{ value }}'.to_i)
@@ -13,8 +13,8 @@ else
     before[p] = f[p]
   end
   before['{{ param }}'] = ['{{ value }}'.to_i]
-  $fb.query('(and (eq what "pmp") (eq area "{{ area }}"))').delete!
-  f = $fb.insert
+  Fbe.fb.query('(and (eq what "pmp") (eq area "{{ area }}"))').delete!
+  f = Fbe.fb.insert
   f.what = 'pmp'
   f.area = '{{ area }}'
   before.each do |k, vv|

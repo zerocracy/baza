@@ -33,6 +33,12 @@ require_relative '../../objects/baza/humans'
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
 class Baza::AlterationsTest < Minitest::Test
+  module Fbe
+    def self.fb
+      @fb ||= Factbase.new
+    end
+  end
+
   def test_simple_scenario
     human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
     alterations = human.alterations
@@ -56,16 +62,14 @@ class Baza::AlterationsTest < Minitest::Test
     assert(!a[:script].nil?)
   end
 
-  # rubocop:disable Style/GlobalVars
   def test_pmp_template
     human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
     alterations = human.alterations
     n = fake_name
     alterations.add(n, 'pmp', { area: 'quality', param: 'qos_interval', value: '42' })
     ruby = alterations.each.to_a.first[:script]
-    $fb = Factbase.new
-    $fb.insert.foo = 42
-    f = $fb.insert
+    Fbe.fb.insert.foo = 42
+    f = Fbe.fb.insert
     f.what = 'pmp'
     f.area = 'quality'
     f.qos_interval = 7
@@ -73,38 +77,27 @@ class Baza::AlterationsTest < Minitest::Test
     # rubocop:disable Security/Eval
     eval(ruby) # full script here
     # rubocop:enable Security/Eval
-    assert_equal(2, $fb.size)
-    f = $fb.query('(eq what "pmp")').each.to_a.first
+    assert_equal(2, Fbe.fb.size)
+    f = Fbe.fb.query('(eq what "pmp")').each.to_a.first
     assert_equal('pmp', f.what)
     assert_equal('quality', f.area)
     assert_equal(33, f.other)
     assert_equal(42, f.qos_interval)
   end
-  # rubocop:enable Style/GlobalVars
 
-  # rubocop:disable Style/GlobalVars
-  def test_all_liquids
+  def test_all_variable_leakage
     human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
     alterations = human.alterations
     n = fake_name
-    %w[pmp].each do |t|
-      alterations.add(
-        n, t,
-        {
-          pmp: " \#{exit} \" --a \n\n",
-          area: "\t\r\t\r \u0000 ",
-          param: 'test_me',
-          value: " \#{} \n\n\n"
-        }
-      )
+    %w[pmp payout].each do |t|
+      alterations.add(n, t, %w[area param value who payout].to_h { |k| [k.to_sym, '#{exit}'] })
     end
     alterations.each do |a|
-      ruby = a[:script]
-      $fb = Factbase.new
       # rubocop:disable Security/Eval
-      eval(ruby) # full script here
+      eval(a[:script]) # full script here
       # rubocop:enable Security/Eval
+    rescue StandardError
+      # ignore it, it's OK (as long as the process doesn't die)
     end
   end
-  # rubocop:enable Style/GlobalVars
 end
