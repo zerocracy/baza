@@ -27,5 +27,11 @@ SOFTWARE.
     <sql>
       ALTER TABLE job ADD COLUMN ip INET;
     </sql>
+    <sql>
+      UPDATE job SET ip = '0.0.0.0' WHERE ip IS NULL;
+    </sql>
+    <sql>
+      ALTER TABLE job ALTER COLUMN ip SET NOT NULL;
+    </sql>
   </changeSet>
 </databaseChangeLog>
