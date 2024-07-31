@@ -168,6 +168,9 @@ class Baza::FrontPushTest < Minitest::Test
     stdout = get("/stdout/#{rid}.txt").body
     assert_status(200)
     assert(stdout.include?('HOW ARE YOU, ДРУГ'), stdout)
+    code = get("/exit/#{rid}.txt").body
+    assert_status(200)
+    assert_equal('0', code)
     get("/pull/#{rid}.fb")
     assert_status(200)
     get("/inspect/#{id}.fb")

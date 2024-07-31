@@ -132,7 +132,7 @@ get(%r{/recent/([a-z0-9-]+).txt}) do
   the_human.jobs.recent(params['captures'].first).id.to_s
 end
 
-# Factbase artifact of this job exists?
+# A job with this name exists?
 get(%r{/exists/([a-z0-9-]+)}) do
   content_type('text/plain')
   the_human.jobs.name_exists?(params['captures'].first) ? 'yes' : 'no'
@@ -146,6 +146,16 @@ get(%r{/stdout/([0-9]+).txt}) do
   raise Baza::Urror, 'There is no result yes' if r.nil?
   content_type('text/plain')
   r.stdout
+end
+
+# Read the exit code of this job.
+get(%r{/exit/([0-9]+).txt}) do
+  the_human.locks.lock(params[:owner]) unless params[:owner].nil?
+  j = the_human.jobs.get(params['captures'].first.to_i)
+  r = j.result
+  raise Baza::Urror, 'There is no result yes' if r.nil?
+  content_type('text/plain')
+  r.exit.to_s
 end
 
 # The job is finished?
