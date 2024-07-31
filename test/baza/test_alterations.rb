@@ -81,4 +81,30 @@ class Baza::AlterationsTest < Minitest::Test
     assert_equal(42, f.qos_interval)
   end
   # rubocop:enable Style/GlobalVars
+
+  # rubocop:disable Style/GlobalVars
+  def test_all_liquids
+    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
+    alterations = human.alterations
+    n = fake_name
+    %w[pmp].each do |t|
+      alterations.add(
+        n, t,
+        {
+          pmp: " \#{exit} \" --a \n\n",
+          area: "\t\r\t\r \u0000 ",
+          param: 'test_me',
+          value: " \#{} \n\n\n"
+        }
+      )
+    end
+    alterations.each do |a|
+      ruby = a[:script]
+      $fb = Factbase.new
+      # rubocop:disable Security/Eval
+      eval(ruby) # full script here
+      # rubocop:enable Security/Eval
+    end
+  end
+  # rubocop:enable Style/GlobalVars
 end

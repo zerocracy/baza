@@ -89,7 +89,10 @@
         %td
           != ago(s[:created])
         %td
-          - unless s[:applied].nil?
+          - if s[:applied].nil?
+            %span.orange
+              Not yet
+          - else
             %a{href: iri.cut('/jobs').append(s[:applied])}
               = "##{s[:applied]}"
         %td
