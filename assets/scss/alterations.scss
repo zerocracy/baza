@@ -28,5 +28,13 @@
     display: inline;
     list-style: none;
     margin-right: 1em;
+
+    a:hover {
+      text-decoration: none;
+    }
+
+    &.ui-tabs-active {
+      border-bottom: 1px solid lightgray;
+    }
   }
 }
