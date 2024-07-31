@@ -27,6 +27,12 @@
         = job.token.name
 
   %p
+    IP:
+    %br
+    %span.ff
+      = job.ip
+
+  %p
     Created:
     %br
     != ago(job.created)
