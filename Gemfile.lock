@@ -217,7 +217,7 @@ GEM
       ast (~> 2.4.1)
       racc
     pg (1.5.7)
-    pgtk (0.9.5)
+    pgtk (0.9.6)
       backtrace (~> 0.3)
       loog (~> 0.2)
       pg (~> 1.1)
