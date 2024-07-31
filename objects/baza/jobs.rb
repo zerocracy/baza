@@ -154,6 +154,7 @@ class Baza::Jobs
     ).empty?
   end
 
+  # Get the most recent job (even if it's not finished yet or finished with error).
   def recent(name)
     rows = pgsql.exec(
       'SELECT job.id FROM job ' \

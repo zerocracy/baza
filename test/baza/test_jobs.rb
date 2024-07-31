@@ -86,12 +86,13 @@ class Baza::JobsTest < Minitest::Test
     human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
     token = human.tokens.add(fake_name)
     name = "#{fake_name}-a"
-    j = token.start(name, fake_name, 1, 0, 'n/a', [])
-    j.finish!(fake_name, 'stdout', 1, 544)
-    token.start("#{fake_name}-b", fake_name, 1, 0, 'n/a', [])
-    id2 = token.start(name, fake_name, 1, 0, 'n/a', []).id
+    first = token.start(name, fake_name, 1, 0, 'n/a', [])
+    first.finish!(fake_name, 'stdout', 0, 100, 1024, 0)
+    second = token.start("#{fake_name}-b", fake_name, 1, 0, 'n/a', [])
+    second.finish!(fake_name, 'stdout', 1, 100)
+    third = token.start(name, fake_name, 1, 0, 'n/a', [])
     assert(human.jobs.name_exists?(name))
-    assert_equal(id2, human.jobs.recent(name).id)
+    assert_equal(third.id, human.jobs.recent(name).id)
   end
 
   def test_is_job_busy
