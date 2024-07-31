@@ -119,14 +119,14 @@ class Baza::Pipeline
         unless errs.zero?
           @tbot.notify(
             job.jobs.human,
-            "⚠️ The job [##{job.id}](https://www.zerocracy.com/jobs/#{job.id}) (`#{job.name}`)",
+            "⚠️ The job [##{job.id}](//jobs/#{job.id}) (`#{job.name}`)",
             "finished with #{errs} error#{errs == 1 ? '' : 's'}.",
             'You better pay attention to it ASAP, before it gets too late.'
           )
         end
       else
         job.jobs.human.notify(
-          "💔 The job [##{job.id}](https://www.zerocracy.com/jobs/#{job.id}) has failed :(",
+          "💔 The job [##{job.id}](//jobs/#{job.id}) has failed :(",
           'This most probably means that there is an internal error on our server.',
           'Please, report this situation to us by ',
           '[submitting an issue](https://github.com/zerocracy/baza/issues) and',
@@ -205,7 +205,7 @@ class Baza::Pipeline
         job.jobs.human.notify(
           "🍊 We have successfully applied the alteration ##{a[:id]}",
           "to the job `#{job.name}` (##{job.id}),",
-          "you can see the log [here](https://www.zerocracy.com/jobs/#{job.id})."
+          "you can see the log [here](//jobs/#{job.id})."
         )
         alts.complete(a[:id], job.id)
       end

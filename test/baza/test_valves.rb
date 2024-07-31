@@ -89,7 +89,7 @@ class Baza::ValveTest < Minitest::Test
     valves.enter(n, b, 'you @jeff-lebowski is [awesome] in foo/foo#42') { 42 }
     post = loog.to_s
     [
-      'A new [valve](https://www.zerocracy.com/valves)',
+      'A new [valve](//valves)',
       '"you [@jeff-lebowski](https://github.com/jeff-lebowski) is \[awesome\]',
       'in [foo/foo#42](https://github.com/foo/foo/issues/42)',
       'The result is `42`'

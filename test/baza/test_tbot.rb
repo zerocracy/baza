@@ -42,6 +42,19 @@ class Baza::TbotTest < Minitest::Test
     tbot.notify(human, 'Hello, look: foo/foo#444')
   end
 
+  def test_posts_correctly
+    humans = Baza::Humans.new(fake_pgsql)
+    human = humans.ensure(fake_name)
+    tbot = Baza::Tbot.new(fake_pgsql, '')
+    tbot.auth(human, tbot.entry(55))
+    tbot.notify(human, 'Hello, **dude**! Read [this](//dash)!  ')
+    sent = tbot.tp.sent[1]
+    [
+      'Hello, **dude**!',
+      'Read [this](https://www.zerocracy.com/dash)'
+    ].each { |t| assert(sent.include?(t), sent) }
+  end
+
   def test_to_string
     tbot = Baza::Tbot::Spy.new(Baza::Tbot.new(fake_pgsql, ''), 0)
     assert(!tbot.to_s.nil?)

@@ -34,6 +34,8 @@ require 'securerandom'
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
 class Baza::Tbot
+  attr_reader :tp
+
   # Fake tbot.
   class Fake
     def initialize(loog = Loog::NULL)
@@ -125,7 +127,7 @@ class Baza::Tbot
         '😸 Hey, I know that you are',
         "[@#{row['github']}](https://github.com/#{row['github']})!",
         "In this chat (ID: `#{chat}`), you will get updates from me when something interesting",
-        'happens in your account at [zerocracy.com](https://www.zerocracy.com).'
+        'happens in [your account](//dash).'
       )
       @loog.debug("Greeted user @#{row['github']} in TG chat ##{chat}")
     end
@@ -135,9 +137,13 @@ class Baza::Tbot
   def notify(human, *lines)
     row = @pgsql.exec('SELECT id FROM telechat WHERE human = $1', [human.id])[0]
     return if row.nil?
-    chat = row['id'].to_i
-    msg = lines.join(' ')
-    @tp.post(chat, msg)
+    @tp.post(
+      row['id'].to_i,
+      lines
+        .join(' ')
+        .gsub(%r{\(//(.+)\)}, '(https://www.zerocracy.com/\1)')
+        .strip
+    )
   end
 
   # Authentical the user and return his chat ID in Telegram.
