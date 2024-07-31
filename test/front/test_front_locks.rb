@@ -44,4 +44,15 @@ class Baza::FrontLocksTest < Minitest::Test
     get('/locks')
     assert_status(200)
   end
+
+  def test_relock_failure
+    login(fake_name)
+    name = fake_name
+    get("/lock/#{name}?owner=first")
+    assert_status(302)
+    get("/lock/#{name}?owner=first")
+    assert_status(302)
+    get("/lock/#{name}?owner=second")
+    assert_status(409)
+  end
 end
