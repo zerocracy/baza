@@ -27,7 +27,7 @@ ruby '~>3.2'
 
 gem 'always', '~>0'
 gem 'aws-sdk-core', '3.201.3'
-gem 'aws-sdk-s3', '1.156.0'
+gem 'aws-sdk-s3', '1.157.0'
 gem 'backtrace', '~>0'
 gem 'capybara'
 gem 'concurrent-ruby', '1.3.3'
