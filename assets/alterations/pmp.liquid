@@ -1,4 +1,4 @@
-# Insert or replace a PMP area/param value
+# Set PMP {{ area }}.{{ param }} to {{ value }}
 
 f = Fbe.fb.query('(and (eq what "pmp") (eq area "{{ area }}"))').each.to_a.first
 if f.nil?
