@@ -10,7 +10,7 @@
   %fieldset
     %label
       Job name:
-    %input{ type: 'text', name: 'name', tabindex: 1, placeholder: "e.g. #{the_human.jobs.each.to_a.first.name}", size: 14, maxlength: 32, required: true, autofocus: true }
+    %input{ type: 'text', name: 'name', tabindex: 1, placeholder: "e.g. #{the_human.jobs.each.to_a.first.name}", size: 30, maxlength: 32, required: true, autofocus: true }
     %input{ id: 'hidden',  type: 'hidden', name: 'template', value: 'pmp' }
     %div#tabs
       %label
@@ -25,7 +25,9 @@
       %div#pmp
         %label
           PMP area:
-        %input{ type: 'text', name: 'area', tabindex: 2, placeholder: "e.g., scope or quality", size: 20 }
+        %select{ name: 'area', tabindex: 2 }
+          - %w[scope quality hr cost time].each do |a|
+            %option{ value: a }= a
         %label
           Parameter:
         %input{ type: 'text', name: 'param', tabindex: 3, size: 30, placeholder: "e.g., qos_interval" }
