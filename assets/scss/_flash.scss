@@ -20,56 +20,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-$debit: #006400;
-$credit: #b22222;
-$gray: #ddd;
+$white: #fff;
 
-$height: 7em;
-$legend-height: 1em;
-
-.bars {
-  border: .1em solid $gray;
-  display: inline-block;
-  margin: 0;
-  padding: .5em;
-  position: relative;
-
-  .week {
-    display: inline-block;
-    height: $height;
-    position: relative;
-    width: 3em;
-
-    .legend {
-      bottom: 0;
-      font-size: .8em;
-      height: $legend-height;
-      left: 0;
-      position: absolute;
-      text-align: center;
-      width: 100%;
-    }
-
-    .both {
-      height: $height - $legend-height;
-      position: relative;
-      width: 100%;
-    }
-
-    .credit {
-      background-color: $credit;
-      bottom: 0;
-      left: 0;
-      position: absolute;
-      width: 50%;
-    }
-
-    .debit {
-      background-color: $debit;
-      bottom: 0;
-      position: absolute;
-      right: 0;
-      width: 50%;
-    }
-  }
+.flash {
+  border-radius: .25em;
+  color: $white;
+  padding: .1em .5em;
+  width: 100%;
 }
+

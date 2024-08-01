@@ -38,6 +38,13 @@ class Baza::FrontPushTest < Minitest::Test
     assert(last_response.body.include?('.logo'))
   end
 
+  def test_renders_other_css
+    %w[main front account alterations empty job].each do |n|
+      get("/css/#{n}.css")
+      assert_status(200)
+    end
+  end
+
   def test_renders_terms
     get('/terms')
     assert_status(200)

@@ -20,9 +20,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
+@import 'flash';
+
+$gray: #808080;
+
 .logo {
-  height: 128px;
-  width: 128px;
+  height: 8em;
+  width: 8em;
 }
 
 section {
@@ -39,6 +43,11 @@ article {
   padding-bottom: .5em;
   padding-top: .5em;
   text-align: center;
+
+  em {
+    border-bottom: .1em solid $gray;
+    font-style: normal;
+  }
 }
 
 .outer {
