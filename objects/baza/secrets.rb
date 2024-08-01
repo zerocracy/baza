@@ -29,7 +29,7 @@
 class Baza::Secrets
   attr_reader :human
 
-  SHAREABLE = ['ZEROCRAT_TOKEN'].freeze
+  SHAREABLE = %w[ZEROCRAT_TOKEN ANTHROPIC_KEY].freeze
 
   def initialize(human)
     @human = human

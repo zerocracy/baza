@@ -90,11 +90,12 @@
           - else
             %a{href: iri.cut('/jobs').over(name: s[:name])}<
               = s[:name]
-        %td.ff{onclick: "$(this).find('span').hide(); $(this).find('pre').show();"}
-          %span{style: 'cursor: pointer;', title: 'Click here to see the full Ruby script'}<>
+        %td.ff
+          %span
             = s[:script].split("\n")[0]
-          %pre{style: 'display: none;'}<>
-            = s[:script]
+            %i.fa-regular.fa-eye{onclick: "$(this).parent().parent().find('span').hide(); $(this).parent().parent().find('pre').show();", title: 'Click here to see the full Ruby script', style: 'cursor: pointer;'}
+          %pre{style: 'border-left: .2em solid lightgray; margin-bottom: 0; display: none;'}<>
+            = s[:script].strip
         %td
           != ago(s[:created])
         %td
