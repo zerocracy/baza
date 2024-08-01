@@ -144,7 +144,7 @@ class Baza::PipelineTest < Minitest::Test
         fbs.load(job.result.uri2, f.path)
         fb = Factbase.new
         fb.import(File.binread(f))
-        assert_equal(3, fb.size)
+        assert_equal(2, fb.size)
         { foo: 42, bar: 7 }.each do |k, v|
           assert_equal(v, fb.query("(exists #{k})").each.to_a.first[k.to_s].first)
         end

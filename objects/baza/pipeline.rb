@@ -192,19 +192,20 @@ class Baza::Pipeline
   end
 
   def alterations(job, input, stdout)
-    Dir.mktmpdir do |dir|
-      alts = job.jobs.human.alterations
-      alts.each(pending: true) do |a|
-        next if a[:name] != job.name
-        FileUtils.mkdir_p(File.join(dir, "alternation-#{a[:id]}"))
+    alts = job.jobs.human.alterations
+    idx = 0
+    alts.each(pending: true) do |a|
+      next if a[:name] != job.name
+      Dir.mktmpdir do |dir|
+        FileUtils.mkdir_p(File.join(dir, "alternation-#{a[:id]}-#{idx}"))
         File.write(
-          File.join(dir, "alternation-#{a[:id]}/alternation-#{a[:id]}.rb"),
+          File.join(dir, "alternation-#{a[:id]}-#{idx}/alternation-#{a[:id]}-#{idx}.rb"),
           [
             ENV['RACK_ENV'] == 'test' ? '' : 'require "fbe/fb"',
             a[:script]
           ].join("\n")
         )
-        stdout.info("Applying alteration ##{a[:id]}...")
+        stdout.info("Applying alteration ##{a[:id]} (idx:#{idx})...")
         stdout.debug("Ruby script of the alteration ##{a[:id]} is this one:\n#{a[:script]}")
         Judges::Update.new(stdout).run(
           {
@@ -217,14 +218,15 @@ class Baza::Pipeline
           },
           [dir, input]
         )
-        job.jobs.human.notify(
-          "🍊 We have successfully applied the alteration ##{a[:id]}",
-          "to the job `#{job.name}` (##{job.id}),",
-          "you can see the log [here](//jobs/#{job.id})."
-        )
-        alts.complete(a[:id], job.id)
-        stdout.info("The alteration ##{a[:id]} was applied successfully\n")
       end
+      job.jobs.human.notify(
+        "🍊 We have successfully applied the alteration ##{a[:id]}",
+        "to the job `#{job.name}` (##{job.id}),",
+        "you can see the log [here](//jobs/#{job.id})."
+      )
+      alts.complete(a[:id], job.id)
+      stdout.info("The alteration ##{a[:id]} was applied successfully\n")
+      idx += 1
     end
   end
 
