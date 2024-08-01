@@ -121,7 +121,7 @@
                 - if j.result.exit.zero?
                   %i.fa-regular.fa-note-sticky
                 - else
-                  %i.fa-regular.fa-note-sticky.bad
+                  %i.fa-solid.fa-note-sticky.bad
             %td
               - if j.result.exit.zero?
                 %a.ico{href: iri.cut('/jobs').append(j.id).append('output.html'), title: "Click here to see the HTML of the output Factbase file (#{bytes(j.result.size)})"}
