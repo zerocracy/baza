@@ -29,8 +29,9 @@
   %p
     IP:
     %br
-    %span.ff
-      = job.ip
+    %a{href: Iri.new('https://iplocation.io/ip').append(job.ip)}
+      %span.ff
+        = job.ip
 
   %p
     Created:
