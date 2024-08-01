@@ -27,8 +27,6 @@
       %col{style: 'width: 5em;'}
       -# Token
       %col{style: 'width: 20em;'}
-      -# IP
-      %col{style: 'width: 9em;'}
       -# Started
       %col{style: 'width: 9em;'}
       -# Code
@@ -51,8 +49,6 @@
           Lock
         %th
           Token
-        %th
-          IP
         %th
           Started
         %th
@@ -104,8 +100,6 @@
                 %i.fa-solid.fa-link
         %td.ff
           = j.token.name
-        %td.ff
-          = j.ip
         %td
           != ago(j.created)
         - if j.finished?
