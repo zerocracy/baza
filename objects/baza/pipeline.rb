@@ -204,6 +204,8 @@ class Baza::Pipeline
             a[:script]
           ].join("\n")
         )
+        stdout.info("Applying alteration ##{a[:id]}...")
+        stdout.debug("Ruby script of the alteration ##{a[:id]} is this one:\n#{a[:script]}")
         Judges::Update.new(stdout).run(
           {
             'quiet' => false,
@@ -221,6 +223,7 @@ class Baza::Pipeline
           "you can see the log [here](//jobs/#{job.id})."
         )
         alts.complete(a[:id], job.id)
+        stdout.info("The alteration ##{a[:id]} was applied successfully\n")
       end
     end
   end
