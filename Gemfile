@@ -29,7 +29,6 @@ gem 'always', '~>0'
 gem 'aws-sdk-core', '3.201.3'
 gem 'aws-sdk-s3', '1.156.0'
 gem 'backtrace', '~>0'
-gem 'capybara'
 gem 'concurrent-ruby', '1.3.3'
 gem 'factbase', '~>0'
 gem 'faraday'
@@ -38,7 +37,6 @@ gem 'haml', '6.3.0'
 gem 'iri', '~>0'
 gem 'j', path: 'j' if File.exist?('j')
 gem 'judges', '~>0'
-gem 'liquid', '5.5.1'
 gem 'loog', '~>0'
 gem 'minitest', '5.24.1', require: false
 gem 'minitest-reporters', '1.7.1', require: false
@@ -65,6 +63,5 @@ gem 'tago', '~>0'
 gem 'telepost', '~>0'
 gem 'truncate', '0.1.0'
 gem 'veils', '~>0'
-gem 'wait_for', '~>0', require: false
 gem 'xcop', '~>0'
 gem 'zache', '~>0'
