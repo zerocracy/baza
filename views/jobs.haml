@@ -109,6 +109,7 @@
             - else
               %span.bad
                 = format('%03d', j.result.exit)
+              %i.fa-solid.fa-triangle-exclamation.bad{title: 'The job finished with an error (see the log)'}
           %td.right.ff
             = msec(j.result.msec)
           - if j.expired?
