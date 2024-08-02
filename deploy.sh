@@ -37,6 +37,7 @@ mkdir j
 cp -R /code/z/j/j.gemspec j
 cp -R /code/z/j/judges j
 cp -R /code/z/j/lib j
+cp -R /code/z/j/assets j
 find j -name '*.yml' -exec rm {} \;
 sed -i -s 's|j/||g' .gitignore
 git add j
