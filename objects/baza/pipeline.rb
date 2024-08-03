@@ -124,10 +124,17 @@ class Baza::Pipeline
       if code.zero?
         errs = Baza::Errors.new(input).count
         unless errs.zero?
+          previous = 0
+          job.jobs.each do |j|
+            break unless j.finished?
+            break if j.errors.zero?
+            previous += 1
+          end
           @tbot.notify(
             job.jobs.human,
             "⚠️ The job [##{job.id}](//jobs/#{job.id}) (`#{job.name}`)",
             "finished with #{errs} error#{errs == 1 ? '' : 's'}.",
+            "There were #{previous.zero? ? 'no' : previous} jobs with errors before this one.",
             'You better pay attention to it ASAP, before it gets too late.'
           )
         end
