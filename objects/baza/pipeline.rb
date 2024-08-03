@@ -26,6 +26,7 @@ require 'always'
 require 'loog'
 require 'loog/tee'
 require 'backtrace'
+require 'logger'
 require 'judges/commands/update'
 require_relative 'tbot'
 require_relative 'humans'
@@ -100,7 +101,9 @@ class Baza::Pipeline
   def process_it(job)
     @loog.info("Job ##{job.id} starts: #{job.uri1}")
     Dir.mktmpdir do |dir|
-      stdout = Loog::Buffer.new
+      stdout = Loog::Buffer.new(
+        level: job.jobs.human.extend(Baza::Human::Admin).admin? ? Logger::DEBUG : Logger::INFO
+      )
       log = Loog::Tee.new(stdout, @loog)
       input = File.join(dir, 'input.fb')
       @fbs.load(job.uri1, input)
@@ -190,7 +193,7 @@ class Baza::Pipeline
         'summary' => true,
         'max-cycles' => 3, # it will stop on the first cycle if no changes are made
         'log' => false,
-        'verbose' => job.jobs.human.extend(Baza::Human::Admin).admin?,
+        'verbose' => true,
         'option' => options(job).map { |k, v| "#{k}=#{v}" },
         'lib' => File.join(@home, 'lib')
       },
