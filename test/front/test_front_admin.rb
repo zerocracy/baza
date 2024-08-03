@@ -45,7 +45,7 @@ class Baza::FrontAdminTest < Minitest::Test
 
   def test_force_login
     login('yegor256')
-    get('/force-login?u=tester')
+    post('/relogin?u=tester')
     assert_status(302)
   end
 end

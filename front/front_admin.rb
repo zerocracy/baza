@@ -28,7 +28,16 @@ def admin_only
   raise Baza::Urror, 'You are not allowed to see this' unless the_human.admin?
 end
 
-get '/force-login' do
+get '/relogin' do
+  admin_only
+  assemble(
+    :relogin,
+    :default,
+    title: '/relogin'
+  )
+end
+
+post '/relogin' do
   admin_only
   login = params[:u]
   cookies[:auth] = GLogin::Cookie::Open.new(

@@ -1,0 +1,6 @@
+%form{ method: 'post', action: iri.cut('/relogin') }
+  %fieldset
+    %label
+      Re-login as someone else:
+    %input{ type: 'text', name: 'u', tabindex: 1, size: 30, placeholder: "e.g., yegor256" }
+    %input{ type: 'submit', tabindex: 2, value: 'Do it!' }
