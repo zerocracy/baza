@@ -44,7 +44,7 @@ class Baza::VerifiedTest < Minitest::Test
     id = token.start(fake_name, fake_name, 1, 0, 'n/a', ["workflow_url:#{url}"], ip).id
     job = human.jobs.get(id)
     stub_request(:get, 'https://api.github.com/repos/foo/foo/actions/runs/555').to_return(
-      body: { path: '.github/workflows/a.yml@master' }.to_json, headers: {
+      body: { path: '.github/workflows/a.yml@master', head_branch: 'master' }.to_json, headers: {
         'content-type': 'application/json'
       }
     )

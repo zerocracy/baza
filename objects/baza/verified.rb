@@ -50,7 +50,8 @@ class Baza::Verified
       rescue Octokit::NotFound => e
         raise "Workflow URL #{url} not found: #{e.message}"
       end
-    path, branch = json[:path].split('@')
+    path = json[:path].split('@')[0]
+    branch = json[:head_branch]
     content =
       begin
         octo.contents(repo, path:, query: { ref: branch })[:content]
