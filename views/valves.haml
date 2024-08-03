@@ -19,6 +19,8 @@
       %col{style: 'width: 3em;'}
       -# Name
       %col{style: 'width: 14em;'}
+      -# Job
+      %col{style: 'width: 4em;'}
       -# Badge
       %col{style: 'width: 18em;'}
       -# Why
@@ -35,6 +37,8 @@
           = '#'
         %th
           Name
+        %th
+          Job
         %th
           Badge
         %th
@@ -62,6 +66,10 @@
               = v[:name]
         %td.ff
           = v[:badge]
+        %td
+          - unless v[:job].nil?
+            %a{href: iri.cut('/jobs').append(v[:job])}
+              = "##{v[:job]}"
         %td
           = v[:why]
         %td.ff

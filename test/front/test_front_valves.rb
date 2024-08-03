@@ -45,7 +45,7 @@ class Baza::FrontValvesTest < Minitest::Test
     get('/valves')
     assert_status(200)
     human = app.humans.ensure(uname)
-    human.valves.enter('foo', 'boom', 'why') do
+    human.valves.enter('foo', 'boom', 'why', nil) do
       # nothing
     end
     get('/valves')

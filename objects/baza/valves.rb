@@ -66,6 +66,7 @@ class Baza::Valves
         created: Time.parse(row['created']),
         name: row['name'],
         badge: row['badge'],
+        job: row['job']&.to_i,
         result: dec(row['result']),
         why: row['why'],
         jobs: row['jobs'].to_i
@@ -74,7 +75,7 @@ class Baza::Valves
     end
   end
 
-  def enter(name, badge, why)
+  def enter(name, badge, why, job)
     raise 'A block is required by the enter()' unless block_given?
     raise Baza::Urror, 'The name cannot be nil' if name.nil?
     raise Baza::Urror, 'The name cannot be empty' if name.empty?
@@ -90,12 +91,12 @@ class Baza::Valves
           pgsql.transaction do |t|
             row = t.exec(
               [
-                'INSERT INTO valve (human, name, badge, owner, why) ',
-                'VALUES ($1, $2, $3, 1, $4) ',
+                'INSERT INTO valve (human, name, badge, owner, why, job) ',
+                'VALUES ($1, $2, $3, 1, $4, $5) ',
                 'ON CONFLICT(human, name, badge) DO UPDATE SET owner = valve.owner + 1 ',
                 'RETURNING id, owner, result'
               ],
-              [@human.id, name.downcase, badge, why]
+              [@human.id, name.downcase, badge, why, job]
             )[0]
             unless row['result'].nil?
               t.exec('ROLLBACK')
@@ -120,7 +121,9 @@ class Baza::Valves
       ).first
       human.notify(
         "🍒 A new [valve](//valves) ##{row['id']}",
-        "just entered for the `#{name}` job: #{escape(why.inspect)}.",
+        "just entered for the `#{name}` job",
+        job.nil? ? '' : " ([##{job}](//jobs/#{job}))",
+        ": #{escape(why.inspect)}.",
         "The result is `#{r.is_a?(Integer) ? r : r.class}`."
       )
       r

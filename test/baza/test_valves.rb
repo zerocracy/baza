@@ -37,7 +37,7 @@ class Baza::ValveTest < Minitest::Test
     valves = human.valves
     n = fake_name
     b = fake_name
-    x = valves.enter(n, b, 'why') { 42 }
+    x = valves.enter(n, b, 'why', nil) { 42 }
     assert_equal(42, x)
     assert(!valves.empty?)
     v = valves.each.to_a.first
@@ -48,7 +48,7 @@ class Baza::ValveTest < Minitest::Test
     assert_equal(42, v[:result])
     assert_equal('why', v[:why])
     assert_equal(0, v[:jobs])
-    y = valves.enter(n, b, 'why') { 55 }
+    y = valves.enter(n, b, 'why', nil) { 55 }
     assert_equal(42, y)
     valves.remove(v[:id])
     assert(valves.each.to_a.empty?)
@@ -59,8 +59,8 @@ class Baza::ValveTest < Minitest::Test
     valves = human.valves
     n = fake_name
     b = fake_name
-    assert_raises { valves.enter(n, b, 'why') { raise 'intentional' } }
-    assert_equal(42, valves.enter(n, b, 'why') { 42 })
+    assert_raises { valves.enter(n, b, 'why', nil) { raise 'intentional' } }
+    assert_equal(42, valves.enter(n, b, 'why', nil) { 42 })
   end
 
   def test_with_two_threads
@@ -70,14 +70,14 @@ class Baza::ValveTest < Minitest::Test
     b = fake_name
     entered = false
     Thread.new do
-      valves.enter(n, b, 'no reason') do
+      valves.enter(n, b, 'no reason', nil) do
         entered = true
         sleep 0.05
         42
       end
     end
     loop { break if entered }
-    assert_equal(42, valves.enter(n, b, 'why') { 55 })
+    assert_equal(42, valves.enter(n, b, 'why', nil) { 55 })
   end
 
   def test_escapes_for_tbot
@@ -86,7 +86,7 @@ class Baza::ValveTest < Minitest::Test
     valves = human.valves
     n = fake_name
     b = fake_name
-    valves.enter(n, b, 'you @jeff-lebowski is [awesome] in foo/foo#42') { 42 }
+    valves.enter(n, b, 'you @jeff-lebowski is [awesome] in foo/foo#42', nil) { 42 }
     post = loog.to_s
     [
       'A new [valve](//valves)',
@@ -94,5 +94,16 @@ class Baza::ValveTest < Minitest::Test
       'in [foo/foo#42](https://github.com/foo/foo/issues/42)',
       'The result is `42`'
     ].each { |t| assert(post.include?(t), post) }
+  end
+
+  def test_link_with_job
+    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
+    token = human.tokens.add(fake_name)
+    ip = '192.168.1.1'
+    id = token.start(fake_name, fake_name, 1, 0, 'n/a', ['hello, dude!', 'пока!'], ip).id
+    job = human.jobs.get(id)
+    valves = human.valves
+    valves.enter(fake_name, fake_name, 'hi', job.id) { 42 }
+    assert_equal(job.id, valves.each.to_a.first[:job])
   end
 end

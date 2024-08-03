@@ -91,7 +91,7 @@ class Baza::ValvesInteractionTest < Minitest::Test
     end
     n = fake_name
     b = fake_name
-    valves.enter(n, b, 'why') { 42 }
+    valves.enter(n, b, 'why', nil) { 42 }
     v = valves.each.to_a.first
     visit "/valves/#{v[:id]}/remove"
     assert valves.empty?
