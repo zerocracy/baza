@@ -46,11 +46,11 @@
         Not yet
     - elsif job.verified.start_with?('FAKE: ')
       %span.bad
-        job.verified
+        = job.verified
     - elsif job.verified.start_with?('OK: ')
       %i.fa-solid.fa-certificate.good
       %span.good
-        job.verified
+        = job.verified
 
   %p
     User-Agent:
