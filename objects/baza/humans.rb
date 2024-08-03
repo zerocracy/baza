@@ -22,10 +22,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+require 'others'
 require_relative 'tbot'
 require_relative 'human'
 require_relative 'urror'
 require_relative 'zents'
+require_relative 'verified'
 
 # All humans.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -131,5 +133,21 @@ class Baza::Humans
       )
     end
     rows.count
+  end
+
+  # Verify one job.
+  def verify_one_job
+    rows = @pgsql.exec(
+      [
+        "UPDATE job SET verified = 'START: #{Time.now.utc.iso8601}' WHERE id = ",
+        '(SELECT id FROM job WHERE verified IS NULL LIMIT 1)',
+        'RETURNING id'
+      ]
+    )
+    return if rows.empty?
+    job = job_by_id(rows.first['id'].to_i)
+    verdict = Baza::Verified.new(job).verdict
+    job.verify!(verdict)
+    yield job, verdict
   end
 end

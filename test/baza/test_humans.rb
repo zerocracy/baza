@@ -88,4 +88,16 @@ class Baza::HumansTest < Minitest::Test
     job.valve.enter('badge', 'why') { 42 }
     assert_equal(1, passed.size)
   end
+
+  def test_verify_one_job
+    passed = []
+    tbot = others { |*args| passed << args }
+    humans = Baza::Humans.new(fake_pgsql, tbot:)
+    human = humans.ensure(fake_name)
+    token = human.tokens.add(fake_name)
+    token.start(fake_name, fake_name, 1, 0, 'n/a', [], '192.168.1.1').id
+    humans.verify_one_job do |_job, verdict|
+      assert(verdict.start_with?('FAKE: '))
+    end
+  end
 end

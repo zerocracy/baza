@@ -43,6 +43,10 @@ class Baza::Job
     @jobs.pgsql
   end
 
+  def verify!(text)
+    @jobs.pgsql.exec('UPDATE job SET verified = $2 WHERE id = $1', [@id, text])
+  end
+
   # Delete the data of the job, that take space.
   def expire!(fbs)
     raise Baza::Urror, 'The job is already expired' if expired?
@@ -176,6 +180,10 @@ class Baza::Job
     to_json[:size]
   end
 
+  def verified
+    to_json[:verified]
+  end
+
   def metas
     to_json[:metas]
   end
@@ -225,6 +233,7 @@ class Baza::Job
           size: row['size'].to_i,
           metas: (row['metas'] || '').split(sep),
           errors: row['errors'].to_i,
+          verified: row['verified'],
           agent: row['agent'],
           finished: !row['rid'].nil?,
           expired: !row['expired'].nil?,

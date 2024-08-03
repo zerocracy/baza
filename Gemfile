@@ -42,6 +42,7 @@ gem 'liquid', '5.5.1'
 gem 'loog', '~>0'
 gem 'minitest', '5.24.1', require: false
 gem 'minitest-reporters', '1.7.1', require: false
+gem 'octokit', '>0'
 gem 'pgtk', '~>0'
 gem 'rack', '3.1.7'
 gem 'rack-ssl', '1.4.1'
@@ -66,5 +67,6 @@ gem 'telepost', '~>0'
 gem 'truncate', '0.1.0'
 gem 'veils', '~>0'
 gem 'wait_for', '~>0', require: false
+gem 'webmock', '3.23.1', require: false
 gem 'xcop', '~>0'
 gem 'zache', '~>0'

@@ -81,6 +81,9 @@
               %li
                 %span{title: 'Telegram bot status'}
                   != footer_status('tbot')
+              %li
+                %span{title: 'Verification of jobs'}
+                  != footer_status('verify')
             %ul
               != menu('/alterations', 'Alterations')
               != menu('/push', 'Push')

@@ -73,7 +73,7 @@ class Baza::Jobs
     return to_enum(__method__, name:, offset:) unless block_given?
     sep = ' -===&62la(o$3s===- '
     sql =
-      'SELECT job.id, job.created, job.name, job.uri1, job.expired, job.size, job.errors, job.agent, ' \
+      'SELECT job.id, job.created, job.name, job.uri1, job.expired, job.size, job.errors, job.agent, job.verified, ' \
       'token.id AS tid, token.name AS token_name, ' \
       'lock.id AS lid, lock.created AS when_locked, lock.owner AS lock_owner, ' \
       'result.id AS rid, result.uri2, result.stdout, result.exit, result.msec, ' \
@@ -105,6 +105,7 @@ class Baza::Jobs
         taken: row['taken'],
         errors: row['errors'].to_i,
         metas: (row['metas'] || '').split(sep),
+        verified: row['verified'],
         when_locked: row['when_locked'].nil? ? nil : Time.parse(row['when_locked']),
         lock_owner: row['lock_owner'],
         finished?: !row['rid'].nil?,

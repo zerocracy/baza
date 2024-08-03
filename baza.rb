@@ -184,6 +184,16 @@ configure do
   end
 end
 
+# Verify jobs:
+configure do
+  set :verify, Always.new(1)
+  settings.verify.start(60) do
+    settings.humans.verify_one_job do |j, verdict|
+      settings.loog.debug("Job ##{j.id} was verified as #{verdict.inspect}")
+    end
+  end
+end
+
 # Donations:
 configure do
   set :donations, Always.new(1)
