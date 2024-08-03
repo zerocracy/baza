@@ -23,6 +23,7 @@
 # SOFTWARE.
 
 require 'octokit'
+require 'base64'
 
 # A verified status of a job.
 #
@@ -56,6 +57,7 @@ class Baza::Verified
       rescue Octokit::NotFound => e
         raise "Workflow content not found at #{repo}/#{path}@#{branch}: #{e.message}"
       end
+    content = Base64.decode64(content)
     yaml = YAML.load(content)
     steps = yaml.dig('jobs', 'zerocracy', 'steps')
     return 'FAKE: Can\'t find "jobs/zerocracy/steps"' if steps.nil?
