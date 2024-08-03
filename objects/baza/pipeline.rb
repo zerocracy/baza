@@ -100,9 +100,11 @@ class Baza::Pipeline
   def process_it(job)
     @loog.info("Job ##{job.id} starts: #{job.uri1}")
     Dir.mktmpdir do |dir|
+      stdout = Loog::Buffer.new
+      log = Loog::Tee.new(stdout, @loog)
       input = File.join(dir, 'input.fb')
       @fbs.load(job.uri1, input)
-      @loog.debug("Factbase loaded from #{job.uri1} into #{input}")
+      log.debug("Factbase loaded from #{job.uri1} into #{input}")
       unless Baza::Errors.new(input).count.zero?
         @tbot.notify(
           job.jobs.human,
@@ -111,12 +113,11 @@ class Baza::Pipeline
         )
       end
       start = Time.now
-      stdout = Loog::Buffer.new
-      code = run(job, input, Loog::Tee.new(stdout, @loog))
+      code = run(job, input, log)
       uuid = nil
       if code.zero?
         uuid = @fbs.save(input)
-        @loog.debug("Factbase saved to #{uuid} from #{input}")
+        log.debug("Factbase saved to #{uuid} from #{input}")
       end
       job.finish!(
         uuid,
