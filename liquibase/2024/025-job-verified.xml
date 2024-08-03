@@ -26,6 +26,7 @@ SOFTWARE.
   <changeSet id="025" author="yegor256">
     <sql>
       ALTER TABLE job ADD COLUMN verified TEXT;
+      UPDATE job SET verified = 'FAKE: did not verify';
       CREATE INDEX idx_job_verified ON job(verified);
     </sql>
   </changeSet>
