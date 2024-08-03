@@ -79,6 +79,8 @@
         %td.ff
           %a{href: iri.over(name: j.name)}<
             = j.name
+          - if !j.verified.nil? && j.verified.start_with?('OK: ')
+            %i.fa-solid.fa-certificate.good{title: 'You are doing everything by the rules, your job is verified, thanks!'}
           - if_meta(j, 'vitals_url') do |url|
             %a.ico{href: url, title: "Click here to open the published vitals report"}
               %i.fa-solid.fa-list
