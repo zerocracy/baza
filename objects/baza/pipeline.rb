@@ -102,6 +102,7 @@ class Baza::Pipeline
     Dir.mktmpdir do |dir|
       input = File.join(dir, 'input.fb')
       @fbs.load(job.uri1, input)
+      @loog.debug("Factbase loaded from #{job.uri1} into #{input}")
       unless Baza::Errors.new(input).count.zero?
         @tbot.notify(
           job.jobs.human,
@@ -112,7 +113,11 @@ class Baza::Pipeline
       start = Time.now
       stdout = Loog::Buffer.new
       code = run(job, input, Loog::Tee.new(stdout, @loog))
-      uuid = code.zero? ? @fbs.save(input) : nil
+      uuid = nil
+      if code.zero?
+        uuid = @fbs.save(input)
+        @loog.debug("Factbase saved to #{uuid} from #{input}")
+      end
       job.finish!(
         uuid,
         escaped(job, stdout.to_s),
