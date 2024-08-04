@@ -30,6 +30,7 @@ require_relative '../test__helper'
 require_relative '../../objects/baza'
 require_relative '../../objects/baza/pipeline'
 require_relative '../../objects/baza/factbases'
+require_relative '../../objects/baza/trails'
 
 # Test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -52,7 +53,7 @@ class Baza::PipelineTest < Minitest::Test
         end
         '
       )
-      pipeline = Baza::Pipeline.new(home, humans, fbs, loog)
+      pipeline = Baza::Pipeline.new(home, humans, fbs, loog, Baza::Trails.new(fake_pgsql))
       pipeline.start(0.1)
       human = humans.ensure(fake_name)
       admin = humans.ensure('yegor256')
@@ -91,7 +92,7 @@ class Baza::PipelineTest < Minitest::Test
     humans = Baza::Humans.new(fake_pgsql)
     fbs = Baza::Factbases.new('', '', loog: Loog::NULL)
     Dir.mktmpdir do |home|
-      pipeline = Baza::Pipeline.new(home, humans, fbs, Loog::NULL)
+      pipeline = Baza::Pipeline.new(home, humans, fbs, Loog::NULL, Baza::Trails.new(fake_pgsql))
       pipeline.start(0.1)
       human = humans.ensure(fake_name)
       token = human.tokens.add(fake_name)
@@ -106,7 +107,7 @@ class Baza::PipelineTest < Minitest::Test
     humans = Baza::Humans.new(fake_pgsql)
     fbs = Baza::Factbases.new('', '', loog: Loog::NULL)
     Dir.mktmpdir do |home|
-      pipeline = Baza::Pipeline.new(home, humans, fbs, Loog::NULL)
+      pipeline = Baza::Pipeline.new(home, humans, fbs, Loog::NULL, Baza::Trails.new(fake_pgsql))
       pipeline.start(0.1)
       human = humans.ensure(fake_name)
       token = human.tokens.add(fake_name)
@@ -128,7 +129,7 @@ class Baza::PipelineTest < Minitest::Test
       FileUtils.mkdir_p(File.join(home, 'lib'))
       FileUtils.mkdir_p(File.join(home, 'judges/foo'))
       File.write(File.join(home, 'judges/foo/foo.rb'), 'x = 42')
-      pipeline = Baza::Pipeline.new(home, humans, fbs, Loog::NULL)
+      pipeline = Baza::Pipeline.new(home, humans, fbs, Loog::NULL, Baza::Trails.new(fake_pgsql))
       pipeline.start(0.1)
       human = humans.ensure(fake_name)
       n = fake_name
@@ -150,6 +151,35 @@ class Baza::PipelineTest < Minitest::Test
         end
       end
     end
+  end
+
+  def test_with_trails
+    humans = Baza::Humans.new(fake_pgsql)
+    trails = Baza::Trails.new(fake_pgsql)
+    fbs = Baza::Factbases.new('', '', loog: Loog::NULL)
+    Dir.mktmpdir do |home|
+      FileUtils.mkdir_p(File.join(home, 'lib'))
+      FileUtils.mkdir_p(File.join(home, 'judges/foo'))
+      File.write(
+        File.join(home, 'judges/foo/foo.rb'),
+        '
+        require "fileutils"
+        p $options.trails_dir
+        FileUtils.mkdir(File.join($options.trails_dir, "bar"))
+        File.write(File.join($options.trails_dir, "bar/bar.json"), "{}")
+        '
+      )
+      pipeline = Baza::Pipeline.new(home, humans, fbs, Loog::NULL, trails)
+      pipeline.start(0.1)
+      human = humans.ensure(fake_name)
+      token = human.tokens.add(fake_name)
+      job = token.start(fake_name, uri(fbs), 1, 0, 'n/a', [], '192.168.1.1')
+      wait_for(2) { job.jobs.get(job.id).finished? }
+      pipeline.stop
+      job = job.jobs.get(job.id)
+      assert_equal(0, job.result.exit, job.result.stdout)
+    end
+    assert(!trails.each.to_a.find { |t| t[:name] == 'bar.json' }.nil?)
   end
 
   private

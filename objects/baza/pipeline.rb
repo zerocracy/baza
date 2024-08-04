@@ -27,6 +27,7 @@ require 'loog'
 require 'loog/tee'
 require 'backtrace'
 require 'logger'
+require 'json'
 require 'judges/commands/update'
 require_relative 'tbot'
 require_relative 'humans'
@@ -42,12 +43,13 @@ require_relative '../../version'
 class Baza::Pipeline
   attr_reader :pgsql
 
-  def initialize(home, humans, fbs, loog, tbot: Baza::Tbot::Fake.new)
+  def initialize(home, humans, fbs, loog, trails, tbot: Baza::Tbot::Fake.new)
     @home = home
     @humans = humans
     @fbs = fbs
     @loog = loog
     @tbot = tbot
+    @trails = trails
     @always = Always.new(1).on_error { |e, _| @loog.error(Backtrace.new(e)) }
   end
 
@@ -187,18 +189,27 @@ class Baza::Pipeline
     # rubocop:disable Style/GlobalVars
     $valve = job.valve
     # rubocop:enable Style/GlobalVars
-    Judges::Update.new(stdout).run(
-      {
-        'quiet' => true,
-        'summary' => true,
-        'max-cycles' => 3, # it will stop on the first cycle if no changes are made
-        'log' => false,
-        'verbose' => true,
-        'option' => options(job).map { |k, v| "#{k}=#{v}" },
-        'lib' => File.join(@home, 'lib')
-      },
-      [File.join(@home, 'judges'), input]
-    )
+    Dir.mktmpdir do |tdir|
+      Judges::Update.new(stdout).run(
+        {
+          'quiet' => true,
+          'summary' => true,
+          'max-cycles' => 3, # it will stop on the first cycle if no changes are made
+          'log' => false,
+          'verbose' => true,
+          'option' => options(job).merge({ 'TRAILS_DIR' => tdir }).map { |k, v| "#{k}=#{v}" },
+          'lib' => File.join(@home, 'lib')
+        },
+        [File.join(@home, 'judges'), input]
+      )
+      Dir[File.join(tdir, '*/*')].each do |f|
+        data = File.read(f)
+        judge = File.basename(File.dirname(f))
+        n = File.basename(f)
+        stdout.debug("The trail '#{n}' (#{data.size} bytes) was left by the '#{judge}' judge")
+        @trails.add(job, judge, n, JSON.parse(data))
+      end
+    end
     0
   # rubocop:disable Lint/RescueException
   rescue Exception => e

@@ -45,6 +45,7 @@ class Baza::Trails
       v = {
         id: row['id'].to_i,
         created: Time.parse(row['created']),
+        judge: row['judge'],
         name: row['name'],
         json: JSON.parse(row['json']),
         job: row['job']&.to_i
@@ -53,12 +54,10 @@ class Baza::Trails
     end
   end
 
-  def add(job, name, json)
-    raise Baza::Urror, 'The name cannot be nil' if name.nil?
-    raise Baza::Urror, 'The name cannot be empty' if name.empty?
+  def add(job, judge, name, json)
     @pgsql.exec(
-      'INSERT INTO trail (job, name, json) VALUES ($1, $2, $3) RETURNING id',
-      [job.id, name.downcase, json]
+      'INSERT INTO trail (job, judge, name, json) VALUES ($1, $2, $3, $4) RETURNING id',
+      [job.id, judge.downcase, name.downcase, json.to_s]
     ).first['id'].to_i
   end
 end

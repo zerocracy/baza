@@ -28,6 +28,7 @@ SOFTWARE.
       CREATE TABLE trail (
         id SERIAL PRIMARY KEY,
         job INT NOT NULL REFERENCES job(id),
+        judge VARCHAR(128) NOT NULL,
         name VARCHAR(128) NOT NULL,
         json JSONB NOT NULL,
         created TIMESTAMPTZ DEFAULT now() NOT NULL,
