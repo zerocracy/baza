@@ -141,7 +141,7 @@ class Baza::Tbot
       row['id'].to_i,
       lines
         .join(' ')
-        .gsub(%r{\(//(.+)\)}, '(https://www.zerocracy.com/\1)')
+        .gsub(%r{\(//([^)]+)\)}, '(https://www.zerocracy.com/\1)')
         .strip
     )
   end

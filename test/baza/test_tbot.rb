@@ -47,11 +47,11 @@ class Baza::TbotTest < Minitest::Test
     human = humans.ensure(fake_name)
     tbot = Baza::Tbot.new(fake_pgsql, '')
     tbot.auth(human, tbot.entry(55))
-    tbot.notify(human, 'Hello, **dude**! Read [this](//dash)!  ')
+    tbot.notify(human, 'Hello, **dude**! Read ([this](//dash))!  ')
     sent = tbot.tp.sent[1]
     [
       'Hello, **dude**!',
-      'Read [this](https://www.zerocracy.com/dash)'
+      'Read ([this](https://www.zerocracy.com/dash))'
     ].each { |t| assert(sent.include?(t), sent) }
   end
 

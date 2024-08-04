@@ -122,7 +122,7 @@ class Baza::Valves
       human.notify(
         "🍒 A new [valve](//valves) ##{row['id']}",
         "just entered for the `#{name}` job",
-        job.nil? ? '' : " ([##{job}](//jobs/#{job}))",
+        job.nil? ? '' : "([##{job}](//jobs/#{job}))",
         ": #{escape(why.inspect)}.",
         "The result is `#{r.is_a?(Integer) ? r : r.class}`."
       )
