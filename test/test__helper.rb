@@ -76,6 +76,14 @@ class Minitest::Test
     "jeff#{SecureRandom.hex(8)}"
   end
 
+  def fake_job
+    Baza::Humans.new(fake_pgsql)
+      .ensure(fake_name)
+      .tokens
+      .add(fake_name)
+      .start(fake_name, fake_name, 1, 0, 'n/a', [], '127.0.0.1')
+  end
+
   def login(name = fake_name)
     enc = GLogin::Cookie::Open.new(
       { 'login' => name, 'id' => app.humans.ensure(name).id.to_s },

@@ -69,24 +69,10 @@
               = request.ip
           - if the_human.admin?
             %ul{style: 'font-family: monospace;'}
-              %li
-                %span{title: 'Pipeline status'}
-                  != footer_status('pipeline')
-              %li
-                %span{title: 'GC status'}
-                  != footer_status('gc')
-              %li
-                %span{title: 'Donations status'}
-                  != footer_status('donations')
-              %li
-                %span{title: 'Telegram bot status'}
-                  != footer_status('tbot')
-              %li
-                %span{title: 'Verification of jobs'}
-                  != footer_status('verify')
+              - %w[pipeline gc donations tbot verify].each do |s|
+                %li
+                  %span
+                    != footer_status(s)
             %ul
-              != menu('/alterations', 'Alterations')
-              != menu('/push', 'Push')
-              != menu('/sql', 'SQL')
-              != menu('/gift', 'Gift')
-              != menu('/relogin', 'Relogin')
+              - %w[Alterations Push SQL Gift Trails Relogin].each do |c|
+                != menu("/#{c.downcase}", c)

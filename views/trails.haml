@@ -1,0 +1,51 @@
+%p
+  These are all trails:
+%table
+  %colgroup
+    -# ID
+    %col{style: 'width: 3em;'}
+    -# Job
+    %col{style: 'width: 4em;'}
+    -# Name
+    %col{style: 'width: 14em;'}
+    -# JSON
+    %col
+    -# Created
+    %col{style: 'width: 10em;'}
+  %thead
+    %tr
+      %th
+        = '#'
+      %th
+        Job
+      %th
+        Name
+      %th
+        JSON
+      %th
+        Created
+  %tbody
+  - total = 0
+  - max = 10
+  - trails.each(offset: offset) do |t|
+    - total += 1
+    - break if total > max
+    %tr
+      %td.ff
+        = "##{t[:id]}"
+      %td
+        %a{href: iri.cut('/jobs').append(t[:job])}
+          = "##{t[:job]}"
+      %td.ff
+        = t[:name]
+      %td.ff
+        = t[:json]
+      %td
+        != ago(t[:created])
+%p
+  - unless offset.zero?
+    %a{href: iri.del(:offset)}
+      Back
+  - if total > max
+    %a{href: iri.over(offset: offset + max)}
+      More

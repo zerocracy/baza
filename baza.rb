@@ -143,6 +143,12 @@ configure do
   set :humans, Baza::Humans.new(settings.pgsql, tbot: settings.tbot)
 end
 
+# Trails:
+configure do
+  require_relative 'objects/baza/trails'
+  set :trails, Baza::Trails.new(settings.pgsql)
+end
+
 # Factbases:
 configure do
   require_relative 'objects/baza/factbases'
@@ -230,6 +236,7 @@ require_relative 'front/front_jobs'
 require_relative 'front/front_account'
 require_relative 'front/front_valves'
 require_relative 'front/front_locks'
+require_relative 'front/front_trails'
 require_relative 'front/front_telegram'
 require_relative 'front/front_secrets'
 require_relative 'front/front_alterations'
