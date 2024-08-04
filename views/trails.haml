@@ -6,6 +6,8 @@
     %col{style: 'width: 3em;'}
     -# Job
     %col{style: 'width: 4em;'}
+    -# Judge
+    %col{style: 'width: 14em;'}
     -# Name
     %col{style: 'width: 14em;'}
     -# JSON
@@ -18,6 +20,8 @@
         = '#'
       %th
         Job
+      %th
+        Judge
       %th
         Name
       %th
@@ -36,6 +40,8 @@
       %td
         %a{href: iri.cut('/jobs').append(t[:job])}
           = "##{t[:job]}"
+      %td.ff
+        = t[:judge]
       %td.ff
         = t[:name]
       %td.ff
