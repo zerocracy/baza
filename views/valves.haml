@@ -64,12 +64,12 @@
           - else
             %a{href: iri.cut('/jobs').over(name: v[:name])}<
               = v[:name]
-        %td.ff
-          = v[:badge]
         %td
           - unless v[:job].nil?
             %a{href: iri.cut('/jobs').append(v[:job])}
               = "##{v[:job]}"
+        %td.ff
+          = v[:badge]
         %td
           = v[:why]
         %td.ff
