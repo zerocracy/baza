@@ -91,6 +91,6 @@ class Baza::VerifiedTest < Minitest::Test
     id = token.start(fake_name, fake_name, 1, 0, 'n/a', ['workflow_url:hey'], ip).id
     job = human.jobs.get(id)
     v = Baza::Verified.new(job).verdict
-    assert_equal('FAKE: Wrong URL at workflow_url: "hey"', v)
+    assert_equal('FAKE: Wrong URL at workflow_url: "hey".', v)
   end
 end

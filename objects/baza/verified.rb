@@ -41,14 +41,14 @@ class Baza::Verified
     return 'FAKE: There is no workflow_url meta' if meta.nil?
     url = meta.split(':', 2)[1]
     mtc = url.match(%r{^https://github\.com/(?<org>[^/]+)/(?<repo>[^/]+)/actions/runs/(?<id>[0-9]+)$})
-    return "FAKE: Wrong URL at workflow_url: #{url.inspect}" unless mtc
+    return "FAKE: Wrong URL at workflow_url: #{url.inspect}." unless mtc
     octo = Octokit::Client.new
     repo = "#{mtc[:org]}/#{mtc[:repo]}"
     json =
       begin
         octo.workflow_run(repo, mtc[:id].to_i)
       rescue Octokit::NotFound => e
-        raise "Workflow URL #{url} not found: #{e.message}"
+        raise "Workflow URL #{url} not found: #{e.message}."
       end
     path = json[:path].split('@')[0]
     branch = json[:head_branch]
@@ -56,17 +56,17 @@ class Baza::Verified
       begin
         octo.contents(repo, path:, query: { ref: branch })[:content]
       rescue Octokit::NotFound => e
-        raise "Workflow content not found at #{repo}/#{path}@#{branch}: #{e.message}"
+        raise "Workflow content not found at #{repo}/#{path}@#{branch}: #{e.message}."
       end
     content = Base64.decode64(content)
     yaml = YAML.load(content)
     steps = yaml.dig('jobs', 'zerocracy', 'steps')
-    return 'FAKE: Can\'t find "jobs/zerocracy/steps"' if steps.nil?
-    return 'FAKE: No array in jobs/zerocracy/steps' unless steps.is_a?(Array)
-    return 'FAKE: No steps in jobs/zerocracy/steps' if steps[0].nil?
+    return 'FAKE: Can\'t find "jobs/zerocracy/steps".' if steps.nil?
+    return 'FAKE: No array in "jobs/zerocracy/steps".' unless steps.is_a?(Array)
+    return 'FAKE: No steps in "jobs/zerocracy/steps".' if steps[0].nil?
     n = steps[0]['uses']
-    return 'FAKE: No "uses" in the first step' if n.nil?
-    return "FAKE: Wrong 'uses' #{n.inspect} in the first step" unless n.start_with?('zerocracy/judges-action@')
+    return 'FAKE: No "uses" in the first step.' if n.nil?
+    return "FAKE: Wrong 'uses' #{n.inspect} in the first step." unless n.start_with?('zerocracy/judges-action@')
     "OK: All good in https://github.com/#{repo}/blob/#{branch}/#{path}"
   rescue StandardError => e
     "FAKE: #{e.message}"
