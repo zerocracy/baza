@@ -34,9 +34,7 @@ require_relative '../../objects/baza/factbases'
 # License:: MIT
 class Baza::ResultTest < Minitest::Test
   def test_keeps_data
-    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
-    token = human.tokens.add(fake_name)
-    job = token.start(fake_name, fake_name, 1, 0, 'n/a', [], '192.168.1.1')
+    job = fake_job
     Tempfile.open do |f|
       File.write(f.path, 'booom')
       job.finish!(Baza::Factbases.new('', '').save(f.path), 'Hello, world!', 1, 42)
