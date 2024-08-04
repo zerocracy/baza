@@ -97,12 +97,8 @@ class Baza::ValveTest < Minitest::Test
   end
 
   def test_link_with_job
-    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
-    token = human.tokens.add(fake_name)
-    ip = '192.168.1.1'
-    id = token.start(fake_name, fake_name, 1, 0, 'n/a', ['hello, dude!', 'пока!'], ip).id
-    job = human.jobs.get(id)
-    valves = human.valves
+    job = fake_job
+    valves = job.jobs.human.valves
     valves.enter(fake_name, fake_name, 'hi', job.id) { 42 }
     assert_equal(job.id, valves.each.to_a.first[:job])
   end
