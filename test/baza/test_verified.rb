@@ -50,7 +50,15 @@ class Baza::VerifiedTest < Minitest::Test
     )
     stub_request(:get, 'https://api.github.com/repos/foo/foo/contents/.github/workflows/a.yml?ref=master').to_return(
       body: {
-        content: Base64.encode64("jobs:\n  zerocracy:\n    steps:\n      - uses: zerocracy/judges-action@0.0.39\n")
+        content: Base64.encode64(
+          "
+          jobs:
+            zerocracy:
+              steps:
+                - uses: actions/checkout@v4
+                - uses: zerocracy/judges-action@0.0.39
+          "
+        )
       }.to_json,
       headers: { 'content-type': 'application/json' }
     )

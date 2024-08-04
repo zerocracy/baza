@@ -63,10 +63,10 @@ class Baza::Verified
     steps = yaml.dig('jobs', 'zerocracy', 'steps')
     return 'FAKE: Can\'t find "jobs/zerocracy/steps".' if steps.nil?
     return 'FAKE: No array in "jobs/zerocracy/steps".' unless steps.is_a?(Array)
-    return 'FAKE: No steps in "jobs/zerocracy/steps".' if steps[0].nil?
-    n = steps[0]['uses']
-    return 'FAKE: No "uses" in the first step.' if n.nil?
-    return "FAKE: Wrong 'uses' #{n.inspect} in the first step." unless n.start_with?('zerocracy/judges-action@')
+    return 'FAKE: Not enough steps in "jobs/zerocracy/steps".' if steps[1].nil?
+    n = steps[1]['uses']
+    return 'FAKE: No "uses" in the second step.' if n.nil?
+    return "FAKE: Wrong 'uses' #{n.inspect} in the second step." unless n.start_with?('zerocracy/judges-action@')
     "OK: All good in https://github.com/#{repo}/blob/#{branch}/#{path}"
   rescue StandardError => e
     "FAKE: #{e.message}"
