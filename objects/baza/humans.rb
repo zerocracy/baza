@@ -100,7 +100,8 @@ class Baza::Humans
       'SELECT human FROM job JOIN token ON token.id = job.token WHERE job.id = $1',
       [id]
     )
-    get(rows[0]['human'].to_i).jobs.get(id)
+    raise Baza::Urror, "Job ##{id} not found" if rows.empty?
+    get(rows.first['human'].to_i).jobs.get(id)
   end
 
   # Donate to all accounts that are not funded enough (and eligible for donation).

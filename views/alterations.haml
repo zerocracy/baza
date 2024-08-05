@@ -98,7 +98,7 @@
             - if the_human.admin?
               %i.fa-regular.fa-eye{onclick: "$(this).parent().parent().find('span').hide(); $(this).parent().parent().find('pre').show();", title: 'Click here to see the full Ruby script', style: 'cursor: pointer;'}
           - if the_human.admin?
-            %pre{style: 'border-left: .2em solid lightgray; margin-bottom: 0; display: none;'}<>
+            %pre{style: 'display: none;'}<>
               = s[:script].strip
         %td
           != ago(s[:created])

@@ -22,6 +22,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+require 'json'
+
 get '/trails' do
   admin_only
   assemble(
@@ -31,4 +33,13 @@ get '/trails' do
     trails: settings.trails,
     offset: (params[:offset] || '0').to_i
   )
+end
+
+post('/trails/add') do
+  admin_only
+  job = settings.humans.job_by_id(params[:job].to_i)
+  judge = params[:judge]
+  n = params[:name]
+  settings.trails.add(job, judge, n, JSON.parse(params[:json]))
+  flash(iri.cut('/trails'), "The trail '#{n}' just added for the job ##{job.id}")
 end

@@ -26,6 +26,7 @@ $white: #fff;
 $gray: #808080;
 $good: #006400;
 $bad: #8b0000;
+$lightgray: #d3d3d3;
 
 section {
   margin: 0;
@@ -78,4 +79,9 @@ footer {
   &:hover {
     text-decoration: none;
   }
+}
+
+td pre {
+  border-left: .2em solid $lightgray;
+  margin-bottom: 0;
 }
