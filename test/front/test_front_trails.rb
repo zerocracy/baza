@@ -37,7 +37,7 @@ class Baza::FrontTrailsTest < Minitest::Test
     get('/trails')
     assert_status(200)
     trails = Baza::Trails.new(fake_pgsql)
-    trails.add(fake_job, 'bar', 'foo', '{"hello": 42}')
+    trails.add(fake_job, 'bar', 'foo', { hello: 42 })
     get('/trails')
     assert_status(200)
   end

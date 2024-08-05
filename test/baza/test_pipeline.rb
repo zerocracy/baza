@@ -164,9 +164,10 @@ class Baza::PipelineTest < Minitest::Test
         File.join(home, 'judges/foo/foo.rb'),
         '
         require "fileutils"
+        require "json"
         p $options.trails_dir
         FileUtils.mkdir(File.join($options.trails_dir, "bar"))
-        File.write(File.join($options.trails_dir, "bar/bar.json"), "{}")
+        File.write(File.join($options.trails_dir, "bar/bar.json"), {"hello":42}.to_json)
         '
       )
       pipeline = Baza::Pipeline.new(home, humans, fbs, Loog::NULL, trails)

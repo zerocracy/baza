@@ -23,6 +23,7 @@
 # SOFTWARE.
 
 require 'minitest/autorun'
+require 'json'
 require_relative '../test__helper'
 require_relative '../../objects/baza'
 require_relative '../../objects/baza/trails'
@@ -34,7 +35,13 @@ require_relative '../../objects/baza/trails'
 class Baza::TrailsTest < Minitest::Test
   def test_simple_scenario
     trails = Baza::Trails.new(fake_pgsql)
-    trails.add(fake_job, 'bar', 'foo', '{"hello": 42}')
+    trails.add(fake_job, 'bar', 'foo', JSON.parse('{"hello": 42}'))
+    assert(!trails.each.to_a.empty?)
+  end
+
+  def test_through_json
+    trails = Baza::Trails.new(fake_pgsql)
+    trails.add(fake_job, 'bar', 'foo', { hey: 44, f: { a: 'test' } })
     assert(!trails.each.to_a.empty?)
   end
 end

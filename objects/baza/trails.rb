@@ -54,10 +54,16 @@ class Baza::Trails
     end
   end
 
+  # Add new trail.
+  # @param [Baza::Job] job The job this trail is related to
+  # @param [String] judge The name of the judge
+  # @param [String] name The name of the trail left, e.g. "1.json"
+  # @param [Hash] json The JSON object after parsing
   def add(job, judge, name, json)
+    raise Baza::Urror, 'The JSON must be a hash' unless json.is_a?(Hash)
     @pgsql.exec(
       'INSERT INTO trail (job, judge, name, json) VALUES ($1, $2, $3, $4) RETURNING id',
-      [job.id, judge.downcase, name.downcase, json.to_s]
+      [job.id, judge.downcase, name.downcase, JSON.pretty_generate(json)]
     ).first['id'].to_i
   end
 end

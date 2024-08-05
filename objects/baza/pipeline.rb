@@ -153,7 +153,10 @@ class Baza::Pipeline
         job.jobs.human.notify(
           "💔 The job [##{job.id}](//jobs/#{job.id}) has failed :(",
           'This most probably means that there is an internal error on our server.',
-          'Please, report this situation to us by ',
+          if job.jobs.human.locks.locked?(job.name)
+            'No further jobs will be processed until you "expire" this one on the server.'
+          end,
+          'Please, report this situation to us as soon as you can, by',
           '[submitting an issue](https://github.com/zerocracy/baza/issues) and',
           "mentioning this job ID: `#{job.id}`."
         )
