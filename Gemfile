@@ -53,7 +53,7 @@ gem 'rerun', '0.14.0', require: false
 gem 'retries', '~>0'
 gem 'rspec-rails', '6.1.3', require: false
 gem 'rubocop', '1.65.1', require: false
-gem 'rubocop-rspec', '3.0.3', require: false
+gem 'rubocop-rspec', '3.0.4', require: false
 gem 'sass-embedded', '1.77.8'
 gem 'scss_lint', '0.60.0', require: false
 gem 'sentry-raven', '3.1.2'
