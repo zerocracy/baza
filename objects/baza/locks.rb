@@ -78,6 +78,7 @@ class Baza::Locks
 
   def lock(name, owner)
     raise Baza::Urror, 'The balance is negative' unless @human.account.balance.positive? || ENV['RACK_ENV'] == 'test'
+    raise Busy, "The #{name} job is busy" if @human.jobs.busy?(name)
     begin
       pgsql.exec(
         [
