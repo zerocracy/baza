@@ -27,7 +27,7 @@ name: codecov
       - master
 jobs:
   codecov:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - run: |
@@ -37,7 +37,7 @@ jobs:
           sudo ln -s /usr/lib/postgresql/14/bin/postgres /bin/postgres
       - uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.2
+          ruby-version: 3.3
       - run: bundle update
       - run: bundle exec rake
       - uses: codecov/codecov-action@v4
