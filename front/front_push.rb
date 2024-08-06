@@ -108,11 +108,11 @@ post '/push' do
 end
 
 put(%r{/push/([a-z0-9-]+)}) do
-  the_human.jobs.lock(params[:owner]) unless params[:owner].nil?
+  name = params['captures'].first
+  the_human.locks.lock(name, params[:owner]) unless params[:owner].nil?
   text = request.env['HTTP_X_ZEROCRACY_TOKEN']
   raise Baza::Urror, 'The "X-Zerocracy-Token" HTTP header with a token is missing' if text.nil?
   token = settings.humans.his_token(text)
-  name = params['captures'].first
   Tempfile.open do |f|
     request.body.rewind
     source =
