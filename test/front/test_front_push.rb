@@ -279,6 +279,37 @@ class Baza::FrontPushTest < Minitest::Test
     assert_equal(ip, job.ip)
   end
 
+  def test_call_lock_via_put
+    uname = fake_name
+    login('yegor256')
+    post('/gift', "human=#{uname}&zents=9999&summary=no")
+    login(uname)
+    get('/tokens')
+    post('/tokens/add', 'name=foo')
+    id = last_response.headers['X-Zerocracy-TokenId'].to_i
+    get("/tokens/#{id}.json")
+    token = JSON.parse(last_response.body)['text']
+    fb = Factbase.new
+    (0..100).each do |i|
+      fb.insert.foo = "booom \x01\x02\x03 #{i}"
+    end
+    header('X-Zerocracy-Token', token)
+    header('User-Agent', 'something')
+    header('Content-Type', 'application/zip')
+    header(
+      'X-Zerocracy-Meta',
+      [
+        Base64.encode64('vitals_url:https://zerocracy.com'),
+        Base64.encode64('how are you, друг?')
+      ].join('  ')
+    )
+    name = fake_name
+    put("/push/#{name}?owner=baza", fb.export)
+    assert_status(200)
+    human = app.humans.find(uname)
+    assert(human.locks.locked?(name))
+  end
+
   private
 
   def make_valid_token
