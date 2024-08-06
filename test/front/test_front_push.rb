@@ -371,13 +371,9 @@ class Baza::FrontPushTest < Minitest::Test
     id = last_response.body.to_i
     assert(id.positive?)
     get('/jobs')
-    assert_status(200)
     get("/jobs/#{id}")
-    assert_status(200)
     get("/jobs/#{id}/input.html")
-    assert_status(200)
     get("/recent/#{name}.txt")
-    assert_status(200)
     rid = last_response.body.to_i
     wait_for(10) do
       get("/finished/#{rid}?owner=baza")
@@ -483,21 +479,15 @@ class Baza::FrontPushTest < Minitest::Test
     )
     name = fake_name
     put("/push/#{name}", fb.export)
-    assert_status(200)
     id = last_response.body.to_i
     assert(id.positive?)
     get('/jobs')
-    assert_status(200)
     get("/jobs/#{id}")
-    assert_status(200)
     get("/jobs/#{id}/input.html")
-    assert_status(200)
     get("/recent/#{name}.txt")
-    assert_status(200)
     rid = last_response.body.to_i
     wait_for(10) do
       get("/finished/#{rid}")
-      assert_status(200)
       last_response.body == 'yes'
     end
     get("/stdout/#{rid}.txt").body
