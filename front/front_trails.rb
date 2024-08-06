@@ -31,7 +31,8 @@ get '/trails' do
     :default,
     title: '/trails',
     trails: settings.trails,
-    offset: (params[:offset] || '0').to_i
+    offset: (params[:offset] || '0').to_i,
+    css: 'trails'
   )
 end
 
