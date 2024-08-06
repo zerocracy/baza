@@ -36,16 +36,16 @@ jobs:
     name: rake
     strategy:
       matrix:
-        os: [ubuntu-22.04]
-        ruby: [3.2]
+        os: [ubuntu-24.04]
+        ruby: [3.3]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - run: |
           sudo apt-get update
-          sudo apt-get install -y postgresql-14
-          sudo ln -s /usr/lib/postgresql/14/bin/initdb /bin/initdb
-          sudo ln -s /usr/lib/postgresql/14/bin/postgres /bin/postgres
+          sudo apt-get install -y postgresql-16
+          sudo ln -s /usr/lib/postgresql/16/bin/initdb /bin/initdb
+          sudo ln -s /usr/lib/postgresql/16/bin/postgres /bin/postgres
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
