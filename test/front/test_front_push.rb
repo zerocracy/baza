@@ -279,6 +279,224 @@ class Baza::FrontPushTest < Minitest::Test
     assert_equal(ip, job.ip)
   end
 
+  def test_call_lock_via_put
+    uname = fake_name
+    login('yegor256')
+    post('/gift', "human=#{uname}&zents=9999&summary=no")
+    login(uname)
+    get('/tokens')
+    post('/tokens/add', 'name=foo')
+    id = last_response.headers['X-Zerocracy-TokenId'].to_i
+    get("/tokens/#{id}.json")
+    token = JSON.parse(last_response.body)['text']
+    fb = Factbase.new
+    (0..100).each do |i|
+      fb.insert.foo = "booom \x01\x02\x03 #{i}"
+    end
+    header('X-Zerocracy-Token', token)
+    header('User-Agent', 'something')
+    header('Content-Type', 'application/zip')
+    header(
+      'X-Zerocracy-Meta',
+      [
+        Base64.encode64('vitals_url:https://zerocracy.com'),
+        Base64.encode64('how are you, друг?')
+      ].join('  ')
+    )
+    name = fake_name
+    put("/push/#{name}?owner=baza", fb.export)
+    assert_status(200)
+    human = app.humans.find(uname)
+    assert(human.locks.locked?(name))
+  end
+
+  def test_call_lock_via_stdout
+    uname = fake_name
+    login('yegor256')
+    post('/gift', "human=#{uname}&zents=9999&summary=no")
+    login(uname)
+    get('/tokens')
+    post('/tokens/add', 'name=foo')
+    id = last_response.headers['X-Zerocracy-TokenId'].to_i
+    get("/tokens/#{id}.json")
+    token = JSON.parse(last_response.body)['text']
+    fb = Factbase.new
+    (0..100).each do |i|
+      fb.insert.foo = "booom \x01\x02\x03 #{i}"
+    end
+    header('X-Zerocracy-Token', token)
+    header('User-Agent', 'something')
+    header(
+      'X-Zerocracy-Meta',
+      [
+        Base64.encode64('vitals_url:https://zerocracy.com'),
+        Base64.encode64('how are you, друг?')
+      ].join('  ')
+    )
+    name = fake_name
+    put("/push/#{name}", fb.export)
+    assert_status(200)
+    rid = last_response.body.to_i
+    get("/stdout/#{rid}.txt?owner=baza").body
+    human = app.humans.find(uname)
+    assert(human.locks.locked?(name))
+  end
+
+  def test_call_lock_via_finished
+    uname = fake_name
+    login('yegor256')
+    post('/gift', "human=#{uname}&zents=9999&summary=no")
+    login(uname)
+    get('/tokens')
+    post('/tokens/add', 'name=foo')
+    id = last_response.headers['X-Zerocracy-TokenId'].to_i
+    get("/tokens/#{id}.json")
+    token = JSON.parse(last_response.body)['text']
+    fb = Factbase.new
+    (0..100).each do |i|
+      fb.insert.foo = "booom \x01\x02\x03 #{i}"
+    end
+    header('X-Zerocracy-Token', token)
+    header('User-Agent', 'something')
+    header(
+      'X-Zerocracy-Meta',
+      [
+        Base64.encode64('vitals_url:https://zerocracy.com'),
+        Base64.encode64('how are you, друг?')
+      ].join('  ')
+    )
+    name = fake_name
+    put("/push/#{name}", fb.export)
+    assert_status(200)
+    id = last_response.body.to_i
+    assert(id.positive?)
+    get('/jobs')
+    get("/jobs/#{id}")
+    get("/jobs/#{id}/input.html")
+    get("/recent/#{name}.txt")
+    rid = last_response.body.to_i
+    wait_for(10) do
+      get("/finished/#{rid}?owner=baza")
+      assert_status(200)
+      last_response.body
+      human = app.humans.find(uname)
+      assert(human.locks.locked?(name))
+    end
+  end
+
+  def test_call_lock_via_exit
+    uname = fake_name
+    login('yegor256')
+    post('/gift', "human=#{uname}&zents=9999&summary=no")
+    login(uname)
+    get('/tokens')
+    post('/tokens/add', 'name=foo')
+    id = last_response.headers['X-Zerocracy-TokenId'].to_i
+    get("/tokens/#{id}.json")
+    token = JSON.parse(last_response.body)['text']
+    fb = Factbase.new
+    (0..100).each do |i|
+      fb.insert.foo = "booom \x01\x02\x03 #{i}"
+    end
+    header('X-Zerocracy-Token', token)
+    header('User-Agent', 'something')
+    header(
+      'X-Zerocracy-Meta',
+      [
+        Base64.encode64('vitals_url:https://zerocracy.com'),
+        Base64.encode64('how are you, друг?')
+      ].join('  ')
+    )
+    name = fake_name
+    put("/push/#{name}", fb.export)
+    assert_status(200)
+    rid = last_response.body.to_i
+    wait_for(10) do
+      get("/finished/#{rid}")
+      assert_status(200)
+      last_response.body == 'yes'
+    end
+    get("/stdout/#{rid}.txt").body
+    get("/exit/#{rid}.txt?owner=baza").body
+    human = app.humans.find(uname)
+    assert(human.locks.locked?(name))
+  end
+
+  def test_call_lock_via_pull
+    uname = fake_name
+    login('yegor256')
+    post('/gift', "human=#{uname}&zents=9999&summary=no")
+    login(uname)
+    get('/tokens')
+    post('/tokens/add', 'name=foo')
+    id = last_response.headers['X-Zerocracy-TokenId'].to_i
+    get("/tokens/#{id}.json")
+    token = JSON.parse(last_response.body)['text']
+    fb = Factbase.new
+    (0..100).each do |i|
+      fb.insert.foo = "booom \x01\x02\x03 #{i}"
+    end
+    header('X-Zerocracy-Token', token)
+    header('User-Agent', 'something')
+    header(
+      'X-Zerocracy-Meta',
+      [
+        Base64.encode64('vitals_url:https://zerocracy.com'),
+        Base64.encode64('how are you, друг?')
+      ].join('  ')
+    )
+    name = fake_name
+    put("/push/#{name}", fb.export)
+    assert_status(200)
+    rid = last_response.body.to_i
+    get("/pull/#{rid}.fb?owner=baza")
+    human = app.humans.find(uname)
+    assert(human.locks.locked?(name))
+  end
+
+  def test_call_lock_via_inspect
+    uname = fake_name
+    login('yegor256')
+    post('/gift', "human=#{uname}&zents=9999&summary=no")
+    login(uname)
+    get('/tokens')
+    post('/tokens/add', 'name=foo')
+    id = last_response.headers['X-Zerocracy-TokenId'].to_i
+    get("/tokens/#{id}.json")
+    token = JSON.parse(last_response.body)['text']
+    fb = Factbase.new
+    (0..100).each do |i|
+      fb.insert.foo = "booom \x01\x02\x03 #{i}"
+    end
+    header('X-Zerocracy-Token', token)
+    header('User-Agent', 'something')
+    header(
+      'X-Zerocracy-Meta',
+      [
+        Base64.encode64('vitals_url:https://zerocracy.com'),
+        Base64.encode64('how are you, друг?')
+      ].join('  ')
+    )
+    name = fake_name
+    put("/push/#{name}", fb.export)
+    id = last_response.body.to_i
+    assert(id.positive?)
+    get('/jobs')
+    get("/jobs/#{id}")
+    get("/jobs/#{id}/input.html")
+    get("/recent/#{name}.txt")
+    rid = last_response.body.to_i
+    wait_for(10) do
+      get("/finished/#{rid}")
+      last_response.body == 'yes'
+    end
+    get("/stdout/#{rid}.txt").body
+    get("/exit/#{rid}.txt").body
+    get("/inspect/#{id}.fb?owner=baza")
+    human = app.humans.find(uname)
+    assert(human.locks.locked?(name))
+  end
+
   private
 
   def make_valid_token

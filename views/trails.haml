@@ -44,8 +44,28 @@
         = t[:judge]
       %td.ff
         = t[:name]
-      %td
-        %pre
+        %i.fa-regular.fa-eye{onclick: "$(this).parent().parent().find('pre').show();", title: 'Click here to see the full JSON', style: 'cursor: pointer;'}
+      %td.json
+        - if t[:judge] == 'greeting'
+          %div.header
+            Model:
+            %span.ff
+              = t[:json]['model']
+          %div.header
+            Template:
+            %span.ff
+              = t[:json]['template']
+          %div.header
+            Prompt:
+          %div.body
+            != markdown t[:json]['prompt']
+          %div.header
+            Answer:
+          %div.body
+            != markdown t[:json]['answer']
+        - else
+          Unknown
+        %pre{style: 'display: none; overflow-x: scroll; width: 50em;'}
           = JSON.pretty_generate(t[:json])
       %td
         != ago(t[:created])
@@ -63,6 +83,6 @@
     %input{ type: 'text', name: 'judge', tabindex: 2, placeholder: 'Judge name', size: 25, maxlength: 64, required: true }
     %input{ type: 'text', name: 'name', tabindex: 3, placeholder: 'e.g., 1.json', size: 20, maxlength: 64, required: true }
     %label
-    %textarea{ name: 'json', required: true, tabindex: 4, autofocus: true, style: 'width: 100%; height: 9em; font-family: monospace;' }
+    %textarea{ name: 'json', required: true, tabindex: 4, style: 'width: 100%; height: 9em; font-family: monospace;' }
     %label
     %input{ type: 'submit', tabindex: 5, value: 'Add' }

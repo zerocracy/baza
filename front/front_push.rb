@@ -108,11 +108,11 @@ post '/push' do
 end
 
 put(%r{/push/([a-z0-9-]+)}) do
-  the_human.jobs.lock(params[:owner]) unless params[:owner].nil?
+  name = params['captures'].first
+  the_human.locks.lock(name, params[:owner]) unless params[:owner].nil?
   text = request.env['HTTP_X_ZEROCRACY_TOKEN']
   raise Baza::Urror, 'The "X-Zerocracy-Token" HTTP header with a token is missing' if text.nil?
   token = settings.humans.his_token(text)
-  name = params['captures'].first
   Tempfile.open do |f|
     request.body.rewind
     source =
@@ -142,8 +142,8 @@ end
 
 # Read the output of this job.
 get(%r{/stdout/([0-9]+).txt}) do
-  the_human.locks.lock(params[:owner]) unless params[:owner].nil?
   j = the_human.jobs.get(params['captures'].first.to_i)
+  the_human.locks.lock(j.name, params[:owner]) unless params[:owner].nil?
   r = j.result
   raise Baza::Urror, 'There is no result yes' if r.nil?
   content_type('text/plain')
@@ -152,8 +152,8 @@ end
 
 # Read the exit code of this job.
 get(%r{/exit/([0-9]+).txt}) do
-  the_human.locks.lock(params[:owner]) unless params[:owner].nil?
   j = the_human.jobs.get(params['captures'].first.to_i)
+  the_human.locks.lock(j.name, params[:owner]) unless params[:owner].nil?
   r = j.result
   raise Baza::Urror, 'There is no result yes' if r.nil?
   content_type('text/plain')
@@ -162,15 +162,15 @@ end
 
 # The job is finished?
 get(%r{/finished/([0-9]+)}) do
-  the_human.locks.lock(params[:owner]) unless params[:owner].nil?
   j = the_human.jobs.get(params['captures'].first.to_i)
+  the_human.locks.lock(j.name, params[:owner]) unless params[:owner].nil?
   content_type('text/plain')
   j.finished? ? 'yes' : 'no'
 end
 
 get(%r{/pull/([0-9]+).fb}) do
-  the_human.locks.lock(params[:owner]) unless params[:owner].nil?
   j = the_human.jobs.get(params['captures'].first.to_i)
+  the_human.locks.lock(j.name, params[:owner]) unless params[:owner].nil?
   r = j.result
   raise Baza::Urror, "The job ##{j.id} is expired" if j.expired?
   raise Baza::Urror, 'The result is empty' if r.empty?
@@ -183,8 +183,8 @@ get(%r{/pull/([0-9]+).fb}) do
 end
 
 get(%r{/inspect/([0-9]+).fb}) do
-  the_human.locks.lock(params[:owner]) unless params[:owner].nil?
   j = the_human.jobs.get(params['captures'].first.to_i)
+  the_human.locks.lock(j.name, params[:owner]) unless params[:owner].nil?
   raise Baza::Urror, "The job ##{j.id} is expired" if j.expired?
   Tempfile.open do |f|
     settings.fbs.load(j.uri1, f.path)
