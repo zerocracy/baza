@@ -59,6 +59,6 @@ class Baza::LocksTest < Minitest::Test
     end
     job.finish!(fake_name, 'stdout', 0, 544, 1, 0)
     human.locks.lock(name, owner)
-    assert human.locks.locked?(name)
+    assert(human.locks.locked?(name))
   end
 end
