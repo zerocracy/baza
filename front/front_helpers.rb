@@ -60,18 +60,19 @@ module Baza::Helpers
     return body unless eye
     uuid = SecureRandom.uuid
     js_eye = [
-      "$('##{CGI.escapeHTML(uuid)} span').html(decodeURIComponent('#{escape(large_text(txt))}'));",
+      "$('##{CGI.escapeHTML(uuid)} .full').html(decodeURIComponent('#{escape(large_text(txt))}'));",
       "$('##{uuid} a.eye').hide();",
       "$('##{uuid} a.copy').show();",
       'return false;'
     ].join
     js_copy = [
       "navigator.clipboard.writeText(decodeURIComponent('#{escape(txt)}'));",
+      "$(this).next().show().delay(1000).fadeOut();",
       'return false;'
     ].join
     html_tag('span', id: uuid) do
       [
-        html_tag('span', id: uuid) { body },
+        html_tag('span', class: 'full') { body },
         html_tag(
           'a',
           href: '',
@@ -86,7 +87,8 @@ module Baza::Helpers
           class: 'copy',
           style: 'display: none',
           onclick: js_copy
-        ) { html_tag('i', class: 'fa-regular fa-copy') }
+        ) { html_tag('i', class: 'fa-regular fa-copy') },
+        html_tag('span', style: 'display: none;') { 'Copied to clipboard!' }
       ].join('&nbsp;')
     end
   end
