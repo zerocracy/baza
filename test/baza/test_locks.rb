@@ -25,6 +25,7 @@
 require 'minitest/autorun'
 require_relative '../test__helper'
 require_relative '../../objects/baza'
+require_relative '../../objects/baza/locks'
 require_relative '../../objects/baza/humans'
 
 # Test.
@@ -44,5 +45,20 @@ class Baza::LocksTest < Minitest::Test
     locks.lock(n, owner)
     locks.unlock(n, owner)
     locks.lock(n, owner)
+  end
+
+  def test_lock_checks_job
+    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
+    token = human.tokens.add(fake_name)
+    name = "#{fake_name}-a"
+    job = token.start(name, fake_name, 1, 0, 'n/a', [], '192.168.1.1')
+    assert(human.jobs.busy?(name))
+    owner = "baza #{Baza::VERSION} #{Time.now.utc.iso8601}"
+    assert_raises(Baza::Locks::Busy) do
+      human.locks.lock(name, owner)
+    end
+    job.finish!(fake_name, 'stdout', 0, 544, 1, 0)
+    human.locks.lock(name, owner)
+    assert(human.locks.locked?(name))
   end
 end

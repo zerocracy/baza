@@ -304,9 +304,11 @@ class Baza::FrontPushTest < Minitest::Test
       ].join('  ')
     )
     name = fake_name
-    put("/push/#{name}?owner=baza", fb.export)
-    assert_status(200)
+    put("/push/#{name}", fb.export)
     human = app.humans.find(uname)
+    job = human.jobs.recent(name)
+    job.finish!(fake_name, 'stdout', 0, 544, 1, 0)
+    put("/push/#{name}?owner=baza", fb.export)
     assert(human.locks.locked?(name))
   end
 
@@ -337,8 +339,10 @@ class Baza::FrontPushTest < Minitest::Test
     put("/push/#{name}", fb.export)
     assert_status(200)
     rid = last_response.body.to_i
-    get("/stdout/#{rid}.txt?owner=baza").body
     human = app.humans.find(uname)
+    job = human.jobs.recent(name)
+    job.finish!(fake_name, 'stdout', 0, 544, 1, 0)
+    get("/stdout/#{rid}.txt?owner=baza").body
     assert(human.locks.locked?(name))
   end
 
@@ -376,10 +380,12 @@ class Baza::FrontPushTest < Minitest::Test
     get("/recent/#{name}.txt")
     rid = last_response.body.to_i
     wait_for(10) do
+      human = app.humans.find(uname)
+      job = human.jobs.recent(name)
+      job.finish!(fake_name, 'stdout', 0, 544, 1, 0)
       get("/finished/#{rid}?owner=baza")
       assert_status(200)
       last_response.body
-      human = app.humans.find(uname)
       assert(human.locks.locked?(name))
     end
   end
@@ -417,8 +423,10 @@ class Baza::FrontPushTest < Minitest::Test
       last_response.body == 'yes'
     end
     get("/stdout/#{rid}.txt").body
-    get("/exit/#{rid}.txt?owner=baza").body
     human = app.humans.find(uname)
+    job = human.jobs.recent(name)
+    job.finish!(fake_name, 'stdout', 0, 544, 1, 0)
+    get("/exit/#{rid}.txt?owner=baza").body
     assert(human.locks.locked?(name))
   end
 
@@ -449,8 +457,10 @@ class Baza::FrontPushTest < Minitest::Test
     put("/push/#{name}", fb.export)
     assert_status(200)
     rid = last_response.body.to_i
-    get("/pull/#{rid}.fb?owner=baza")
     human = app.humans.find(uname)
+    job = human.jobs.recent(name)
+    job.finish!(fake_name, 'stdout', 0, 544, 1, 0)
+    get("/pull/#{rid}.fb?owner=baza")
     assert(human.locks.locked?(name))
   end
 
@@ -492,8 +502,10 @@ class Baza::FrontPushTest < Minitest::Test
     end
     get("/stdout/#{rid}.txt").body
     get("/exit/#{rid}.txt").body
-    get("/inspect/#{id}.fb?owner=baza")
     human = app.humans.find(uname)
+    job = human.jobs.recent(name)
+    job.finish!(fake_name, 'stdout', 0, 544, 1, 0)
+    get("/inspect/#{id}.fb?owner=baza")
     assert(human.locks.locked?(name))
   end
 

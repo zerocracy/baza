@@ -176,11 +176,6 @@ class Baza::Pipeline
     rows.each do |row|
       job = @humans.job_by_id(row['id'].to_i)
       next if job.jobs.human.account.balance.negative?
-      begin
-        job.jobs.human.locks.lock(job.name, owner)
-      rescue Baza::Locks::Busy
-        next
-      end
       @humans.pgsql.exec('UPDATE job SET taken = $1 WHERE id = $2', [owner, job.id])
       return job
     end
