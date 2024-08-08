@@ -25,6 +25,7 @@
 require 'minitest/autorun'
 require_relative '../test__helper'
 require_relative '../../objects/baza'
+require_relative '../../objects/baza/locks'
 require_relative '../../objects/baza/humans'
 
 # Test.
