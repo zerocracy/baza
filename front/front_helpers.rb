@@ -67,7 +67,7 @@ module Baza::Helpers
     ].join
     js_copy = [
       "navigator.clipboard.writeText(decodeURIComponent('#{escape(txt)}'));",
-      "$(this).next().show().delay(1000).fadeOut();",
+      '$(this).next().show().delay(1000).fadeOut();',
       'return false;'
     ].join
     html_tag('span', id: uuid) do
