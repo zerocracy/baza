@@ -110,5 +110,6 @@
             %a{href: iri.cut('/jobs').append(s[:applied])}
               = "##{s[:applied]}"
         %td
-          %a.ico{href: iri.cut('/alterations').append(s[:id]).append('remove'), title: "Remove alteration ##{s[:id]}", onclick: "return confirm('Are you sure you want to remove the alteration ##{s[:id]}?')"}
-            %i.fa-regular.fa-trash-can
+          - if s[:applied].nil?
+            %a.ico{href: iri.cut('/alterations').append(s[:id]).append('remove'), title: "Remove alteration ##{s[:id]}", onclick: "return confirm('Are you sure you want to remove the alteration ##{s[:id]}?')"}
+              %i.fa-regular.fa-trash-can
