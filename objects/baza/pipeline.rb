@@ -269,6 +269,7 @@ class Baza::Pipeline
         end
       )
       .merge(job.secrets.to_h { |s| [s['key'], s['value']] })
+      .merge({ 'JOB_NAME' => job.name, 'JOB_ID' => job.id })
   end
 
   # Replace all secrets in the text with *****
