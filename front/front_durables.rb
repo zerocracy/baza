@@ -55,10 +55,14 @@ end
 
 post(%r{/durables/place}) do
   jname = params[:jname]
-  file = params[:jname]
+  raise Baza::Urror, 'The "jname" param is mandatory' if jname.nil?
+  file = params[:file]
+  raise Baza::Urror, 'The "file" param is mandatory' if file.nil?
+  zip = params[:zip]
+  raise Baza::Urror, 'The "zip" param is mandatory (with file content)' if zip.nil?
   durable =
     Tempfile.open do |f|
-      FileUtils.copy(params[:zip][:tempfile], f.path)
+      FileUtils.copy(zip[:tempfile], f.path)
       the_durables.place(jname, file, f.path)
     end
   response.headers['X-Zerocracy-DurableId'] = durable.id.to_s
