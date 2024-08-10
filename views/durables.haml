@@ -1,0 +1,62 @@
+%form{method: 'post', action: iri.cut('/durables/place')}
+  %fieldset
+    %input{ type: 'text', name: 'jname', tabindex: 1, placeholder: 'Job name', size: 14, maxlength: 32, required: true }
+    %input{ type: 'text', name: 'directory', tabindex: 2, placeholder: 'Directory', size: 25, maxlength: 64, required: true }
+    %input{ type: 'file', name: 'zip', tabindex: 3, placeholder: 'ZIP archive' }
+    %input{ type: 'submit', tabindex: 4, value: 'Place' }
+
+%p
+  - if durables.empty?
+    There are no durables yet.
+  - else
+    These are your durables:
+
+- unless durables.empty?
+  %table
+    %colgroup
+      -# ID
+      %col{style: 'width: 3em;'}
+      -# Jname
+      %col{style: 'width: 16em;'}
+      -# Directory
+      %col
+      -# Size
+      %col{style: 'width: 4em;'}
+      -# Created
+      %col{style: 'width: 10em;'}
+      -# Commands
+      %col{style: 'width: 6em;'}
+    %thead
+      %tr
+        %th
+          = '#'
+        %th
+          Jname
+        %th
+          Directory
+        %th
+          Size
+        %th
+          Created
+        %th
+    %tbody
+    - durables.each do |d|
+      %tr
+        %td.ff
+          = "##{d[:id]}"
+        %td.ff
+          - if d[:jobs].zero?
+            = d[:jname]
+            %i.fa-solid.fa-triangle-exclamation.bad{title: 'There is no job by this name, maybe a spelling error?'}
+          - else
+            %a{href: iri.cut('/jobs').over(name: d[:jname])}<
+              = d[:jname]
+        %td.ff
+          = d[:directory]
+        %td.ff
+          = d[:size]
+        %td
+          != ago(d[:created])
+        %td
+          %a.ico{href: iri.cut('/durables').append(d[:id]).append('remove'), title: "Remove durable ##{d[:id]}", onclick: "return confirm('Are you sure you want to remove the durable ##{d[:id]}?')"}
+            %i.fa-regular.fa-trash-can

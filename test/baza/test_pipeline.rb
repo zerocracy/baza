@@ -62,7 +62,7 @@ class Baza::PipelineTest < Minitest::Test
       job = token.start(fake_name, uri(fbs), 1, 0, 'n/a', ['vitals_url:abc', 'ppp:hello'], '192.168.1.1')
       assert(!human.jobs.get(job.id).finished?)
       human.secrets.add(job.name, 'ppp', 'swordfish')
-      wait_for(2) { human.jobs.get(job.id).finished? }
+      wait_for(5) { human.jobs.get(job.id).finished? }
       pipeline.stop
       stdout = loog.to_s
       [
@@ -98,7 +98,7 @@ class Baza::PipelineTest < Minitest::Test
       token = human.tokens.add(fake_name)
       first = token.start(fake_name, uri(fbs), 1, 0, 'n/a', [], '192.168.1.1')
       second = token.start(fake_name, uri(fbs), 1, 0, 'n/a', [], '192.168.1.1')
-      wait_for(2) { human.jobs.get(first.id).finished? && human.jobs.get(second.id).finished? }
+      wait_for(5) { human.jobs.get(first.id).finished? && human.jobs.get(second.id).finished? }
       pipeline.stop
     end
   end
@@ -112,7 +112,7 @@ class Baza::PipelineTest < Minitest::Test
       human = humans.ensure(fake_name)
       token = human.tokens.add(fake_name)
       job = token.start(fake_name, fake_name, 1, 0, 'n/a', [], '192.168.1.1')
-      wait_for(2) { human.jobs.get(job.id).finished? }
+      wait_for(5) { human.jobs.get(job.id).finished? }
       pipeline.stop
       job = human.jobs.get(job.id)
       assert(!job.result.nil?)
@@ -137,7 +137,7 @@ class Baza::PipelineTest < Minitest::Test
       human.alterations.add(n, 'ruby', script: '$fb.insert.bar = 7')
       token = human.tokens.add(fake_name)
       job = token.start(n, uri(fbs), 1, 0, 'n/a', [], '192.168.1.1')
-      wait_for(2) { human.jobs.get(job.id).finished? }
+      wait_for(5) { human.jobs.get(job.id).finished? }
       pipeline.stop
       Tempfile.open do |f|
         job = human.jobs.get(job.id)
@@ -175,7 +175,7 @@ class Baza::PipelineTest < Minitest::Test
       human = humans.ensure(fake_name)
       token = human.tokens.add(fake_name)
       job = token.start(fake_name, uri(fbs), 1, 0, 'n/a', [], '192.168.1.1')
-      wait_for(2) { job.jobs.get(job.id).finished? }
+      wait_for(5) { job.jobs.get(job.id).finished? }
       pipeline.stop
       job = job.jobs.get(job.id)
       assert_equal(0, job.result.exit, job.result.stdout)

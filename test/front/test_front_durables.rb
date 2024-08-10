@@ -49,6 +49,8 @@ class Baza::FrontDurablesTest < Minitest::Test
     assert_status(302)
     get("/durables/#{id}/unlock?owner=foobar")
     assert_status(302)
+    get('/durables')
+    assert_status(200)
   end
 
   def test_place_twice

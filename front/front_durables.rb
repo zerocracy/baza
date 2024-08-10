@@ -31,7 +31,7 @@ get '/durables' do
     :durables,
     :default,
     title: '/durables',
-    secrets: the_durables
+    durables: the_durables
   )
 end
 
@@ -40,14 +40,14 @@ put(%r{/durables/([0-9]+)}) do
   Tempfile.open do |f|
     request.body.rewind
     File.binwrite(f, request.body.read)
-    the_durables.save(id, f.path)
+    the_durables.get(id).save(f.path)
   end
 end
 
 get(%r{/durables/([0-9]+)}) do
   id = params['captures'].first.to_i
   Tempfile.open do |f|
-    the_durables.load(id, f.path)
+    the_durables.get(id).load(f.path)
     content_type('application/octet-stream')
     File.binread(f.path)
   end
@@ -56,20 +56,20 @@ end
 post(%r{/durables/place}) do
   jname = params[:jname]
   directory = params[:jname]
-  id =
+  durable =
     Tempfile.open do |f|
       FileUtils.copy(params[:zip][:tempfile], f.path)
       the_durables.place(jname, directory, f.path)
     end
-  response.headers['X-Zerocracy-DurableId'] = id.to_s
-  flash(iri.cut('/durables'), "The ID of the durable is ##{id}")
+  response.headers['X-Zerocracy-DurableId'] = durable.id.to_s
+  flash(iri.cut('/durables'), "The ID of the durable is ##{durable.id}")
 end
 
 get(%r{/durables/([0-9]+)/lock}) do
   id = params['captures'].first.to_i
   owner = params[:owner]
   raise Baza::Urror, 'The "owner" param is mandatory' if owner.nil?
-  the_durables.lock(id, owner)
+  the_durables.get(id).lock(owner)
   flash(iri.cut('/durables'), "The durable ##{id} locked")
 end
 
@@ -77,6 +77,6 @@ get(%r{/durables/([0-9]+)/unlock}) do
   id = params['captures'].first.to_i
   owner = params[:owner]
   raise Baza::Urror, 'The "owner" param is mandatory' if owner.nil?
-  the_durables.unlock(id, owner)
+  the_durables.get(id).unlock(owner)
   flash(iri.cut('/durables'), "The durable ##{id} unlocked")
 end

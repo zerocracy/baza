@@ -22,9 +22,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require 'loog'
-require 'fileutils'
-
 # Durables of a human.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
@@ -37,10 +34,9 @@ class Baza::Durables
   # When can't lock a durable.
   class Busy < StandardError; end
 
-  def initialize(human, fbs, loog: Loog::NULL)
+  def initialize(human, fbs)
     @human = human
     @fbs = fbs
-    @loog = loog
   end
 
   def pgsql
@@ -85,28 +81,9 @@ class Baza::Durables
   #
   # @param [Integer] id The ID of the durable to lock
   # @param [String] owner The owner of the lock
-  def lock(id, owner)
-    rows = pgsql.exec(
-      [
-        'UPDATE durable SET busy = $1',
-        'WHERE human = $2 AND id = $3 AND (busy IS NULL OR busy = $1)',
-        'RETURNING id'
-      ],
-      [owner, human.id, id]
-    )
-    raise Busy, "The durable ##{id} is busy or does not exist" if rows.empty?
-  end
-
-  # Unlock one durable.
-  #
-  # @param [Integer] id The ID of the durable to lock
-  # @param [String] owner The owner of the lock
-  def unlock(id, owner)
-    rows = pgsql.exec(
-      'UPDATE durable SET busy = NULL WHERE human = $1 AND id = $2 AND busy = $3 RETURNING id',
-      [human.id, id, owner]
-    )
-    raise Busy, "The durable ##{id} is either not locked or locked by someone else" if rows.empty?
+  def get(id)
+    require_relative 'durable'
+    Baza::Durable.new(@human, @fbs, id)
   end
 
   # Start a new durable (using the file provided) or return an already existing one.
@@ -116,46 +93,22 @@ class Baza::Durables
   # @param [String] file The file where to get start content
   # @return [Integer] The ID of the durable created or found
   def place(jname, directory, file)
-    pgsql.transaction do |t|
-      t.exec('LOCK human')
-      rows = t.exec(
-        'SELECT id FROM durable WHERE human = $1 AND jname = $2 AND directory = $3',
-        [human.id, jname, directory]
-      )
-      if rows.empty?
-        t.exec(
-          'INSERT INTO durable (human, jname, directory, uri, size) VALUES ($1, $2, $3, $4, $5) RETURNING id',
-          [human.id, jname, directory, @fbs.save(file), File.size(file)]
-        ).first['id'].to_i
-      else
-        rows.first['id'].to_i
+    get(
+      pgsql.transaction do |t|
+        t.exec('LOCK human')
+        rows = t.exec(
+          'SELECT id FROM durable WHERE human = $1 AND jname = $2 AND directory = $3',
+          [human.id, jname, directory]
+        )
+        if rows.empty?
+          t.exec(
+            'INSERT INTO durable (human, jname, directory, uri, size) VALUES ($1, $2, $3, $4, $5) RETURNING id',
+            [human.id, jname, directory, @fbs.save(file), File.size(file)]
+          ).first['id'].to_i
+        else
+          rows.first['id'].to_i
+        end
       end
-    end
-  end
-
-  # Dowload the durable from the cloud and save into the file provided.
-  #
-  # @param [Integer] id The ID of the durable to lock
-  # @param [String] file The file where to save it
-  def load(id, file)
-    uri = pgsql.exec(
-      'SELECT uri FROM durable WHERE human = $1 AND id = $2',
-      [human.id, id]
-    ).first['uri']
-    @fbs.load(uri, file)
-  end
-
-  # Put it back to cloud and delete all files from the +target+ directory.
-  #
-  # @param [Integer] id The ID of the durable to lock
-  # @param [String] file The file where to take the content
-  # @return [String] URI of the file just saved to the cloud
-  def save(id, file)
-    uri = @fbs.save(file)
-    pgsql.exec(
-      'UPDATE durable SET uri = $3, size = $4 WHERE human = $1 AND id = $2',
-      [human.id, id, uri, File.size(file)]
     )
-    uri
   end
 end

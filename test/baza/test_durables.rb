@@ -42,17 +42,17 @@ class Baza::DurablesTest < Minitest::Test
       data = 'test me'
       File.binwrite(file, data)
       directory = 'dir-name'
-      id = durables.place(job.name, directory, file)
-      assert_equal(id, durables.place(job.name, directory, nil))
-      durables.lock(id, owner)
-      durables.lock(id, owner)
-      assert_raises(Baza::Durables::Busy) { durables.lock(id, 'another owner') }
-      durables.lock(id, owner)
+      durable = durables.place(job.name, directory, file)
+      assert_equal(durable.id, durables.place(job.name, directory, nil).id)
+      durable.lock(owner)
+      durable.lock(owner)
+      assert_raises(Baza::Durable::Busy) { durable.lock('another owner') }
+      durable.lock(owner)
       FileUtils.rm_f(file)
-      durables.load(id, file)
+      durable.load(file)
       assert(File.exist?(file))
       assert_equal(data, File.binread(file))
-      durables.unlock(id, owner)
+      durable.unlock(owner)
     end
   end
 end
