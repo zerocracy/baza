@@ -68,7 +68,7 @@ class Baza::DurablesTest < Minitest::Test
       File.binwrite(file, data)
       n = "@#{fake_name}"
       id = admin.durables(fbs).place('test', n, file).id
-      durable = human.durables(fbs).place('another', n, file)
+      durable = human.durables(fbs).place(nil, n, file)
       assert_equal(id, durable.id)
       durable.lock('test')
       durable.load(file)
