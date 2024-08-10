@@ -31,9 +31,6 @@ class Baza::Durables
 
   SHAREABLE = %w[eva-model].freeze
 
-  # When can't lock a durable.
-  class Busy < StandardError; end
-
   def initialize(human, fbs)
     @human = human
     @fbs = fbs
