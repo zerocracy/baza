@@ -145,7 +145,7 @@ get(%r{/stdout/([0-9]+).txt}) do
   j = the_human.jobs.get(params['captures'].first.to_i)
   the_human.locks.lock(j.name, params[:owner]) unless params[:owner].nil?
   r = j.result
-  raise Baza::Urror, 'There is no result yes' if r.nil?
+  raise Baza::Urror, 'There is no result yet' if r.nil?
   content_type('text/plain')
   r.stdout
 end
@@ -155,7 +155,7 @@ get(%r{/exit/([0-9]+).txt}) do
   j = the_human.jobs.get(params['captures'].first.to_i)
   the_human.locks.lock(j.name, params[:owner]) unless params[:owner].nil?
   r = j.result
-  raise Baza::Urror, 'There is no result yes' if r.nil?
+  raise Baza::Urror, 'There is no result yet' if r.nil?
   content_type('text/plain')
   r.exit.to_s
 end
@@ -171,10 +171,10 @@ end
 get(%r{/pull/([0-9]+).fb}) do
   j = the_human.jobs.get(params['captures'].first.to_i)
   the_human.locks.lock(j.name, params[:owner]) unless params[:owner].nil?
-  r = j.result
   raise Baza::Urror, "The job ##{j.id} is expired" if j.expired?
-  raise Baza::Urror, 'The result is empty' if r.empty?
-  raise Baza::Urror, 'The result is broken' unless r.exit.zero?
+  r = j.result
+  raise Baza::Urror, 'There is no result as of yet' if r.nil?
+  raise Baza::Urror, 'The result is broken, you cannot pull it' unless r.exit.zero?
   Tempfile.open do |f|
     settings.fbs.load(r.uri2, f.path)
     content_type('application/octet-stream')
