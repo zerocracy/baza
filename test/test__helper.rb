@@ -42,6 +42,8 @@ require 'rack/test'
 require 'glogin/cookie'
 require 'capybara'
 require 'capybara/dsl'
+require_relative '../baza'
+require_relative '../objects/baza/humans'
 
 module Rack
   module Test

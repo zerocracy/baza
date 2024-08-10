@@ -69,6 +69,11 @@ class Baza::Human
     Baza::Secrets.new(self)
   end
 
+  def durables(fbs)
+    require_relative 'durables'
+    Baza::Durables.new(self, fbs)
+  end
+
   def alterations
     require_relative 'alterations'
     Baza::Alterations.new(self)

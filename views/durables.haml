@@ -1,0 +1,71 @@
+%form{method: 'post', action: iri.cut('/durables/place'), enctype: 'multipart/form-data'}
+  %fieldset
+    %input{ type: 'text', name: 'jname', tabindex: 1, placeholder: 'Job name', size: 14, maxlength: 32, required: true }
+    %input{ type: 'text', name: 'file', tabindex: 2, placeholder: 'file', size: 25, maxlength: 64, required: true }
+    %input{ type: 'file', name: 'zip', tabindex: 3, required: true }
+    %input{ type: 'submit', tabindex: 4, value: 'Place' }
+
+%p
+  - if durables.empty?
+    There are no durables yet.
+  - else
+    These are your durables:
+
+- unless durables.empty?
+  %table
+    %colgroup
+      -# ID
+      %col{style: 'width: 3em;'}
+      -# Jname
+      %col{style: 'width: 16em;'}
+      -# File
+      %col
+      -# Lock
+      %col{style: 'width: 5em;'}
+      -# Size
+      %col{style: 'width: 5em;'}
+      -# Created
+      %col{style: 'width: 10em;'}
+      -# Commands
+      %col{style: 'width: 6em;'}
+    %thead
+      %tr
+        %th
+          = '#'
+        %th
+          Jname
+        %th
+          File
+        %th
+          Lock
+        %th
+          Size
+        %th
+          Created
+        %th
+    %tbody
+    - durables.each do |d|
+      %tr
+        %td.ff
+          = "##{d[:id]}"
+        %td.ff
+          - if d[:jobs].zero?
+            = d[:jname]
+            %i.fa-solid.fa-triangle-exclamation.bad{title: 'There is no job by this name, maybe a spelling error?'}
+          - else
+            %a{href: iri.cut('/jobs').over(name: d[:jname])}<
+              = d[:jname]
+        %td.ff
+          = d[:file]
+          - if the_human.admin? && d[:shareable]
+            %i.fa-solid.fa-star.gray{title: 'This file is shared among all jobs of all users!'}
+        %td
+          - unless d[:busy].nil?
+            %i.fa-solid.fa-lock{title: d[:busy]}
+        %td.ff
+          != bytes(d[:size])
+        %td
+          != ago(d[:created])
+        %td
+          %a.ico{href: iri.cut('/durables').append(d[:id]).append('remove'), title: "Remove durable ##{d[:id]}", onclick: "return confirm('Are you sure you want to remove the durable ##{d[:id]}?')"}
+            %i.fa-regular.fa-trash-can

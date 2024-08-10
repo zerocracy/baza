@@ -30,11 +30,19 @@ require 'aws-sdk-core'
 require 'loog'
 require 'retries'
 
-# All factbases.
+# All factbases in the cloud.
+#
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
 class Baza::Factbases
+  # Ctor.
+  #
+  # @param [String] key AWS authentication key (if empty, the object will NOT use AWS S3)
+  # @param [String] secret AWS authentication secret
+  # @param [String] region AWS region
+  # @param [String] bucket The name of the S3 bucket
+  # @param [Loog] loog Logging facility
   def initialize(key, secret, region = 'us-east-1', bucket = 'baza.zerocracy.com', loog: Loog::NULL)
     @key = key
     @secret = secret
@@ -45,7 +53,11 @@ class Baza::Factbases
 
   # Save the content of this file into the cloud and return a unique ID
   # of the cloud BLOB just created.
+  #
+  # @param [String] file The name of the file to upload to the cloud
+  # @return [String] URI of the object in cloud
   def save(file)
+    raise 'File name can\'t be nil' if file.nil?
     uuid = "#{Time.now.strftime('%Y-%m-%d')}-#{SecureRandom.uuid}"
     if @key.empty?
       File.binwrite(fake(uuid), File.binread(file))
@@ -68,9 +80,13 @@ class Baza::Factbases
 
   # Read the BLOB from the cloud, identified by the +uuid+, and save it
   # to the file provided. Fail if there is not such BLOB.
+  #
+  # @param [String] uuid The URI of the object in the cloud to download
+  # @param [String] file The name of the file, where to save the object
   def load(uuid, file)
     raise 'UUID can\'t be nil' if uuid.nil?
     raise 'UUID can\'t be empty' if uuid.empty?
+    raise 'File name can\'t be nil' if file.nil?
     if @key.empty?
       FileUtils.mkdir_p(File.dirname(file))
       File.binwrite(file, File.binread(fake(uuid)))
@@ -93,6 +109,8 @@ class Baza::Factbases
   end
 
   # Delete the BLOB from the cloud.
+  #
+  # @param [String] uuid The URI of the object in the cloud to delete
   def delete(uuid)
     raise 'UUID can\'t be nil' if uuid.nil?
     raise 'UUID can\'t be empty' if uuid.empty?

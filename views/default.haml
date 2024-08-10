@@ -28,13 +28,8 @@
             %li
               %a{href: 'https://t.me/zerocrat_bot'}
                 %i.fa-brands.fa-telegram.fa-lg{class: ('gray' unless telegram?), title: (telegram? ? 'You are connected already' : 'Click to connect to our Telegram bot')}
-            != menu('/jobs', 'Jobs')
-            != menu('/tokens', 'Tokens')
-            != menu('/secrets', 'Secrets')
-            != menu('/valves', 'Valves')
-            != menu('/account', 'Account')
-            != menu('/locks', 'Locks')
-            != menu('/logout', 'Logout')
+            - %w[Jobs Tokens Secrets Durables Valves Account Locks Logout].each do |n|
+              != menu("/#{n.downcase}", n)
       %article
         - if defined?(flash_msg) && !flash_msg.empty?
           %p.flash{style: "background-color:#{flash_color}"}
