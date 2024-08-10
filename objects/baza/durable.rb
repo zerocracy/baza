@@ -69,6 +69,14 @@ class Baza::Durable
     raise Busy, "The durable ##{@id} is either not locked or locked by someone else" if rows.empty?
   end
 
+  # Is it locked now?
+  def locked?
+    pgsql.exec(
+      'SELECT id FROM durable WHERE human = $1 AND id = $2 AND busy IS NULL',
+      [human.id, @id]
+    ).empty?
+  end
+
   # Dowload the durable from the cloud and save into the file provided.
   #
   # @param [String] file The file where to save it
@@ -85,6 +93,7 @@ class Baza::Durable
   # @param [String] file The file where to take the content
   # @return [String] URI of the file just saved to the cloud
   def save(file)
+    raise Baza::Urror, "The durable ##{@id} is not locked, can't save" unless locked?
     uri = @fbs.save(file)
     before = pgsql.exec(
       'SELECT uri FROM durable WHERE human = $1 AND id = $2',
