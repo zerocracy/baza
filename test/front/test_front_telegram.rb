@@ -33,6 +33,6 @@ class Baza::AppTest < Minitest::Test
 
   def test_telegram_auth
     get('/tauth?secret=wrong')
-    assert_status(302)
+    assert_status(303)
   end
 end

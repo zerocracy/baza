@@ -59,7 +59,7 @@ class Baza::AppTest < Minitest::Test
     ]
     pages.each do |p|
       get(p)
-      assert_status(302)
+      assert_status(303)
     end
   end
 

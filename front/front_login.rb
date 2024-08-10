@@ -91,7 +91,7 @@ get '/logout' do
 end
 
 def the_human
-  flash(iri.cut('/'), 'You have to login first') unless @locals[:human]
+  raise Baza::Urror, 'You have to login first' unless @locals[:human]
   Unpiercable.new(
     settings.humans.get(@locals[:human]),
     github: @locals[:human_login]
