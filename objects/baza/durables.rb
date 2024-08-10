@@ -69,6 +69,7 @@ class Baza::Durables
         directory: row['directory'],
         uri: row['uri'],
         busy: row['busy'],
+        size: row['size'].to_i,
         created: Time.parse(row['created']),
         jobs: row['jobs'].to_i,
         shareable: SHAREABLE.include?(row['directory'].downcase)

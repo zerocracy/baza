@@ -1,8 +1,8 @@
-%form{method: 'post', action: iri.cut('/durables/place')}
+%form{method: 'post', action: iri.cut('/durables/place'), enctype: 'multipart/form-data'}
   %fieldset
     %input{ type: 'text', name: 'jname', tabindex: 1, placeholder: 'Job name', size: 14, maxlength: 32, required: true }
     %input{ type: 'text', name: 'directory', tabindex: 2, placeholder: 'Directory', size: 25, maxlength: 64, required: true }
-    %input{ type: 'file', name: 'zip', tabindex: 3, placeholder: 'ZIP archive' }
+    %input{ type: 'file', name: 'zip', tabindex: 3, required: true }
     %input{ type: 'submit', tabindex: 4, value: 'Place' }
 
 %p
@@ -20,8 +20,10 @@
       %col{style: 'width: 16em;'}
       -# Directory
       %col
+      -# Lock
+      %col{style: 'width: 5em;'}
       -# Size
-      %col{style: 'width: 4em;'}
+      %col{style: 'width: 5em;'}
       -# Created
       %col{style: 'width: 10em;'}
       -# Commands
@@ -34,6 +36,8 @@
           Jname
         %th
           Directory
+        %th
+          Lock
         %th
           Size
         %th
@@ -53,8 +57,11 @@
               = d[:jname]
         %td.ff
           = d[:directory]
+        %td
+          - unless d[:busy].nil?
+            %i.fa-solid.fa-lock{title: d[:busy]}
         %td.ff
-          = d[:size]
+          != bytes(d[:size])
         %td
           != ago(d[:created])
         %td

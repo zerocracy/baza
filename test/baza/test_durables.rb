@@ -53,6 +53,7 @@ class Baza::DurablesTest < Minitest::Test
       assert(File.exist?(file))
       assert_equal(data, File.binread(file))
       durable.unlock(owner)
+      durable.delete
     end
   end
 end

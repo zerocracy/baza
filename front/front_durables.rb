@@ -80,3 +80,9 @@ get(%r{/durables/([0-9]+)/unlock}) do
   the_durables.get(id).unlock(owner)
   flash(iri.cut('/durables'), "The durable ##{id} unlocked")
 end
+
+get(%r{/durables/([0-9]+)/remove}) do
+  id = params['captures'].first.to_i
+  the_durables.get(id).delete
+  flash(iri.cut('/durables'), "The durable ##{id} was deleted")
+end
