@@ -50,7 +50,8 @@ class Baza::Durable
     rows = pgsql.exec(
       [
         'UPDATE durable SET busy = $1',
-        'WHERE human = $2 AND id = $3 AND (busy IS NULL OR busy = $1)',
+        'WHERE (busy IS NULL OR busy = $1) AND id = $3',
+        "AND (human = $2 OR file LIKE '@%')",
         'RETURNING id'
       ],
       [owner, human.id, @id]
@@ -63,7 +64,12 @@ class Baza::Durable
   # @param [String] owner The owner of the lock
   def unlock(owner)
     rows = pgsql.exec(
-      'UPDATE durable SET busy = NULL WHERE human = $1 AND id = $2 AND busy = $3 RETURNING id',
+      [
+        'UPDATE durable SET busy = NULL',
+        'WHERE busy = $3 AND id = $2',
+        "AND (human = $1 OR file LIKE '@%')",
+        'RETURNING id'
+      ],
       [human.id, @id, owner]
     )
     raise Busy, "The durable ##{@id} is either not locked or locked by someone else" if rows.empty?
@@ -72,7 +78,11 @@ class Baza::Durable
   # Is it locked now?
   def locked?
     pgsql.exec(
-      'SELECT id FROM durable WHERE human = $1 AND id = $2 AND busy IS NULL',
+      [
+        'SELECT id FROM durable',
+        'WHERE busy IS NULL AND id = $2',
+        "AND (human = $1 OR file LIKE '@%')"
+      ],
       [human.id, @id]
     ).empty?
   end
@@ -82,13 +92,16 @@ class Baza::Durable
   # @param [String] file The file where to save it
   def load(file)
     uri = pgsql.exec(
-      'SELECT uri FROM durable WHERE human = $1 AND id = $2',
+      [
+        'SELECT uri FROM durable',
+        "WHERE id = $2 AND (human = $1 OR file LIKE '@%')"
+      ],
       [human.id, @id]
     ).first['uri']
     @fbs.load(uri, file)
   end
 
-  # Put it back to cloud and delete all files from the +target+ directory.
+  # Put it back to cloud and delete all files from the +target+ file.
   #
   # @param [String] file The file where to take the content
   # @return [String] URI of the file just saved to the cloud
@@ -96,12 +109,15 @@ class Baza::Durable
     raise Baza::Urror, "The durable ##{@id} is not locked, can't save" unless locked?
     uri = @fbs.save(file)
     before = pgsql.exec(
-      'SELECT uri FROM durable WHERE human = $1 AND id = $2',
+      "SELECT uri FROM durable WHERE id = $2 AND (human = $1 OR file LIKE '@%')",
       [human.id, @id]
     ).first['uri']
     @fbs.delete(before)
     pgsql.exec(
-      'UPDATE durable SET uri = $3, size = $4 WHERE human = $1 AND id = $2',
+      [
+        'UPDATE durable SET uri = $3, size = $4',
+        "WHERE id = $2 OR (human = $1 AND file LIKE '@%')"
+      ],
       [human.id, @id, uri, File.size(file)]
     )
     uri
@@ -109,14 +125,36 @@ class Baza::Durable
 
   # Delete it here and in the cloud.
   def delete
-    uri = pgsql.exec(
-      'SELECT uri FROM durable WHERE human = $1 AND id = $2',
-      [human.id, @id]
-    ).first['uri']
     @fbs.delete(uri)
     pgsql.exec(
       'DELETE FROM durable WHERE human = $1 AND id = $2',
       [human.id, @id]
     )
+  end
+
+  # Get its URI.
+  def uri
+    to_json[:uri]
+  end
+
+  def to_json(*_args)
+    @to_json ||=
+      begin
+        row = pgsql.exec(
+          [
+            'SELECT * FROM durable',
+            "WHERE id = $1 AND human = $2 OR (human = $1 AND file LIKE '@%')"
+          ],
+          [@id, @human.id]
+        ).first
+        raise Baza::Urror, "There is no durable ##{@id}" if row.nil?
+        {
+          id: @id,
+          jname: row['jname'].downcase,
+          created: Time.parse(row['created']),
+          uri: row['uri'],
+          file: row['file']
+        }
+      end
   end
 end

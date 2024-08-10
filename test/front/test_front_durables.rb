@@ -58,11 +58,11 @@ class Baza::FrontDurablesTest < Minitest::Test
   def test_place_twice
     login
     jname = fake_name
-    directory = fake_name
-    place(jname, directory, 'first')
+    file = fake_name
+    place(jname, file, 'first')
     assert_status(302)
     first = last_response.headers['X-Zerocracy-DurableId'].to_i
-    place(jname, directory, 'second')
+    place(jname, file, 'second')
     assert_status(302)
     second = last_response.headers['X-Zerocracy-DurableId'].to_i
     assert_equal(first, second)
@@ -70,13 +70,13 @@ class Baza::FrontDurablesTest < Minitest::Test
 
   private
 
-  def place(jname, directory, body)
+  def place(jname, file, body)
     Tempfile.open do |f|
       File.binwrite(f.path, body)
       post(
         '/durables/place',
         'jname' => jname,
-        'directory' => directory,
+        'file' => file,
         'zip' => Rack::Test::UploadedFile.new(f.path, 'application/zip')
       )
     end

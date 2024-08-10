@@ -1,7 +1,7 @@
 %form{method: 'post', action: iri.cut('/durables/place'), enctype: 'multipart/form-data'}
   %fieldset
     %input{ type: 'text', name: 'jname', tabindex: 1, placeholder: 'Job name', size: 14, maxlength: 32, required: true }
-    %input{ type: 'text', name: 'directory', tabindex: 2, placeholder: 'Directory', size: 25, maxlength: 64, required: true }
+    %input{ type: 'text', name: 'file', tabindex: 2, placeholder: 'file', size: 25, maxlength: 64, required: true }
     %input{ type: 'file', name: 'zip', tabindex: 3, required: true }
     %input{ type: 'submit', tabindex: 4, value: 'Place' }
 
@@ -18,7 +18,7 @@
       %col{style: 'width: 3em;'}
       -# Jname
       %col{style: 'width: 16em;'}
-      -# Directory
+      -# File
       %col
       -# Lock
       %col{style: 'width: 5em;'}
@@ -35,7 +35,7 @@
         %th
           Jname
         %th
-          Directory
+          File
         %th
           Lock
         %th
@@ -56,7 +56,9 @@
             %a{href: iri.cut('/jobs').over(name: d[:jname])}<
               = d[:jname]
         %td.ff
-          = d[:directory]
+          = d[:file]
+          - if the_human.admin? && d[:shareable]
+            %i.fa-solid.fa-star.gray{title: 'This file is shared among all jobs of all users!'}
         %td
           - unless d[:busy].nil?
             %i.fa-solid.fa-lock{title: d[:busy]}

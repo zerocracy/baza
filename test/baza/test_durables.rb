@@ -41,9 +41,8 @@ class Baza::DurablesTest < Minitest::Test
       file = File.join(dir, 'test.bin')
       data = 'test me'
       File.binwrite(file, data)
-      directory = 'dir-name'
-      durable = durables.place(job.name, directory, file)
-      assert_equal(durable.id, durables.place(job.name, directory, nil).id)
+      durable = durables.place(job.name, File.basename(file), file)
+      assert_equal(durable.id, durables.place(job.name, File.basename(file), nil).id)
       durable.lock(owner)
       durable.lock(owner)
       assert_raises(Baza::Durable::Busy) { durable.lock('another owner') }
@@ -52,8 +51,29 @@ class Baza::DurablesTest < Minitest::Test
       durable.load(file)
       assert(File.exist?(file))
       assert_equal(data, File.binread(file))
+      durable.save(file)
       durable.unlock(owner)
       durable.delete
+    end
+  end
+
+  def test_place_shareable
+    fbs = Baza::Factbases.new('', '')
+    humans = Baza::Humans.new(fake_pgsql)
+    admin = humans.ensure('yegor256')
+    human = humans.ensure(fake_name)
+    Dir.mktmpdir do |dir|
+      file = File.join(dir, 'test.bin')
+      data = 'test me'
+      File.binwrite(file, data)
+      n = "@#{fake_name}"
+      id = admin.durables(fbs).place('test', n, file).id
+      durable = human.durables(fbs).place('another', n, file)
+      assert_equal(id, durable.id)
+      durable.lock('test')
+      durable.load(file)
+      durable.save(file)
+      durable.unlock('test')
     end
   end
 end

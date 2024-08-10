@@ -29,15 +29,15 @@ SOFTWARE.
         id SERIAL PRIMARY KEY,
         human INT NOT NULL REFERENCES human(id),
         jname VARCHAR(32) NOT NULL,
-        directory VARCHAR(32) NOT NULL,
+        file VARCHAR(32) NOT NULL,
         uri VARCHAR(1024) NOT NULL,
         busy VARCHAR(64),
         size INT NOT NULL,
         created TIMESTAMPTZ DEFAULT now() NOT NULL,
-        UNIQUE(human, jname, directory),
+        UNIQUE(human, jname, file),
         UNIQUE(uri)
       );
-      CREATE INDEX idx_durable1 ON durable(human, jname, directory);
+      CREATE INDEX idx_durable1 ON durable(human, jname, file);
     </sql>
   </changeSet>
 </databaseChangeLog>

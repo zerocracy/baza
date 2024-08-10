@@ -22,14 +22,15 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+require_relative 'urror'
+require_relative 'human'
+
 # Durables of a human.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
 class Baza::Durables
   attr_reader :human
-
-  SHAREABLE = %w[eva-model].freeze
 
   def initialize(human, fbs)
     @human = human
@@ -55,7 +56,7 @@ class Baza::Durables
         'LEFT JOIN job ON job.name = durable.jname',
         'WHERE human = $1',
         'GROUP BY durable.id',
-        'ORDER BY durable.directory'
+        'ORDER BY durable.file'
       ],
       [human.id]
     )
@@ -63,13 +64,13 @@ class Baza::Durables
       d = {
         id: row['id'].to_i,
         jname: row['jname'],
-        directory: row['directory'],
+        file: row['file'],
         uri: row['uri'],
         busy: row['busy'],
         size: row['size'].to_i,
         created: Time.parse(row['created']),
         jobs: row['jobs'].to_i,
-        shareable: SHAREABLE.include?(row['directory'].downcase)
+        shareable: row['file'].start_with?('@')
       }
       yield d
     end
@@ -87,21 +88,28 @@ class Baza::Durables
   # Start a new durable (using the file provided) or return an already existing one.
   #
   # @param [String] jname The name of a job
-  # @param [String] directory The directory of the durable
+  # @param [String] file The file of the durable
   # @param [String] file The file where to get start content
   # @return [Integer] The ID of the durable created or found
-  def place(jname, directory, file)
+  def place(jname, file, source)
     get(
       pgsql.transaction do |t|
-        t.exec('LOCK human')
+        t.exec('LOCK human IN EXCLUSIVE MODE')
         rows = t.exec(
-          'SELECT id FROM durable WHERE human = $1 AND jname = $2 AND directory = $3',
-          [human.id, jname, directory]
+          [
+            'SELECT id FROM durable',
+            'WHERE (human = $1 AND jname = $2 AND file = $3)',
+            "OR (file LIKE '@%' AND file = $3)"
+          ],
+          [human.id, jname, file]
         )
         if rows.empty?
+          if file.start_with?('@') && !@human.extend(Baza::Human::Admin).admin?
+            raise Baza::Urror, "You cannot use the '#{file}' name, it is only for admins"
+          end
           t.exec(
-            'INSERT INTO durable (human, jname, directory, uri, size) VALUES ($1, $2, $3, $4, $5) RETURNING id',
-            [human.id, jname, directory, @fbs.save(file), File.size(file)]
+            'INSERT INTO durable (human, jname, file, uri, size) VALUES ($1, $2, $3, $4, $5) RETURNING id',
+            [human.id, jname, file, @fbs.save(source), File.size(source)]
           ).first['id'].to_i
         else
           rows.first['id'].to_i

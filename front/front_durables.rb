@@ -55,11 +55,11 @@ end
 
 post(%r{/durables/place}) do
   jname = params[:jname]
-  directory = params[:jname]
+  file = params[:jname]
   durable =
     Tempfile.open do |f|
       FileUtils.copy(params[:zip][:tempfile], f.path)
-      the_durables.place(jname, directory, f.path)
+      the_durables.place(jname, file, f.path)
     end
   response.headers['X-Zerocracy-DurableId'] = durable.id.to_s
   flash(iri.cut('/durables'), "The ID of the durable is ##{durable.id}")
