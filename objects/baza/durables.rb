@@ -47,14 +47,14 @@ class Baza::Durables
     @human.pgsql
   end
 
-  def empty?(human)
+  def empty?
     pgsql.exec(
       'SELECT id FROM durable WHERE human = $1',
       [human.id]
     ).empty?
   end
 
-  def each(human)
+  def each
     return to_enum(__method__) unless block_given?
     rows = pgsql.exec(
       [

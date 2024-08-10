@@ -36,7 +36,6 @@ class Baza::DurablesTest < Minitest::Test
     fbs = Baza::Factbases.new('', '')
     job = fake_job
     durables = job.jobs.human.durables(fbs)
-    key = 'foo'
     owner = 'it is me'
     Dir.mktmpdir do |dir|
       file = File.join(dir, 'test.bin')
