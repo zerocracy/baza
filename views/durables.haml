@@ -16,6 +16,8 @@
     %colgroup
       -# ID
       %col{style: 'width: 3em;'}
+      -# Package
+      %col{style: 'width: 3em;'}
       -# Jname
       %col{style: 'width: 16em;'}
       -# File
@@ -33,7 +35,8 @@
         %th
           = '#'
         %th
-          Jname
+        %th
+          Job name
         %th
           File
         %th
@@ -48,6 +51,9 @@
       %tr
         %td.ff
           = "##{d[:id]}"
+        %td
+          %a.ico{href: iri.cut('/durables').append(d[:id]), title: 'Click here to download it'}
+            %i.fa-solid.fa-box-archive
         %td.ff
           - if d[:jobs].zero?
             = d[:jname]
