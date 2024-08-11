@@ -24,12 +24,20 @@
 
 require 'minitest/autorun'
 require 'factbase'
-require_relative 'test__helper'
-require_relative '../baza'
+require_relative '../test__helper'
+require_relative '../../baza'
 
 class Baza::AppTest < Minitest::Test
   def app
     Sinatra::Application
+  end
+
+  def test_all_daemons
+    %w[gc verify tbot donations gc].each do |d|
+      a = app.settings.send(d)
+      s = a.to_s
+      assert(s.end_with?('/0'), "#{d} (#{s}) fails with #{a.backtraces}")
+    end
   end
 
   def test_renders_public_pages

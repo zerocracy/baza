@@ -196,11 +196,15 @@ configure do
       j.expire!(settings.fbs)
       settings.loog.debug("Job ##{j.id} was a test, expired")
     end
-    tester = settings.humans.his_token('00000000-0000-0000-0000-000000000000').human
-    tester.durables(settings.fbs).each do |d|
-      next if d[:created] > Time.now - (2 * 24 * 60 * 60)
-      tester.durables(settings.fbs).get(d[:id]).delete
-      settings.loog.debug("Durable ##{d[:id]} was a test, deleted")
+    begin
+      tester = settings.humans.his_token('00000000-0000-0000-0000-000000000000').human
+      tester.durables(settings.fbs).each do |d|
+        next if d[:created] > Time.now - (2 * 24 * 60 * 60)
+        tester.durables(settings.fbs).get(d[:id]).delete
+        settings.loog.debug("Durable ##{d[:id]} was a test, deleted")
+      end
+    rescue Baza::Humans::TokenNotFound
+      settings.loog.warn('There is not tester in the system')
     end
   end
 end
