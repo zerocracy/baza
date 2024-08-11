@@ -58,7 +58,7 @@ GEM
     backtrace (0.4.0)
     base58 (0.2.3)
     base64 (0.2.0)
-    baza.rb (0.0.3)
+    baza.rb (0.0.4)
       backtrace (> 0)
       faraday (> 0)
       faraday-http-cache (> 0)
@@ -235,7 +235,7 @@ GEM
       sawyer (~> 0.9)
     openssl (3.2.0)
     others (0.0.3)
-    parallel (1.26.1)
+    parallel (1.26.2)
     parser (3.3.4.2)
       ast (~> 2.4.1)
       racc
