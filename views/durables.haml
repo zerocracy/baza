@@ -55,12 +55,15 @@
           %a.ico{href: iri.cut('/durables').append(d[:id]), title: 'Click here to download it'}
             %i.fa-solid.fa-box-archive
         %td.ff
-          - if d[:jobs].zero?
-            = d[:jname]
-            %i.fa-solid.fa-triangle-exclamation.bad{title: 'There is no job by this name, maybe a spelling error?'}
+          - if the_human.admin? && d[:shareable]
+            != '&mdash;'
           - else
-            %a{href: iri.cut('/jobs').over(name: d[:jname])}<
+            - if d[:jobs].zero?
               = d[:jname]
+              %i.fa-solid.fa-triangle-exclamation.bad{title: 'There is no job by this name, maybe a spelling error?'}
+            - else
+              %a{href: iri.cut('/jobs').over(name: d[:jname])}<
+                = d[:jname]
         %td.ff
           = d[:file]
           - if the_human.admin? && d[:shareable]

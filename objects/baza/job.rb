@@ -92,6 +92,7 @@ class Baza::Job
     raise Baza::Urror, 'Number of errors cannot be negative' unless errors.nil? || !errors.negative?
     raise Baza::Urror, 'When exit code is zero, size is mandatory' if exit.zero? && size.nil?
     raise Baza::Urror, 'When exit code is zero, errors count is mandatory' if exit.zero? && errors.nil?
+    raise Baza::Urror, 'The job is already finished' if finished?
     summary =
       "Job ##{id} #{exit.zero? ? 'completed' : "failed (#{exit})"} " \
       "in #{msec}ms, #{stdout.split("\n").size} lines in stdout"

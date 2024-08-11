@@ -163,14 +163,19 @@ end
 
 # Pipeline:
 configure do
-  require_relative 'objects/baza/pipeline'
   lib = File.absolute_path(File.join(__dir__, ENV['RACK_ENV'] == 'test' ? 'target/j' : 'j'))
   ['', 'lib', 'judges'].each { |d| FileUtils.mkdir_p(File.join(lib, d)) }
-  set :pipeline, Baza::Pipeline.new(
-    lib, settings.humans, settings.fbs,
-    settings.loog, settings.trails, tbot: settings.tbot
-  )
-  settings.pipeline.start unless ENV['RACK_ENV'] == 'test'
+  set(:pipeline, Always.new(1).on_error { |e, _| settings.loog.error(Backtrace.new(e)) })
+  unless ENV['RACK_ENV'] == 'test'
+    settings.pipeline.start(5) do
+      require_relative 'objects/baza/pipeline'
+      Baza::Pipeline.new(
+        lib, settings.humans, settings.fbs,
+        settings.loog, settings.trails, tbot: settings.tbot,
+                                        check_balance: true
+      ).process_one
+    end
+  end
 end
 
 # Garbage collection:

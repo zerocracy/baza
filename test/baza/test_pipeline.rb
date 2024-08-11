@@ -37,6 +37,17 @@ require_relative '../../objects/baza/trails'
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
 class Baza::PipelineTest < Minitest::Test
+  def setup
+    loop do
+      Dir.mktmpdir do |home|
+        process_all(home, Baza::Humans.new(fake_pgsql), Baza::Factbases.new('', ''))
+      end
+      break
+    rescue StandardError
+      retry
+    end
+  end
+
   def test_simple_processing
     loog = Loog::Buffer.new
     humans = Baza::Humans.new(fake_pgsql)
@@ -53,8 +64,6 @@ class Baza::PipelineTest < Minitest::Test
         end
         '
       )
-      pipeline = Baza::Pipeline.new(home, humans, fbs, loog, Baza::Trails.new(fake_pgsql))
-      pipeline.start(0.1)
       human = humans.ensure(fake_name)
       admin = humans.ensure('yegor256')
       admin.secrets.add(fake_name, 'ZEROCRAT_TOKEN', 'nothing interesting')
@@ -62,18 +71,16 @@ class Baza::PipelineTest < Minitest::Test
       job = token.start(fake_name, uri(fbs), 1, 0, 'n/a', ['vitals_url:abc', 'ppp:hello'], '192.168.1.1')
       assert(!human.jobs.get(job.id).finished?)
       human.secrets.add(job.name, 'ppp', 'swordfish')
-      wait_for(5) { human.jobs.get(job.id).finished? }
-      pipeline.stop
+      process_all(home, humans, fbs, loog:)
+      assert(human.jobs.get(job.id).finished?)
       stdout = loog.to_s
       [
-        'Pipeline started',
         'Running foo (#0)',
         'The following options provided',
         'PPP → "swor*fish"',
         'VITALS_URL → "abc"',
         'ZEROCRAT_TOKEN → "noth***********ting"',
-        'Update finished in 2 cycle(s), modified 1/0 fact(s)',
-        'Pipeline stopped'
+        'Update finished in 2 cycle(s), modified 1/0 fact(s)'
       ].each { |t| assert(stdout.include?(t), "Can't find '#{t}' in #{stdout}") }
       Tempfile.open do |f|
         job = human.jobs.get(job.id)
@@ -92,14 +99,13 @@ class Baza::PipelineTest < Minitest::Test
     humans = Baza::Humans.new(fake_pgsql)
     fbs = Baza::Factbases.new('', '', loog: Loog::NULL)
     Dir.mktmpdir do |home|
-      pipeline = Baza::Pipeline.new(home, humans, fbs, Loog::NULL, Baza::Trails.new(fake_pgsql))
-      pipeline.start(0.1)
       human = humans.ensure(fake_name)
       token = human.tokens.add(fake_name)
       first = token.start(fake_name, uri(fbs), 1, 0, 'n/a', [], '192.168.1.1')
       second = token.start(fake_name, uri(fbs), 1, 0, 'n/a', [], '192.168.1.1')
-      wait_for(5) { human.jobs.get(first.id).finished? && human.jobs.get(second.id).finished? }
-      pipeline.stop
+      process_all(home, humans, fbs)
+      assert(human.jobs.get(first.id).finished?, first.id)
+      assert(human.jobs.get(second.id).finished?, second.id)
     end
   end
 
@@ -107,13 +113,11 @@ class Baza::PipelineTest < Minitest::Test
     humans = Baza::Humans.new(fake_pgsql)
     fbs = Baza::Factbases.new('', '', loog: Loog::NULL)
     Dir.mktmpdir do |home|
-      pipeline = Baza::Pipeline.new(home, humans, fbs, Loog::NULL, Baza::Trails.new(fake_pgsql))
-      pipeline.start(0.1)
       human = humans.ensure(fake_name)
       token = human.tokens.add(fake_name)
       job = token.start(fake_name, fake_name, 1, 0, 'n/a', [], '192.168.1.1')
-      wait_for(5) { human.jobs.get(job.id).finished? }
-      pipeline.stop
+      assert_raises { process_all(home, humans, fbs) }
+      assert(human.jobs.get(job.id).finished?)
       job = human.jobs.get(job.id)
       assert(!job.result.nil?)
       assert(!job.result.exit.zero?)
@@ -129,16 +133,14 @@ class Baza::PipelineTest < Minitest::Test
       FileUtils.mkdir_p(File.join(home, 'lib'))
       FileUtils.mkdir_p(File.join(home, 'judges/foo'))
       File.write(File.join(home, 'judges/foo/foo.rb'), 'x = 42')
-      pipeline = Baza::Pipeline.new(home, humans, fbs, Loog::NULL, Baza::Trails.new(fake_pgsql))
-      pipeline.start(0.1)
       human = humans.ensure(fake_name)
       n = fake_name
       human.alterations.add(n, 'ruby', script: '$fb.insert.foo = 42')
       human.alterations.add(n, 'ruby', script: '$fb.insert.bar = 7')
       token = human.tokens.add(fake_name)
       job = token.start(n, uri(fbs), 1, 0, 'n/a', [], '192.168.1.1')
-      wait_for(5) { human.jobs.get(job.id).finished? }
-      pipeline.stop
+      process_all(home, humans, fbs)
+      assert(human.jobs.get(job.id).finished?)
       Tempfile.open do |f|
         job = human.jobs.get(job.id)
         assert_equal(0, job.result.exit, job.result.stdout)
@@ -170,13 +172,11 @@ class Baza::PipelineTest < Minitest::Test
         File.write(File.join($options.trails_dir, "bar/bar.json"), {"hello":42}.to_json)
         '
       )
-      pipeline = Baza::Pipeline.new(home, humans, fbs, Loog::NULL, trails)
-      pipeline.start(0.1)
       human = humans.ensure(fake_name)
       token = human.tokens.add(fake_name)
       job = token.start(fake_name, uri(fbs), 1, 0, 'n/a', [], '192.168.1.1')
-      wait_for(5) { job.jobs.get(job.id).finished? }
-      pipeline.stop
+      process_all(home, humans, fbs)
+      assert(job.jobs.get(job.id).finished?)
       job = job.jobs.get(job.id)
       assert_equal(0, job.result.exit, job.result.stdout)
     end
@@ -184,6 +184,14 @@ class Baza::PipelineTest < Minitest::Test
   end
 
   private
+
+  def process_all(home, humans, fbs, loog: Loog::NULL)
+    FileUtils.mkdir_p(File.join(home, 'judges'))
+    pp = Baza::Pipeline.new(home, humans, fbs, loog, Baza::Trails.new(fake_pgsql))
+    loop do
+      break unless pp.process_one
+    end
+  end
 
   def uri(fbs)
     Tempfile.open do |f|

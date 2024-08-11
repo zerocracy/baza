@@ -29,11 +29,21 @@ require 'zlib'
 require 'wait_for'
 require_relative '../test__helper'
 require_relative '../../objects/baza'
+require_relative '../../objects/baza/pipeline'
 require_relative '../../baza'
 
 class Baza::FrontPushTest < Minitest::Test
   def app
     Sinatra::Application
+  end
+
+  def setup
+    loop do
+      process_pipeline
+      break
+    rescue StandardError
+      retry
+    end
   end
 
   def test_starts_job_via_post
@@ -104,7 +114,6 @@ class Baza::FrontPushTest < Minitest::Test
     token = JSON.parse(last_response.body)['text']
     get('/push')
     header('User-Agent', 'something')
-
     fb = Factbase.new
     fb.insert.foo = 'booom \x01\x02\x03'
     Tempfile.open do |f|
@@ -131,7 +140,6 @@ class Baza::FrontPushTest < Minitest::Test
   end
 
   def test_starts_job_via_put
-    app.settings.pipeline.start(0)
     token = make_valid_token
     fb = Factbase.new
     (0..100).each do |i|
@@ -160,11 +168,10 @@ class Baza::FrontPushTest < Minitest::Test
     get("/recent/#{name}.txt")
     assert_status(200)
     rid = last_response.body.to_i
-    wait_for(10) do
-      get("/finished/#{rid}")
-      assert_status(200)
-      last_response.body == 'yes'
-    end
+    process_pipeline
+    get("/finished/#{rid}")
+    assert_status(200)
+    assert(last_response.body == 'yes')
     stdout = get("/stdout/#{rid}.txt").body
     assert_status(200)
     assert(stdout.include?('HOW ARE YOU, ДРУГ'), stdout)
@@ -182,7 +189,6 @@ class Baza::FrontPushTest < Minitest::Test
     assert_status(200)
     get("/jobs/#{rid}/expire")
     assert_status(302)
-    app.settings.pipeline.stop
   end
 
   def test_pushes_gzipped_file_via_put
@@ -379,15 +385,12 @@ class Baza::FrontPushTest < Minitest::Test
     get("/jobs/#{id}/input.html")
     get("/recent/#{name}.txt")
     rid = last_response.body.to_i
-    wait_for(10) do
-      human = app.humans.find(uname)
-      job = human.jobs.recent(name)
-      job.finish!(fake_name, 'stdout', 0, 544, 1, 0)
-      get("/finished/#{rid}?owner=baza")
-      assert_status(200)
-      last_response.body
-      assert(human.locks.locked?(name))
-    end
+    process_pipeline
+    human = app.humans.find(uname)
+    get("/finished/#{rid}?owner=baza")
+    assert_status(200)
+    last_response.body
+    assert(human.locks.locked?(name))
   end
 
   def test_call_lock_via_exit
@@ -417,15 +420,12 @@ class Baza::FrontPushTest < Minitest::Test
     put("/push/#{name}", fb.export)
     assert_status(200)
     rid = last_response.body.to_i
-    wait_for(10) do
-      get("/finished/#{rid}")
-      assert_status(200)
-      last_response.body == 'yes'
-    end
+    process_pipeline
+    get("/finished/#{rid}")
+    assert_status(200)
+    assert(last_response.body == 'yes')
     get("/stdout/#{rid}.txt").body
     human = app.humans.find(uname)
-    job = human.jobs.recent(name)
-    job.finish!(fake_name, 'stdout', 0, 544, 1, 0)
     get("/exit/#{rid}.txt?owner=baza").body
     assert(human.locks.locked?(name))
   end
@@ -496,20 +496,29 @@ class Baza::FrontPushTest < Minitest::Test
     get("/jobs/#{id}/input.html")
     get("/recent/#{name}.txt")
     rid = last_response.body.to_i
-    wait_for(10) do
-      get("/finished/#{rid}")
-      last_response.body == 'yes'
-    end
+    process_pipeline
+    get("/finished/#{rid}")
+    assert(last_response.body == 'yes')
     get("/stdout/#{rid}.txt").body
     get("/exit/#{rid}.txt").body
     human = app.humans.find(uname)
-    job = human.jobs.recent(name)
-    job.finish!(fake_name, 'stdout', 0, 544, 1, 0)
     get("/inspect/#{id}.fb?owner=baza")
     assert(human.locks.locked?(name))
   end
 
   private
+
+  def process_pipeline
+    Dir.mktmpdir do |home|
+      humans = Baza::Humans.new(fake_pgsql)
+      fbs = Baza::Factbases.new('', '', loog: Loog::NULL)
+      FileUtils.mkdir_p(File.join(home, 'judges'))
+      pp = Baza::Pipeline.new(home, humans, fbs, Loog::NULL, Baza::Trails.new(fake_pgsql))
+      loop do
+        break unless pp.process_one
+      end
+    end
+  end
 
   def make_valid_token
     uname = fake_name

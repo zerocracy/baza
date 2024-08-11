@@ -43,59 +43,52 @@ require_relative '../../version'
 class Baza::Pipeline
   attr_reader :pgsql
 
-  def initialize(home, humans, fbs, loog, trails, tbot: Baza::Tbot::Fake.new)
+  def initialize(home, humans, fbs, loog, trails, tbot: Baza::Tbot::Fake.new, check_balance: false)
     @home = home
     @humans = humans
     @fbs = fbs
     @loog = loog
     @tbot = tbot
     @trails = trails
-    @always = Always.new(1).on_error { |e, _| @loog.error(Backtrace.new(e)) }
+    @check_balance = check_balance
   end
 
-  def to_s
-    @always.to_s
-  end
-
-  def backtraces
-    @always.backtraces
-  end
-
-  def start(pause = 15)
-    @always.start(pause) do
-      owner = "baza #{Baza::VERSION} #{Time.now.utc.iso8601}"
-      job = pop(owner)
-      next if job.nil?
-      begin
-        process_it(job)
-      # rubocop:disable Lint/RescueException
-      rescue Exception => e
-        # rubocop:enable Lint/RescueException
-        @humans.pgsql.transaction do |t|
-          if t.exec('SELECT id FROM result WHERE job = $1', [job.id]).empty?
-            t.exec(
-              'INSERT INTO result (job, stdout, exit, msec) VALUES ($1, $2, 1, 1)',
-              [job.id, Backtrace.new(e).to_s]
-            )
-          else
-            t.exec(
-              'UPDATE result SET exit = 1, stdout = CONCAT($2, stdout) WHERE job = $1',
-              [job.id, Backtrace.new(e).to_s]
-            )
-          end
-          t.exec('UPDATE job SET taken = $1 WHERE id = $2', [e.message[0..255], job.id])
-        end
-        raise e
-      ensure
-        job.jobs.human.locks.unlock(job.name, owner)
-      end
+  # Process one job, if there is one that expects processing. If there are no
+  # jobs that needs processing, FALSE is returned. Otherwise, it's TRUE.
+  #
+  # @return [Boolean] TRUE if processing happened, FALSE if no jobs to process
+  def process_one
+    owner = "baza #{Baza::VERSION} #{Time.now.utc.iso8601}"
+    job = pop(owner)
+    if job.nil?
+      @loog.debug('Nothing to process by the pipeline at this time')
+      return false
     end
-    @loog.info('Pipeline started')
-  end
-
-  def stop
-    @always.stop
-    @loog.info('Pipeline stopped')
+    begin
+      process_it(job)
+    # rubocop:disable Lint/RescueException
+    rescue Exception => e
+      # rubocop:enable Lint/RescueException
+      @humans.pgsql.transaction do |t|
+        if t.exec('SELECT id FROM result WHERE job = $1', [job.id]).empty?
+          t.exec(
+            'INSERT INTO result (job, stdout, exit, msec) VALUES ($1, $2, 1, 1)',
+            [job.id, Backtrace.new(e).to_s]
+          )
+        else
+          t.exec(
+            'UPDATE result SET exit = 1, stdout = CONCAT($2, stdout) WHERE job = $1',
+            [job.id, Backtrace.new(e).to_s]
+          )
+        end
+        t.exec('UPDATE job SET taken = $1 WHERE id = $2', [e.message[0..255], job.id])
+      end
+      raise e
+    ensure
+      job.jobs.human.locks.unlock(job.name, owner)
+    end
+    @loog.debug("Pipeline finished processing job ##{job.id}")
+    true
   end
 
   private
@@ -175,7 +168,10 @@ class Baza::Pipeline
     )
     rows.each do |row|
       job = @humans.job_by_id(row['id'].to_i)
-      next if job.jobs.human.account.balance.negative?
+      if job.jobs.human.account.balance.negative? && @check_balance
+        @loog.debug("The job ##{job.id} needs processing, but the balance of @#{job.jobs.human.github} is negative")
+        next
+      end
       @humans.pgsql.exec('UPDATE job SET taken = $1 WHERE id = $2', [owner, job.id])
       return job
     end

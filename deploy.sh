@@ -42,6 +42,7 @@ find j -name '*.yml' -exec rm {} \;
 sed -i -s 's|j/||g' .gitignore
 git add j
 bundle up --retry=10
+bundle exec rake
 
 cp /code/home/assets/zerocracy/baza.yml config.yml
 git add config.yml
