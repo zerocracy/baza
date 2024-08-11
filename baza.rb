@@ -171,8 +171,9 @@ configure do
       require_relative 'objects/baza/pipeline'
       Baza::Pipeline.new(
         lib, settings.humans, settings.fbs,
-        settings.loog, settings.trails, tbot: settings.tbot,
-                                        check_balance: true
+        settings.loog, settings.trails,
+        tbot: settings.tbot,
+        check_balance: true
       ).process_one
     end
   end
@@ -195,7 +196,7 @@ configure do
       j.expire!(settings.fbs)
       settings.loog.debug("Job ##{j.id} was a test, expired")
     end
-    tester = settings.humans.his_token('00000000-0000-0000-0000-000000000000')
+    tester = settings.humans.his_token('00000000-0000-0000-0000-000000000000').human
     tester.durables(settings.fbs).each do |d|
       next if d[:created] > Time.now - (2 * 24 * 60 * 60)
       tester.durables(settings.fbs).get(d[:id]).delete

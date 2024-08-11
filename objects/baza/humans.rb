@@ -83,6 +83,8 @@ class Baza::Humans
   end
 
   # Find a human by the text of his token and returns the token (not the human).
+  #
+  # @return [Baza::Token] THe token just found
   def his_token(text)
     raise "Token (#{text.inspect}) must be a String" unless text.is_a?(String)
     rows = @pgsql.exec(
