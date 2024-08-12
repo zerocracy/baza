@@ -178,6 +178,7 @@ get(%r{/pull/([0-9]+).fb}) do
   Tempfile.open do |f|
     settings.fbs.load(r.uri2, f.path)
     content_type('application/octet-stream')
+    response.headers['Content-Disposition'] = "attachment; filename=\"#{j.name}-#{j.id}.fb\""
     File.binread(f.path)
   end
 end
