@@ -137,6 +137,11 @@ class Baza::Durable
     to_json[:uri]
   end
 
+  # Get its file.
+  def file
+    to_json[:file]
+  end
+
   def to_json(*_args)
     @to_json ||=
       begin

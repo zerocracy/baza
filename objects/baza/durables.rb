@@ -92,6 +92,9 @@ class Baza::Durables
   # @param [String] file The file where to get start content
   # @return [Integer] The ID of the durable created or found
   def place(jname, file, source)
+    raise Baza::Urror, "The name '#{jname}' is not valid, make it low-case" unless jname.match?(/^[a-z0-9-]+$/)
+    raise Baza::Urror, "The file name '#{file}' is not valid" unless file.match?(/^@?[A-Za-z0-9-\.]+$/)
+    raise Baza::Urror, "The file '#{source}' doesn't exist" unless File.exist?(source)
     get(
       pgsql.transaction do |t|
         t.exec('LOCK human IN EXCLUSIVE MODE')

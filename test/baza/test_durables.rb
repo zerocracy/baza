@@ -42,7 +42,7 @@ class Baza::DurablesTest < Minitest::Test
       data = 'test me'
       File.binwrite(file, data)
       durable = durables.place(job.name, File.basename(file), file)
-      assert_equal(durable.id, durables.place(job.name, File.basename(file), nil).id)
+      assert_equal(durable.id, durables.place(job.name, File.basename(file), file).id)
       durable.lock(owner)
       durable.lock(owner)
       assert_raises(Baza::Durable::Busy) { durable.lock('another owner') }
@@ -68,7 +68,7 @@ class Baza::DurablesTest < Minitest::Test
       File.binwrite(file, data)
       n = "@#{fake_name}"
       id = admin.durables(fbs).place('test', n, file).id
-      durable = human.durables(fbs).place(nil, n, file)
+      durable = human.durables(fbs).place('x', n, file)
       assert_equal(id, durable.id)
       durable.lock('test')
       durable.load(file)

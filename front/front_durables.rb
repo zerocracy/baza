@@ -47,8 +47,10 @@ end
 get(%r{/durables/([0-9]+)}) do
   id = params['captures'].first.to_i
   Tempfile.open do |f|
-    the_durables.get(id).load(f.path)
+    d = the_durables.get(id)
+    d.load(f.path)
     content_type('application/octet-stream')
+    response.headers['Content-Disposition'] = "attachment; filename=\"#{d.file}\""
     File.binread(f.path)
   end
 end
