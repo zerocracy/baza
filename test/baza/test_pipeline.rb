@@ -32,7 +32,7 @@ require_relative '../../objects/baza/pipeline'
 require_relative '../../objects/baza/factbases'
 require_relative '../../objects/baza/trails'
 
-# Test.
+# Test for Pipeline.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
@@ -181,6 +181,16 @@ class Baza::PipelineTest < Minitest::Test
       assert_equal(0, job.result.exit, job.result.stdout)
     end
     assert(!trails.each.to_a.find { |t| t[:name] == 'bar.json' }.nil?)
+  end
+
+  def test_with_j_if_exists
+    j = File.absolute_path(File.join(__dir__, '../../j'))
+    skip unless File.exist?(j)
+    job = fake_job
+    human = job.jobs.human
+    process_all(j, human.humans, Baza::Factbases.new('', ''))
+    job = human.jobs.get(job.id)
+    assert(job.result.errors.zero?)
   end
 
   private
