@@ -105,7 +105,7 @@ class Baza::Durables
         )
         if rows.empty?
           if file.start_with?('@') && !@human.extend(Baza::Human::Admin).admin?
-            raise Baza::Urror, "You cannot use the '#{file}' name, it is only for admins"
+            raise Baza::Urror, "You cannot place a new durable with the name '#{file}', the prefix is admin-only"
           end
           t.exec(
             'INSERT INTO durable (human, jname, file, uri, size) VALUES ($1, $2, $3, $4, $5) RETURNING id',
