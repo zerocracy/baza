@@ -83,3 +83,10 @@ get(%r{/jobs/([0-9]+)/output.html}) do
   job = the_human.jobs.get(id)
   render_html(job.result.uri2, job.result.id)
 end
+
+get(%r{/jobs/([0-9]+)/verified.txt}) do
+  id = params['captures'].first.to_i
+  job = the_human.jobs.get(id)
+  content_type('text/plain')
+  job.verified || ''
+end
