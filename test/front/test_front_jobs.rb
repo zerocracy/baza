@@ -36,6 +36,8 @@ class Baza::FrontJobsTest < Minitest::Test
   def test_read_job
     job = fake_job
     login(job.jobs.human.github)
+    get("/jobs/#{job.id}")
+    assert_status(200)
     get("/jobs/#{job.id}/verified.txt")
     assert_status(200)
   end
