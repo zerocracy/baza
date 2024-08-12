@@ -186,9 +186,10 @@ class Baza::PipelineTest < Minitest::Test
   def test_with_j_if_exists
     j = File.absolute_path(File.join(__dir__, '../../j'))
     skip unless File.exist?(j)
-    job = fake_job
+    fbs = Baza::Factbases.new('', '')
+    job = fake_token.start(fake_name, uri(fbs), 1, 0, 'n/a', [], '192.168.1.1')
     human = job.jobs.human
-    process_all(j, human.humans, Baza::Factbases.new('', ''))
+    process_all(j, human.humans, fbs)
     job = human.jobs.get(job.id)
     assert(job.result.errors.zero?)
   end
