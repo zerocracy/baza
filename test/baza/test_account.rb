@@ -25,7 +25,6 @@
 require 'minitest/autorun'
 require_relative '../test__helper'
 require_relative '../../objects/baza'
-require_relative '../../objects/baza/humans'
 
 # Test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -33,7 +32,7 @@ require_relative '../../objects/baza/humans'
 # License:: MIT
 class Baza::AccountTest < Minitest::Test
   def test_simple_receipt
-    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
+    human = fake_human
     acc = human.account
     assert_equal(0, acc.balance)
     acc.top_up(42, 'nothing')
@@ -44,7 +43,7 @@ class Baza::AccountTest < Minitest::Test
   end
 
   def test_fetch_receipts
-    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
+    human = fake_human
     token = human.tokens.add(fake_name)
     job = token.start(fake_name, fake_name, 1, 0, 'n/a', [], '192.168.1.1')
     job.finish!(fake_name, 'stdout', 0, 544, 111, 0)
@@ -57,7 +56,7 @@ class Baza::AccountTest < Minitest::Test
   end
 
   def test_fetch_bars
-    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
+    human = fake_human
     acc = human.account
     (-10..0).each do |week|
       created = Time.now - (week * 7 * 24 * 60 * 60)

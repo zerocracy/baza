@@ -37,7 +37,7 @@ require_relative '../../objects/baza/verified'
 class Baza::VerifiedTest < Minitest::Test
   def test_simple_check
     WebMock.disable_net_connect!
-    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
+    human = fake_human
     token = human.tokens.add(fake_name)
     ip = '192.168.1.1'
     url = 'https://github.com/foo/foo/actions/runs/555'
@@ -68,7 +68,7 @@ class Baza::VerifiedTest < Minitest::Test
 
   def test_missing_workflow_page
     WebMock.disable_net_connect!
-    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
+    human = fake_human
     token = human.tokens.add(fake_name)
     ip = '192.168.1.1'
     id = token.start(
@@ -83,7 +83,7 @@ class Baza::VerifiedTest < Minitest::Test
   end
 
   def test_missed_meta
-    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
+    human = fake_human
     token = human.tokens.add(fake_name)
     ip = '192.168.1.1'
     id = token.start(fake_name, fake_name, 1, 0, 'n/a', [], ip).id
@@ -93,7 +93,7 @@ class Baza::VerifiedTest < Minitest::Test
   end
 
   def test_broken_meta
-    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
+    human = fake_human
     token = human.tokens.add(fake_name)
     ip = '192.168.1.1'
     id = token.start(fake_name, fake_name, 1, 0, 'n/a', ['workflow_url:hey'], ip).id

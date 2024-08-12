@@ -78,11 +78,15 @@ class Minitest::Test
     "jeff#{SecureRandom.hex(8)}"
   end
 
-  def fake_token(human = Baza::Humans.new(fake_pgsql).ensure(fake_name))
+  def fake_human
+    Baza::Humans.new(fake_pgsql).ensure(fake_name)
+  end
+
+  def fake_token(human = fake_human)
     human.tokens.add(fake_name)
   end
 
-  def fake_job(human = Baza::Humans.new(fake_pgsql).ensure(fake_name))
+  def fake_job(human = fake_human)
     fake_token(human).start(fake_name, fake_name, 1, 0, 'n/a', [], '127.0.0.1')
   end
 

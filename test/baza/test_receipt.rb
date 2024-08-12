@@ -33,7 +33,7 @@ require_relative '../../objects/baza/humans'
 # License:: MIT
 class Baza::ReceiptTest < Minitest::Test
   def test_simple_receipt
-    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
+    human = fake_human
     acc = human.account
     assert_equal(0, acc.balance)
     acc.top_up(42, 'nothing')

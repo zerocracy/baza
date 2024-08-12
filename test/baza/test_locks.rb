@@ -26,7 +26,6 @@ require 'minitest/autorun'
 require_relative '../test__helper'
 require_relative '../../objects/baza'
 require_relative '../../objects/baza/locks'
-require_relative '../../objects/baza/humans'
 
 # Test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -34,7 +33,7 @@ require_relative '../../objects/baza/humans'
 # License:: MIT
 class Baza::LocksTest < Minitest::Test
   def test_simple_locking_scenario
-    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
+    human = fake_human
     locks = human.locks
     owner = "#{fake_name} #{fake_name} #{fake_name} --"
     n = fake_name
@@ -48,7 +47,7 @@ class Baza::LocksTest < Minitest::Test
   end
 
   def test_lock_checks_job
-    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
+    human = fake_human
     token = human.tokens.add(fake_name)
     name = "#{fake_name}-a"
     job = token.start(name, fake_name, 1, 0, 'n/a', [], '192.168.1.1')

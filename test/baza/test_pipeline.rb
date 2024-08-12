@@ -67,7 +67,7 @@ class Baza::PipelineTest < Minitest::Test
       human = humans.ensure(fake_name)
       admin = humans.ensure('yegor256')
       admin.secrets.add(fake_name, 'ZEROCRAT_TOKEN', 'nothing interesting')
-      token = human.tokens.add(fake_name)
+      token = fake_token(human)
       job = token.start(fake_name, uri(fbs), 1, 0, 'n/a', ['vitals_url:abc', 'ppp:hello'], '192.168.1.1')
       assert(!human.jobs.get(job.id).finished?)
       human.secrets.add(job.name, 'ppp', 'swordfish')
@@ -96,27 +96,25 @@ class Baza::PipelineTest < Minitest::Test
   end
 
   def test_picks_all_of_them
-    humans = Baza::Humans.new(fake_pgsql)
     fbs = Baza::Factbases.new('', '', loog: Loog::NULL)
     Dir.mktmpdir do |home|
-      human = humans.ensure(fake_name)
-      token = human.tokens.add(fake_name)
+      token = fake_token
       first = token.start(fake_name, uri(fbs), 1, 0, 'n/a', [], '192.168.1.1')
       second = token.start(fake_name, uri(fbs), 1, 0, 'n/a', [], '192.168.1.1')
-      process_all(home, humans, fbs)
+      human = token.human
+      process_all(home, human.humans, fbs)
       assert(human.jobs.get(first.id).finished?, first.id)
       assert(human.jobs.get(second.id).finished?, second.id)
     end
   end
 
   def test_with_fatal_error
-    humans = Baza::Humans.new(fake_pgsql)
     fbs = Baza::Factbases.new('', '', loog: Loog::NULL)
     Dir.mktmpdir do |home|
-      human = humans.ensure(fake_name)
-      token = human.tokens.add(fake_name)
+      token = fake_token
       job = token.start(fake_name, fake_name, 1, 0, 'n/a', [], '192.168.1.1')
-      assert_raises { process_all(home, humans, fbs) }
+      human = token.human
+      assert_raises { process_all(home, human.humans, fbs) }
       assert(human.jobs.get(job.id).finished?)
       job = human.jobs.get(job.id)
       assert(!job.result.nil?)
@@ -167,7 +165,6 @@ class Baza::PipelineTest < Minitest::Test
         '
         require "fileutils"
         require "json"
-        p $options.trails_dir
         FileUtils.mkdir(File.join($options.trails_dir, "bar"))
         File.write(File.join($options.trails_dir, "bar/bar.json"), {"hello":42}.to_json)
         '

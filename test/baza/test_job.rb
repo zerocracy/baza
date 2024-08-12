@@ -34,7 +34,7 @@ require_relative '../../objects/baza/factbases'
 # License:: MIT
 class Baza::JobTest < Minitest::Test
   def test_starts
-    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
+    human = fake_human
     token = human.tokens.add(fake_name)
     ip = '192.168.1.1'
     id = token.start(fake_name, fake_name, 1, 0, 'n/a', ['hello, dude!', 'пока!'], ip).id
@@ -55,7 +55,7 @@ class Baza::JobTest < Minitest::Test
   end
 
   def test_cant_finish_twice
-    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
+    human = fake_human
     token = human.tokens.add(fake_name)
     job = token.start(fake_name, fake_name, 1, 0, 'n/a', [], '192.168.1.1')
     assert(!job.finished?)
@@ -66,7 +66,7 @@ class Baza::JobTest < Minitest::Test
   end
 
   def test_finishes_and_saves_result
-    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
+    human = fake_human
     token = human.tokens.add(fake_name)
     job = token.start(fake_name, fake_name, 1, 0, 'n/a', [], '192.168.1.1')
     assert_nil(job.result)
@@ -79,7 +79,7 @@ class Baza::JobTest < Minitest::Test
   end
 
   def test_expires_once
-    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
+    human = fake_human
     token = human.tokens.add(fake_name)
     job = token.start(fake_name, fake_name, 1, 0, 'n/a', [], '192.168.1.1')
     assert(!job.expired?)
@@ -91,7 +91,7 @@ class Baza::JobTest < Minitest::Test
   end
 
   def test_expires_job_without_result
-    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
+    human = fake_human
     token = human.tokens.add(fake_name)
     job = token.start(fake_name, fake_name, 1, 0, 'n/a', [], '192.168.1.1')
     job.expire!(Baza::Factbases.new('', ''))
@@ -99,7 +99,7 @@ class Baza::JobTest < Minitest::Test
   end
 
   def test_job_secrets
-    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
+    human = fake_human
     n = fake_name
     human.secrets.add(n, 'k', 'v')
     human.secrets.add(fake_name, 'k', 'v')
@@ -110,7 +110,7 @@ class Baza::JobTest < Minitest::Test
   end
 
   def test_valve
-    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
+    human = fake_human
     token = human.tokens.add(fake_name)
     job = token.start(fake_name, fake_name, 1, 0, 'n/a', [], '192.168.1.1')
     b = fake_name

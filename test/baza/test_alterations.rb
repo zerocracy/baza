@@ -40,7 +40,7 @@ class Baza::AlterationsTest < Minitest::Test
   end
 
   def test_simple_scenario
-    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
+    human = fake_human
     alterations = human.alterations
     n = fake_name
     script = 'puts "Hello, world!"'
@@ -54,7 +54,7 @@ class Baza::AlterationsTest < Minitest::Test
   end
 
   def test_with_template
-    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
+    human = fake_human
     alterations = human.alterations
     n = fake_name
     alterations.add(n, 'pmp', { area: 'quality', param: 'qos_interval', value: '4' })
@@ -63,7 +63,7 @@ class Baza::AlterationsTest < Minitest::Test
   end
 
   def test_pmp_template
-    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
+    human = fake_human
     alterations = human.alterations
     n = fake_name
     alterations.add(n, 'pmp', { area: 'quality', param: 'qos_interval', value: '42' })
@@ -87,7 +87,7 @@ class Baza::AlterationsTest < Minitest::Test
   end
 
   def test_payout_template
-    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
+    human = fake_human
     alterations = human.alterations
     n = fake_name
     alterations.add(n, 'payout', { who: '444', payout: '100' })
@@ -117,7 +117,7 @@ class Baza::AlterationsTest < Minitest::Test
   end
 
   def test_all_variable_leakage
-    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
+    human = fake_human
     alterations = human.alterations
     n = fake_name
     %w[pmp payout].each do |t|
