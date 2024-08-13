@@ -23,6 +23,7 @@
 # SOFTWARE.
 
 require 'minitest/autorun'
+require 'iri'
 require_relative '../test__helper'
 require_relative '../../baza'
 
@@ -47,9 +48,10 @@ class Baza::AppTest < Minitest::Test
   end
 
   def test_fatal_error
-    get('/error')
+    get(Iri.new('/error').add(m: "\u0000;\n\t\t\r\nhello").to_s)
     assert_status(503)
-    assert(last_response.body.include?('intentional'))
+    assert(last_response.body.include?('hello'))
+    assert(last_response.headers['X-Zerocracy-Failure'].include?('hello'))
   end
 
   def test_protected_pages

@@ -51,7 +51,7 @@ end
 
 if ENV['RACK_ENV'] == 'test'
   get '/error' do
-    raise 'The error is intentional'
+    raise params[:m] || 'The error is intentional'
   end
 end
 
@@ -64,7 +64,7 @@ error do
     Sentry.capture_exception(e)
     bt = Backtrace.new(e)
     settings.loog.error("At #{request.url}:\n#{bt}")
-    response.headers['X-Zerocracy-Failure'] = e.message
+    response.headers['X-Zerocracy-Failure'] = e.message.inspect.gsub(/^"(.*)"$/, '\1')
     haml(:error, layout: :empty, locals: { backtrace: bt.to_s })
   end
 end
