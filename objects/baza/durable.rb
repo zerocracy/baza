@@ -116,7 +116,7 @@ class Baza::Durable
     pgsql.exec(
       [
         'UPDATE durable SET uri = $3, size = $4',
-        "WHERE id = $2 OR (human = $1 AND file LIKE '@%')"
+        "WHERE id = $2 AND (human = $1 OR file LIKE '@%')"
       ],
       [human.id, @id, uri, File.size(file)]
     )

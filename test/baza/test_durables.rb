@@ -77,4 +77,22 @@ class Baza::DurablesTest < Minitest::Test
       durable.unlock('test')
     end
   end
+
+  def test_update_two_by_admin
+    fbs = Baza::Factbases.new('', '')
+    humans = Baza::Humans.new(fake_pgsql)
+    admin = humans.ensure('yegor256')
+    Dir.mktmpdir do |dir|
+      file = File.join(dir, 'test.bin')
+      data = 'test me'
+      File.binwrite(file, data)
+      n1 = "@#{fake_name}"
+      n2 = "@#{fake_name}"
+      admin.durables(fbs).place('test', n1, file).id
+      admin.durables(fbs).place('test', n2, file).id
+      durable = admin.durables(fbs).place('x', n2, file)
+      durable.lock('test')
+      durable.save(file)
+    end
+  end
 end
