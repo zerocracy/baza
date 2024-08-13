@@ -115,10 +115,14 @@ class Baza::Human
     @tbot.notify(self, *lines)
   end
 
-  # An admin.
-  module Admin
+  # Roles of a human.
+  module Roles
     def admin?
       github == 'yegor256' || ENV['RACK_ENV'] == 'test'
+    end
+
+    def tester?
+      github == '!tester' || ENV['RACK_ENV'] == 'test'
     end
   end
 end

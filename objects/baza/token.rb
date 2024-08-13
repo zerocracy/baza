@@ -59,7 +59,9 @@ class Baza::Token
 
   def start(name, uri1, size, errors, agent, meta, ip)
     raise Baza::Urror, 'The token is inactive' unless active?
-    raise Baza::Urror, 'The balance is negative' unless human.account.balance.positive? || ENV['RACK_ENV'] == 'test'
+    unless human.account.balance.positive? || human.extend(Baza::Human::Roles).tester?
+      raise Baza::Urror, 'The balance is negative, you cannot post new jobs'
+    end
     @tokens.human.jobs.start(@id, name, uri1, size, errors, agent, meta, ip)
   end
 

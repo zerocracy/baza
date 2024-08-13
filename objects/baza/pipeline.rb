@@ -97,7 +97,7 @@ class Baza::Pipeline
     @loog.info("Job ##{job.id} starts: #{job.uri1}")
     Dir.mktmpdir do |dir|
       stdout = Loog::Buffer.new(
-        level: job.jobs.human.extend(Baza::Human::Admin).admin? ? Logger::DEBUG : Logger::INFO
+        level: job.jobs.human.extend(Baza::Human::Roles).admin? ? Logger::DEBUG : Logger::INFO
       )
       log = Loog::Tee.new(stdout, @loog)
       input = File.join(dir, 'input.fb')
@@ -168,7 +168,8 @@ class Baza::Pipeline
     )
     rows.each do |row|
       job = @humans.job_by_id(row['id'].to_i)
-      if job.jobs.human.account.balance.negative? && @check_balance
+      human = job.jobs.human
+      if human.account.balance.negative? && @check_balance && !human.extend(Baza::Human::Roles).tester?
         @loog.debug("The job ##{job.id} needs processing, but the balance of @#{job.jobs.human.github} is negative")
         next
       end

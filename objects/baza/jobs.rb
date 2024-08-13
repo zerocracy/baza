@@ -47,6 +47,9 @@ class Baza::Jobs
   end
 
   def start(token, name, uri1, size, errors, agent, meta, ip)
+    unless @human.account.balance.positive? || @human.extend(Baza::Human::Roles).tester?
+      raise Baza::Urror, 'The balance is negative, you cannot post new jobs'
+    end
     raise Baza::Urror, "The name '#{name}' is not valid, make it low-case" unless name.match?(/^[a-z0-9-]+$/)
     raise Baza::Urror, "The size '#{size}' is not positive" unless size.positive?
     raise Baza::Urror, 'The agent is empty' if agent.empty?

@@ -95,5 +95,5 @@ def the_human
   Unpiercable.new(
     settings.humans.get(@locals[:human]),
     github: @locals[:human_login]
-  ).extend(Baza::Human::Admin)
+  ).extend(Baza::Human::Roles)
 end

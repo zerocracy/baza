@@ -23,8 +23,12 @@
               %a{href: iri.cut('/dash')}
                 %img.logo{src: iri.cut('/svg/logo.svg'), alt: 'Logo'}
             %li
-              %span{title: "Current user ##{the_human.id}"}
-                = "@#{the_human.github}"
+              - if the_human.tester?
+                %span{title: "Current user ##{the_human.id} (test account)", style: 'background-color: darkred; color: white;'}
+                  tester
+              - else
+                %span{title: "Current user ##{the_human.id}"}
+                  = "@#{the_human.github}"
             %li
               %a{href: 'https://t.me/zerocrat_bot'}
                 %i.fa-brands.fa-telegram.fa-lg{class: ('gray' unless telegram?), title: (telegram? ? 'You are connected already' : 'Click to connect to our Telegram bot')}

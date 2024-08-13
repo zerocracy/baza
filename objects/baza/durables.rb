@@ -107,7 +107,7 @@ class Baza::Durables
           [human.id, jname, file]
         )
         if rows.empty?
-          if file.start_with?('@') && !@human.extend(Baza::Human::Admin).admin?
+          if file.start_with?('@') && !@human.extend(Baza::Human::Roles).admin?
             raise Baza::Urror, "You cannot place a new durable with the name '#{file}', the prefix is admin-only"
           end
           t.exec(

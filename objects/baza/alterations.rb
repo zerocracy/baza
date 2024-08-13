@@ -82,7 +82,7 @@ class Baza::Alterations
     raise Baza::Urror, 'The name is not valid' unless name.match?(/^[a-z0-9]+$/)
     script =
       if template == 'ruby'
-        raise Baza::Urror, 'You cannot do this' unless @human.extend(Baza::Human::Admin).admin?
+        raise Baza::Urror, 'You cannot do this' unless @human.extend(Baza::Human::Roles).admin?
         params[:script]
       else
         script(template, params)
