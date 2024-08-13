@@ -108,6 +108,9 @@ module Baza::Helpers
   end
 
   def large_text(text)
+    return text if text.is_a?(Integer) || text.is_a?(Float)
+    return 'NIL' if text.nil?
+    return text.class unless text.is_a?(String)
     text
       .tr("\n", '↵')
       .scan(/.{1,4}/)

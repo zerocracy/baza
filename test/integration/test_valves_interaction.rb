@@ -60,7 +60,7 @@ class Baza::ValvesInteractionTest < Minitest::Test
     assert page.has_text?(job_name)
     assert page.has_no_selector?('i[title="There is no job by this name, maybe a spelling error?"]')
     assert page.has_text?(badge)
-    assert page.has_text?("\"#{result}\"")
+    assert page.has_text?(result)
   end
 
   def test_adds_valve_without_job
@@ -79,7 +79,7 @@ class Baza::ValvesInteractionTest < Minitest::Test
     assert page.has_text?(job_name)
     assert page.has_selector?('i[title="There is no job by this name, maybe a spelling error?"]')
     assert page.has_text?(badge)
-    assert page.has_text?("\"#{result}\"")
+    assert page.has_text?(result)
   end
 
   def test_removes_valve

@@ -73,16 +73,7 @@
         %td
           = v[:why]
         %td.ff
-          - if v[:result].nil?
-            %span.bad
-              NULL
-          - elsif v[:result].is_a?(String)
-            = v[:result].truncate.inspect
-          - elsif v[:result].is_a?(Integer) || v[:result].is_a?(Float)
-            = v[:result]
-          - else
-            %span.gray
-              = v[:result].class
+          != large_text(v[:result])
         %td
           != ago(v[:created])
         %td
