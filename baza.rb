@@ -197,7 +197,7 @@ configure do
       settings.loog.debug("Job ##{j.id} was a test, expired")
     end
     begin
-      tester = settings.humans.his_token('00000000-0000-0000-0000-000000000000').human
+      tester = settings.humans.his_token(Baza::Tokens::TESTER).human
       tester.durables(settings.fbs).each do |d|
         next if d[:created] > Time.now - (2 * 24 * 60 * 60)
         tester.durables(settings.fbs).get(d[:id]).delete

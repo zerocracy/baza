@@ -22,6 +22,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+require_relative 'tokens'
+
 # Garbage collector for all humans.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
@@ -40,7 +42,7 @@ class Baza::Gc
   # Iterate jobs that are tests (from 00000-0000-0000-00000 token).
   def tests(minutes = 2 * 60)
     return to_enum(__method__, minutes) unless block_given?
-    tid = @humans.his_token('00000000-0000-0000-0000-000000000000').id
+    tid = @humans.his_token(Baza::Tokens::TESTER).id
     q =
       'SELECT job.id FROM job WHERE token = $1 ' \
       'AND job.expired IS NULL ' \

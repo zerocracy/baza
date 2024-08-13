@@ -32,6 +32,8 @@ require 'veil'
 class Baza::Tokens
   attr_reader :human
 
+  TESTER = '00000000-0000-0000-0000-000000000000'
+
   def initialize(human)
     @human = human
   end

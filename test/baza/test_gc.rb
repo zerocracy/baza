@@ -62,7 +62,7 @@ class Baza::GcTest < Minitest::Test
   def test_finds_tests
     humans = Baza::Humans.new(fake_pgsql)
     human = humans.ensure(fake_name)
-    key = '00000000-0000-0000-0000-000000000000'
+    key = Baza::Tokens::TESTER
     humans.pgsql.exec('INSERT INTO token (human, name, text) VALUES ($1, $2, $3)', [human.id, fake_name, key])
     fake_job(human)
     humans.gc.tests(0) do |j|

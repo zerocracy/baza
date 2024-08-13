@@ -47,6 +47,7 @@ class Baza::Token
   end
 
   def deactivate!
+    raise Baza::Urror, 'This token cannot be deactivated' if text == Baza::Tokens::TESTER
     @tokens.pgsql.exec('UPDATE token SET active = false WHERE id = $1', [@id])
   end
 
