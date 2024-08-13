@@ -81,7 +81,7 @@
           Applied
         %th
     %tbody
-    - alterations.each do |s|
+    - paging(alterations, offset:) do |s|
       %tr
         %td.ff
           = "##{s[:id]}"

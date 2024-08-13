@@ -50,8 +50,8 @@ class Baza::Alterations
     ).empty?
   end
 
-  def each(pending: false)
-    return to_enum(__method__, pending:) unless block_given?
+  def each(pending: false, offset: 0)
+    return to_enum(__method__, pending:, offset:) unless block_given?
     rows = pgsql.exec(
       [
         'SELECT alteration.*, b.id AS applied, COUNT(a.id) AS jobs FROM alteration',
@@ -60,7 +60,8 @@ class Baza::Alterations
         'WHERE alteration.human = $1',
         (pending ? 'AND job IS NULL' : ''),
         'GROUP BY alteration.id, b.id',
-        'ORDER BY alteration.created DESC'
+        'ORDER BY alteration.created DESC',
+        "OFFSET #{offset.to_i}"
       ],
       [@human.id]
     )

@@ -29,11 +29,7 @@
       %th
         Created
   %tbody
-  - total = 0
-  - max = 10
-  - trails.each(offset: offset) do |t|
-    - total += 1
-    - break if total > max
+  - paging(trails, offset:) do |t|
     %tr
       %td.ff
         = "##{t[:id]}"
@@ -69,13 +65,6 @@
           = JSON.pretty_generate(t[:json])
       %td
         != ago(t[:created])
-%p
-  - unless offset.zero?
-    %a{href: iri.del(:offset)}
-      Back
-  - if total > max
-    %a{href: iri.over(offset: offset + max)}
-      More
 
 %form{method: 'post', action: iri.cut('/trails/add')}
   %fieldset

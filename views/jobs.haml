@@ -60,11 +60,7 @@
         %th
           Out
     %tbody
-    - total = 0
-    - max = 10
-    - jobs.each(offset: offset, name: name) do |j|
-      - total += 1
-      - break if total > max
+    - paging(jobs, offset:, name:) do |j|
       %tr
         %td
           %a{href: iri.cut('/jobs').append(j.id)}
@@ -140,10 +136,3 @@
         - else
           %td.center.orange{colspan: 5}
             In progress...
-  %p
-    - unless offset.zero?
-      %a{href: iri.del(:offset)}<
-        Back
-    - if total > max
-      %a{href: iri.over(offset: offset + max)}<
-        More

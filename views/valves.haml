@@ -49,11 +49,7 @@
           Created
         %th
     %tbody
-    - total = 0
-    - max = 10
-    - valves.each(offset: offset) do |v|
-      - total += 1
-      - break if total > max
+    - paging(valves, offset:) do |v|
       %tr
         %td.ff
           = "##{v[:id]}"
@@ -79,10 +75,3 @@
         %td
           %a.ico{href: iri.cut('/valves').append(v[:id]).append('remove'), title: "Remove valve ##{v[:id]}", onclick: "return confirm('Are you sure you want to remove valve ##{v[:id]}?')"}
             %i.fa-regular.fa-trash-can
-  %p
-    - unless offset.zero?
-      %a{href: iri.del(:offset)}
-        Back
-    - if total > max
-      %a{href: iri.over(offset: offset + max)}
-        More

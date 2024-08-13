@@ -27,7 +27,8 @@ get '/secrets' do
     :secrets,
     :default,
     title: '/secrets',
-    secrets: the_human.secrets
+    secrets: the_human.secrets,
+    offset: (params[:offset] || '0').to_i
   )
 end
 

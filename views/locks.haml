@@ -28,7 +28,7 @@
           Created
         %th
     %tbody
-    - locks.each do |lk|
+    - paging(locks, offset:) do |lk|
       %tr
         %td.ff
           = "##{lk[:id]}"

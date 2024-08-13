@@ -46,15 +46,16 @@ class Baza::Secrets
     ).empty?
   end
 
-  def each
-    return to_enum(__method__) unless block_given?
+  def each(offset: 0)
+    return to_enum(__method__, offset:) unless block_given?
     rows = pgsql.exec(
       [
         'SELECT secret.*, COUNT(job.id) AS jobs FROM secret',
         'LEFT JOIN job ON job.name = secret.name',
         'WHERE human = $1',
         'GROUP BY secret.id',
-        'ORDER BY secret.key'
+        'ORDER BY secret.key',
+        "OFFSET #{offset.to_i}"
       ],
       [@human.id]
     )

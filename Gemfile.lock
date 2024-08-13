@@ -181,7 +181,7 @@ GEM
     iri (0.8.0)
     jmespath (1.6.2)
     json (2.7.2)
-    judges (0.25.0)
+    judges (0.25.1)
       backtrace (~> 0)
       baza.rb (~> 0)
       concurrent-ruby (~> 1.2)

@@ -48,15 +48,16 @@ class Baza::Durables
     ).empty?
   end
 
-  def each
-    return to_enum(__method__) unless block_given?
+  def each(offset: 0)
+    return to_enum(__method__, offset:) unless block_given?
     rows = pgsql.exec(
       [
         'SELECT durable.*, COUNT(job.id) AS jobs FROM durable',
         'LEFT JOIN job ON job.name = durable.jname',
         'WHERE human = $1',
         'GROUP BY durable.id',
-        'ORDER BY durable.file'
+        'ORDER BY durable.file',
+        "OFFSET #{offset.to_i}"
       ],
       [human.id]
     )

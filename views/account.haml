@@ -64,11 +64,7 @@
       %th
         Created
   %tbody
-  - total = 0
-  - max = 10
-  - account.each(offset: offset) do |r|
-    - total += 1
-    - break if total > max
+  - paging(account, offset:) do |r|
     %tr
       - j = r.job_id
       %td
@@ -89,10 +85,3 @@
         = r.summary
       %td
         != ago(r.created)
-%p
-  - unless offset.zero?
-    %a{href: iri.del(:offset)}
-      Back
-  - if total > max
-    %a{href: iri.over(offset: offset + max)}
-      More

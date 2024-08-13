@@ -31,6 +31,26 @@ require 'securerandom'
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
 module Baza::Helpers
+  def paging(items, params = {}, &)
+    total = 0
+    max = 10
+    items.each(**params) do |v|
+      total += 1
+      break if total > max
+      yield v
+    end
+    # Doesn't work: https://stackoverflow.com/questions/78865053
+    html_tag('tr') do
+      html_tag('td', colspan: 4) do
+        [
+          "total=#{total}",
+          params[:offset].zero? ? '' : html_tag('a', href: iri.del(:offset)) { 'Back' },
+          total > max ? html_tag('a', href: iri.over(offset: params[:offset] + max)) { 'More' } : ''
+        ]
+      end
+    end
+  end
+
   def escape(txt)
     CGI.escape(txt).gsub('+', '%20')
   end

@@ -30,7 +30,8 @@ get '/alterations' do
     :default,
     title: '/alterations',
     alterations: the_human.alterations,
-    css: 'alterations'
+    css: 'alterations',
+    offset: (params[:offset] || '0').to_i
   )
 end
 

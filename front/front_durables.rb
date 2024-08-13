@@ -31,7 +31,8 @@ get '/durables' do
     :durables,
     :default,
     title: '/durables',
-    durables: the_durables
+    durables: the_durables,
+    offset: (params[:offset] || '0').to_i
   )
 end
 

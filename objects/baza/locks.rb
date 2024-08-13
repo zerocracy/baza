@@ -46,7 +46,7 @@ class Baza::Locks
     ).empty?
   end
 
-  def each(&)
+  def each(offset: 0)
     return to_enum(__method__, offset:) unless block_given?
     pgsql.exec(
       [
@@ -54,7 +54,8 @@ class Baza::Locks
         'LEFT JOIN job ON job.name = lock.name',
         'WHERE human = $1',
         'GROUP BY lock.id',
-        'ORDER BY lock.created DESC'
+        'ORDER BY lock.created DESC',
+        "OFFSET #{offset.to_i}"
       ],
       [@human.id]
     ).each do |row|

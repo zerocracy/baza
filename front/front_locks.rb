@@ -27,7 +27,8 @@ get '/locks' do
     :locks,
     :default,
     title: '/locks',
-    locks: the_human.locks
+    locks: the_human.locks,
+    offset: (params[:offset] || '0').to_i
   )
 end
 
