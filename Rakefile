@@ -84,7 +84,7 @@ task(:config) do
 end
 
 task(run: %i[pgsql liquibase]) do
-  `rerun -b "RACK_ENV=test ruby baza.rb"`
+  `rerun -b "RACK_ENV=test bundle exec ruby baza.rb"`
 end
 
 task(:copyright) do

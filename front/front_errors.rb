@@ -22,7 +22,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+require 'backtrace'
+require 'sentry-ruby'
 require_relative '../objects/baza/urror'
+require_relative '../version'
 
 configure do
   set :show_exceptions, false
@@ -38,10 +41,9 @@ end
 
 configure do
   unless ENV['RACK_ENV'] == 'test'
-    require 'raven'
-    Raven.configure do |c|
+    Sentry.init do |c|
       c.dsn = settings.config['sentry']
-      require_relative '../version'
+      c.logger = settings.loog
       c.release = Baza::VERSION
     end
   end
@@ -59,8 +61,7 @@ error do
   if e.is_a?(Baza::Urror)
     flash(@locals[:human] ? iri.cut('/dash') : iri.cut('/'), e.message, alert: true, code: 303)
   else
-    require 'raven'
-    Raven.capture_exception(e)
+    Sentry.capture_exception(e)
     bt = Backtrace.new(e)
     settings.loog.error("At #{request.url}:\n#{bt}")
     response.headers['X-Zerocracy-Failure'] = e.message

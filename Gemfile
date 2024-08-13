@@ -56,7 +56,7 @@ gem 'rubocop', '1.65.1', require: false
 gem 'rubocop-rspec', '3.0.4', require: false
 gem 'sass-embedded', '1.77.8'
 gem 'scss_lint', '0.60.0', require: false
-gem 'sentry-raven', '3.1.2'
+gem 'sentry-ruby', '~>5.18'
 gem 'simplecov', '0.22.0'
 gem 'simplecov-cobertura', '~> 2.1'
 gem 'sinatra', '4.0.0'
