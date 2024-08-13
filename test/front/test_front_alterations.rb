@@ -22,37 +22,29 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-get '/alterations' do
-  admin_only
-  flash(iri.cut('/dash'), 'You have no jobs yet, nothing to alter') if the_human.jobs.empty?
-  assemble(
-    :alterations,
-    :default,
-    title: '/alterations',
-    alterations: the_human.alterations,
-    css: 'alterations'
-  )
-end
+require 'minitest/autorun'
+require 'factbase'
+require_relative '../test__helper'
+require_relative '../../objects/baza'
+require_relative '../../baza'
 
-get(%r{/alterations/([0-9]+)/remove}) do
-  admin_only
-  id = params['captures'].first.to_i
-  the_human.alterations.remove(id)
-  flash(iri.cut('/alterations'), "The alteration ##{id} just removed")
-end
+class Baza::FrontAlterationsTest < Minitest::Test
+  def app
+    Sinatra::Application
+  end
 
-get(%r{/alterations/([0-9]+)/copy}) do
-  admin_only
-  id = params['captures'].first.to_i
-  a = the_human.alterations.get(id)
-  id = the_human.alterations.add(a[:name], 'ruby', { script: a[:script] })
-  flash(iri.cut('/alterations'), "The alteration ##{a[:id]} just copied to #{id}")
-end
-
-post('/alterations/add') do
-  admin_only
-  n = params[:name]
-  t = params[:template]
-  id = the_human.alterations.add(n, t, params)
-  flash(iri.cut('/alterations'), "The alteration ##{id} ('#{t}') just added for '#{n}'")
+  def test_read_alterations
+    human = fake_job.jobs.human
+    login(human.github)
+    alterations = human.alterations
+    n = fake_name
+    script = 'puts "Hello, world!"'
+    id = alterations.add(n, 'ruby', script:)
+    get('/alterations')
+    assert_status(200)
+    get("/alterations/#{id}/copy")
+    assert_status(302)
+    get("/alterations/#{id}/remove")
+    assert_status(302)
+  end
 end

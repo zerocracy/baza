@@ -77,6 +77,20 @@ class Baza::Alterations
     end
   end
 
+  def get(id)
+    row = pgsql.exec(
+      'SELECT * FROM alteration WHERE id = $1 AND human = $2',
+      [id, @human.id]
+    ).first
+    {
+      id: row['id'].to_i,
+      name: row['name'],
+      script: row['script'],
+      created: Time.parse(row['created']),
+      applied: row['applied']&.to_i
+    }
+  end
+
   def add(name, template, params)
     raise Baza::Urror, 'The name cannot be empty' if name.empty?
     raise Baza::Urror, 'The name is not valid' unless name.match?(/^[a-z0-9]+$/)

@@ -113,3 +113,5 @@
           - if s[:applied].nil?
             %a.ico{href: iri.cut('/alterations').append(s[:id]).append('remove'), title: "Remove alteration ##{s[:id]}", onclick: "return confirm('Are you sure you want to remove the alteration ##{s[:id]}?')"}
               %i.fa-regular.fa-trash-can
+          %a.ico{href: iri.cut('/alterations').append(s[:id]).append('copy'), title: "Make a copy of alteration ##{s[:id]}", onclick: "return confirm('Are you sure you want to make a copy of the alteration ##{s[:id]}?')"}
+            %i.fa-regular.fa-copy
