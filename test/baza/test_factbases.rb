@@ -23,6 +23,7 @@
 # SOFTWARE.
 
 require 'minitest/autorun'
+require 'webmock/minitest'
 require 'loog'
 require_relative '../test__helper'
 require_relative '../../objects/baza'
@@ -46,7 +47,63 @@ class Baza::FactbasesTest < Minitest::Test
     end
   end
 
-  def test_aws_usage
+  def test_save_to_aws
+    WebMock.disable_net_connect!
+    stub_request(:put, %r{https://s3.amazonaws.com/baza.zerocracy.com/.*$})
+      .to_return(status: 200)
+    fbs = Baza::Factbases.new('fake-key', 'fake-secret', loog: Loog::NULL)
+    Dir.mktmpdir do |dir|
+      input = File.join(dir, 'a.fb')
+      File.write(input, 'hey')
+      uuid = fbs.save(input)
+      assert_equal(47, uuid.length)
+    end
+  end
+
+  def test_load_from_aws
+    WebMock.disable_net_connect!
+    stub_request(:get, %r{https://s3.amazonaws.com/baza.zerocracy.com/.*$})
+      .to_return(status: 200, body: 'hello, world!')
+    fbs = Baza::Factbases.new('fake-key', 'fake-secret', loog: Loog::NULL)
+    Dir.mktmpdir do |dir|
+      input = File.join(dir, 'a.fb')
+      uuid = '2024-08-13-d7956cd6-9f2c-42db-a4e3-d9186f080bfa'
+      fbs.load(uuid, input)
+      assert_equal(13, File.size(input))
+    end
+  end
+
+  def test_load_from_aws_not_found
+    WebMock.disable_net_connect!
+    stub_request(:get, %r{https://s3.amazonaws.com/baza.zerocracy.com/.*$})
+      .to_return(status: 404)
+    fbs = Baza::Factbases.new('fake-key', 'fake-secret', loog: Loog::NULL)
+    Dir.mktmpdir do |dir|
+      input = File.join(dir, 'a.fb')
+      uuid = '2024-08-13-d7956cd6-9f2c-42db-a4e3-d9186f080bfa'
+      assert(assert_raises { fbs.load(uuid, input) }.message.include?("Can't read S3 object"))
+    end
+  end
+
+  def test_delete_in_aws
+    WebMock.disable_net_connect!
+    stub_request(:delete, %r{https://s3.amazonaws.com/baza.zerocracy.com/.*$})
+      .to_return(status: 200)
+    fbs = Baza::Factbases.new('fake-key', 'fake-secret', loog: Loog::NULL)
+    uuid = '2024-08-13-d7956cd6-9f2c-42db-a4e3-d9186f080bfa'
+    fbs.delete(uuid)
+  end
+
+  def test_delete_in_aws_not_found
+    WebMock.disable_net_connect!
+    stub_request(:delete, %r{https://s3.amazonaws.com/baza.zerocracy.com/.*$})
+      .to_return(status: 404)
+    fbs = Baza::Factbases.new('fake-key', 'fake-secret', loog: Loog::NULL)
+    uuid = '2024-08-13-d7956cd6-9f2c-42db-a4e3-d9186f080bfa'
+    assert(assert_raises { fbs.delete(uuid) }.message.include?("Can't delete S3 object"))
+  end
+
+  def test_live_aws_usage
     skip
     fbs = Baza::Factbases.new('AKIAQJE...', 'KmX8eM...', loog: Loog::NULL)
     Dir.mktmpdir do |dir|

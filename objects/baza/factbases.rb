@@ -101,7 +101,7 @@ class Baza::Factbases
             key:
           )
         end
-      rescue StandardException => e
+      rescue StandardError => e
         raise "Can't read S3 object '#{key}': #{e.message}"
       end
       @loog.info("Loaded from S3: #{key} (#{File.size(file)} bytes)")
@@ -125,7 +125,7 @@ class Baza::Factbases
             key:
           )
         end
-      rescue StandardException => e
+      rescue StandardError => e
         raise "Can't delete S3 object '#{key}': #{e.message}"
       end
       @loog.info("Deleted in S3: #{key}")
