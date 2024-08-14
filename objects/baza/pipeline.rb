@@ -268,6 +268,7 @@ class Baza::Pipeline
       .merge(job.secrets.to_h { |s| [s['key'], s['value']] })
       .merge(
         {
+          'TESTING' => ENV['RACK_ENV'] == 'test',
           'JOB_NAME' => job.name,
           'JOB_ID' => job.id,
           'ZEROCRACY_TOKEN' => job.token.text
