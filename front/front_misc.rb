@@ -24,6 +24,7 @@
 
 require 'get_process_mem'
 require 'total'
+require 'sys-cpu'
 require_relative '../version'
 
 before '/*' do
@@ -40,7 +41,8 @@ before '/*' do
       settings.pgsql.version
     end,
     mem: settings.zache.get(:mem, lifetime: 60) { GetProcessMem.new.bytes.to_i },
-    total_mem: settings.zache.get(:total_mem, lifetime: 60) { Total::Mem.new.bytes }
+    total_mem: settings.zache.get(:total_mem, lifetime: 60) { Total::Mem.new.bytes },
+    load_avg: format('%0.2f', Sys::CPU.load_avg[0])
   }
 end
 

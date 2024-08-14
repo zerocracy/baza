@@ -391,6 +391,8 @@ GEM
       rack (>= 2.2.4, < 4)
     stringio (3.1.1)
     strscan (3.1.0)
+    sys-cpu (1.1.0)
+      ffi (~> 1.1)
     tago (0.0.2)
     telebot (0.1.2)
       faraday
@@ -488,6 +490,7 @@ DEPENDENCIES
   sinatra (= 4.0.0)
   sinatra-contrib (= 4.0.0)
   sprockets (= 4.2.1)
+  sys-cpu (= 1.1.0)
   tago (> 0)
   telepost (> 0)
   total (> 0)
