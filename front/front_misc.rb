@@ -22,6 +22,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+require 'get_process_mem'
+require 'total'
 require_relative '../version'
 
 before '/*' do
@@ -36,7 +38,9 @@ before '/*' do
     end,
     pgsql_version: settings.zache.get(:pgsql_version, lifetime: 30 * 60) do
       settings.pgsql.version
-    end
+    end,
+    mem: settings.zache.get(:mem, lifetime: 60) { GetProcessMem.new.bytes.to_i },
+    total_mem: settings.zache.get(:total_mem, lifetime: 60) { Total::Mem.new.bytes }
   }
 end
 

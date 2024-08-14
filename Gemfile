@@ -25,32 +25,33 @@
 source 'https://rubygems.org'
 ruby '~>3.2'
 
-gem 'always', '~>0'
+gem 'always', '>0'
 gem 'aws-sdk-core', '3.201.4'
 gem 'aws-sdk-s3', '1.157.0'
-gem 'backtrace', '~>0'
+gem 'backtrace', '>0'
 gem 'capybara'
 gem 'concurrent-ruby', '1.3.4'
-gem 'factbase', '~>0'
+gem 'factbase', '>0'
 gem 'faraday'
-gem 'glogin', '~>0'
+gem 'get_process_mem', '~>0.2'
+gem 'glogin', '>0'
 gem 'haml', '6.3.0'
-gem 'iri', '~>0'
+gem 'iri', '>0'
 gem 'j', path: 'j' if File.exist?('j')
-gem 'judges', '~>0'
+gem 'judges', '>0'
 gem 'liquid', '5.5.1'
-gem 'loog', '~>0'
+gem 'loog', '>0'
 gem 'minitest', '5.25.0', require: false
 gem 'minitest-reporters', '1.7.1', require: false
 gem 'octokit', '>0'
-gem 'pgtk', '~>0'
+gem 'pgtk', '>0'
 gem 'rack', '3.1.7'
 gem 'rack-ssl', '1.4.1'
 gem 'rack-test', '2.1.0'
 gem 'rake', '13.2.1', require: false
 gem 'redcarpet', '~>3.5'
 gem 'rerun', '0.14.0', require: false
-gem 'retries', '~>0'
+gem 'retries', '>0'
 gem 'rspec-rails', '6.1.3', require: false
 gem 'rubocop', '1.65.1', require: false
 gem 'rubocop-rspec', '3.0.4', require: false
@@ -62,11 +63,12 @@ gem 'simplecov-cobertura', '~> 2.1'
 gem 'sinatra', '4.0.0'
 gem 'sinatra-contrib', '4.0.0'
 gem 'sprockets', '4.2.1'
-gem 'tago', '~>0'
-gem 'telepost', '~>0'
+gem 'tago', '>0'
+gem 'telepost', '>0'
+gem 'total', '>0'
 gem 'truncate', '0.1.0'
-gem 'veils', '~>0'
-gem 'wait_for', '~>0', require: false
+gem 'veils', '>0'
+gem 'wait_for', '>0', require: false
 gem 'webmock', '3.23.1', require: false
-gem 'xcop', '~>0'
-gem 'zache', '~>0'
+gem 'xcop', '>0'
+gem 'zache', '>0'
