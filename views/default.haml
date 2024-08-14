@@ -14,6 +14,10 @@
     %script{src: 'https://code.jquery.com/ui/1.13.2/jquery-ui.min.js'}
     - if defined?(css)
       %link{href: iri.cut("/css/#{css}.css"), rel: 'stylesheet'}
+    - if the_human.tester?
+      :css
+        body { background-color: #fff3f3; }
+        .login { background-color: darkred; color: white; padding: .1em .3em; }
   %body
     %section
       %header
@@ -23,12 +27,8 @@
               %a{href: iri.cut('/dash')}
                 %img.logo{src: iri.cut('/svg/logo.svg'), alt: 'Logo'}
             %li
-              - if the_human.tester?
-                %span{title: "Current user ##{the_human.id} (test account)", style: 'background-color: darkred; color: white;'}
-                  tester
-              - else
-                %span{title: "Current user ##{the_human.id}"}
-                  = "@#{the_human.github}"
+              %span.login{title: "Current user ##{the_human.id}"}
+                = "@#{the_human.github}"
             %li
               %a{href: 'https://t.me/zerocrat_bot'}
                 %i.fa-brands.fa-telegram.fa-lg{class: ('gray' unless telegram?), title: (telegram? ? 'You are connected already' : 'Click to connect to our Telegram bot')}
