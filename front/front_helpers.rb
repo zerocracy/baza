@@ -39,14 +39,12 @@ module Baza::Helpers
       break if total > max
       yield v
     end
-    # Doesn't work: https://stackoverflow.com/questions/78865053
-    html_tag('tr') do
+    @_out_buf << html_tag('tr') do
       html_tag('td', colspan: 4) do
         [
-          "total=#{total}",
           params[:offset].zero? ? '' : html_tag('a', href: iri.del(:offset)) { 'Back' },
           total > max ? html_tag('a', href: iri.over(offset: params[:offset] + max)) { 'More' } : ''
-        ]
+        ].join
       end
     end
   end
