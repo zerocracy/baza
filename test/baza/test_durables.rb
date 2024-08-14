@@ -71,6 +71,7 @@ class Baza::DurablesTest < Minitest::Test
       id = admin.durables(fbs).place('test', n, file).id
       durable = human.durables(fbs).place('x', n, file)
       assert_equal(id, durable.id)
+      assert(!durable.uri.nil?)
       durable.lock('test')
       durable.load(file)
       durable.save(file)

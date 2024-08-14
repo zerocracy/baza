@@ -148,7 +148,7 @@ class Baza::Durable
         row = pgsql.exec(
           [
             'SELECT * FROM durable',
-            "WHERE id = $1 AND human = $2 OR (human = $1 AND file LIKE '@%')"
+            "WHERE id = $1 AND (human = $2 OR file LIKE '@%')"
           ],
           [@id, @human.id]
         ).first

@@ -43,7 +43,7 @@ end
 # @param [String] ip the IP of a sender
 # @return [Baza::Job] The job just started
 def job_start(token, file, name, metas, ip)
-  max_file_size = 10 * 1024 * 1024
+  max_file_size = 20 * 1024 * 1024
   if file.size > max_file_size
     raise Baza::Urror, "The uploaded file exceeds the maximum allowed size of #{max_file_size} bytes"
   end
@@ -54,9 +54,9 @@ def job_start(token, file, name, metas, ip)
     raise Baza::Urror, "Cannot parse the data, try to upload again: #{e.message.inspect}"
   end
   raise Baza::Urror, "An existing job named '#{name}' is running now" if token.human.jobs.busy?(name)
-  fid = settings.fbs.save(file.path)
+  uuid = settings.fbs.save(file.path)
   token.start(
-    name, fid,
+    name, uuid,
     File.size(file.path),
     Baza::Errors.new(file.path).count,
     user_agent,
