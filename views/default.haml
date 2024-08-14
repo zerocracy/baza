@@ -62,8 +62,8 @@
               = format('%.3f', Time.now - http_start)
             %li{title: 'The version of Ruby on the server'}
               = "rb:#{RUBY_VERSION}"
-            %li{title: 'Current "load average" on the server'}
-              = load_avg
+            %li{title: 'Current "load average" on the server', class: load_avg > 8 ? 'bad' : ''}
+              = format('%0.2f', load_avg)
             %li{title: 'Currently consumed memory vs. total system memory, in Mb'}
               = "#{(mem / (1024 * 1024)).round}/#{(total_mem / (1024 * 1024)).round}"
             %li{title: 'The version of PostgreSQL server and the size of the DB'}

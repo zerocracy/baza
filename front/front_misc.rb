@@ -42,7 +42,7 @@ before '/*' do
     end,
     mem: settings.zache.get(:mem, lifetime: 60) { GetProcessMem.new.bytes.to_i },
     total_mem: settings.zache.get(:total_mem, lifetime: 60) { Total::Mem.new.bytes },
-    load_avg: format('%0.2f', Sys::CPU.load_avg[0])
+    load_avg: Sys::CPU.load_avg[0]
   }
 end
 
