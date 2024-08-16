@@ -41,7 +41,7 @@ gem 'j', path: 'j' if File.exist?('j')
 gem 'judges', '>0'
 gem 'liquid', '5.5.1'
 gem 'loog', '>0'
-gem 'minitest', '5.25.0', require: false
+gem 'minitest', '5.25.1', require: false
 gem 'minitest-reporters', '1.7.1', require: false
 gem 'octokit', '>0'
 gem 'pgtk', '>0'
