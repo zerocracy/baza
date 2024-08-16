@@ -128,11 +128,11 @@
                 %span{title: "#{j.result.errors} error(s) in the 'judges-summary' fact, after processing"}
                   %i.fa-solid.fa-triangle-exclamation.bad
         - elsif j.expired?
-          %td.center.orange{colspan: 5}
+          %td.center.orange{colspan: 4}
             Never finished
         - elsif j.taken.nil?
-          %td.center.orange{colspan: 5}
+          %td.center.orange{colspan: 4}
             Waiting...
         - else
-          %td.center.orange{colspan: 5}
+          %td.center.orange{colspan: 4}
             In progress...
