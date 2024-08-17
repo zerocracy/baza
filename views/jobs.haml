@@ -100,6 +100,8 @@
           = j.token.name
         %td
           != ago(j.created)
+          - if j.created < Time.now - 24 * 60 * 60
+            %i.fa-solid.fa-triangle-exclamation.bad{title: 'We have not seen updates for a long time'}
         - if j.finished?
           %td
             - if j.result.exit.zero?
