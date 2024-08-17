@@ -47,6 +47,7 @@ require_relative 'version'
 disable :method_override
 use Rack::RewindableInput::Middleware
 use Rack::MethodOverride
+use Rack::Deflater
 
 Haml::Template.options[:escape_html] = true
 Haml::Template.options[:format] = :xhtml
