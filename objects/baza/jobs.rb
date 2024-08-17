@@ -89,7 +89,7 @@ class Baza::Jobs
       'LEFT JOIN result ON result.job = job.id ' \
       'LEFT JOIN meta ON meta.job = job.id ' \
       'WHERE token.human = $1 ' \
-      "AND #{name.nil? ? 'job.expired IS NULL' : 'job.name = $3'} " \
+      "#{name.nil? ? '' : 'AND job.name = $3'} " \
       'GROUP BY job.id, result.id, lock.id, token.id ' \
       'ORDER BY created DESC'
     sql = "SELECT t.* FROM (#{sql}) AS t WHERE t.row = 1" if name.nil?
