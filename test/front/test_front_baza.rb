@@ -24,12 +24,42 @@
 
 require 'minitest/autorun'
 require 'factbase'
+require 'w3c_validators'
+require 'nokogiri'
+require 'webmock/minitest'
 require_relative '../test__helper'
 require_relative '../../baza'
 
 class Baza::AppTest < Minitest::Test
   def app
     Sinatra::Application
+  end
+
+  def test_w3c_validity
+    pages = []
+    get('/')
+    assert_status(200)
+    pages << last_response.body
+    login
+    get('/dash')
+    assert_status(200)
+    pages << last_response.body
+    pages.each do |html|
+      xml =
+        begin
+          Nokogiri::XML.parse(html) do |c|
+            c.norecover
+            c.strict
+          end
+        rescue StandardError => e
+          raise "#{html}\n\n#{e}"
+        end
+      assert(xml.errors.empty?, xml)
+      assert(!xml.xpath('/html').empty?, xml)
+      WebMock.enable_net_connect!
+      v = W3CValidators::NuValidator.new.validate_text(html)
+      assert(v.errors.empty?, "#{html}\n\n#{v.errors.join('; ')}")
+    end
   end
 
   def test_all_daemons

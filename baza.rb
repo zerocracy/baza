@@ -49,6 +49,7 @@ use Rack::RewindableInput::Middleware
 use Rack::MethodOverride
 
 Haml::Template.options[:escape_html] = true
+Haml::Template.options[:format] = :xhtml
 
 unless ENV['RACK_ENV'] == 'test'
   require 'rack/ssl'
