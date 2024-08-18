@@ -53,11 +53,14 @@
         %td
           != ago(t.created)
         %td.right.ff
-          = t.jobs_count
+          = t.jobs
         %td
-          - unless t.text == Baza::Tokens::TESTER
-            - if t.active?
+          - if t.active? && t.text != Baza::Tokens::TESTER
+            - if t.jobs.zero?
               %a.ico{href: iri.cut('/tokens').append(t.id).append('deactivate'), onclick: "return confirm('Once you deactive this token, it will be impossible to activate it back. Are you sure you want to deactivate it?')"}
-                %i.fa-regular.fa-trash-can
+                %i.fa-solid.fa-ban
             - else
-              Inactive
+              %a.ico{href: iri.cut('/tokens').append(t.id).append('delete'), onclick: "return confirm('Are you sure you want to delete this token?')"}
+                %i.fa-regular.fa-trash-can
+          - else
+            Inactive

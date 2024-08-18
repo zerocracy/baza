@@ -171,12 +171,14 @@ module Baza::Helpers
   end
 
   def bytes(bytes)
-    if bytes < 1000
-      "#{bytes}B"
-    elsif bytes < 1000 * 1000
-      "#{format('%d', bytes / 1000)}kB"
-    else
-      "#{format('%d', bytes / (1000 * 1000))}MB"
+    html_tag('span', title: "#{bytes.to_s.reverse.gsub(/(\d{3})(?=\d)/, '\\1,').reverse} bytes") do
+      if bytes < 1000
+        "#{bytes}B"
+      elsif bytes < 1000 * 1000
+        "#{format('%d', bytes / 1000)}kB"
+      else
+        "#{format('%d', bytes / (1000 * 1000))}MB"
+      end
     end
   end
 

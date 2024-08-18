@@ -72,7 +72,7 @@ class Baza::Tokens
 
   def each(offset: 0)
     q =
-      'SELECT token.*, COUNT(job.id) AS jobs_count FROM token ' \
+      'SELECT token.*, COUNT(job.id) AS jobs FROM token ' \
       'LEFT JOIN job ON job.token = token.id ' \
       'WHERE human=$1 ' \
       'GROUP BY token.id ' \
@@ -86,7 +86,7 @@ class Baza::Tokens
         name: row['name'],
         created: Time.parse(row['created']),
         text: row['text'],
-        jobs_count: row['jobs_count']
+        jobs: row['jobs'].to_i
       )
     end
   end

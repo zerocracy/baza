@@ -62,7 +62,10 @@ class Baza::Tbot
 
     def notify(human, *msg)
       unless ENV['RACK_ENV'] == 'test' || human.github == 'yegor256'
-        @tbot.notify(human.humans.find('yegor256'), ["To `@#{human.github}`:"] + msg)
+        @tbot.notify(
+          human.humans.find('yegor256'),
+          ["To [@#{human.github}](https://github.com/#{human.github}):"] + msg
+        )
       end
       @tbot.notify(human, *msg)
     end

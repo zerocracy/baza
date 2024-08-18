@@ -25,17 +25,33 @@
 require 'minitest/autorun'
 require_relative '../test__helper'
 require_relative '../../objects/baza'
-require_relative '../../objects/baza/humans'
 
 # Test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class Baza::TokensTest < Minitest::Test
+class Baza::TokenTest < Minitest::Test
   def test_generates_token_text
-    human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
-    tokens = human.tokens
+    tokens = fake_human.tokens
     token = tokens.add(fake_name)
     assert_equal(36, token.text.length)
+    assert(!token.name.nil?)
+    assert(!token.jobs.nil?)
+    assert(!token.created.nil?)
+  end
+
+  def test_deletes_it
+    tokens = fake_human.tokens
+    token = tokens.add(fake_name)
+    token.delete!
+    assert(tokens.empty?)
+  end
+
+  def test_deactivate_it
+    tokens = fake_human.tokens
+    token = tokens.add(fake_name)
+    assert(token.active?)
+    token.deactivate!
+    assert(!token.active?)
   end
 end

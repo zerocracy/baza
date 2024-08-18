@@ -48,7 +48,6 @@ class Baza::TokensInteractionTest < Minitest::Test
     click_button 'Add'
     assert page.has_content?(token_name)
     assert page.has_text?(/New token #\d+ added/)
-
     fill_in 'Unique token name', with: token_name
     click_button 'Add'
     assert_current_path '/dash'
@@ -67,12 +66,10 @@ class Baza::TokensInteractionTest < Minitest::Test
     start_as_tester
     human = tester_human
     tokens = human.tokens
-    name = fake_name
-    token = tokens.add(name)
+    token = tokens.add(fake_name)
     assert(token.active?)
     visit "/tokens/#{token.id}/deactivate"
     assert page.has_text?("##{token.id}")
-    tokens.get(token.id)
-    assert(!token.active?)
+    assert(!tokens.get(token.id).active?)
   end
 end

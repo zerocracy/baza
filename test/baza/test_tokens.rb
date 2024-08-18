@@ -32,14 +32,12 @@ require_relative '../../objects/baza'
 # License:: MIT
 class Baza::TokensTest < Minitest::Test
   def test_emptiness_checks
-    human = fake_human
-    tokens = human.tokens
+    tokens = fake_human.tokens
     assert(tokens.empty?)
   end
 
   def test_creates_token
-    human = fake_human
-    tokens = human.tokens
+    tokens = fake_human.tokens
     name = fake_name
     token = tokens.add(name)
     assert_equal(token.name, name)
@@ -47,21 +45,18 @@ class Baza::TokensTest < Minitest::Test
   end
 
   def test_deactivates_token
-    human = fake_human
-    tokens = human.tokens
-    name = fake_name
+    tokens = fake_human.tokens
     assert_equal(0, tokens.size)
-    token = tokens.add(name)
+    token = tokens.add(fake_name)
     assert_equal(1, tokens.size)
     assert(token.active?)
     tokens.get(token.id).deactivate!
     assert_equal(1, tokens.size)
-    assert(!token.active?)
+    assert(!tokens.get(token.id).active?)
   end
 
   def test_finds_token
-    human = fake_human
-    tokens = human.tokens
+    tokens = fake_human.tokens
     name = fake_name
     token = tokens.add(name)
     assert_equal(token.id, tokens.find(token.text).id)

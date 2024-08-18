@@ -48,13 +48,22 @@ class Baza::Token
 
   def deactivate!
     raise Baza::Urror, 'This token cannot be deactivated' if text == Baza::Tokens::TESTER
-    @tokens.pgsql.exec('UPDATE token SET active = false WHERE id = $1', [@id])
+    rows = @tokens.pgsql.exec(
+      'UPDATE token SET active = false WHERE id = $1 AND human = $2 RETURNING id',
+      [@id, @tokens.human.id]
+    )
+    raise Baza::Urror, "The token ##{@id} wasn't deactivated" if rows.empty?
+    @to_json = nil
   end
 
-  def active?
-    rows = @tokens.pgsql.exec('SELECT active FROM token WHERE id = $1', [@id])
-    raise Baza::Urror, "Token ##{@id} not found" if rows.empty?
-    rows[0]['active'] == 't'
+  def delete!
+    raise Baza::Urror, 'This token cannot be deactivated' if text == Baza::Tokens::TESTER
+    rows = @tokens.pgsql.exec(
+      'DELETE FROM token WHERE id = $1 AND human = $2 RETURNING id',
+      [@id, @tokens.human.id]
+    )
+    raise Baza::Urror, "The token ##{@id} wasn't deactivated" if rows.empty?
+    @to_json = nil
   end
 
   def start(name, uri1, size, errors, agent, meta, ip)
@@ -65,35 +74,47 @@ class Baza::Token
     @tokens.human.jobs.start(@id, name, uri1, size, errors, agent, meta, ip)
   end
 
+  def active?
+    to_json[:active]
+  end
+
   def created
-    rows = @tokens.pgsql.exec('SELECT created FROM token WHERE id = $1', [@id])
-    raise Baza::Urror, "Token ##{@id} not found" if rows.empty?
-    Time.parse(rows[0]['created'])
+    to_json[:created]
   end
 
   def name
-    rows = @tokens.pgsql.exec('SELECT name FROM token WHERE id = $1', [@id])
-    raise Baza::Urror, "Token ##{@id} not found" if rows.empty?
-    rows[0]['name']
+    to_json[:name]
   end
 
   def text
-    rows = @tokens.pgsql.exec('SELECT text FROM token WHERE id = $1', [@id])
-    raise Baza::Urror, "Token ##{@id} not found" if rows.empty?
-    rows[0]['text']
+    to_json[:text]
   end
 
-  def jobs_count
-    @tokens.pgsql.exec('SELECT COUNT(job.id) AS c FROM job WHERE token = $1', [@id])[0]['c']
+  def jobs
+    to_json[:jobs]
   end
 
   def to_json(*_args)
-    {
-      id: @id,
-      name:,
-      text:,
-      created:,
-      active: active?
-    }
+    @to_json ||=
+      begin
+        row = pgsql.exec(
+          [
+            'SELECT token.*, COUNT(job.id) AS jobs FROM token',
+            'LEFT JOIN job ON job.token = token.id',
+            'WHERE token.id = $1 AND token.human = $2',
+            'GROUP BY token.id'
+          ],
+          [@id, @tokens.human.id]
+        ).first
+        raise Baza::Urror, "There is no token ##{@id} for user ##{@tokens.human.id}" if row.nil?
+        {
+          id: @id,
+          name: row['name'],
+          text: row['text'],
+          active: row['active'] == 't',
+          jobs: row['jobs'].to_i,
+          created: Time.parse(row['created'])
+        }
+      end
   end
 end

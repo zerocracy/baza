@@ -41,9 +41,9 @@ class Baza::FrontHelpersTest < Minitest::Test
   end
 
   def test_bytes
-    assert_equal('42B', bytes(42))
-    assert_equal('42kB', bytes(42_000))
-    assert_equal('42MB', bytes(42_000_000))
+    assert(bytes(42).include?('42B'))
+    assert(bytes(42_000).include?('42kB'))
+    assert(bytes(42_000_000).include?('42MB'))
   end
 
   def test_zents
