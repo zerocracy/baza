@@ -506,6 +506,34 @@ class Baza::FrontPushTest < Minitest::Test
     assert(human.locks.locked?(name))
   end
 
+  def test_pull_with_deflater
+    token = make_valid_token
+    fb = Factbase.new
+    (0..100).each do |i|
+      fb.insert.foo = "booom \x01\x02\x03 #{i}"
+    end
+    header('X-Zerocracy-Token', token)
+    header('User-Agent', 'something')
+    header(
+      'X-Zerocracy-Meta',
+      [
+        Base64.encode64('vitals_url:https://zerocracy.com'),
+        Base64.encode64('how are you, друг?')
+      ].join('  ')
+    )
+    name = fake_name
+    put("/push/#{name}", fb.export)
+    assert_status(200)
+    get("/recent/#{name}.txt")
+    assert_status(200)
+    id = last_response.body.to_i
+    process_pipeline
+    header('Accept-Encoding', 'gzip')
+    get("/pull/#{id}.fb")
+    assert_status(200)
+    assert_equal('gzip', last_response.headers['Content-Encoding'])
+  end
+
   private
 
   def process_pipeline
