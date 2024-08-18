@@ -67,7 +67,7 @@ class Baza::Valves
         name: row['name'],
         badge: row['badge'],
         job: row['job']&.to_i,
-        result: dec(row['result']),
+        result: row['result'].nil? ? nil : dec(row['result']),
         why: row['why'],
         jobs: row['jobs'].to_i
       }
