@@ -35,8 +35,26 @@ class Baza::FrontValvesTest < Minitest::Test
 
   def test_add
     login
-    post('/valve-add', 'name=hi&badge=abc&why=nothing')
+    post('/valves/add', 'name=hi&badge=abc&why=nothing')
     assert_status(302)
+  end
+
+  def test_reset
+    n = fake_name
+    login(n)
+    post('/valves/add', 'name=hi&badge=abc&why=nothing')
+    assert_status(302)
+    human = app.humans.ensure(n)
+    id = human.valves.each.to_a.first[:id]
+    post('/valves/reset', "id=#{id}&result=hello")
+    assert_status(302)
+    assert_equal('hello', human.valves.each.to_a.first[:result])
+    post('/valves/reset', "id=#{id}&result=NIL")
+    assert_status(302)
+    assert_nil(human.valves.each.to_a.first[:result])
+    post('/valves/reset', "id=#{id}&result=42")
+    assert_status(302)
+    assert_equal(42, human.valves.each.to_a.first[:result])
   end
 
   def test_valves

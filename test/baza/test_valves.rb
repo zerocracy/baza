@@ -102,4 +102,13 @@ class Baza::ValveTest < Minitest::Test
     valves.enter(fake_name, fake_name, 'hi', job.id) { 42 }
     assert_equal(job.id, valves.each.to_a.first[:job])
   end
+
+  def test_reset_id
+    job = fake_job
+    valves = job.jobs.human.valves
+    valves.enter(fake_name, fake_name, 'hi', job.id) { 42 }
+    id = valves.each.to_a.first[:id]
+    valves.reset(id, 'another')
+    assert_equal('another', valves.each.to_a.first[:result])
+  end
 end

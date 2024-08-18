@@ -1,0 +1,9 @@
+%form{ method: 'post', action: iri.cut('/valves/reset') }
+  %fieldset
+    %label
+      Valve ID:
+    %input{ type: 'text', name: 'id', tabindex: 1, size: 10, autofocus: true, required: true }
+    %label
+      New result (say "NIL" if you want it to be nil):
+    %input{ type: 'text', name: 'result', tabindex: 2, size: 50, required: true }
+    %input{ type: 'submit', tabindex: 3, value: 'Reset' }

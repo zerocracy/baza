@@ -1,5 +1,5 @@
 - if the_human.admin?
-  %form{method: 'post', action: iri.cut('/valve-add')}
+  %form{method: 'post', action: iri.cut('/valves/add')}
     %fieldset
       %input{ type: 'text', name: 'name', tabindex: 1, placeholder: 'Job name', size: 14, maxlength: 32, required: true, autofocus: true }
       %input{ type: 'text', name: 'badge', tabindex: 2, placeholder: 'Badge', size: 20, maxlength: 64, required: true }

@@ -110,7 +110,7 @@ class Baza::Valves
             throw :stop
           end
         end
-        raise "Time out while waiting for '#{badge}'" if Time.now - start > 60
+        raise "Time out while waiting for '#{badge}' (probably another job is holding it)" if Time.now - start > 60
       end
     end
     begin
@@ -124,7 +124,7 @@ class Baza::Valves
         "just entered for the `#{name}` job",
         job.nil? ? '' : "([##{job}](//jobs/#{job}))",
         ": #{escape(why.inspect)}.",
-        "The result is `#{r.is_a?(Integer) ? r : r.class}`."
+        "The result is #{show(r)}."
       )
       r
     rescue StandardError => e
@@ -137,10 +137,19 @@ class Baza::Valves
   end
 
   def remove(id)
-    pgsql.exec(
-      'DELETE FROM valve WHERE id = $1 AND human = $2',
+    rows = pgsql.exec(
+      'DELETE FROM valve WHERE id = $1 AND human = $2 RETURNING id',
       [id, @human.id]
     )
+    raise Baza::Urror, "The valve ##{id} cannot be removed" if rows.empty?
+  end
+
+  def reset(id, result)
+    rows = pgsql.exec(
+      'UPDATE valve SET result = $1 WHERE id = $2 AND human = $3 RETURNING id',
+      [enc(result), id, @human.id]
+    )
+    raise Baza::Urror, "The valve ##{id} cannot be reset" if rows.empty?
   end
 
   private
@@ -157,6 +166,7 @@ class Baza::Valves
   end
 
   def enc(obj)
+    return obj if obj.nil?
     Base64.encode64(Marshal.dump(obj))
   end
 
@@ -164,5 +174,15 @@ class Baza::Valves
     # rubocop:disable Security/MarshalLoad
     Marshal.load(Base64.decode64(base64))
     # rubocop:enable Security/MarshalLoad
+  end
+
+  def show(res)
+    if res.is_a?(Integer) || res.is_a?(Float)
+      "`#{res}`"
+    elsif res.is_a?(String)
+      "\"#{escape(res)}\""
+    else
+      "instance of `#{res.class}`"
+    end
   end
 end

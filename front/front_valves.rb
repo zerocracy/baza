@@ -32,13 +32,30 @@ get '/valves' do
   )
 end
 
-post('/valve-add') do
-  the_human.valves.enter(params[:name], params[:badge], params[:why], nil) { params[:result] }
+def as_result(text)
+  return text.to_f if text =~ /^[0-9]+\.[0-9]+$/
+  return text.to_i if text =~ /^[0-9]+$/
+  return nil if text == 'NIL'
+  text
+end
+
+post('/valves/add') do
+  the_human.valves.enter(params[:name], params[:badge], params[:why], nil) { as_result(params[:result]) }
   flash(iri.cut('/valves'), "The valve '#{params[:badge]}' has been added for '#{params[:name]}'")
 end
 
 get(%r{/valves/([0-9]+)/remove}) do
   id = params['captures'].first.to_i
   the_human.valves.remove(id)
-  flash(iri.cut('/valves'), "The valve ##{id}' just removed")
+  flash(iri.cut('/valves'), "The valve ##{id} just removed")
+end
+
+get '/reset' do
+  assemble(:reset, :default, title: '/reset')
+end
+
+post('/valves/reset') do
+  id = params[:id].to_i
+  the_human.valves.reset(id, as_result(params[:result]))
+  flash(iri.cut('/valves'), "The valve ##{id} reset")
 end

@@ -126,10 +126,11 @@ module Baza::Helpers
   end
 
   def large_text(text)
-    return text if text.is_a?(Integer) || text.is_a?(Float)
-    return 'NIL' if text.nil?
-    return text.class unless text.is_a?(String)
-    text
+    return "#{text}<sub class='gray'>i</sub>" if text.is_a?(Integer)
+    return "#{text}<sub class='gray'>f</sub>" if text.is_a?(Float)
+    return '<i class="gray">nil</i>' if text.nil?
+    return "#{text.class}<sub class='gray'>c</sub>" unless text.is_a?(String)
+    html = text
       .tr("\n", '↵')
       .scan(/.{1,4}/)
       .map do |t|
@@ -141,6 +142,7 @@ module Baza::Helpers
       .chars
       .map { |c| c.ord > 0x7f ? "<span class='firebrick'>\\x#{format('%x', c.ord)}</span>" : c }
       .join
+    "<span class='gray'>\"</span>#{html}<span class='gray'>\"</span>"
   end
 
   def ago(time)
