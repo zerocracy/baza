@@ -180,7 +180,11 @@ class Baza::Valves
     if res.is_a?(Integer) || res.is_a?(Float)
       "`#{res}`"
     elsif res.is_a?(String)
-      "\"#{escape(res)}\""
+      if res.start_with?('http')
+        "[link](#{res})"
+      else
+        "\"#{escape(res)}\""
+      end
     else
       "instance of `#{res.class}`"
     end
