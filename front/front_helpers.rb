@@ -40,11 +40,11 @@ module Baza::Helpers
       yield v
     end
     @_out_buf << html_tag('tr') do
-      html_tag('td', colspan: 4) do
+      html_tag('td', colspan: '100%') do
         [
           params[:offset].zero? ? '' : html_tag('a', href: iri.del(:offset)) { 'Back' },
           total > max ? html_tag('a', href: iri.over(offset: params[:offset] + max)) { 'More' } : ''
-        ].join
+        ].join(' ')
       end
     end
   end
