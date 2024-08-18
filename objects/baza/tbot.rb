@@ -28,6 +28,7 @@ require 'loog'
 require 'telepost'
 require 'decoor'
 require 'securerandom'
+require_relative 'humans'
 
 # Telegram Bot.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -126,8 +127,8 @@ class Baza::Tbot
       )
       @loog.debug("Invited user to authenticate, in TG chat ##{chat}")
     else
-      @tp.post(
-        chat,
+      notify(
+        Baza::Humans.new(@pgsql, tbot: self).get(row['id'].to_i),
         '😸 Hey, I know that you are',
         "[@#{row['github']}](https://github.com/#{row['github']})!",
         "In this chat (ID: `#{chat}`), you will get updates from me when something interesting",
