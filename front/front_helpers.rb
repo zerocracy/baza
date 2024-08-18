@@ -42,8 +42,18 @@ module Baza::Helpers
     @_out_buf << html_tag('tr') do
       html_tag('td', colspan: '4') do
         [
-          params[:offset].zero? ? '' : html_tag('a', href: iri.del(:offset)) { 'Back' },
-          total > max ? html_tag('a', href: iri.over(offset: params[:offset] + max)) { 'More' } : ''
+          params[:offset].zero? ? '' : html_tag('a', href: iri.del(:offset)) do
+            [
+              html_tag('i', class: 'fa-solid fa-backward'),
+              'Back'
+            ].join
+          end,
+          total > max ? html_tag('a', href: iri.over(offset: params[:offset] + max)) do
+            [
+              html_tag('i', class: 'fa-solid fa-forward'),
+              'More'
+            ].join
+          end : ''
         ].join(' ')
       end
     end
