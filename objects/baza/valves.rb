@@ -151,7 +151,7 @@ class Baza::Valves
       .gsub('[', '\[')
       .gsub(']', '\]')
       .gsub(/@([a-zA-Z0-9-]+)/, '[@\1](https://github.com/\1)')
-      .gsub(%r{([a-zA-Z0-9_-]+/[a-zA-Z0-9_-]+)#([0-9]+)}) do |s|
+      .gsub(%r{([\.a-zA-Z0-9_\-]+/[\.a-zA-Z0-9_\-]+)#([0-9]+)}) do |s|
         "[#{s}](https://github.com/#{Regexp.last_match[1]}/issues/#{Regexp.last_match[2]})"
       end
   end
