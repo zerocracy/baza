@@ -133,7 +133,7 @@ class Baza::Alterations
           raise Baza::Urror, "Wrong param name '#{k}'" unless k =~ /^[a-z0-9-]+$/
           k.to_s
         end
-        .transform_values { |v| v.gsub(/['"\u0000]/, ' ') }
+        .transform_values { |v| v.gsub(/['"\u0000\n\r]/, ' ') }
     )
   end
 end

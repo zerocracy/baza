@@ -116,6 +116,21 @@ class Baza::AlterationsTest < Minitest::Test
     assert_equal(100, r.payout)
   end
 
+  def test_tune_template
+    human = fake_human
+    alterations = human.alterations
+    n = fake_name
+    alterations.add(n, 'tune', { love: '3', anger: '1' })
+    ruby = alterations.each.to_a.first[:script]
+    Fbe.fb.query('(always)').delete!
+    # rubocop:disable Security/Eval
+    eval(ruby) # full script here
+    # rubocop:enable Security/Eval
+    assert_equal(1, Fbe.fb.size)
+    r = Fbe.fb.query('(and (eq what "pmp") (eq area "hr"))').each.to_a.first
+    assert(!r.dud_was_punished.nil?)
+  end
+
   def test_all_variable_leakage
     human = fake_human
     alterations = human.alterations

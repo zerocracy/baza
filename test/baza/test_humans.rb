@@ -87,6 +87,7 @@ class Baza::HumansTest < Minitest::Test
   end
 
   def test_verify_one_job
+    WebMock.disable_net_connect!
     passed = []
     tbot = others { |*args| passed << args }
     humans = Baza::Humans.new(fake_pgsql, tbot:)

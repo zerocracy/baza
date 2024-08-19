@@ -1,0 +1,22 @@
+# Tune HR policies for love={{ love }}, anger={{ anger }}
+
+require 'factbase/syntax'
+require 'fbe/bylaws'
+require 'fbe/overwrite'
+
+love = '{{ love }}'.to_i
+raise "Love #{love} is too small, must be 0..4" if love.negative?
+raise "Love #{love} is too big, must be 0..4" if love > 4
+
+anger = '{{ anger }}'.to_i
+raise "Anger #{anger} is too small, must be 0..4" if anger.negative?
+raise "Anger #{anger} is too big, must be 0..4" if anger > 4
+
+Fbe.bylaws(love:, anger:).each do |n, term|
+  fact =
+    Fbe.just_one do |f|
+      f.what = 'pmp'
+      f.area = 'hr'
+    end
+  Fbe.overwrite(fact, n.gsub('-', '_'), Factbase::Syntax.new(term).to_term.to_s)
+end
