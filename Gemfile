@@ -43,6 +43,7 @@ gem 'liquid', '5.5.1'
 gem 'loog', '>0'
 gem 'minitest', '5.25.1', require: false
 gem 'minitest-reporters', '1.7.1', require: false
+gem 'net-ping', '2.0.8', require: false
 gem 'octokit', '>0'
 gem 'pgtk', '>0'
 gem 'rack', '3.1.7'

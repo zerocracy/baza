@@ -27,6 +27,7 @@ require 'factbase'
 require 'w3c_validators'
 require 'nokogiri'
 require 'webmock/minitest'
+require 'net/ping'
 require_relative '../test__helper'
 require_relative '../../baza'
 
@@ -36,6 +37,7 @@ class Baza::AppTest < Minitest::Test
   end
 
   def test_w3c_validity
+    skip unless Net::Ping::External.new('8.8.8.8').ping?
     pages = []
     get('/')
     assert_status(200)
