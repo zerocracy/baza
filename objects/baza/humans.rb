@@ -28,6 +28,7 @@ require_relative 'human'
 require_relative 'urror'
 require_relative 'zents'
 require_relative 'verified'
+require_relative 'pipe'
 
 # All humans.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -41,6 +42,11 @@ class Baza::Humans
   def initialize(pgsql, tbot: Baza::Tbot::Fake.new)
     @pgsql = pgsql
     @tbot = tbot
+  end
+
+  def pipe
+    require_relative 'pipe'
+    Baza::Pipe.new(self)
   end
 
   def gc

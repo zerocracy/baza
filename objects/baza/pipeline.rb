@@ -29,7 +29,6 @@ require 'backtrace'
 require 'logger'
 require 'json'
 require 'judges/commands/update'
-require_relative 'tbot'
 require_relative 'humans'
 require_relative 'human'
 require_relative 'urror'
@@ -43,12 +42,11 @@ require_relative '../../version'
 class Baza::Pipeline
   attr_reader :pgsql
 
-  def initialize(home, humans, fbs, loog, trails, tbot: Baza::Tbot::Fake.new)
+  def initialize(home, humans, fbs, loog, trails)
     @home = home
     @humans = humans
     @fbs = fbs
     @loog = loog
-    @tbot = tbot
     @trails = trails
   end
 
@@ -58,7 +56,7 @@ class Baza::Pipeline
   # @return [Boolean] TRUE if processing happened, FALSE if no jobs to process
   def process_one
     owner = "baza #{Baza::VERSION} #{Time.now.utc.iso8601}"
-    job = pop(owner)
+    job = @humans.pipe.pop(owner)
     if job.nil?
       @loog.debug('Nothing to process by the pipeline at this time')
       return false
@@ -119,21 +117,6 @@ class Baza::Pipeline
       )
       @loog.info("Job ##{job.id} finished, exit=#{code}!")
     end
-  end
-
-  def pop(owner)
-    rows = @humans.pgsql.exec(
-      [
-        'SELECT job.id FROM job',
-        'LEFT JOIN result ON result.job = job.id',
-        'WHERE result.id IS NULL',
-        'LIMIT 1'
-      ]
-    )
-    return nil if rows.empty?
-    job = @humans.job_by_id(rows.first['id'].to_i)
-    @humans.pgsql.exec('UPDATE job SET taken = $1 WHERE id = $2', [owner, job.id])
-    job
   end
 
   def run(job, input, stdout)

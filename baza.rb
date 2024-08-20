@@ -173,8 +173,7 @@ configure do
       require_relative 'objects/baza/pipeline'
       Baza::Pipeline.new(
         lib, settings.humans, settings.fbs,
-        settings.loog, settings.trails,
-        tbot: settings.tbot
+        settings.loog, settings.trails
       ).process_one
     end
   end
