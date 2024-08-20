@@ -130,6 +130,7 @@ class Baza::Pipeline
         unless errs.zero?
           previous = 0
           job.jobs.each do |j|
+            next if j.name != job.name
             break unless j.finished?
             break if j.errors.zero?
             previous += 1
