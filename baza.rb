@@ -174,8 +174,7 @@ configure do
       Baza::Pipeline.new(
         lib, settings.humans, settings.fbs,
         settings.loog, settings.trails,
-        tbot: settings.tbot,
-        check_balance: true
+        tbot: settings.tbot
       ).process_one
     end
   end

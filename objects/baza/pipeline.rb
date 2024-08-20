@@ -43,14 +43,13 @@ require_relative '../../version'
 class Baza::Pipeline
   attr_reader :pgsql
 
-  def initialize(home, humans, fbs, loog, trails, tbot: Baza::Tbot::Fake.new, check_balance: false)
+  def initialize(home, humans, fbs, loog, trails, tbot: Baza::Tbot::Fake.new)
     @home = home
     @humans = humans
     @fbs = fbs
     @loog = loog
     @tbot = tbot
     @trails = trails
-    @check_balance = check_balance
   end
 
   # Process one job, if there is one that expects processing. If there are no
@@ -118,18 +117,6 @@ class Baza::Pipeline
         code.zero? ? File.size(input) : nil,
         code.zero? ? Baza::Errors.new(input).count : nil
       )
-      unless code.zero?
-        job.jobs.human.notify(
-          "💔 The job [##{job.id}](//jobs/#{job.id}) has failed :(",
-          'This most probably means that there is an internal error on our server.',
-          if job.jobs.human.locks.locked?(job.name)
-            'No further jobs will be processed until you "expire" this one on the server.'
-          end,
-          'Please, report this situation to us as soon as you can, by',
-          '[submitting an issue](https://github.com/zerocracy/baza/issues) and',
-          "mentioning this job ID: `#{job.id}`."
-        )
-      end
       @loog.info("Job ##{job.id} finished, exit=#{code}!")
     end
   end
@@ -139,20 +126,14 @@ class Baza::Pipeline
       [
         'SELECT job.id FROM job',
         'LEFT JOIN result ON result.job = job.id',
-        'WHERE result.id IS NULL'
+        'WHERE result.id IS NULL',
+        'LIMIT 1'
       ]
     )
-    rows.each do |row|
-      job = @humans.job_by_id(row['id'].to_i)
-      human = job.jobs.human
-      if human.account.balance.negative? && @check_balance && !human.extend(Baza::Human::Roles).tester?
-        @loog.debug("The job ##{job.id} needs processing, but the balance of @#{job.jobs.human.github} is negative")
-        next
-      end
-      @humans.pgsql.exec('UPDATE job SET taken = $1 WHERE id = $2', [owner, job.id])
-      return job
-    end
-    nil
+    return nil if rows.empty?
+    job = @humans.job_by_id(rows.first['id'].to_i)
+    @humans.pgsql.exec('UPDATE job SET taken = $1 WHERE id = $2', [owner, job.id])
+    job
   end
 
   def run(job, input, stdout)

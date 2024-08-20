@@ -113,7 +113,7 @@ class Baza::Job
     end
     if exit.zero? && !errors.zero?
       previous = 0
-      jobs.each do |j|
+      @jobs.each do |j|
         next if j.name != name
         break unless j.finished?
         break if j.errors.zero?
@@ -124,6 +124,17 @@ class Baza::Job
         "finished with #{errors} error#{errors == 1 ? '' : 's'}.",
         "There were #{previous.zero? ? 'no' : previous} jobs with errors before this one.",
         'You better pay attention to it ASAP, before it gets too late.'
+      )
+    elsif !exit.zero?
+      jobs.human.notify(
+        "💔 The job [##{id}](//jobs/#{id}) has failed :(",
+        'This most probably means that there is an internal error on our server.',
+        if @jobs.human.locks.locked?(name)
+          'No further jobs will be processed until you "expire" this one on the server.'
+        end,
+        'Please, report this situation to us as soon as you can, by',
+        '[submitting an issue](https://github.com/zerocracy/baza/issues) and',
+        "mentioning this job ID: `#{id}`."
       )
     end
     balance = @jobs.human.account.balance
