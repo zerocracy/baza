@@ -45,13 +45,14 @@ module Baza::Helpers
           params[:offset].zero? ? '' : html_tag('a', href: iri.del(:offset)) do
             [
               html_tag('i', class: 'fa-solid fa-backward'),
-              'Back'
+              html_tag('span', style: 'margin-left: .5em') { 'Back' }
             ].join
           end,
+          ' ',
           total > max ? html_tag('a', href: iri.over(offset: params[:offset] + max)) do
             [
-              html_tag('i', class: 'fa-solid fa-forward'),
-              'More'
+              html_tag('span', style: 'margin-right: .5em') { 'More' },
+              html_tag('i', class: 'fa-solid fa-forward')
             ].join
           end : ''
         ].join(' ')
