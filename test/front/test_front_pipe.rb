@@ -22,26 +22,18 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require_relative '../objects/baza/urror'
+require 'minitest/autorun'
+require_relative '../test__helper'
+require_relative '../../baza'
 
-# Take a job that needs processing (or return 204 if no job).
-get '/pop' do
-  admin_only
-  owner = params[:owner]
-  raise Baza::Urror, 'The "owner" is a mandatory query param' if owner.nil?
-  job = settings.humans.pipe.pop(owner)
-  if job.nil?
-    status 204
-  else
-    content_type('text/plain')
-    job.id.to_s
+class Baza::FrontPipeTest < Minitest::Test
+  def app
+    Sinatra::Application
   end
-end
 
-# Put back the result of its processing (the body is a ZIP file).
-put '/finish' do
-  admin_only
-  id = params[:id]
-  raise Baza::Urror, 'The "id" is a mandatory query param' if id.nil?
-  raise Baza::Urror, 'Not implemented yet'
+  def test_renders_admin_pages
+    login('yegor256')
+    get('/pop?owner=foo')
+    assert_status(204)
+  end
 end
