@@ -159,6 +159,29 @@ class Baza::Job
     ).each.to_a
   end
 
+  # Create list of options for the job.
+  # @return [Hash] Option/value pairs
+  def options
+    @jobs.human.humans.ensure('yegor256').secrets.each.to_a
+      .select { |s| s[:shareable] }.to_h { |s| [s[:key], s[:value]] }
+      .merge(
+        metas.to_h do |m|
+          a = m.split(':', 2)
+          a[1] = '' if a.size == 1
+          a
+        end
+      )
+      .merge(secrets.to_h { |s| [s['key'], s['value']] })
+      .merge(ENV['RACK_ENV'] == 'test' ? { 'TESTING' => true } : {})
+      .merge(
+        {
+          'JOB_NAME' => name,
+          'JOB_ID' => id,
+          'ZEROCRACY_TOKEN' => token.text
+        }
+      )
+  end
+
   def valve
     Valve.new(self)
   end

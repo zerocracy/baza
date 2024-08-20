@@ -132,7 +132,7 @@ class Baza::Pipeline
           'max-cycles' => 3, # it will stop on the first cycle if no changes are made
           'log' => false,
           'verbose' => true,
-          'option' => options(job).merge({ 'TRAILS_DIR' => tdir }).map { |k, v| "#{k}=#{v}" },
+          'option' => job.options.merge({ 'TRAILS_DIR' => tdir }).map { |k, v| "#{k}=#{v}" },
           'lib' => File.join(@home, 'lib')
         },
         [File.join(@home, 'judges'), input]
@@ -190,30 +190,6 @@ class Baza::Pipeline
       stdout.info("The alteration ##{a[:id]} was applied successfully\n")
       idx += 1
     end
-  end
-
-  # Create list of options for the job.
-  # @param [Baza::Job] job The job
-  # @return [Hash] Option/value pairs
-  def options(job)
-    @humans.ensure('yegor256').secrets.each.to_a
-      .select { |s| s[:shareable] }.to_h { |s| [s[:key], s[:value]] }
-      .merge(
-        job.metas.to_h do |m|
-          a = m.split(':', 2)
-          a[1] = '' if a.size == 1
-          a
-        end
-      )
-      .merge(job.secrets.to_h { |s| [s['key'], s['value']] })
-      .merge(ENV['RACK_ENV'] == 'test' ? { 'TESTING' => true } : {})
-      .merge(
-        {
-          'JOB_NAME' => job.name,
-          'JOB_ID' => job.id,
-          'ZEROCRACY_TOKEN' => job.token.text
-        }
-      )
   end
 
   # Replace all secrets in the text with *****
