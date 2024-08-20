@@ -138,6 +138,18 @@ class Baza::Jobs
     Baza::Job.new(self, id)
   end
 
+  # Get full list of unique names of all jobs.
+  def names
+    pgsql.exec(
+      [
+        'SELECT DISTINCT(job.name) AS name FROM job',
+        'JOIN token ON token.id = job.token',
+        'WHERE token.human = $1'
+      ],
+      [@human.id]
+    ).map { |row| row['name'] }
+  end
+
   def name_exists?(name)
     !pgsql.exec(
       'SELECT job.id FROM job ' \

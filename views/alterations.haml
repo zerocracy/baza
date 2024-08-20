@@ -6,11 +6,27 @@
       }
     });
   });
+  $(function() {
+    $('#job_name').on('keyup', function() {
+      const job_names = [ #{the_human.jobs.names.map { |n| "'#{n}'" }.join(',')} ];
+      const span = $(this).next();
+      const v = $(this).val();
+      span.removeClass();
+      if (v !== '') {
+        if (job_names.includes(v)) {
+          span.addClass('good fa-solid fa-thumbs-up');
+        } else {
+          span.addClass('bad fa-solid fa-thumbs-down');
+        }
+      }
+    });
+  });
 %form{method: 'post', action: iri.cut('/alterations/add')}
   %fieldset
     %label
       Job name:
-    %input{ type: 'text', name: 'name', tabindex: 1, placeholder: "e.g. #{the_human.jobs.each.to_a.first.name}", size: 30, maxlength: 32, required: true, autofocus: true }
+    %input{ type: 'text', name: 'name', tabindex: 1, placeholder: "e.g. #{the_human.jobs.names.first}", size: 30, maxlength: 32, required: true, autofocus: true, id: 'job_name' }
+    %i
     %input{ id: 'hidden',  type: 'hidden', name: 'template', value: 'pmp' }
     %div#tabs
       %label

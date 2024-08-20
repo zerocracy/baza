@@ -50,6 +50,15 @@ class Baza::JobsTest < Minitest::Test
     assert_equal('boom', job.metas.first)
   end
 
+  def test_list_names
+    human = fake_human
+    first = fake_job(human)
+    second = fake_job(human)
+    assert_equal(2, human.jobs.names.size)
+    assert(human.jobs.names.include?(first.name))
+    assert(human.jobs.names.include?(second.name))
+  end
+
   def test_emptiness_checks
     human = fake_human
     jobs = human.jobs
