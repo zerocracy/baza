@@ -118,25 +118,7 @@ class Baza::Pipeline
         code.zero? ? File.size(input) : nil,
         code.zero? ? Baza::Errors.new(input).count : nil
       )
-      if code.zero?
-        errs = Baza::Errors.new(input).count
-        unless errs.zero?
-          previous = 0
-          job.jobs.each do |j|
-            next if j.name != job.name
-            break unless j.finished?
-            break if j.errors.zero?
-            previous += 1
-          end
-          @tbot.notify(
-            job.jobs.human,
-            "⚠️ The job [##{job.id}](//jobs/#{job.id}) (`#{job.name}`)",
-            "finished with #{errs} error#{errs == 1 ? '' : 's'}.",
-            "There were #{previous.zero? ? 'no' : previous} jobs with errors before this one.",
-            'You better pay attention to it ASAP, before it gets too late.'
-          )
-        end
-      else
+      unless code.zero?
         job.jobs.human.notify(
           "💔 The job [##{job.id}](//jobs/#{job.id}) has failed :(",
           'This most probably means that there is an internal error on our server.',

@@ -111,6 +111,21 @@ class Baza::Job
         )[0]['id'].to_i
       )
     end
+    if exit.zero? && !errors.zero?
+      previous = 0
+      jobs.each do |j|
+        next if j.name != name
+        break unless j.finished?
+        break if j.errors.zero?
+        previous += 1
+      end
+      @jobs.human.notify(
+        "⚠️ The job [##{id}](//jobs/#{id}) (`#{name}`)",
+        "finished with #{errors} error#{errors == 1 ? '' : 's'}.",
+        "There were #{previous.zero? ? 'no' : previous} jobs with errors before this one.",
+        'You better pay attention to it ASAP, before it gets too late.'
+      )
+    end
     balance = @jobs.human.account.balance
     if balance.negative?
       @jobs.human.notify(
