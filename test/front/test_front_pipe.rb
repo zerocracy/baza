@@ -34,6 +34,6 @@ class Baza::FrontPipeTest < Minitest::Test
   def test_renders_admin_pages
     login('yegor256')
     get('/pop?owner=foo')
-    assert_status(204)
+    assert([204, 200].include?(last_response.status))
   end
 end

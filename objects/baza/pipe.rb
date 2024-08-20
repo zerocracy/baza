@@ -36,15 +36,16 @@ class Baza::Pipe
   def pop(owner)
     rows = @humans.pgsql.exec(
       [
-        'SELECT job.id FROM job',
-        'LEFT JOIN result ON result.job = job.id',
-        'WHERE result.id IS NULL AND taken IS NULL',
-        'LIMIT 1'
-      ]
+        'UPDATE job SET taken = $1 WHERE id = (',
+        '  SELECT job.id FROM job',
+        '  LEFT JOIN result ON result.job = job.id',
+        '  WHERE result.id IS NULL AND taken IS NULL',
+        '  LIMIT 1)',
+        'RETURNING id'
+      ],
+      [owner]
     )
     return nil if rows.empty?
-    job = @humans.job_by_id(rows.first['id'].to_i)
-    @humans.pgsql.exec('UPDATE job SET taken = $1 WHERE id = $2', [owner, job.id])
-    job
+    @humans.job_by_id(rows.first['id'].to_i)
   end
 end
