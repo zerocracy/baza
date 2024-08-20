@@ -52,10 +52,12 @@
           Tune the attitude of the bylaws, either making them
           aggressive or forgiving:
         %label
-          Love:
+          %i.fa-solid.fa-heart.good
+          Love (rewards for doing good):
         %input{ type: 'range', min: '0', max: '4', name: 'love', tabindex: 2, placeholder: "e.g., 2", size: 4, list: 'attitude' }
         %label
-          Anger:
+          %i.fa-solid.fa-bolt.bad
+          Anger (punishments for breaking rules):
         %input{ type: 'range', min: '0', max: '4', name: 'anger', tabindex: 3, placeholder: "e.g., 4", size: 4, list: 'attitude' }
         %datalist{ id: 'attitude' }
           %option{ value: '0' }
