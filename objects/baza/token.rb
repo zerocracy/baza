@@ -71,7 +71,14 @@ class Baza::Token
     unless human.account.balance.positive? || human.extend(Baza::Human::Roles).tester?
       raise Baza::Urror, 'The balance is negative, you cannot post new jobs'
     end
-    @tokens.human.jobs.start(@id, name, uri1, size, errors, agent, meta, ip)
+    job = @tokens.human.jobs.start(@id, name, uri1, size, errors, agent, meta, ip)
+    unless errors.zero?
+      @tokens.human.notify(
+        "⚠️ The job [##{job.id}](//jobs/#{job.id}) (`#{job.name}`)",
+        'arrived with errors. You better look at it now, before it gets too late.'
+      )
+    end
+    job
   end
 
   def active?

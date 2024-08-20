@@ -103,13 +103,6 @@ class Baza::Pipeline
       input = File.join(dir, 'input.fb')
       @fbs.load(job.uri1, input)
       log.debug("Factbase loaded from #{job.uri1} into #{input}")
-      unless Baza::Errors.new(input).count.zero?
-        @tbot.notify(
-          job.jobs.human,
-          "⚠️ The job [##{job.id}](//jobs/#{job.id}) (`#{job.name}`)",
-          'arrived with errors. You better look at it now, before it gets too late.'
-        )
-      end
       start = Time.now
       code = run(job, input, log)
       uuid = nil
