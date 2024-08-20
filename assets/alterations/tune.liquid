@@ -1,8 +1,9 @@
-# Tune HR policies for love={{ love }}, anger={{ anger }}
+# Tune HR policies: love={{ love }}, anger={{ anger }}
 
 require 'factbase/syntax'
 require 'fbe/bylaws'
 require 'fbe/overwrite'
+require 'fbe/just_one'
 
 love = '{{ love }}'.to_i
 raise "Love #{love} is too small, must be 0..4" if love.negative?

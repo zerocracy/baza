@@ -88,13 +88,9 @@ class Baza::HumansTest < Minitest::Test
 
   def test_verify_one_job
     WebMock.disable_net_connect!
-    passed = []
-    tbot = others { |*args| passed << args }
-    humans = Baza::Humans.new(fake_pgsql, tbot:)
-    human = humans.ensure(fake_name)
-    token = human.tokens.add(fake_name)
-    token.start(fake_name, fake_name, 1, 0, 'n/a', [], '192.168.1.1').id
-    humans.verify_one_job do |_job, verdict|
+    token = fake_token
+    token.start(fake_name, fake_name, 1, 0, 'n/a', [], '192.168.1.1')
+    token.human.humans.verify_one_job do |_job, verdict|
       assert(verdict.start_with?('FAKE: '))
     end
   end

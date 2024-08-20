@@ -214,9 +214,11 @@ end
 # Verify jobs:
 configure do
   set :verify, Always.new(1)
-  settings.verify.start(60) do
-    settings.humans.verify_one_job do |j, verdict|
-      settings.loog.debug("Job ##{j.id} was verified as #{verdict.inspect}")
+  unless ENV['RACK_ENV'] == 'test'
+    settings.verify.start(60) do
+      settings.humans.verify_one_job do |j, verdict|
+        settings.loog.debug("Job ##{j.id} was verified as #{verdict.inspect}")
+      end
     end
   end
 end
@@ -226,11 +228,13 @@ configure do
   set :donations, Always.new(1)
   set :donation_amount, 8 * 100_000
   set :donation_period, 30
-  settings.donations.start(60) do
-    settings.humans.donate(
-      amount: settings.donation_amount,
-      days: settings.donation_period
-    )
+  unless ENV['RACK_ENV'] == 'test'
+    settings.donations.start(60) do
+      settings.humans.donate(
+        amount: settings.donation_amount,
+        days: settings.donation_period
+      )
+    end
   end
 end
 

@@ -24,6 +24,9 @@
 
 require 'minitest/autorun'
 require 'factbase'
+require 'loog'
+require 'judges/options'
+require 'fbe/fb'
 require_relative '../test__helper'
 require_relative '../../objects/baza'
 require_relative '../../objects/baza/humans'
@@ -33,12 +36,6 @@ require_relative '../../objects/baza/humans'
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
 class Baza::AlterationsTest < Minitest::Test
-  module Fbe
-    def self.fb
-      @fb ||= Factbase.new
-    end
-  end
-
   def test_simple_scenario
     human = fake_human
     alterations = human.alterations
@@ -68,16 +65,14 @@ class Baza::AlterationsTest < Minitest::Test
     n = fake_name
     alterations.add(n, 'pmp', { area: 'quality', param: 'qos_interval', value: '42' })
     ruby = alterations.each.to_a.first[:script]
-    Fbe.fb.query('(always)').delete!
+    load_it('')
     Fbe.fb.insert.foo = 42
     f = Fbe.fb.insert
     f.what = 'pmp'
     f.area = 'quality'
     f.qos_interval = 7
     f.other = 33
-    # rubocop:disable Security/Eval
-    eval(ruby) # full script here
-    # rubocop:enable Security/Eval
+    load_it(ruby, reset: false)
     assert_equal(2, Fbe.fb.size)
     f = Fbe.fb.query('(eq what "pmp")').each.to_a.first
     assert_equal('pmp', f.what)
@@ -92,23 +87,19 @@ class Baza::AlterationsTest < Minitest::Test
     n = fake_name
     alterations.add(n, 'payout', { who: '444', payout: '100' })
     ruby = alterations.each.to_a.first[:script]
-    Fbe.fb.query('(always)').delete!
+    load_it('')
     f = Fbe.fb.insert
     f.what = 'resolved-bug-was-rewarded'
     f.award = 15
     f.who = 444
     f.when = Time.now - (5 * 24 * 60 * 60)
-    # rubocop:disable Security/Eval
-    eval(ruby) # full script here
-    # rubocop:enable Security/Eval
+    load_it(ruby, reset: false)
     assert_equal(2, Fbe.fb.size)
     r = Fbe.fb.query('(eq what "reconciliation")').each.to_a.first
     assert_equal(-85, r.balance)
     assert_equal(15, r.awarded)
     assert_equal(100, r.payout)
-    # rubocop:disable Security/Eval
-    eval(ruby) # full script here
-    # rubocop:enable Security/Eval
+    load_it(ruby, reset: false)
     assert_equal(2, Fbe.fb.size)
     r = Fbe.fb.query('(eq what "reconciliation")').each.to_a.first
     assert_equal(-185, r.balance)
@@ -122,10 +113,7 @@ class Baza::AlterationsTest < Minitest::Test
     n = fake_name
     alterations.add(n, 'tune', { love: '3', anger: '1' })
     ruby = alterations.each.to_a.first[:script]
-    Fbe.fb.query('(always)').delete!
-    # rubocop:disable Security/Eval
-    eval(ruby) # full script here
-    # rubocop:enable Security/Eval
+    load_it(ruby)
     assert_equal(1, Fbe.fb.size)
     r = Fbe.fb.query('(and (eq what "pmp") (eq area "hr"))').each.to_a.first
     assert(!r.dud_was_punished.nil?)
@@ -139,11 +127,27 @@ class Baza::AlterationsTest < Minitest::Test
       alterations.add(n, t, %w[area param value who payout].to_h { |k| [k.to_sym, "\u0023{exit}"] })
     end
     alterations.each do |a|
-      # rubocop:disable Security/Eval
-      eval(a[:script]) # full script here
-      # rubocop:enable Security/Eval
+      load_it(a[:script])
     rescue StandardError
       # ignore it, it's OK (as long as the process doesn't die)
+    end
+  end
+
+  private
+
+  def load_it(ruby, reset: true)
+    if reset
+      # rubocop:disable Style/GlobalVars
+      $global = {}
+      $fb = Factbase.new
+      $loog = Loog::NULL
+      $options = Judges::Options.new
+      # rubocop:enable Style/GlobalVars
+      Fbe.fb.query('(always)').delete!
+    end
+    Tempfile.open do |f|
+      File.write(f.path, ruby)
+      load(f.path, true)
     end
   end
 end
