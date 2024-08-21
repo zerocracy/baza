@@ -22,15 +22,16 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require 'others'
+require 'zip'
 
 # Pipe of jobs.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
 class Baza::Pipe
-  def initialize(humans)
+  def initialize(humans, fbs)
     @humans = humans
+    @fbs = fbs
   end
 
   def pop(owner)
@@ -47,5 +48,41 @@ class Baza::Pipe
     )
     return nil if rows.empty?
     @humans.job_by_id(rows.first['id'].to_i)
+  end
+
+  # Pack one job into a ZIP file.
+  #
+  # @param [Baza::Job] job The job to pack
+  # @param [String] file The path to .zip file to create
+  def pack(job, file)
+    Dir.mktmpdir do |dir|
+      Zip::File.open(file, create: true) do |zip|
+        fb = File.join(dir, "#{job.id}.fb")
+        @fbs.load(job.uri1, fb)
+        zip.add(fb, fb)
+        alts = job.jobs.human.alterations
+        idx = 0
+        alts.each(pending: true) do |a|
+          next if a[:name] != job.name
+          af = File.join(dir, "alternation-#{a[:id]}.rb")
+          File.write(af, a[:script])
+          zip.add(af)
+        end
+      end
+    end
+  end
+
+  # Unpack a ZIP file and finish the job with the information from it.
+  #
+  # @param [Baza::Job] job The job to pack
+  # @param [String] file The path to .zip file to read
+  def unpack(job, file)
+    Dir.mktmpdir do |dir|
+      Zip::File.open(file) do |zip|
+        zip.each do |entry|
+          entry.extract(File.join(dir, entry.name))
+        end
+      end
+    end
   end
 end

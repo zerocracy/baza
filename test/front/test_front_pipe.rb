@@ -31,7 +31,7 @@ class Baza::FrontPipeTest < Minitest::Test
     Sinatra::Application
   end
 
-  def test_renders_admin_pages
+  def test_pops_a_job
     login('yegor256')
     get('/pop?owner=foo')
     assert([204, 200].include?(last_response.status))

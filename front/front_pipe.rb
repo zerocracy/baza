@@ -22,6 +22,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+require 'zlib'
 require_relative '../objects/baza/urror'
 
 # Take a job that needs processing (or return 204 if no job).
@@ -32,9 +33,12 @@ get '/pop' do
   job = settings.humans.pipe.pop(owner)
   if job.nil?
     status 204
-  else
-    content_type('text/plain')
-    job.id.to_s
+    return
+  end
+  content_type('application/zip')
+  Tempfile.open do |f|
+    settings.humans.pipe.pack(job, f.path)
+    File.binread(f.path)
   end
 end
 
@@ -43,5 +47,10 @@ put '/finish' do
   admin_only
   id = params[:id]
   raise Baza::Urror, 'The "id" is a mandatory query param' if id.nil?
-  raise Baza::Urror, 'Not implemented yet'
+  job = settings.humans.job_by_id(id)
+  Tempfile.open do |f|
+    request.body.rewind
+    File.binwrite(f.path, request.body.read)
+    settings.humans.pipe.unpack(job, f.path)
+  end
 end

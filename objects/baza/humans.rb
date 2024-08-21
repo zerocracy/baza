@@ -44,9 +44,9 @@ class Baza::Humans
     @tbot = tbot
   end
 
-  def pipe
+  def pipe(fbs)
     require_relative 'pipe'
-    Baza::Pipe.new(self)
+    Baza::Pipe.new(self, fbs)
   end
 
   def gc

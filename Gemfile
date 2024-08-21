@@ -57,6 +57,7 @@ gem 'retries', '>0'
 gem 'rspec-rails', '6.1.4', require: false
 gem 'rubocop', '1.65.1', require: false
 gem 'rubocop-rspec', '3.0.4', require: false
+gem 'rubyzip', '>0'
 gem 'sass-embedded', '1.77.8'
 gem 'scss_lint', '0.60.0', require: false
 gem 'sentry-ruby', '~>5.18'

@@ -23,6 +23,7 @@
 # SOFTWARE.
 
 require 'minitest/autorun'
+require 'loog'
 require_relative '../test__helper'
 require_relative '../../objects/baza'
 require_relative '../../objects/baza/pipe'
@@ -36,5 +37,21 @@ class Baza::PipeTest < Minitest::Test
     fake_job
     pipe = Baza::Humans.new(fake_pgsql).pipe
     assert(!pipe.pop('owner').nil?)
+  end
+
+  def test_pack
+    job = fake_job
+    fbs = Baza::Factbases.new('', '', loog: Loog::NULL)
+    pipe = Baza::Humans.new(fake_pgsql).pipe(fbs)
+    Dir.mktmpdir do |dir|
+      zip = File.join(dir, 'foo.zip')
+      pipe.pack(job, zip)
+      Zip::File.open(zip) do |z|
+        z.each do |entry|
+          entry.extract(File.join(dir, entry.name))
+        end
+      end
+      assert(File.exist?(File.join(dir, "#{job.id}.fb")))
+    end
   end
 end
