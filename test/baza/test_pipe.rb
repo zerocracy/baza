@@ -24,6 +24,7 @@
 
 require 'minitest/autorun'
 require 'loog'
+require 'factbase'
 require_relative '../test__helper'
 require_relative '../../objects/baza'
 require_relative '../../objects/baza/pipe'
@@ -35,15 +36,20 @@ require_relative '../../objects/baza/pipe'
 class Baza::PipeTest < Minitest::Test
   def test_pop_one
     fake_job
-    pipe = Baza::Humans.new(fake_pgsql).pipe
+    fbs = Baza::Factbases.new('', '', loog: Loog::NULL)
+    pipe = Baza::Humans.new(fake_pgsql).pipe(fbs)
     assert(!pipe.pop('owner').nil?)
   end
 
   def test_pack
-    job = fake_job
     fbs = Baza::Factbases.new('', '', loog: Loog::NULL)
-    pipe = Baza::Humans.new(fake_pgsql).pipe(fbs)
     Dir.mktmpdir do |dir|
+      input = File.join(dir, 'foo.fb')
+      File.binwrite(input, Factbase.new.export)
+      uri = fbs.save(input)
+      job = fake_token.start(fake_name, uri, 1, 0, 'n/a', [], '1.1.1.1')
+      alt = job.jobs.human.alterations.add(job.name, 'ruby', { script: 'puts "hi!"' })
+      pipe = Baza::Humans.new(fake_pgsql).pipe(fbs)
       zip = File.join(dir, 'foo.zip')
       pipe.pack(job, zip)
       Zip::File.open(zip) do |z|
@@ -51,7 +57,12 @@ class Baza::PipeTest < Minitest::Test
           entry.extract(File.join(dir, entry.name))
         end
       end
+      assert(File.exist?(File.join(dir, 'job.json')))
       assert(File.exist?(File.join(dir, "#{job.id}.fb")))
+      assert(File.exist?(File.join(dir, "alteration-#{alt}.rb")))
+      json = JSON.parse(File.read(File.join(dir, 'job.json')))
+      assert_equal(job.id, json['id'], json)
+      assert_equal(job.name, json['name'], json)
     end
   end
 end

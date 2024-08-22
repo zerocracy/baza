@@ -92,6 +92,12 @@ class Baza::Alterations
     }
   end
 
+  # Add new alteration and return its ID.
+  #
+  # @param [String] name Name of the job to alter
+  # @param [String] template Name of template, like "tune" or "ruby"
+  # @param [Hash] params Hash map of params for the template
+  # @return [Integer] The ID of the added alteration
   def add(name, template, params)
     raise Baza::Urror, 'The name cannot be empty' if name.empty?
     raise Baza::Urror, 'The name is not valid' unless name.match?(/^[a-z0-9]+$/)

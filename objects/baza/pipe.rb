@@ -23,6 +23,7 @@
 # SOFTWARE.
 
 require 'zip'
+require 'json'
 
 # Pipe of jobs.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -59,14 +60,26 @@ class Baza::Pipe
       Zip::File.open(file, create: true) do |zip|
         fb = File.join(dir, "#{job.id}.fb")
         @fbs.load(job.uri1, fb)
-        zip.add(fb, fb)
+        zip.add(File.basename(fb), fb)
+        json = File.join(dir, 'job.json')
+        File.write(
+          json,
+          JSON.pretty_generate(
+            {
+              id: job.id,
+              name: job.name,
+              human: job.jobs.human.id,
+            }
+          )
+        )
+        zip.add(File.basename(json), json)
         alts = job.jobs.human.alterations
         idx = 0
         alts.each(pending: true) do |a|
           next if a[:name] != job.name
-          af = File.join(dir, "alternation-#{a[:id]}.rb")
+          af = File.join(dir, "alteration-#{a[:id]}.rb")
           File.write(af, a[:script])
-          zip.add(af)
+          zip.add(File.basename(af), af)
         end
       end
     end
