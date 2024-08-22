@@ -24,6 +24,7 @@
 
 require 'zip'
 require 'json'
+require_relative 'errors'
 
 # Pipe of jobs.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -61,14 +62,14 @@ class Baza::Pipe
         fb = File.join(dir, "#{job.id}.fb")
         @fbs.load(job.uri1, fb)
         zip.add(File.basename(fb), fb)
-        json = File.join(dir, 'job.json')
+        json = File.join(dir, "#{job.id}.json")
         File.write(
           json,
           JSON.pretty_generate(
             {
               id: job.id,
               name: job.name,
-              human: job.jobs.human.id,
+              human: job.jobs.human.id
             }
           )
         )
@@ -96,6 +97,24 @@ class Baza::Pipe
           entry.extract(File.join(dir, entry.name))
         end
       end
+      %w[json fb stdout].each do |ext|
+        f = File.join(dir, "#{job.id}.#{ext}")
+        raise Baza::Urror, "The #{File.basename(f)} file is missing" unless File.exist?(f)
+      end
+      meta = JSON.parse(File.read(File.join(dir, "#{job.id}.json")))
+      %w[exit msec].each do |a|
+        raise Baza::Urror, "The '#{a}' is missing in JSON" if meta[a].nil?
+      end
+      fb = File.join(dir, "#{job.id}.fb")
+      uri = @fbs.save(fb)
+      job.finish!(
+        uri,
+        File.binread(File.join(dir, "#{job.id}.stdout")),
+        meta['exit'],
+        meta['msec'],
+        meta['exit'].zero? ? File.size(fb) : nil,
+        meta['exit'].zero? ? Baza::Errors.new(fb).count : nil
+      )
     end
   end
 end

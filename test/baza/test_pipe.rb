@@ -57,12 +57,43 @@ class Baza::PipeTest < Minitest::Test
           entry.extract(File.join(dir, entry.name))
         end
       end
-      assert(File.exist?(File.join(dir, 'job.json')))
+      assert(File.exist?(File.join(dir, "#{job.id}.json")))
       assert(File.exist?(File.join(dir, "#{job.id}.fb")))
       assert(File.exist?(File.join(dir, "alteration-#{alt}.rb")))
-      json = JSON.parse(File.read(File.join(dir, 'job.json')))
+      json = JSON.parse(File.read(File.join(dir, "#{job.id}.json")))
       assert_equal(job.id, json['id'], json)
       assert_equal(job.name, json['name'], json)
+    end
+  end
+
+  def test_unpack
+    job = fake_job
+    fbs = Baza::Factbases.new('', '', loog: Loog::NULL)
+    pipe = Baza::Humans.new(fake_pgsql).pipe(fbs)
+    Dir.mktmpdir do |dir|
+      output = File.join(dir, "#{job.id}.fb")
+      File.binwrite(output, Factbase.new.export)
+      stdout = File.join(dir, "#{job.id}.stdout")
+      File.write(stdout, 'Nothing interesting')
+      json = File.join(dir, "#{job.id}.json")
+      File.write(
+        json,
+        JSON.pretty_generate(
+          {
+            id: job.id,
+            exit: 0,
+            msec: 500
+          }
+        )
+      )
+      zip = File.join(dir, 'foo.zip')
+      Zip::File.open(zip, create: true) do |z|
+        z.add(File.basename(output), output)
+        z.add(File.basename(stdout), stdout)
+        z.add(File.basename(json), json)
+      end
+      pipe.unpack(job, zip)
+      assert(job.jobs.get(job.id).finished?)
     end
   end
 end
