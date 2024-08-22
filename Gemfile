@@ -73,7 +73,6 @@ gem 'total', '>0'
 gem 'truncate', '0.1.0'
 gem 'veils', '>0'
 gem 'w3c_validators', '1.3.7', require: false
-gem 'wait_for', '>0', require: false
 gem 'webmock', '3.23.1', require: false
 gem 'xcop', '>0'
 gem 'zache', '>0'

@@ -87,7 +87,13 @@ class Minitest::Test
   end
 
   def fake_job(human = fake_human)
-    fake_token(human).start(fake_name, fake_name, 1, 0, 'n/a', [], '127.0.0.1')
+    fbs = Baza::Factbases.new('', '', loog: Loog::NULL)
+    Dir.mktmpdir do |dir|
+      input = File.join(dir, 'foo.fb')
+      File.binwrite(input, Factbase.new.export)
+      uri = fbs.save(input)
+      fake_token(human).start(fake_name, uri, 1, 0, 'n/a', [], '127.0.0.1')
+    end
   end
 
   def login(name = fake_name)
@@ -114,5 +120,25 @@ class Minitest::Test
     visit '/dash'
     click_link 'Start'
     tester_human.tokens.each(&:deactivate!)
+  end
+
+  def finish_all_jobs
+    fbs = Baza::Factbases.new('', '', loog: Loog::NULL)
+    loop do
+      Dir.mktmpdir do |home|
+        FileUtils.mkdir_p(File.join(home, 'judges'))
+        pp = Baza::Pipeline.new(home, Baza::Humans.new(fake_pgsql), fbs, Loog::NULL, Baza::Trails.new(fake_pgsql))
+        count = 0
+        loop do
+          break unless pp.process_one
+          count += 1
+          raise 'Too many, definitely an error' if count > 100
+        end
+      end
+      break
+    rescue StandardError => e
+      puts Backtrace.new(e)
+      retry
+    end
   end
 end

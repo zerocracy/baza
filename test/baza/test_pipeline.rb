@@ -25,7 +25,6 @@
 require 'minitest/autorun'
 require 'loog'
 require 'factbase'
-require 'wait_for'
 require_relative '../test__helper'
 require_relative '../../objects/baza'
 require_relative '../../objects/baza/pipeline'
@@ -37,18 +36,8 @@ require_relative '../../objects/baza/trails'
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
 class Baza::PipelineTest < Minitest::Test
-  def setup
-    loop do
-      Dir.mktmpdir do |home|
-        process_all(home, Baza::Humans.new(fake_pgsql), Baza::Factbases.new('', ''))
-      end
-      break
-    rescue StandardError
-      retry
-    end
-  end
-
   def test_simple_processing
+    finish_all_jobs
     loog = Loog::Buffer.new
     humans = Baza::Humans.new(fake_pgsql)
     fbs = Baza::Factbases.new('', '', loog:)
@@ -96,6 +85,7 @@ class Baza::PipelineTest < Minitest::Test
   end
 
   def test_picks_all_of_them
+    finish_all_jobs
     fbs = Baza::Factbases.new('', '', loog: Loog::NULL)
     Dir.mktmpdir do |home|
       token = fake_token
@@ -109,6 +99,7 @@ class Baza::PipelineTest < Minitest::Test
   end
 
   def test_with_fatal_error
+    finish_all_jobs
     fbs = Baza::Factbases.new('', '', loog: Loog::NULL)
     Dir.mktmpdir do |home|
       token = fake_token
@@ -125,6 +116,7 @@ class Baza::PipelineTest < Minitest::Test
   end
 
   def test_with_two_alterations
+    finish_all_jobs
     humans = Baza::Humans.new(fake_pgsql)
     fbs = Baza::Factbases.new('', '', loog: Loog::NULL)
     Dir.mktmpdir do |home|
@@ -154,6 +146,7 @@ class Baza::PipelineTest < Minitest::Test
   end
 
   def test_with_trails
+    finish_all_jobs
     humans = Baza::Humans.new(fake_pgsql)
     trails = Baza::Trails.new(fake_pgsql)
     fbs = Baza::Factbases.new('', '', loog: Loog::NULL)
@@ -181,6 +174,7 @@ class Baza::PipelineTest < Minitest::Test
   end
 
   def test_with_j_if_exists
+    finish_all_jobs
     j = File.absolute_path(File.join(__dir__, '../../j'))
     skip unless File.exist?(j)
     fbs = Baza::Factbases.new('', '')

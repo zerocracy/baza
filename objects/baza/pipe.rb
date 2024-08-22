@@ -75,7 +75,6 @@ class Baza::Pipe
         )
         zip.add(File.basename(json), json)
         alts = job.jobs.human.alterations
-        idx = 0
         alts.each(pending: true) do |a|
           next if a[:name] != job.name
           af = File.join(dir, "alteration-#{a[:id]}.rb")

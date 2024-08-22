@@ -56,7 +56,7 @@ class Baza::Pipeline
   # @return [Boolean] TRUE if processing happened, FALSE if no jobs to process
   def process_one
     owner = "baza #{Baza::VERSION} #{Time.now.utc.iso8601}"
-    job = @humans.pipe.pop(owner)
+    job = @humans.pipe(@fbs).pop(owner)
     if job.nil?
       @loog.debug('Nothing to process by the pipeline at this time')
       return false

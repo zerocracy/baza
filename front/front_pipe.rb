@@ -30,14 +30,15 @@ get '/pop' do
   admin_only
   owner = params[:owner]
   raise Baza::Urror, 'The "owner" is a mandatory query param' if owner.nil?
-  job = settings.humans.pipe.pop(owner)
+  pipe = settings.humans.pipe(settings.fbs)
+  job = pipe.pop(owner)
   if job.nil?
     status 204
     return
   end
   content_type('application/zip')
   Tempfile.open do |f|
-    settings.humans.pipe.pack(job, f.path)
+    pipe.pack(job, f.path)
     File.binread(f.path)
   end
 end
@@ -48,9 +49,11 @@ put '/finish' do
   id = params[:id]
   raise Baza::Urror, 'The "id" is a mandatory query param' if id.nil?
   job = settings.humans.job_by_id(id)
+  pipe = settings.humans.pipe(settings.fbs)
   Tempfile.open do |f|
     request.body.rewind
     File.binwrite(f.path, request.body.read)
-    settings.humans.pipe.unpack(job, f.path)
+    pipe.unpack(job, f.path)
   end
+  "Job ##{job.id} finished, thanks!"
 end
