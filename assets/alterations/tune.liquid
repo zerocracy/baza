@@ -1,4 +1,4 @@
-# Tune HR policies: love={{ love }}, anger={{ anger }}
+# Tune HR policies: love={{ love }}, anger={{ anger }}, paranoia={{ paranoia }}
 
 require 'factbase/syntax'
 require 'fbe/bylaws'
@@ -13,7 +13,11 @@ anger = '{{ anger }}'.to_i
 raise "Anger #{anger} is too small, must be 0..4" if anger.negative?
 raise "Anger #{anger} is too big, must be 0..4" if anger > 4
 
-Fbe.bylaws(love:, anger:).each do |n, term|
+paranoia = '{{ paranoia }}'.to_i
+raise "Paranoia #{paranoia} is too small, must be 1..4" if !paranoia.positive?
+raise "Paranoia #{paranoia} is too big, must be 1..4" if paranoia > 4
+
+Fbe.bylaws(love:, anger:, paranoia:).each do |n, term|
   fact =
     Fbe.just_one do |f|
       f.what = 'pmp'

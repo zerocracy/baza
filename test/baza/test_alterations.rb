@@ -111,7 +111,7 @@ class Baza::AlterationsTest < Minitest::Test
     human = fake_human
     alterations = human.alterations
     n = fake_name
-    alterations.add(n, 'tune', { love: '3', anger: '1' })
+    alterations.add(n, 'tune', { love: '3', anger: '1', paranoia: '2' })
     ruby = alterations.each.to_a.first[:script]
     load_it(ruby)
     assert_equal(1, Fbe.fb.size)

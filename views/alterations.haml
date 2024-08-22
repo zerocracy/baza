@@ -81,6 +81,15 @@
           %option{ value: '2' }
           %option{ value: '3' }
           %option{ value: '4' }
+        %label
+          %i.fa-solid.fa-glasses
+          Paranoia (the level of meticulousness applied to quality standards):
+        %input{ type: 'range', min: '1', max: '4', name: 'paranoia', tabindex: 3, placeholder: "e.g., 4", size: 4, list: 'meticulousness' }
+        %datalist{ id: 'meticulousness' }
+          %option{ value: '1' }
+          %option{ value: '2' }
+          %option{ value: '3' }
+          %option{ value: '4' }
       %div#ruby
         %label
           Ruby:
