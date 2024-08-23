@@ -59,12 +59,10 @@ class Baza::Pipe
   def pack(job, file)
     Dir.mktmpdir do |dir|
       Zip::File.open(file, create: true) do |zip|
-        fb = File.join(dir, "#{job.id}.fb")
-        @fbs.load(job.uri1, fb)
-        zip.add(File.basename(fb), fb)
-        json = File.join(dir, "#{job.id}.json")
+        File.write(File.join(dir, 'id.txt'), job.id.to_s)
+        @fbs.load(job.uri1, File.join(dir, "#{job.id}.fb"))
         File.write(
-          json,
+          File.join(dir, "#{job.id}.json"),
           JSON.pretty_generate(
             {
               id: job.id,
@@ -73,13 +71,13 @@ class Baza::Pipe
             }
           )
         )
-        zip.add(File.basename(json), json)
         alts = job.jobs.human.alterations
         alts.each(pending: true) do |a|
           next if a[:name] != job.name
-          af = File.join(dir, "alteration-#{a[:id]}.rb")
-          File.write(af, a[:script])
-          zip.add(File.basename(af), af)
+          File.write(File.join(dir, "alteration-#{a[:id]}.rb"), a[:script])
+        end
+        Dir[File.join(dir, '**/*')].each do |f|
+          zip.add(File.basename(f), f)
         end
       end
     end

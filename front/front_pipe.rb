@@ -48,7 +48,7 @@ put '/finish' do
   admin_only
   id = params[:id]
   raise Baza::Urror, 'The "id" is a mandatory query param' if id.nil?
-  job = settings.humans.job_by_id(id)
+  job = settings.humans.job_by_id(id.to_i)
   pipe = settings.humans.pipe(settings.fbs)
   Tempfile.open do |f|
     request.body.rewind

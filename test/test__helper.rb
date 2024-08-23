@@ -44,6 +44,7 @@ require 'capybara'
 require 'capybara/dsl'
 require_relative '../baza'
 require_relative '../objects/baza/humans'
+require_relative '../objects/baza/pipeline'
 
 module Rack
   module Test

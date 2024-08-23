@@ -57,9 +57,9 @@ class Baza::PipeTest < Minitest::Test
           entry.extract(File.join(dir, entry.name))
         end
       end
-      assert(File.exist?(File.join(dir, "#{job.id}.json")))
-      assert(File.exist?(File.join(dir, "#{job.id}.fb")))
-      assert(File.exist?(File.join(dir, "alteration-#{alt}.rb")))
+      ['id.txt', "#{job.id}.json", "#{job.id}.fb", "alteration-#{alt}.rb"].each do |f|
+        assert(File.exist?(File.join(dir, f)))
+      end
       json = JSON.parse(File.read(File.join(dir, "#{job.id}.json")))
       assert_equal(job.id, json['id'], json)
       assert_equal(job.name, json['name'], json)

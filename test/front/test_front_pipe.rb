@@ -23,6 +23,8 @@
 # SOFTWARE.
 
 require 'minitest/autorun'
+require 'factbase'
+require 'fileutils'
 require_relative '../test__helper'
 require_relative '../../baza'
 
@@ -31,11 +33,35 @@ class Baza::FrontPipeTest < Minitest::Test
     Sinatra::Application
   end
 
-  def test_pops_a_job
+  def test_pop_and_finish_job
     finish_all_jobs
     login('yegor256')
     fake_job
     get('/pop?owner=foo')
     assert_equal(200, last_response.status, last_response.body)
+    Dir.mktmpdir do |dir|
+      zip = File.join(dir, 'foo.zip')
+      File.binwrite(zip, last_response.body)
+      Zip::File.open(zip) do |z|
+        z.each do |entry|
+          entry.extract(File.join(dir, entry.name))
+        end
+      end
+      id = File.read(File.join(dir, 'id.txt')).to_i
+      fb = File.join(dir, "#{id}.fb")
+      File.binwrite(fb, Factbase.new.export)
+      json = File.join(dir, "#{id}.json")
+      File.write(json, JSON.pretty_generate({ exit: 0, msec: 500 }))
+      stdout = File.join(dir, "#{id}.stdout")
+      File.write(stdout, 'all good!')
+      FileUtils.rm_f(zip)
+      Zip::File.open(zip, create: true) do |z|
+        z.add(File.basename(fb), fb)
+        z.add(File.basename(json), json)
+        z.add(File.basename(stdout), stdout)
+      end
+      put("/finish?id=#{id}", File.binread(zip))
+      assert_equal(200, last_response.status, last_response.body)
+    end
   end
 end
