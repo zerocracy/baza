@@ -41,21 +41,28 @@ module Baza::Helpers
     end
     @_out_buf << html_tag('tr') do
       html_tag('td', colspan: '4') do
-        [
-          params[:offset].zero? ? '' : html_tag('a', href: iri.del(:offset)) do
+        html_tag('nav') do
+          html_tag('ul') do
             [
-              html_tag('i', class: 'fa-solid fa-backward'),
-              html_tag('span', style: 'margin-left: .5em') { 'Back' }
+              html_tag('li') do
+                params[:offset].zero? ? '' : html_tag('a', href: iri.del(:offset)) do
+                  [
+                    html_tag('i', class: 'fa-solid fa-backward'),
+                    html_tag('span', style: 'margin-left: .5em') { 'Back' }
+                  ].join
+                end
+              end,
+              html_tag('li') do
+                total > max ? html_tag('a', href: iri.over(offset: params[:offset] + max)) do
+                  [
+                    html_tag('span', style: 'margin-right: .5em') { 'More' },
+                    html_tag('i', class: 'fa-solid fa-forward')
+                  ].join
+                end : ''
+              end
             ].join
-          end,
-          ' ',
-          total > max ? html_tag('a', href: iri.over(offset: params[:offset] + max)) do
-            [
-              html_tag('span', style: 'margin-right: .5em') { 'More' },
-              html_tag('i', class: 'fa-solid fa-forward')
-            ].join
-          end : ''
-        ].join(' ')
+          end
+        end
       end
     end
   end
