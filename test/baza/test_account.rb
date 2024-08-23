@@ -43,11 +43,9 @@ class Baza::AccountTest < Minitest::Test
   end
 
   def test_fetch_receipts
-    human = fake_human
-    token = human.tokens.add(fake_name)
-    job = token.start(fake_name, fake_name, 1, 0, 'n/a', [], '192.168.1.1')
+    job = fake_job
     job.finish!(fake_name, 'stdout', 0, 544, 111, 0)
-    r = human.account.each.to_a.first
+    r = job.jobs.human.account.each.to_a.first
     assert(!r.id.nil?)
     assert(!r.summary.nil?)
     assert(!r.zents.nil?)
