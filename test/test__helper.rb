@@ -125,6 +125,7 @@ class Minitest::Test
 
   def finish_all_jobs
     fbs = Baza::Factbases.new('', '', loog: Loog::NULL)
+    retries = 0
     loop do
       Dir.mktmpdir do |home|
         FileUtils.mkdir_p(File.join(home, 'judges'))
@@ -138,7 +139,8 @@ class Minitest::Test
       end
       break
     rescue StandardError => e
-      puts Backtrace.new(e)
+      retries += 1
+      raise e if retries > 100
       retry
     end
   end
