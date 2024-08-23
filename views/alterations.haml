@@ -70,11 +70,15 @@
         %label
           %i.fa-solid.fa-heart.good
           Love (rewards for doing good):
-        %input{ type: 'range', min: '0', max: '4', name: 'love', tabindex: 2, placeholder: "e.g., 2", size: 4, list: 'attitude' }
+        %input{ type: 'range', min: '0', max: '4', name: 'love', tabindex: 2, placeholder: "e.g., 2", size: 4, list: 'attitude', oninput: "$(this).next().val($(this).val());" }
+        %output
+          2
         %label
           %i.fa-solid.fa-bolt.bad
           Anger (punishments for breaking rules):
-        %input{ type: 'range', min: '0', max: '4', name: 'anger', tabindex: 3, placeholder: "e.g., 4", size: 4, list: 'attitude' }
+        %input{ type: 'range', min: '0', max: '4', name: 'anger', tabindex: 3, placeholder: "e.g., 4", size: 4, list: 'attitude', oninput: "$(this).next().val($(this).val());" }
+        %output
+          2
         %datalist{ id: 'attitude' }
           %option{ value: '0' }
           %option{ value: '1' }
@@ -84,7 +88,9 @@
         %label
           %i.fa-solid.fa-glasses
           Paranoia (the level of meticulousness applied to quality standards):
-        %input{ type: 'range', min: '1', max: '4', name: 'paranoia', tabindex: 3, placeholder: "e.g., 4", size: 4, list: 'meticulousness' }
+        %input{ type: 'range', min: '1', max: '4', name: 'paranoia', tabindex: 3, placeholder: "e.g., 4", size: 4, list: 'meticulousness', oninput: "$(this).next().val($(this).val());" }
+        %output
+          2
         %datalist{ id: 'meticulousness' }
           %option{ value: '1' }
           %option{ value: '2' }
