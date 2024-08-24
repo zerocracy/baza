@@ -77,6 +77,12 @@ configure do
       'region' => '',
       'bucket' => ''
     },
+    'sqs' => {
+      'key' => '',
+      'secret' => '',
+      'url' => '',
+      'region' => ''
+    },
     'github' => {
       'id' => '',
       'secret' => '',
@@ -159,6 +165,18 @@ configure do
     settings.config['s3']['secret'],
     settings.config['s3']['region'],
     settings.config['s3']['bucket'],
+    loog: settings.loog
+  )
+end
+
+# Amazon SQS:
+configure do
+  require_relative 'objects/baza/sqs'
+  set :sqs, Baza::SQS.new(
+    settings.config['sqs']['key'],
+    settings.config['sqs']['secret'],
+    settings.config['sqs']['url'],
+    settings.config['sqs']['region'],
     loog: settings.loog
   )
 end

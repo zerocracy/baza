@@ -55,7 +55,7 @@ def job_start(token, file, name, metas, ip)
   end
   raise Baza::Urror, "An existing job named '#{name}' is running now" if token.human.jobs.busy?(name)
   uuid = settings.fbs.save(file.path)
-  token.start(
+  job = token.start(
     name, uuid,
     File.size(file.path),
     Baza::Errors.new(file.path).count,
@@ -63,6 +63,7 @@ def job_start(token, file, name, metas, ip)
     (request.env['HTTP_X_ZEROCRACY_META'] || '').split(/\s+/).map { |v| Base64.decode64(v) } + metas,
     ip
   )
+  settings.sqs.push("Job ##{job.id} (#{job.name}) registered from #{ip}")
 end
 
 # @param [Sinatra::IndifferentHash] uploaded_file The uploaded file data
