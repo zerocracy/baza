@@ -22,8 +22,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+require 'English'
 require 'liquid'
 require 'fileutils'
+require 'digest/sha1'
 
 # Function in AWS Lambda.
 #
@@ -48,9 +50,14 @@ class Baza::Lambda
   end
 
   # Deploy all swarms into AWS lambda.
-  def deploy(ecr)
-    # check every swarm
-    #   if SHA is different in GitHub, add install.sh to package
+  def deploy
+    Dir.mktmpdir do |home|
+      zip = File.join(home, 'image.zip')
+      pack(zip)
+      sha = Digest::SHA1.hexdigest(File.binread(zip))
+      break if aws_sha == sha
+    end
+
     # create EC2 instance
     # enter it via SSH
     # upload Dockerfile + all install.sh files
@@ -58,6 +65,13 @@ class Baza::Lambda
     # 'docker push' to ECR
     # delete EC2 instance
     # update Lambda function to use new image
+  end
+
+  # What is the current SHA of the AWS lambda function?
+  #
+  # @return [String] The SHA or '' if no lambda function found
+  def aws_sha
+    ''
   end
 
   # Package all necessary files for Docker image.
@@ -79,30 +93,50 @@ class Baza::Lambda
         'WORKDIR /z'
       ]
       swarms do |swarm|
+        dir = checkout(swarm)
+        next if dir.nil?
         sub = "swarms/#{swarm.name}"
-        dir = File.join(home, sub)
-        git = [
-          'set -ex',
-          'date',
-          "git clone -b #{swarm.branch} --depth=1 --single-branch git@github.com:#{swarm.repository}.git #{dir}"
-        ]
-        stdout = `(#{git.join(' && ')}) 2>&1`
-        swarm.stdout!(stdout)
-        sh = File.join(sub, 'install.sh')
-        if File.exist?(File.join(home, sh))
-          dockerfile << "COPY #{sh} install"
-          dockerfile << "RUN chmod a+x #{sh} && #{sh} && rm #{sh}"
+        FileUtils.copy(dir, File.join(home, sub))
+        if File.exist?(File.join(dir, File.join(sub, 'install.sh')))
+          n = "install-#{swarm.name}.sh"
+          dockerfile << "COPY #{sub}/install.sh #{n}"
+          dockerfile << "RUN chmod a+x #{n} && ./#{n} && rm #{n}"
         end
       end
       dockerfile << 'RUN rm -rf /z/swarms'
       dockerfile << 'COPY swarms /z'
       dockerfile << 'CMD ["entry.rb"]'
       File.write(File.join(home, 'Dockerfile'), dockerfile.join("\n"))
-      Baza::Zip.new(file, loog: Loog::VERBOSE).pack(home)
+      Baza::Zip.new(file, loog: @loog).pack(home)
     end
   end
 
   private
+
+  # Checkout swarm and return the directory where it's located. Also,
+  # update its SHA if necessary.
+  #
+  # @param [Baza::Swarm] swarm The swarm
+  # @return [String] Path to location
+  def checkout(swarm)
+    sub = "swarms/#{swarm.name}"
+    dir = File.join('/tmp', sub)
+    FileUtils.mkdir_p(File.dirname(dir))
+    git = ['set -ex', 'date', 'git --version']
+    if File.exist?(dir)
+      git += ["cd #{dir}", 'git pull']
+    else
+      git << "git clone -b #{swarm.branch} --depth=1 --single-branch git@github.com:#{swarm.repository}.git #{dir}"
+    end
+    git << 'git log'
+    stdout = `(#{git.join(' && ')}) 2>&1`
+    @loog.debug(stdout)
+    swarm.stdout!(stdout)
+    code = $CHILD_STATUS.exitstatus
+    return nil unless code.zero?
+    swarm.sha!(stdout.split("\n").last.strip)
+    dir
+  end
 
   def swarms
     @humans.pgsql.exec('SELECT * FROM swarm').each do |row|

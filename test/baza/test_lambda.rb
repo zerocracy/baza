@@ -24,6 +24,7 @@
 
 require 'minitest/autorun'
 require 'fileutils'
+require 'loog'
 require_relative '../test__helper'
 require_relative '../../objects/baza'
 require_relative '../../objects/baza/zip'
@@ -39,7 +40,7 @@ class Baza::LambdaTest < Minitest::Test
     fake_human.swarms.add(fake_name, 'zerocracy/j', 'master')
     Dir.mktmpdir do |dir|
       zip = File.join(dir, 'image.zip')
-      Baza::Lambda.new(fake_humans, '', '', '').pack(zip)
+      Baza::Lambda.new(fake_humans, '', '', '', loog: Loog::VERBOSE).pack(zip)
       Baza::Zip.new(zip).unpack(dir)
       puts File.read(File.join(dir, 'Dockerfile'))
       # assert(File.exist?())
