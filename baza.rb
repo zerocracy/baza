@@ -83,6 +83,11 @@ configure do
       'url' => '',
       'region' => ''
     },
+    'lambda' => {
+      'key' => '',
+      'secret' => '',
+      'region' => ''
+    },
     'github' => {
       'id' => '',
       'secret' => '',
@@ -254,12 +259,20 @@ configure do
   end
 end
 
-# Create a new AWS ECR docker image from all swarms:
+# Redeploy AWS lambda function:
 configure do
-  set :dock, Always.new(1)
+  require_relative 'objects/baza/lambda'
+  lmbd = Baza::Lambda.new(
+    settings.pgsql,
+    settings.config['lambda']['key'],
+    settings.config['lambda']['secret'],
+    settings.config['lambda']['region'],
+    loog: settings.loog
+  )
+  set :lambda, Always.new(1)
   unless ENV['RACK_ENV'] == 'test'
-    settings.dock.start(5 * 60) do
-      settings.humans.ensure('yegor256').swarms.deploy
+    settings.lambda.start(5 * 60) do
+      lmbd.deploy
     end
   end
 end

@@ -112,6 +112,20 @@ class Baza::Humans
     get(rows.first['human'].to_i).jobs.get(id)
   end
 
+  # Find swarm ID, if it exists.
+  #
+  # @param [String] repo Name of repository
+  # @param [String] branch Name of branch
+  # @return [Baza::Swarm] The found swarm or NIL
+  def find_swarm(repo, branch)
+    rows = @pgsql.exec(
+      'SELECT id, human FROM swarm WHERE repository = $1 and branch = $2',
+      [repo, branch]
+    )
+    return nil if rows.empty?
+    get(rows.first['human'].to_i).swarms.get(id)
+  end
+
   # Donate to all accounts that are not funded enough (and eligible for donation).
   def donate(amount: 8, days: 30)
     summary = 'Donation'

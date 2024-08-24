@@ -22,8 +22,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require 'liquid'
-
 # Swarms of a human.
 #
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -39,6 +37,12 @@ class Baza::Swarms
 
   def pgsql
     @human.pgsql
+  end
+
+  def get(id)
+    raise 'Swarm ID must be an integer' unless id.is_a?(Integer)
+    require_relative 'swarm'
+    Baza::Swarm.new(self, id, tbot: @tbot)
   end
 
   def empty?
@@ -75,50 +79,19 @@ class Baza::Swarms
   # @param [String] name Name of the swarm
   # @param [String] repo Name of repository
   # @param [String] branch Name of branch
-  # @return [Integer] The ID of the added swarm
+  # @return [Baza::Swarm] The added swarm
   def add(name, repo, branch)
     raise Baza::Urror, 'The "name" cannot be empty' if name.empty?
     raise Baza::Urror, "The name #{name.inspect} is not valid" unless name.match?(/^[a-z0-9-]+$/)
     raise Baza::Urror, 'The "repo" cannot be empty' if repo.empty?
-    unless repo.match?(%r{^[a-zA-Z][a-zA-Z0-9-.]*/[a-zA-Z][a-z0-9-.]*$})
+    unless repo.match?(%r{^[a-zA-Z][a-zA-Z0-9\-.]*/[a-zA-Z][a-z0-9\-.]*$})
       raise Baza::Urror, "The repo #{repo.inspect} is not valid"
     end
-    pgsql.exec(
-      'INSERT INTO swarm (human, name, repository, branch) VALUES ($1, $2, $3, $4) RETURNING id',
-      [@human.id, name.downcase, repo, branch]
-    )[0]['id'].to_i
-  end
-
-  # Change SHA of the swarm.
-  #
-  # @param [Integer] id The ID of the swarm
-  # @param [String] sha The SHA of the head of the swarm
-  def update(id, sha)
-    pgsql.exec(
-      'UPDATE swarm SET sha = $1 WHERE id = $2 AND human = $3',
-      [sha, id, @human.id]
+    get(
+      pgsql.exec(
+        'INSERT INTO swarm (human, name, repository, branch) VALUES ($1, $2, $3, $4) RETURNING id',
+        [@human.id, name.downcase, repo, branch]
+      )[0]['id'].to_i
     )
-  end
-
-  def remove(id)
-    pgsql.exec(
-      'DELETE FROM swarm WHERE id = $1 AND human = $2',
-      [id, @human.id]
-    )
-  end
-
-  # Deploy them all (not only those that belong to this particular human)
-  # into ECR, while the current human is the deployment manager, who will
-  # receive the message in Tbot on success or failure.
-  def deploy(ecr)
-    # check every swarm
-    #   if SHA is different in GitHub, add install.sh to package
-    # create EC2 instance
-    # enter it via SSH
-    # upload Dockerfile + all install.sh files
-    # run 'docker build'
-    # 'docker push' to ECR
-    # delete EC2 instance
-    # update Lambda function to use new image
   end
 end

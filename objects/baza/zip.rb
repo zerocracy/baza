@@ -22,6 +22,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+require 'loog'
 require 'zip'
 require 'fileutils'
 require 'pathname'
@@ -31,8 +32,9 @@ require 'pathname'
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
 class Baza::Zip
-  def initialize(file)
+  def initialize(file, loog: Loog::NULL)
     @file = file
+    @loog = loog
   end
 
   # Pack all files in the directory into the ZIP archive.
@@ -40,25 +42,32 @@ class Baza::Zip
   # @param [String] dir The path of the directory
   def pack(dir)
     FileUtils.rm_f(@file)
+    entries = []
     Zip::File.open(@file, create: true) do |zip|
       Dir[File.join(dir, '**/*')].each do |f|
         next if f == @file
-        zip.add(Pathname.new(f).relative_path_from(dir), f)
+        path = Pathname.new(f).relative_path_from(dir)
+        zip.add(path, f)
+        entries << "#{path}: #{File.size(f)}"
       end
     end
+    @loog.debug("Directory #{dir} zipped to #{@file}:\n  #{entries.join("\n  ")}")
   end
 
   # Unpack a ZIP file into the directory.
   #
   # @param [String] dir The path to directory
   def unpack(dir)
+    entries = []
     FileUtils.mkdir_p(dir)
     Zip::File.open(@file) do |zip|
       zip.each do |entry|
         t = File.join(dir, entry.name)
         next if t == @file
         entry.extract(t)
+        entries << "#{t}: #{File.size(t)}"
       end
     end
+    @loog.debug("The archive #{@file} unzipped to #{dir}:\n  #{entries.join("\n  ")}")
   end
 end

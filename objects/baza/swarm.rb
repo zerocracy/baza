@@ -22,44 +22,34 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require 'minitest/autorun'
-require 'factbase'
-require_relative '../test__helper'
-require_relative '../../objects/baza'
-require_relative '../../baza'
+# A swarm of a human.
+#
+# Author:: Yegor Bugayenko (yegor256@gmail.com)
+# Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
+# License:: MIT
+class Baza::Swarm
+  attr_reader :swarms, :id
 
-class Baza::FrontAlterationsTest < Minitest::Test
-  def app
-    Sinatra::Application
+  def initialize(swarms, id, tbot: Baza::Tbot::Fake.new)
+    @swarms = swarms
+    @id = id
+    @tbot = tbot
   end
 
-  def test_read_swarms
-    human = fake_job.jobs.human
-    fake_login(human.github)
-    swarms = human.swarms
-    n = fake_name
-    repo = "#{fake_name}/#{fake_name}"
-    branch = fake_name
-    swarm = swarms.add(n, repo, branch)
-    get('/swarms')
-    assert_status(200)
-    get("/swarms/#{swarm.id}/remove")
-    assert_status(302)
-  end
-
-  def test_swarms_webhook
-    human = fake_job.jobs.human
-    fake_login(human.github)
-    swarms = human.swarms
-    n = fake_name
-    repo = "#{fake_name}/#{fake_name}"
-    branch = fake_name
-    swarms.add(n, repo, branch)
-    post(
-      '/swarms/webhook',
-      JSON.pretty_generate({ repository: repo, branch: }),
-      'CONTENT_TYPE' => 'application/json'
+  # Change SHA of the swarm.
+  #
+  # @param [String] sha The SHA of the head of the swarm
+  def update(sha)
+    swarms.pgsql.exec(
+      'UPDATE swarm SET sha = $1 WHERE id = $2 AND human = $3',
+      [sha, @id, swarms.human.id]
     )
-    assert_status(200)
+  end
+
+  def remove
+    swarms.pgsql.exec(
+      'DELETE FROM swarm WHERE id = $1 AND human = $2',
+      [@id, @swarms.human.id]
+    )
   end
 end

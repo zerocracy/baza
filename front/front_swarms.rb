@@ -33,10 +33,22 @@ get '/swarms' do
   )
 end
 
+post '/swarms/webhook' do
+  # if it's not PUSH event, ignore it and return 200
+  json = {} # take it
+  repo = json[:repository]
+  branch = json[:branch]
+  swarm = settings.humans.find_swarm(repo, branch)
+  return "The swarm not found for #{repo}@#{branch}" if swarm.nil?
+  sha = '???'
+  swarm.update(sha)
+  "The swarm ##{swarm.id} of #{repo}@#{branch} reset to #{sha}, thanks!"
+end
+
 get(%r{/swarms/([0-9]+)/remove}) do
   admin_only
   id = params['captures'].first.to_i
-  the_human.swarms.remove(id)
+  the_human.swarms.get(id).remove
   flash(iri.cut('/swarms'), "The swarm ##{id} just removed")
 end
 

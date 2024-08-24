@@ -23,43 +23,26 @@
 # SOFTWARE.
 
 require 'minitest/autorun'
-require 'factbase'
+require 'fileutils'
 require_relative '../test__helper'
 require_relative '../../objects/baza'
-require_relative '../../baza'
+require_relative '../../objects/baza/zip'
+require_relative '../../objects/baza/lambda'
 
-class Baza::FrontAlterationsTest < Minitest::Test
-  def app
-    Sinatra::Application
-  end
-
-  def test_read_swarms
-    human = fake_job.jobs.human
-    fake_login(human.github)
-    swarms = human.swarms
-    n = fake_name
-    repo = "#{fake_name}/#{fake_name}"
-    branch = fake_name
-    swarm = swarms.add(n, repo, branch)
-    get('/swarms')
-    assert_status(200)
-    get("/swarms/#{swarm.id}/remove")
-    assert_status(302)
-  end
-
-  def test_swarms_webhook
-    human = fake_job.jobs.human
-    fake_login(human.github)
-    swarms = human.swarms
-    n = fake_name
-    repo = "#{fake_name}/#{fake_name}"
-    branch = fake_name
-    swarms.add(n, repo, branch)
-    post(
-      '/swarms/webhook',
-      JSON.pretty_generate({ repository: repo, branch: }),
-      'CONTENT_TYPE' => 'application/json'
-    )
-    assert_status(200)
+# Test for Lambda.
+# Author:: Yegor Bugayenko (yegor256@gmail.com)
+# Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
+# License:: MIT
+class Baza::LambdaTest < Minitest::Test
+  def test_build_docker_image
+    fake_pgsql.exec('DELETE FROM swarm')
+    fake_human.swarms.add(fake_name, 'zerocracy/j', 'master')
+    Dir.mktmpdir do |dir|
+      zip = File.join(dir, 'image.zip')
+      Baza::Lambda.new(fake_pgsql, '', '', '').pack(zip)
+      Baza::Zip.new(zip).unpack(dir)
+      puts File.read(File.join(dir, 'Dockerfile'))
+      # assert(File.exist?())
+    end
   end
 end

@@ -34,16 +34,21 @@ require_relative '../../objects/baza/zip'
 # License:: MIT
 class Baza::ZipTest < Minitest::Test
   def test_packs_and_unpacks
-    Dir.mktmpdir do |dir|
-      txt = File.join(dir, 'a/b/c/test.txt')
-      FileUtils.mkdir_p(File.dirname(txt))
-      File.write(txt, 'hello, world!')
-      zip = File.join(dir, 'foo.zip')
-      Baza::Zip.new(zip).pack(dir)
+    Dir.mktmpdir do |home|
+      zip = File.join(home, 'foo.zip')
+      path = 'a/b/c/test.txt'
+      Dir.mktmpdir do |dir|
+        txt = File.join(dir, path)
+        FileUtils.mkdir_p(File.dirname(txt))
+        File.write(txt, 'hello, world!')
+        Baza::Zip.new(zip).pack(dir)
+      end
       assert(File.exist?(zip))
-      FileUtils.rm_f(txt)
-      Baza::Zip.new(zip).unpack(dir)
-      assert(File.exist?(txt))
+      Dir.mktmpdir do |dir|
+        Baza::Zip.new(zip).unpack(dir)
+        txt = File.join(dir, path)
+        assert(File.exist?(txt))
+      end
     end
   end
 end
