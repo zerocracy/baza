@@ -142,7 +142,7 @@ class Baza::FrontPushTest < Minitest::Test
     token = make_valid_token
     fb = Factbase.new
     (0..100).each do |i|
-      fb.insert.foo = "booom \x01\x02\x03 #{i}"
+      fb.insert.foo = "booom % \x01\x02\x03 #{i}"
     end
     header('X-Zerocracy-Token', token)
     header('User-Agent', 'something')

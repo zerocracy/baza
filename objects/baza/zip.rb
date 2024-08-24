@@ -22,39 +22,43 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require 'minitest/autorun'
-require 'factbase'
+require 'zip'
 require 'fileutils'
-require_relative '../test__helper'
-require_relative '../../baza'
-require_relative '../../objects/baza/zip'
+require 'pathname'
 
-class Baza::FrontPipeTest < Minitest::Test
-  def app
-    Sinatra::Application
+# Zip archive.
+# Author:: Yegor Bugayenko (yegor256@gmail.com)
+# Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
+# License:: MIT
+class Baza::Zip
+  def initialize(file)
+    @file = file
   end
 
-  def test_pop_and_finish_job
-    finish_all_jobs
-    login('yegor256')
-    fake_job
-    get('/pop?owner=foo')
-    assert_equal(200, last_response.status, last_response.body)
-    Dir.mktmpdir do |dir|
-      zip = File.join(dir, 'foo.zip')
-      File.binwrite(zip, last_response.body)
-      Baza::Zip.new(zip).unpack(dir)
-      json = File.join(dir, 'job.json')
-      meta = JSON.parse(File.read(json))
-      id = meta['id']
-      File.binwrite(File.join(dir, 'output.fb'), Factbase.new.export)
-      meta[:exit] = 0
-      meta[:msec] = 500
-      File.write(json, JSON.pretty_generate(meta))
-      File.write(File.join(dir, 'stdout.txt'), 'all good!')
-      Baza::Zip.new(zip).pack(dir)
-      put("/finish?id=#{id}", File.binread(zip))
-      assert_equal(200, last_response.status, last_response.body)
+  # Pack all files in the directory into the ZIP archive.
+  #
+  # @param [String] dir The path of the directory
+  def pack(dir)
+    FileUtils.rm_f(@file) if File.exist?(@file)
+    Zip::File.open(@file, create: true) do |zip|
+      Dir[File.join(dir, '**/*')].each do |f|
+        next if f == @file
+        zip.add(Pathname.new(f).relative_path_from(dir), f)
+      end
+    end
+  end
+
+  # Unpack a ZIP file into the directory.
+  #
+  # @param [String] dir The path to directory
+  def unpack(dir)
+    FileUtils.mkdir_p(dir) unless File.exist?(dir)
+    Zip::File.open(@file) do |zip|
+      zip.each do |entry|
+        t = File.join(dir, entry.name)
+        next if t == @file
+        entry.extract(t)
+      end
     end
   end
 end

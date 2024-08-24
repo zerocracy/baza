@@ -23,38 +23,27 @@
 # SOFTWARE.
 
 require 'minitest/autorun'
-require 'factbase'
 require 'fileutils'
 require_relative '../test__helper'
-require_relative '../../baza'
+require_relative '../../objects/baza'
 require_relative '../../objects/baza/zip'
 
-class Baza::FrontPipeTest < Minitest::Test
-  def app
-    Sinatra::Application
-  end
-
-  def test_pop_and_finish_job
-    finish_all_jobs
-    login('yegor256')
-    fake_job
-    get('/pop?owner=foo')
-    assert_equal(200, last_response.status, last_response.body)
+# Test for Zip.
+# Author:: Yegor Bugayenko (yegor256@gmail.com)
+# Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
+# License:: MIT
+class Baza::ZipTest < Minitest::Test
+  def test_packs_and_unpacks
     Dir.mktmpdir do |dir|
+      txt = File.join(dir, 'a/b/c/test.txt')
+      FileUtils.mkdir_p(File.dirname(txt))
+      File.write(txt, 'hello, world!')
       zip = File.join(dir, 'foo.zip')
-      File.binwrite(zip, last_response.body)
-      Baza::Zip.new(zip).unpack(dir)
-      json = File.join(dir, 'job.json')
-      meta = JSON.parse(File.read(json))
-      id = meta['id']
-      File.binwrite(File.join(dir, 'output.fb'), Factbase.new.export)
-      meta[:exit] = 0
-      meta[:msec] = 500
-      File.write(json, JSON.pretty_generate(meta))
-      File.write(File.join(dir, 'stdout.txt'), 'all good!')
       Baza::Zip.new(zip).pack(dir)
-      put("/finish?id=#{id}", File.binread(zip))
-      assert_equal(200, last_response.status, last_response.body)
+      assert(File.exist?(zip))
+      FileUtils.rm_f(txt)
+      Baza::Zip.new(zip).unpack(dir)
+      assert(File.exist?(txt))
     end
   end
 end
