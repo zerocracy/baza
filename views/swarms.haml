@@ -17,8 +17,12 @@
     %col{style: 'width: 14em;'}
     -# Branch
     %col{style: 'width: 14em;'}
+    -# SHA
+    %col{style: 'width: 14em;'}
     -# Created
     %col{style: 'width: 10em;'}
+    -# Commands
+    %col{style: 'width: 6em;'}
   %thead
     %tr
       %th
@@ -30,7 +34,10 @@
       %th
         Branch
       %th
+        SHA
+      %th
         Created
+      %th
   %tbody
   - paging(swarms, offset:) do |s|
     %tr
@@ -39,11 +46,15 @@
       %td.ff
         = s[:name]
       %td.ff
-        = s[:repository]
+        %a{href: "https://github.com/#{s[:repository]}/tree/#{s[:branch]}"}
+          = s[:repository]
+        %i.fa-brands.fa-github
       %td.ff
         = s[:branch]
+      %td.ff
+        != large_text(s[:sha])
       %td
         != ago(s[:created])
       %td
-        %a.ico{href: iri.cut('/swarm').append(s[:id]).append('remove'), title: "Remove swarm ##{s[:id]}", onclick: "return confirm('Are you sure you want to remove the swarm ##{s[:id]}?')"}
+        %a.ico{href: iri.cut('/swarms').append(s[:id]).append('remove'), title: "Remove swarm ##{s[:id]}", onclick: "return confirm('Are you sure you want to remove the swarm ##{s[:id]}?')"}
           %i.fa-regular.fa-trash-can

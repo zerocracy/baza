@@ -69,7 +69,6 @@ class Baza::PipeTest < Minitest::Test
     Dir.mktmpdir do |dir|
       File.binwrite(File.join(dir, 'output.fb'), Factbase.new.export)
       File.write(File.join(dir, 'stdout.txt'), 'Nothing interesting')
-      json =
       File.write(
         File.join(dir, 'job.json'),
         JSON.pretty_generate(

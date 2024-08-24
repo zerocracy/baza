@@ -114,7 +114,7 @@ class Baza::FrontPushTest < Minitest::Test
     get('/push')
     header('User-Agent', 'something')
     fb = Factbase.new
-    fb.insert.foo = 'booom \x01\x02\x03'
+    fb.insert.foo = 'booom % \x01\x02\x03'
     Tempfile.open do |f|
       Zlib::GzipWriter.open(f.path) do |gz|
         gz.write fb.export
@@ -154,7 +154,7 @@ class Baza::FrontPushTest < Minitest::Test
       ].join('  ')
     )
     name = fake_name
-    put("/push/#{name}", fb.export)
+    put("/push/#{name}", fb.export, 'CONTENT_TYPE' => 'application/octet-stream')
     assert_status(200)
     id = last_response.body.to_i
     assert(id.positive?)

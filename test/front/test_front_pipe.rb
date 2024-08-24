@@ -53,7 +53,7 @@ class Baza::FrontPipeTest < Minitest::Test
       File.write(json, JSON.pretty_generate(meta))
       File.write(File.join(dir, 'stdout.txt'), 'all good!')
       Baza::Zip.new(zip).pack(dir)
-      put("/finish?id=#{id}", File.binread(zip))
+      put("/finish?id=#{id}", File.binread(zip), 'CONTENT_TYPE' => 'application/octet-stream')
       assert_equal(200, last_response.status, last_response.body)
     end
   end

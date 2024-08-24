@@ -64,6 +64,7 @@ def job_start(token, file, name, metas, ip)
     ip
   )
   settings.sqs.push("Job ##{job.id} (#{job.name}) registered from #{ip}")
+  job
 end
 
 # @param [Sinatra::IndifferentHash] uploaded_file The uploaded file data

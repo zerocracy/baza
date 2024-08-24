@@ -39,7 +39,7 @@ class Baza::Zip
   #
   # @param [String] dir The path of the directory
   def pack(dir)
-    FileUtils.rm_f(@file) if File.exist?(@file)
+    FileUtils.rm_f(@file)
     Zip::File.open(@file, create: true) do |zip|
       Dir[File.join(dir, '**/*')].each do |f|
         next if f == @file
@@ -52,7 +52,7 @@ class Baza::Zip
   #
   # @param [String] dir The path to directory
   def unpack(dir)
-    FileUtils.mkdir_p(dir) unless File.exist?(dir)
+    FileUtils.mkdir_p(dir)
     Zip::File.open(@file) do |zip|
       zip.each do |entry|
         t = File.join(dir, entry.name)

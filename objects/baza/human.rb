@@ -81,7 +81,7 @@ class Baza::Human
 
   def swarms
     require_relative 'swarms'
-    Baza::Swarms.new(self)
+    Baza::Swarms.new(self, tbot: @tbot)
   end
 
   def valves

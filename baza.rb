@@ -254,6 +254,16 @@ configure do
   end
 end
 
+# Create a new AWS ECR docker image from all swarms:
+configure do
+  set :dock, Always.new(1)
+  unless ENV['RACK_ENV'] == 'test'
+    settings.dock.start(5 * 60) do
+      settings.humans.ensure('yegor256').swarms.deploy
+    end
+  end
+end
+
 # Global in-memory cache.
 configure do
   set :zache, Zache.new
