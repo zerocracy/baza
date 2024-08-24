@@ -39,10 +39,17 @@ class Baza::Swarm
   # Change SHA of the swarm.
   #
   # @param [String] sha The SHA of the head of the swarm
-  def update(sha)
+  def sha!(sha)
     swarms.pgsql.exec(
       'UPDATE swarm SET sha = $1 WHERE id = $2 AND human = $3',
       [sha, @id, swarms.human.id]
+    )
+  end
+
+  def stdout!(log)
+    swarms.pgsql.exec(
+      'UPDATE swarm SET stdout = $1 WHERE id = $2 AND human = $3',
+      [log, @id, @swarms.human.id]
     )
   end
 
@@ -51,5 +58,52 @@ class Baza::Swarm
       'DELETE FROM swarm WHERE id = $1 AND human = $2',
       [@id, @swarms.human.id]
     )
+  end
+
+  # Get its name.
+  def name
+    to_json[:name]
+  end
+
+  # Get its repo.
+  def repository
+    to_json[:repository]
+  end
+
+  # Get its branch.
+  def branch
+    to_json[:branch]
+  end
+
+  # Get its stdout.
+  def stdout
+    to_json[:stdout]
+  end
+
+  # Get its sha.
+  def sha
+    to_json[:sha]
+  end
+
+  private
+
+  def to_json(*_args)
+    @to_json ||=
+      begin
+        row = swarms.pgsql.exec(
+          'SELECT * FROM swarm WHERE id = $1 AND human = $2',
+          [@id, @swarms.human.id]
+        ).first
+        raise Baza::Urror, "There is no swarm ##{@id}" if row.nil?
+        {
+          id: @id,
+          name: row['name'],
+          repository: row['repository'],
+          branch: row['branch'],
+          sha: row['sha'],
+          stdout: row['stdout'],
+          created: Time.parse(row['created'])
+        }
+      end
   end
 end

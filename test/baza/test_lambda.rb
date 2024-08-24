@@ -39,7 +39,7 @@ class Baza::LambdaTest < Minitest::Test
     fake_human.swarms.add(fake_name, 'zerocracy/j', 'master')
     Dir.mktmpdir do |dir|
       zip = File.join(dir, 'image.zip')
-      Baza::Lambda.new(fake_pgsql, '', '', '').pack(zip)
+      Baza::Lambda.new(fake_humans, '', '', '').pack(zip)
       Baza::Zip.new(zip).unpack(dir)
       puts File.read(File.join(dir, 'Dockerfile'))
       # assert(File.exist?())

@@ -38,8 +38,8 @@ class Baza::Lambda
   # @param [String] region AWS region
   # @param [Loog] loog Logging facility
   # @param [Baza:Tbot] tbot Telegram bot
-  def initialize(pgsql, key, secret, region, tbot: Baza::Tbot::Fake.new, loog: Loog::NULL)
-    @pgsql = pgsql
+  def initialize(humans, key, secret, region, tbot: Baza::Tbot::Fake.new, loog: Loog::NULL)
+    @humans = humans
     @key = key
     @secret = secret
     @region = region
@@ -78,10 +78,16 @@ class Baza::Lambda
         'RUN gem install bundler:2.4.20 && bundle install',
         'WORKDIR /z'
       ]
-      @pgsql.exec('SELECT * FROM swarm').each do |row|
-        sub = "swarms/#{row['name']}"
+      swarms do |swarm|
+        sub = "swarms/#{swarm.name}"
         dir = File.join(home, sub)
-        `git clone -b #{row['branch']} --depth=1 --single-branch git@github.com:#{row['repository']}.git #{dir}`
+        git = [
+          'set -ex',
+          'date',
+          "git clone -b #{swarm.branch} --depth=1 --single-branch git@github.com:#{swarm.repository}.git #{dir}"
+        ]
+        stdout = `(#{git.join(' && ')}) 2>&1`
+        swarm.stdout!(stdout)
         sh = File.join(sub, 'install.sh')
         if File.exist?(File.join(home, sh))
           dockerfile << "COPY #{sh} install"
@@ -90,8 +96,17 @@ class Baza::Lambda
       end
       dockerfile << 'RUN rm -rf /z/swarms'
       dockerfile << 'COPY swarms /z'
+      dockerfile << 'CMD ["entry.rb"]'
       File.write(File.join(home, 'Dockerfile'), dockerfile.join("\n"))
       Baza::Zip.new(file, loog: Loog::VERBOSE).pack(home)
+    end
+  end
+
+  private
+
+  def swarms
+    @humans.pgsql.exec('SELECT * FROM swarm').each do |row|
+      yield @humans.find_swarm(row['repository'], row['branch'])
     end
   end
 end

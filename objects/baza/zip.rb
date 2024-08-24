@@ -48,7 +48,7 @@ class Baza::Zip
         next if f == @file
         path = Pathname.new(f).relative_path_from(dir)
         zip.add(path, f)
-        entries << "#{path}: #{File.size(f)}"
+        entries << "#{path}#{File.directory?(f) ? '/' : ": #{File.size(f)}"}"
       end
     end
     @loog.debug("Directory #{dir} zipped to #{@file}:\n  #{entries.join("\n  ")}")

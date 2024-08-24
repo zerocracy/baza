@@ -263,7 +263,7 @@ end
 configure do
   require_relative 'objects/baza/lambda'
   lmbd = Baza::Lambda.new(
-    settings.pgsql,
+    settings.humans,
     settings.config['lambda']['key'],
     settings.config['lambda']['secret'],
     settings.config['lambda']['region'],

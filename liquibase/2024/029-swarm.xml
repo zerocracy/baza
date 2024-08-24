@@ -32,6 +32,7 @@ SOFTWARE.
         repository VARCHAR(128) NOT NULL,
         branch VARCHAR(128) NOT NULL,
         sha VARCHAR(64),
+        stdout TEXT,
         created TIMESTAMPTZ DEFAULT now() NOT NULL,
         UNIQUE(name),
         UNIQUE(repository, branch)

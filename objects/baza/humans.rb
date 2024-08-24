@@ -123,7 +123,7 @@ class Baza::Humans
       [repo, branch]
     )
     return nil if rows.empty?
-    get(rows.first['human'].to_i).swarms.get(id)
+    get(rows.first['human'].to_i).swarms.get(rows.first['id'].to_i)
   end
 
   # Donate to all accounts that are not funded enough (and eligible for donation).
