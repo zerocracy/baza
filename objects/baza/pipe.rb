@@ -69,7 +69,8 @@ class Baza::Pipe
             id: job.id,
             name: job.name,
             human: job.jobs.human.id,
-            alterations: alts.map { |a| a[:id] }
+            alterations: alts.map { |a| a[:id] },
+            options: job.options
           }
         )
       )
