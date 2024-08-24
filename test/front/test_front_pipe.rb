@@ -36,7 +36,7 @@ class Baza::FrontPipeTest < Minitest::Test
 
   def test_pop_and_finish_job
     finish_all_jobs
-    login('yegor256')
+    fake_login('yegor256')
     fake_job
     get('/pop?owner=foo')
     assert_equal(200, last_response.status, last_response.body)

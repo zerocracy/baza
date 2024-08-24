@@ -35,7 +35,7 @@ class Baza::FrontAlterationsTest < Minitest::Test
 
   def test_read_swarms
     human = fake_job.jobs.human
-    login(human.github)
+    fake_login(human.github)
     swarms = human.swarms
     n = fake_name
     id = swarms.add(n, 'zerocracy/foo', 'master')

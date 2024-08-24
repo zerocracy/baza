@@ -73,7 +73,7 @@ class Baza::AppTest < Minitest::Test
       '/footer/status?badge=pipeline',
       '/footer/status?badge=donations'
     ]
-    login('yegor256')
+    fake_login('yegor256')
     pages.each do |p|
       get(p)
       assert_status(200)

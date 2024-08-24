@@ -97,7 +97,7 @@ class Minitest::Test
     end
   end
 
-  def login(name = fake_name)
+  def fake_login(name = fake_name)
     enc = GLogin::Cookie::Open.new(
       { 'login' => name, 'id' => app.humans.ensure(name).id.to_s },
       ''
@@ -117,7 +117,7 @@ class Minitest::Test
   end
 
   def start_as_tester
-    login('tester')
+    fake_login('tester')
     visit '/dash'
     click_link 'Start'
     tester_human.tokens.each(&:deactivate!)

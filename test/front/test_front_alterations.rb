@@ -35,7 +35,7 @@ class Baza::FrontAlterationsTest < Minitest::Test
 
   def test_read_alterations
     human = fake_job.jobs.human
-    login(human.github)
+    fake_login(human.github)
     alterations = human.alterations
     n = fake_name
     script = 'puts "Hello, world!"'
