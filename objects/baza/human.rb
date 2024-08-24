@@ -79,6 +79,11 @@ class Baza::Human
     Baza::Alterations.new(self)
   end
 
+  def swarms
+    require_relative 'swarms'
+    Baza::Swarms.new(self)
+  end
+
   def valves
     require_relative 'valves'
     Baza::Valves.new(self, tbot: @tbot)

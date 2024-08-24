@@ -1,0 +1,49 @@
+%form{method: 'post', action: iri.cut('/swarms/add')}
+  %fieldset
+    %input{ type: 'text', name: 'name', tabindex: 1, placeholder: 'Name', size: 14, maxlength: 32, required: true, autofocus: true }
+    %input{ type: 'text', name: 'repository', tabindex: 2, placeholder: 'GitHub Repository', size: 30, maxlength: 64, required: true }
+    %input{ type: 'text', name: 'branch', tabindex: 3, placeholder: 'Branch', size: 15, size: 64, required: true }
+    %input{ type: 'submit', tabindex: 4, value: 'Add' }
+
+%p
+  These are all swarms:
+%table
+  %colgroup
+    -# ID
+    %col{style: 'width: 4em;'}
+    -# Name
+    %col
+    -# Repository
+    %col{style: 'width: 14em;'}
+    -# Branch
+    %col{style: 'width: 14em;'}
+    -# Created
+    %col{style: 'width: 10em;'}
+  %thead
+    %tr
+      %th
+        = '#'
+      %th
+        Name
+      %th
+        Repository
+      %th
+        Branch
+      %th
+        Created
+  %tbody
+  - paging(swarms, offset:) do |s|
+    %tr
+      %td.ff
+        = "##{s[:id]}"
+      %td.ff
+        = s[:name]
+      %td.ff
+        = s[:repository]
+      %td.ff
+        = s[:branch]
+      %td
+        != ago(s[:created])
+      %td
+        %a.ico{href: iri.cut('/swarm').append(s[:id]).append('remove'), title: "Remove swarm ##{s[:id]}", onclick: "return confirm('Are you sure you want to remove the swarm ##{s[:id]}?')"}
+          %i.fa-regular.fa-trash-can
