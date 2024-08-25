@@ -32,6 +32,10 @@ require 'pathname'
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
 class Baza::Zip
+  # Ctor.
+  #
+  # @param [String] file The path of .zip archive
+  # @param [Loog] loog The log
   def initialize(file, loog: Loog::NULL)
     @file = file
     @loog = loog
@@ -51,7 +55,7 @@ class Baza::Zip
         entries << "#{path}#{File.directory?(f) ? '/' : ": #{File.size(f)}"}"
       end
     end
-    @loog.debug("Directory #{dir} zipped to #{@file}:\n  #{entries.join("\n  ")}")
+    @loog.debug("Directory #{dir} zipped to #{@file}:\n#{entries.join("\n")}")
   end
 
   # Unpack a ZIP file into the directory.
@@ -68,6 +72,6 @@ class Baza::Zip
         entries << "#{t}: #{File.size(t)}"
       end
     end
-    @loog.debug("The archive #{@file} unzipped to #{dir}:\n  #{entries.join("\n  ")}")
+    @loog.debug("The archive #{@file} unzipped to #{dir}:\n#{entries.join("\n")}")
   end
 end

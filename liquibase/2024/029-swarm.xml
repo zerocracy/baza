@@ -31,8 +31,9 @@ SOFTWARE.
         name VARCHAR(32) NOT NULL,
         repository VARCHAR(128) NOT NULL,
         branch VARCHAR(128) NOT NULL,
-        sha VARCHAR(64),
+        dirty BOOL DEFAULT true,
         stdout TEXT,
+        exit INT,
         created TIMESTAMPTZ DEFAULT now() NOT NULL,
         UNIQUE(name),
         UNIQUE(repository, branch)

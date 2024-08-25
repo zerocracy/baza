@@ -36,16 +36,29 @@ class Baza::Swarm
     @tbot = tbot
   end
 
-  # Change SHA of the swarm.
+  # Change DIRTY status of the swarm.
   #
-  # @param [String] sha The SHA of the head of the swarm
-  def sha!(sha)
+  # @param [Bool] yes TRUE if it has to become dirty
+  def dirty!(yes)
     swarms.pgsql.exec(
-      'UPDATE swarm SET sha = $1 WHERE id = $2 AND human = $3',
-      [sha, @id, swarms.human.id]
+      'UPDATE swarm SET dirty = $1 WHERE id = $2 AND human = $3',
+      [yes, @id, swarms.human.id]
     )
   end
 
+  # Change exit code of the swarm.
+  #
+  # @param [Integer] code The exit code of the deployment attempt
+  def exit!(code)
+    swarms.pgsql.exec(
+      'UPDATE swarm SET exit = $1 WHERE id = $2 AND human = $3',
+      [code, @id, swarms.human.id]
+    )
+  end
+
+  # Change STDOUT of the latest deployment of the swarm.
+  #
+  # @param [String] log The stdout of the deployment attempt of the swarm
   def stdout!(log)
     swarms.pgsql.exec(
       'UPDATE swarm SET stdout = $1 WHERE id = $2 AND human = $3',
@@ -80,9 +93,14 @@ class Baza::Swarm
     to_json[:stdout]
   end
 
-  # Get its sha.
-  def sha
-    to_json[:sha]
+  # Get its exit code.
+  def exit
+    to_json[:exit]
+  end
+
+  # Get its dirty status.
+  def dirty
+    to_json[:dirty]
   end
 
   private
@@ -100,8 +118,9 @@ class Baza::Swarm
           name: row['name'],
           repository: row['repository'],
           branch: row['branch'],
-          sha: row['sha'],
+          dirty: row['dirty'] == 't',
           stdout: row['stdout'],
+          exit: row['exit'].to_i,
           created: Time.parse(row['created'])
         }
       end

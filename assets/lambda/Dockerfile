@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 # MIT License
 #
 # Copyright (c) 2009-2024 Zerocracy
@@ -22,27 +20,32 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require 'minitest/autorun'
-require 'fileutils'
-require 'loog'
-require_relative '../test__helper'
-require_relative '../../objects/baza'
-require_relative '../../objects/baza/zip'
-require_relative '../../objects/baza/lambda'
+FROM public.ecr.aws/lambda/ruby:3.2
 
-# Test for Lambda.
-# Author:: Yegor Bugayenko (yegor256@gmail.com)
-# Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
-# License:: MIT
-class Baza::LambdaTest < Minitest::Test
-  def test_build_docker_image
-    fake_pgsql.exec('DELETE FROM swarm')
-    fake_human.swarms.add(fake_name, 'zerocracy/j', 'master')
-    Dir.mktmpdir do |dir|
-      zip = File.join(dir, 'image.zip')
-      Baza::Lambda.new(fake_humans, '', '', '', loog: Loog::VERBOSE).pack(zip)
-      Baza::Zip.new(zip).unpack(dir)
-      `docker build #{dir} -t kill-me`
-    end
-  end
-end
+RUN yum update -y
+RUN yum install -y make automake gcc gcc-c++ kernel-devel \
+  gcc readline-devel libicu-devel zlib-devel \
+  openssl-devel openssl \
+  wget tar gzip \
+  libyaml libyaml-devel
+
+RUN wget https://ftp.postgresql.org/pub/source/v16.1/postgresql-16.1.tar.gz \
+  && tar -xvzf postgresql-16.1.tar.gz \
+  && cd postgresql-16.1 \
+  && ./configure --bindir=/usr/bin --with-openssl \
+  && make -C src/bin install \
+  && make -C src/include install \
+  && make -C src/interfaces install
+
+COPY Gemfile ${LAMBDA_TASK_ROOT}/
+COPY Gemfile.lock ${LAMBDA_TASK_ROOT}/
+COPY entry.rb ${LAMBDA_TASK_ROOT}/
+RUN gem install bundler && bundle install
+
+WORKDIR /z
+
+{{ installs }}
+
+RUN rm -rf /z/swarms
+COPY swarms /z
+CMD ["entry.rb"]

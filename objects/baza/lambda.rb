@@ -49,18 +49,25 @@ class Baza::Lambda
     @loog = loog
   end
 
-  # Deploy all swarms into AWS lambda.
+  # Deploy all swarms into AWS Lambda.
   def deploy
+    return unless dirty?
     Dir.mktmpdir do |home|
       zip = File.join(home, 'image.zip')
       pack(zip)
       sha = Digest::SHA1.hexdigest(File.binread(zip))
       break if aws_sha == sha
+      build_and_publish(zip)
+      done!
     end
+  end
 
+  # Build a new Docker image in a new EC2 server and publish it to
+  # Lambda function.
+  def build_and_publish(zip)
     # create EC2 instance
     # enter it via SSH
-    # upload Dockerfile + all install.sh files
+    # upload zip
     # run 'docker build'
     # 'docker push' to ECR
     # delete EC2 instance
@@ -79,34 +86,32 @@ class Baza::Lambda
   # @param [String] file Path of the .zip file to create
   def pack(file)
     Dir.mktmpdir do |home|
-      dockerfile = ['FROM public.ecr.aws/lambda/ruby:3.2']
       [
         '../../Gemfile',
         '../../Gemfile.lock',
-        '../lambda/entry.rb'
+        '../../assets/lambda/entry.rb'
       ].each do |f|
         FileUtils.copy(File.join(__dir__, f), File.join(home, File.basename(f)))
-        dockerfile << "COPY #{File.basename(f)} ${LAMBDA_TASK_ROOT}/"
       end
-      dockerfile += [
-        'RUN gem install bundler:2.4.20 && bundle install',
-        'WORKDIR /z'
-      ]
-      swarms do |swarm|
+      installs = []
+      each_swarm do |swarm|
         dir = checkout(swarm)
         next if dir.nil?
         sub = "swarms/#{swarm.name}"
-        FileUtils.copy(dir, File.join(home, sub))
+        target = File.join(home, sub)
+        FileUtils.mkdir_p(File.dirname(target))
+        FileUtils.copy_entry(dir, target)
         if File.exist?(File.join(dir, File.join(sub, 'install.sh')))
           n = "install-#{swarm.name}.sh"
-          dockerfile << "COPY #{sub}/install.sh #{n}"
-          dockerfile << "RUN chmod a+x #{n} && ./#{n} && rm #{n}"
+          installs << "COPY #{sub}/install.sh #{n}"
+          installs << "RUN chmod a+x #{n} && ./#{n} && rm #{n}"
         end
       end
-      dockerfile << 'RUN rm -rf /z/swarms'
-      dockerfile << 'COPY swarms /z'
-      dockerfile << 'CMD ["entry.rb"]'
-      File.write(File.join(home, 'Dockerfile'), dockerfile.join("\n"))
+      dockerfile = Liquid::Template.parse(File.read(File.join(__dir__, '../../assets/lambda/Dockerfile'))).render(
+        'installs' => installs.join("\n")
+      )
+      File.write(File.join(home, 'Dockerfile'), dockerfile)
+      @loog.debug("Dockerfile:\n#{dockerfile}")
       Baza::Zip.new(file, loog: @loog).pack(home)
     end
   end
@@ -128,19 +133,31 @@ class Baza::Lambda
     else
       git << "git clone -b #{swarm.branch} --depth=1 --single-branch git@github.com:#{swarm.repository}.git #{dir}"
     end
-    git << 'git log'
+    git << 'git rev-parse HEAD'
     stdout = `(#{git.join(' && ')}) 2>&1`
     @loog.debug(stdout)
     swarm.stdout!(stdout)
     code = $CHILD_STATUS.exitstatus
+    swarm.exit!(code)
     return nil unless code.zero?
-    swarm.sha!(stdout.split("\n").last.strip)
     dir
   end
 
-  def swarms
+  # Iterate all swarms that need to be deployed.
+  def each_swarm
     @humans.pgsql.exec('SELECT * FROM swarm').each do |row|
       yield @humans.find_swarm(row['repository'], row['branch'])
     end
+  end
+
+  # Returns TRUE if at least one swarm is "dirty" and because of that
+  # the entire pack must be re-deployed.
+  def dirty?
+    !@humans.pgsql.exec('SELECT id FROM swarm WHERE dirty = true').empty?
+  end
+
+  # Mark all swarms as "not dirty any more".
+  def done!
+    @humans.pgsql.exec('UPDATE swarm SET dirty = f')
   end
 end

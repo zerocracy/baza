@@ -40,9 +40,8 @@ post '/swarms/webhook' do
   branch = json[:branch]
   swarm = settings.humans.find_swarm(repo, branch)
   return "The swarm not found for #{repo}@#{branch}" if swarm.nil?
-  sha = '???'
-  swarm.update(sha)
-  "The swarm ##{swarm.id} of #{repo}@#{branch} reset to #{sha}, thanks!"
+  swarm.dirty!(true)
+  "The swarm ##{swarm.id} of #{repo}@#{branch} scheduled for deployment, thanks!"
 end
 
 get(%r{/swarms/([0-9]+)/remove}) do
