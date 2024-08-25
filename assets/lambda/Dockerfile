@@ -43,9 +43,8 @@ COPY entry.rb ${LAMBDA_TASK_ROOT}/
 RUN gem install bundler && bundle install
 
 WORKDIR /z
+COPY swarms/ /z/swarms
 
 {{ installs }}
 
-RUN rm -rf /z/swarms
-COPY swarms /z
 CMD ["entry.rb"]

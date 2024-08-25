@@ -42,7 +42,7 @@ class Baza::LambdaTest < Minitest::Test
       zip = File.join(dir, 'image.zip')
       Baza::Lambda.new(fake_humans, '', '', '', loog: Loog::VERBOSE).pack(zip)
       Baza::Zip.new(zip).unpack(dir)
-      `docker build #{dir} -t kill-me`
+      `docker build #{dir} -t kill-me --progress=plain`
     end
   end
 end

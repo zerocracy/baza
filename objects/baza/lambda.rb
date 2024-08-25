@@ -101,22 +101,31 @@ class Baza::Lambda
         target = File.join(home, sub)
         FileUtils.mkdir_p(File.dirname(target))
         FileUtils.copy_entry(dir, target)
-        if File.exist?(File.join(dir, File.join(sub, 'install.sh')))
-          n = "install-#{swarm.name}.sh"
-          installs << "COPY #{sub}/install.sh #{n}"
-          installs << "RUN chmod a+x #{n} && ./#{n} && rm #{n}"
-        end
+        installs << install(target, sub)
       end
       dockerfile = Liquid::Template.parse(File.read(File.join(__dir__, '../../assets/lambda/Dockerfile'))).render(
         'installs' => installs.join("\n")
       )
       File.write(File.join(home, 'Dockerfile'), dockerfile)
-      @loog.debug("Dockerfile:\n#{dockerfile}")
+      @loog.debug("This is the Dockerfile:\n#{dockerfile}")
       Baza::Zip.new(file, loog: @loog).pack(home)
     end
   end
 
   private
+
+  # Create install commands for Docker, from this directory.
+  #
+  # @param [String] dir The local directory with swarm content files, e.g. "/tmp/bar/foo-contents"
+  # @param [String] sub Subdirectory inside docker image, e.g. "swarms/foo"
+  def install(dir, sub)
+    gemfile = File.join(dir, 'Gemfile.lock')
+    if File.exist?(gemfile)
+      "RUN bundle install --gemfile=#{sub}/Gemfile"
+    else
+      ''
+    end
+  end
 
   # Checkout swarm and return the directory where it's located. Also,
   # update its SHA if necessary.
