@@ -24,8 +24,14 @@
 
 require 'English'
 require 'liquid'
+require 'elapsed'
 require 'fileutils'
 require 'digest/sha1'
+require 'aws-sdk-ec2'
+require 'aws-sdk-core'
+require 'net/ssh'
+require 'net/scp'
+require 'openssl'
 
 # Function in AWS Lambda.
 #
@@ -38,13 +44,20 @@ class Baza::Lambda
   # @param [String] key AWS authentication key (if empty, the object will NOT use AWS S3)
   # @param [String] secret AWS authentication secret
   # @param [String] region AWS region
+  # @param [String] ssh SSH private key
   # @param [Loog] loog Logging facility
   # @param [Baza:Tbot] tbot Telegram bot
-  def initialize(humans, key, secret, region, tbot: Baza::Tbot::Fake.new, loog: Loog::NULL)
+  def initialize(humans, key, secret, region, sgroup, subnet, image, ssh,
+    tbot: Baza::Tbot::Fake.new, loog: Loog::NULL)
     @humans = humans
     @key = key
     @secret = secret
     @region = region
+    @sgroup = sgroup
+    @subnet = subnet
+    @image = image
+    OpenSSL::PKey.read(ssh) unless key.empty? # sanity check
+    @ssh = ssh
     @tbot = tbot
     @loog = loog
   end
@@ -62,16 +75,93 @@ class Baza::Lambda
     end
   end
 
+  private
+
   # Build a new Docker image in a new EC2 server and publish it to
   # Lambda function.
   def build_and_publish(zip)
-    # create EC2 instance
-    # enter it via SSH
-    # upload zip
-    # run 'docker build'
-    # 'docker push' to ECR
-    # delete EC2 instance
-    # update Lambda function to use new image
+    id = run_instance
+    begin
+      ip = host_of(warm(id))
+      @loog.debug("The IP of #{id} is #{ip}")
+      user = 'ubuntu'
+      Net::SSH.start(ip, user, keys: [], key_data: [@ssh], keys_only: true) do |ssh|
+        @loog.debug("Logged into EC2 instance #{ip} as #{user}")
+        ssh.scp.upload(zip, '/tmp/baza.zip')
+        @loog.debug("ZIP (#{File.size(zip)} bytes) uploaded to EC2 instance #{id}")
+        ssh.exec!('mkdir /tmp/baza && cd /tmp/baza && unzip ../baza.zip && docker build . -t baza')
+        @loog.debug("Docker image built successfully")
+        # 'docker push' to ECR
+        # update Lambda function to use new image
+      end
+    ensure
+      terminate(id)
+    end
+  end
+
+  def warm(id)
+    elapsed(@loog, intro: 'Warmed up EC2 instance') do
+      start = Time.now
+      loop do
+        status = status_of(id)
+        @loog.debug("Status of #{id} is #{status.inspect}")
+        break if status == 'ok'
+        raise "Looks like #{id} will never be OK" if Time.now - start > 60 * 10
+        sleep 10
+      end
+      id
+    end
+  end
+
+  # Terminate one EC2 instance.
+  def terminate(id)
+    elapsed(@loog, intro: "Terminated EC2 instance #{id}") do
+      ec2.terminate_instances(instance_ids: [id])
+    end
+  end
+
+  # Get IP of the running EC2 instance.
+  def host_of(id)
+    elapsed(@loog, intro: "Found IP address of #{id}") do
+      ec2.describe_instances(instance_ids: [id])
+        .reservations[0]
+        .instances[0]
+        .public_ip_address
+    end
+  end
+
+  def status_of(id)
+    elapsed(@loog, intro: "Detected status of #{id}") do
+      puts ec2.describe_instance_status(instance_ids: [id], include_all_instances: true).to_json
+      ec2.describe_instance_status(instance_ids: [id], include_all_instances: true)
+        .instance_statuses[0]
+        .instance_status
+        .status
+    end
+  end
+
+  def run_instance
+    elapsed(@loog, intro: 'Started new EC2 instance') do
+      ec2.run_instances(
+        image_id: @image,
+        instance_type: 't2.large',
+        max_count: 1,
+        min_count: 1,
+        security_group_ids: [@sgroup],
+        subnet_id: @subnet,
+        tag_specifications: [
+          {
+            resource_type: 'instance',
+            tags: [
+              {
+                key: 'Name',
+                value: 'baza-deploy',
+              },
+            ],
+          },
+        ],
+      ).instances[0].instance_id
+    end
   end
 
   # What is the current SHA of the AWS lambda function?
@@ -112,8 +202,6 @@ class Baza::Lambda
     end
   end
 
-  private
-
   # Create install commands for Docker, from this directory.
   #
   # @param [String] dir The local directory with swarm content files, e.g. "/tmp/bar/foo-contents"
@@ -133,23 +221,25 @@ class Baza::Lambda
   # @param [Baza::Swarm] swarm The swarm
   # @return [String] Path to location
   def checkout(swarm)
-    sub = "swarms/#{swarm.name}"
-    dir = File.join('/tmp', sub)
-    FileUtils.mkdir_p(File.dirname(dir))
-    git = ['set -ex', 'date', 'git --version']
-    if File.exist?(dir)
-      git += ["cd #{dir}", 'git pull']
-    else
-      git << "git clone -b #{swarm.branch} --depth=1 --single-branch git@github.com:#{swarm.repository}.git #{dir}"
+    elapsed(@loog, intro: "Checked out #{swarm.name} swarm") do
+      sub = "swarms/#{swarm.name}"
+      dir = File.join('/tmp', sub)
+      FileUtils.mkdir_p(File.dirname(dir))
+      git = ['set -ex', 'date', 'git --version']
+      if File.exist?(dir)
+        git += ["cd #{dir}", 'git pull']
+      else
+        git << "git clone -b #{swarm.branch} --depth=1 --single-branch git@github.com:#{swarm.repository}.git #{dir}"
+      end
+      git << 'git rev-parse HEAD'
+      stdout = `(#{git.join(' && ')}) 2>&1`
+      @loog.debug(stdout)
+      swarm.stdout!(stdout)
+      code = $CHILD_STATUS.exitstatus
+      swarm.exit!(code)
+      return nil unless code.zero?
+      dir
     end
-    git << 'git rev-parse HEAD'
-    stdout = `(#{git.join(' && ')}) 2>&1`
-    @loog.debug(stdout)
-    swarm.stdout!(stdout)
-    code = $CHILD_STATUS.exitstatus
-    swarm.exit!(code)
-    return nil unless code.zero?
-    dir
   end
 
   # Iterate all swarms that need to be deployed.
@@ -162,11 +252,18 @@ class Baza::Lambda
   # Returns TRUE if at least one swarm is "dirty" and because of that
   # the entire pack must be re-deployed.
   def dirty?
-    !@humans.pgsql.exec('SELECT id FROM swarm WHERE dirty = true').empty?
+    !@humans.pgsql.exec('SELECT id FROM swarm WHERE dirty = TRUE').empty?
   end
 
   # Mark all swarms as "not dirty any more".
   def done!
-    @humans.pgsql.exec('UPDATE swarm SET dirty = f')
+    @humans.pgsql.exec('UPDATE swarm SET dirty = FALSE')
+  end
+
+  def ec2
+    Aws::EC2::Client.new(
+      region: @region,
+      credentials: Aws::Credentials.new(@key, @secret),
+    )
   end
 end

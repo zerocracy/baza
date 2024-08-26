@@ -35,14 +35,16 @@ require_relative '../../objects/baza/lambda'
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
 class Baza::LambdaTest < Minitest::Test
-  def test_build_docker_image
+  def test_live_deploy
+    require 'net/ssh'
     fake_pgsql.exec('DELETE FROM swarm')
     fake_human.swarms.add(fake_name, 'zerocracy/j', 'master')
     Dir.mktmpdir do |dir|
       zip = File.join(dir, 'image.zip')
-      Baza::Lambda.new(fake_humans, '', '', '', loog: Loog::VERBOSE).pack(zip)
-      Baza::Zip.new(zip).unpack(dir)
-      `docker build #{dir} -t kill-me --progress=plain`
+      Baza::Lambda.new(
+        fake_humans,
+        loog: Loog::VERBOSE
+      ).deploy
     end
   end
 end

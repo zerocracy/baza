@@ -27,11 +27,13 @@ ruby '~>3.2'
 
 gem 'always', '>0'
 gem 'aws-sdk-core', '3.201.5'
+gem 'aws-sdk-ec2', '1.470.0'
 gem 'aws-sdk-s3', '1.159.0'
 gem 'aws-sdk-sqs', '1.80.0'
 gem 'backtrace', '>0'
 gem 'capybara'
 gem 'concurrent-ruby', '1.3.4'
+gem 'elapsed', '>0'
 gem 'factbase', '>0'
 gem 'faraday'
 gem 'fbe', '>0'
@@ -46,6 +48,8 @@ gem 'loog', '>0'
 gem 'minitest', '5.25.1', require: false
 gem 'minitest-reporters', '1.7.1', require: false
 gem 'net-ping', '2.0.8', require: false
+gem 'net-ssh', '7.2.3'
+gem 'net-scp', '4.0.0'
 gem 'octokit', '>0'
 gem 'pgtk', '>0'
 gem 'rack', '3.1.7'

@@ -72,21 +72,25 @@ configure do
       'admin_chat' => ''
     },
     's3' => {
-      'key' => '',
-      'secret' => '',
-      'region' => '',
+      'key' => '', # AWS authentication key
+      'secret' => '', # AWS secret
+      'region' => '', # S3 region
       'bucket' => ''
     },
     'sqs' => {
-      'key' => '',
-      'secret' => '',
-      'url' => '',
-      'region' => ''
+      'key' => '', # AWS authentication key
+      'secret' => '', # AWS secret
+      'region' => '', # SQS region
+      'url' => ''
     },
     'lambda' => {
-      'key' => '',
-      'secret' => '',
-      'region' => ''
+      'key' => '', # AWS authentication key
+      'secret' => '', # AWS secret
+      'region' => '', # EC2 region
+      'sgroup' => '', # EC2 security group
+      'subnet' => '', # EC2 subnet
+      'image' => '', # EC2 instance image name
+      'ssh' => '' # SSH private key
     },
     'github' => {
       'id' => '',
@@ -267,6 +271,10 @@ configure do
     settings.config['lambda']['key'],
     settings.config['lambda']['secret'],
     settings.config['lambda']['region'],
+    settings.config['lambda']['sgroup'],
+    settings.config['lambda']['subnet'],
+    settings.config['lambda']['image'],
+    settings.config['lambda']['ssh'],
     loog: settings.loog
   )
   set :lambda, Always.new(1)
