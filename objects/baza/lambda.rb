@@ -69,11 +69,17 @@ class Baza::Lambda
   def deploy
     return unless dirty?
     Dir.mktmpdir do |home|
-      zip = File.join(home, 'image.zip')
-      pack(zip)
+      zip = pack(File.join(home, 'image.zip'))
       sha = Digest::SHA1.hexdigest(File.binread(zip))
       break if aws_sha == sha
-      build_and_publish(zip)
+      instance_id = run_instance
+      begin
+        ip = host_of(warm(instance_id))
+        @loog.debug("The IP of #{instance_id} is #{ip}")
+        build_and_publish(ip, zip)
+      ensure
+        terminate(instance_id)
+      end
       done!
     end
   end
@@ -82,47 +88,40 @@ class Baza::Lambda
 
   # Build a new Docker image in a new EC2 server and publish it to
   # Lambda function.
-  def build_and_publish(zip)
-    id = run_instance
-    begin
-      ip = host_of(warm(id))
-      @loog.debug("The IP of #{id} is #{ip}")
-      Net::SSH.start(ip, @user, port: @port, keys: [], key_data: [@ssh], keys_only: true) do |ssh|
-        @loog.debug("Logged into EC2 instance #{ip} as #{@user.inspect}")
-        ssh.scp.upload(zip, '/tmp/baza.zip')
-        @loog.debug("ZIP (#{File.size(zip)} bytes) uploaded to EC2 instance #{id}")
-        script = [
-          'set -ex',
-          'cd /tmp',
-          'rm -rf baza',
-          'mkdir baza',
-          'unzip -qq baza.zip -d baza',
-          'docker build baza -t baza'
-        ].join(' && ')
-        script = "( #{script} ) 2>&1"
-        stdout = ''
-        code = nil
-        ssh.open_channel do |channel|
-          channel.exec(script) do |ch, success|
-            p success
-            failed |= !success
-            ch.on_data do |_, data|
-              stdout += data
-            end
-            ch.on_request('exit-status') do |_, data|
-              code = data.read_long
-            end
+  def build_and_publish(ip, zip)
+    Net::SSH.start(ip, @user, port: @port, keys: [], key_data: [@ssh], keys_only: true) do |ssh|
+      @loog.debug("Logged into EC2 instance #{ip} as #{@user.inspect}")
+      ssh.scp.upload(zip, '/tmp/baza.zip')
+      @loog.debug("ZIP (#{File.size(zip)} bytes) uploaded to #{ip}")
+      script = [
+        'set -ex',
+        'cd /tmp',
+        'rm -rf baza',
+        'mkdir baza',
+        'unzip -qq baza.zip -d baza',
+        'docker build baza -t baza'
+      ].join(' && ')
+      script = "( #{script} ) 2>&1"
+      stdout = ''
+      code = nil
+      ssh.open_channel do |channel|
+        channel.exec(script) do |ch, success|
+          p success
+          failed |= !success
+          ch.on_data do |_, data|
+            stdout += data
+          end
+          ch.on_request('exit-status') do |_, data|
+            code = data.read_long
           end
         end
-        ssh.loop
-        @loog.debug(stdout)
-        raise "Failed with ##{code} on #{script.inspect}" unless code.zero?
-        @loog.debug("Docker image built successfully")
-        # 'docker push' to ECR
-        # update Lambda function to use new image
       end
-    ensure
-      terminate(id)
+      ssh.loop
+      @loog.debug(stdout)
+      raise "Failed with ##{code} on #{script.inspect}" unless code.zero?
+      @loog.debug("Docker image built successfully")
+      # 'docker push' to ECR
+      # update Lambda function to use new image
     end
   end
 
@@ -200,6 +199,7 @@ class Baza::Lambda
   # Package all necessary files for Docker image.
   #
   # @param [String] file Path of the .zip file to create
+  # @return [String] File path of .zip
   def pack(file)
     Dir.mktmpdir do |home|
       [
@@ -226,6 +226,7 @@ class Baza::Lambda
       @loog.debug("This is the Dockerfile:\n#{dockerfile}")
       Baza::Zip.new(file, loog: @loog).pack(home)
     end
+    file
   end
 
   # Create install commands for Docker, from this directory.
