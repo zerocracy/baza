@@ -88,19 +88,35 @@ class Baza::Lambda
       ip = host_of(warm(id))
       @loog.debug("The IP of #{id} is #{ip}")
       Net::SSH.start(ip, @user, port: @port, keys: [], key_data: [@ssh], keys_only: true) do |ssh|
-        @loog.debug("Logged into EC2 instance #{ip} as '#{@user}'")
+        @loog.debug("Logged into EC2 instance #{ip} as #{@user.inspect}")
         ssh.scp.upload(zip, '/tmp/baza.zip')
         @loog.debug("ZIP (#{File.size(zip)} bytes) uploaded to EC2 instance #{id}")
         script = [
           'set -ex',
           'cd /tmp',
           'rm -rf baza',
-          'unzip baza.zip -d baza',
+          'mkdir baza',
+          'unzip -qq baza.zip -d baza',
           'docker build baza -t baza'
         ].join(' && ')
-        ssh.exec!(script) do |_, stream, data|
-          @loog.debug(data) if stream == :stdout
+        script = "( #{script} ) 2>&1"
+        stdout = ''
+        code = nil
+        ssh.open_channel do |channel|
+          channel.exec(script) do |ch, success|
+            p success
+            failed |= !success
+            ch.on_data do |_, data|
+              stdout += data
+            end
+            ch.on_request('exit-status') do |_, data|
+              code = data.read_long
+            end
+          end
         end
+        ssh.loop
+        @loog.debug(stdout)
+        raise "Failed with ##{code} on #{script.inspect}" unless code.zero?
         @loog.debug("Docker image built successfully")
         # 'docker push' to ECR
         # update Lambda function to use new image

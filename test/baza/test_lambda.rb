@@ -40,7 +40,7 @@ class Baza::LambdaTest < Minitest::Test
     WebMock.disable_net_connect!
     fake_pgsql.exec('DELETE FROM swarm')
     fake_human.swarms.add(fake_name, 'zerocracy/j', 'master')
-    stub('RunInstances', { instancesSet: { item: { instanceId: 'i-42' } } })
+    stub('RunInstances', { instancesSet: { item: { instanceId: 'i-42424242' } } })
     stub('TerminateInstances', {})
     stub('DescribeInstanceStatus', { instanceStatusSet: { item: { instanceStatus: { status: 'ok' } } } })
     stub('DescribeInstances', { reservationSet: { item: { instancesSet: { item: { ipAddress: '127.0.0.1' } } } } })
