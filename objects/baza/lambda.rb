@@ -24,6 +24,7 @@
 
 require 'English'
 require 'liquid'
+require 'backtrace'
 require 'elapsed'
 require 'fileutils'
 require 'digest/sha1'
@@ -88,33 +89,38 @@ class Baza::Lambda
   # Lambda function.
   def build_and_publish(ip, zip)
     Net::SSH.start(ip, @user, port: @port, keys: [], key_data: [@ssh], keys_only: true) do |ssh|
-      @loog.debug("Logged into EC2 instance #{ip} as #{@user.inspect}")
-      ssh.scp.upload(zip, '/tmp/baza.zip')
-      @loog.debug("ZIP (#{File.size(zip)} bytes) uploaded to #{ip}")
-      script = [
-        'set -ex',
-        'cd /tmp',
-        'rm -rf baza',
-        'mkdir baza',
-        'unzip -qq baza.zip -d baza',
-        'docker build baza -t baza'
-      ].join(' && ')
-      script = "( #{script} ) 2>&1"
-      stdout = ''
-      code = nil
-      ssh.open_channel do |channel|
-        channel.exec(script) do |ch, success|
-          p success
-          failed |= !success
-          ch.on_data do |_, data|
-            stdout += data
-          end
-          ch.on_request('exit-status') do |_, data|
-            code = data.read_long
+      begin
+        @loog.debug("Logged into EC2 instance #{ip} as #{@user.inspect}")
+        ssh.scp.upload(zip, '/tmp/baza.zip')
+        @loog.debug("ZIP (#{File.size(zip)} bytes) uploaded to #{ip}")
+        script = [
+          'set -ex',
+          'cd /tmp',
+          'rm -rf baza',
+          'mkdir baza',
+          'unzip -qq baza.zip -d baza',
+          'docker build baza -t baza'
+        ].join(' && ')
+        script = "( #{script} ) 2>&1"
+        stdout = ''
+        code = nil
+        ssh.open_channel do |channel|
+          channel.exec(script) do |ch, success|
+            p success
+            failed |= !success
+            ch.on_data do |_, data|
+              stdout += data
+            end
+            ch.on_request('exit-status') do |_, data|
+              code = data.read_long
+            end
           end
         end
+        ssh.loop
+      rescue StandardError => e
+        @loog.warn(Backtrace.new(e))
+        raise e
       end
-      ssh.loop
       @loog.debug(stdout)
       raise "Failed with ##{code} on #{script.inspect}" unless code.zero?
       @loog.debug("Docker image built successfully")
