@@ -48,7 +48,7 @@ class Baza::Lambda
   # @param [Loog] loog Logging facility
   # @param [Baza:Tbot] tbot Telegram bot
   def initialize(humans, key, secret, region, sgroup, subnet, image, ssh,
-    tbot: Baza::Tbot::Fake.new, loog: Loog::NULL)
+    tbot: Baza::Tbot::Fake.new, loog: Loog::NULL, user: 'ubuntu', port: 22)
     @humans = humans
     @key = key
     @secret = secret
@@ -56,10 +56,13 @@ class Baza::Lambda
     @sgroup = sgroup
     @subnet = subnet
     @image = image
+    ssh = ssh.gsub(/\n +/, "\n")
     OpenSSL::PKey.read(ssh) unless key.empty? # sanity check
     @ssh = ssh
     @tbot = tbot
     @loog = loog
+    @user = user
+    @port = port
   end
 
   # Deploy all swarms into AWS Lambda.
@@ -84,12 +87,20 @@ class Baza::Lambda
     begin
       ip = host_of(warm(id))
       @loog.debug("The IP of #{id} is #{ip}")
-      user = 'ubuntu'
-      Net::SSH.start(ip, user, keys: [], key_data: [@ssh], keys_only: true) do |ssh|
-        @loog.debug("Logged into EC2 instance #{ip} as #{user}")
+      Net::SSH.start(ip, @user, port: @port, keys: [], key_data: [@ssh], keys_only: true) do |ssh|
+        @loog.debug("Logged into EC2 instance #{ip} as '#{@user}'")
         ssh.scp.upload(zip, '/tmp/baza.zip')
         @loog.debug("ZIP (#{File.size(zip)} bytes) uploaded to EC2 instance #{id}")
-        ssh.exec!('mkdir /tmp/baza && cd /tmp/baza && unzip ../baza.zip && docker build . -t baza')
+        script = [
+          'set -ex',
+          'cd /tmp',
+          'rm -rf baza',
+          'unzip baza.zip -d baza',
+          'docker build baza -t baza'
+        ].join(' && ')
+        ssh.exec!(script) do |_, stream, data|
+          @loog.debug(data) if stream == :stdout
+        end
         @loog.debug("Docker image built successfully")
         # 'docker push' to ECR
         # update Lambda function to use new image
@@ -107,7 +118,7 @@ class Baza::Lambda
         @loog.debug("Status of #{id} is #{status.inspect}")
         break if status == 'ok'
         raise "Looks like #{id} will never be OK" if Time.now - start > 60 * 10
-        sleep 10
+        sleep 15
       end
       id
     end
@@ -132,7 +143,6 @@ class Baza::Lambda
 
   def status_of(id)
     elapsed(@loog, intro: "Detected status of #{id}") do
-      puts ec2.describe_instance_status(instance_ids: [id], include_all_instances: true).to_json
       ec2.describe_instance_status(instance_ids: [id], include_all_instances: true)
         .instance_statuses[0]
         .instance_status
