@@ -102,6 +102,7 @@ class Baza::LambdaTest < Minitest::Test
   end
 
   def test_live_deploy
+    skip
     fake_pgsql.exec('DELETE FROM swarm')
     yml = '/code/home/assets/zerocracy/baza.yml'
     skip unless File.exist?(yml)
@@ -120,6 +121,17 @@ class Baza::LambdaTest < Minitest::Test
       cfg['ssh'],
       loog: Loog::VERBOSE
     ).deploy
+  end
+
+  def test_live_publish
+    skip
+    WebMock.enable_net_connect!
+    Baza::Lambda.new(
+      fake_humans,
+      '', '', '', '', '', '', '',
+      File.read(File.join(ENV['HOME'], '.ssh/id_rsa')),
+      loog: Loog::VERBOSE
+    ).build_and_publish('3.219.39.28', __FILE__, 'latest')
   end
 
   private

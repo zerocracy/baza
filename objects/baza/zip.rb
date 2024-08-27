@@ -55,7 +55,7 @@ class Baza::Zip
         entries << "#{path}#{File.directory?(f) ? '/' : ": #{File.size(f)}"}"
       end
     end
-    @loog.debug("Directory #{dir} zipped to #{@file}:\n#{entries.join("\n")}")
+    @loog.debug("Directory #{dir} zipped to #{@file} (#{File.size(@file)} bytes):\n#{entries.join("\n")}")
   end
 
   # Unpack a ZIP file into the directory.
@@ -72,6 +72,6 @@ class Baza::Zip
         entries << "#{t}: #{File.size(t)}"
       end
     end
-    @loog.debug("The archive #{@file} unzipped to #{dir}:\n#{entries.join("\n")}")
+    @loog.debug("The archive #{@file} (#{File.size(@file)} bytes) unzipped to #{dir}:\n#{entries.join("\n")}")
   end
 end

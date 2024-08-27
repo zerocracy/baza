@@ -50,7 +50,7 @@ class Baza::Lambda
   # @param [Loog] loog Logging facility
   # @param [Baza:Tbot] tbot Telegram bot
   def initialize(humans, account, key, secret, region, sgroup, subnet, image, ssh,
-    tbot: Baza::Tbot::Fake.new, loog: Loog::NULL, type: 't2.large', user: 'ubuntu', port: 22)
+    tbot: Baza::Tbot::Fake.new, loog: Loog::NULL, type: 't2.small', user: 'ubuntu', port: 22)
     @humans = humans
     @account = account
     @key = key
@@ -88,24 +88,25 @@ class Baza::Lambda
     end
   end
 
-  private
+  # private
 
   # Build a new Docker image in a new EC2 server and publish it to
   # Lambda function.
   def build_and_publish(ip, zip, tag)
-    Net::SSH.start(ip, @user, port: @port, keys: [], key_data: [@ssh], keys_only: true) do |ssh|
+    terminal(ip) do |ssh|
       begin
         @loog.debug("Logged into EC2 instance #{ip} as #{@user.inspect}")
-        path = '/tmp/baza.zip'
-        ssh.scp.upload(zip, path)
-        @loog.debug("ZIP (#{File.size(zip)} bytes) uploaded to #{path} at #{ip}")
+        path = 'baza.zip'
+        ssh.scp.upload!(zip, path)
+        @loog.debug("ZIP (#{File.size(zip)} bytes) uploaded to #{path} at #{ip}:#{@port}")
+        ssh.scp.download!(path, zip)
+        @loog.debug("ZIP (#{File.size(zip)} bytes) downloaded from #{path} of #{ip}:#{@port}")
         script = [
           'set -ex',
           'PATH=$PATH:$(pwd)',
-          'cd /tmp',
           'ls -al',
-          'rm -rf baza',
-          'mkdir baza',
+          'mkdir --p baza',
+          'rm -rf baza/*',
           'unzip -qq baza.zip -d baza',
           'docker build baza -t baza',
           "aws ecr get-login-password --region #{@region} | docker login --username AWS --password-stdin #{@account}.dkr.ecr.#{@region}.amazonaws.com",
@@ -137,6 +138,15 @@ class Baza::Lambda
     end
   end
 
+  def terminal(ip)
+    Net::SSH.start(ip, @user, port: @port, keys: [], key_data: [@ssh], keys_only: true, timeout: 60_000) do |ssh|
+      yield ssh
+    end
+  rescue Net::SSH::Disconnect => e
+    @loog.warn("There is a temporary error, will retry: #{e.message}")
+    retry
+  end
+
   def warm(id)
     elapsed(@loog, intro: 'Warmed up EC2 instance') do
       start = Time.now
@@ -147,7 +157,7 @@ class Baza::Lambda
         @loog.debug("Status of #{id} is #{status.inspect}, attempt ##{attempt}")
         break if status == 'ok'
         raise "Looks like #{id} will never be OK" if Time.now - start > 60 * 10
-        sleep 15
+        sleep 30
       end
       id
     end
@@ -180,7 +190,7 @@ class Baza::Lambda
   end
 
   def run_instance
-    elapsed(@loog, intro: 'Started new EC2 instance') do
+    elapsed(@loog, intro: "Started new #{@type.inspect} EC2 instance") do
       ec2.run_instances(
         image_id: @image,
         instance_type: @type,
@@ -274,7 +284,7 @@ class Baza::Lambda
       end
       git << 'git rev-parse HEAD'
       stdout = `(#{git.join(' && ')}) 2>&1`
-      @loog.debug(stdout)
+      @loog.debug("Checkout log of #{swarm.name}:\n#{stdout}")
       swarm.stdout!(stdout)
       code = $CHILD_STATUS.exitstatus
       swarm.exit!(code)
