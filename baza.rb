@@ -84,6 +84,7 @@ configure do
       'url' => ''
     },
     'lambda' => {
+      'account' => '', # AWS account ID
       'key' => '', # AWS authentication key
       'secret' => '', # AWS secret
       'region' => '', # EC2 region
@@ -268,6 +269,7 @@ configure do
   require_relative 'objects/baza/lambda'
   lmbd = Baza::Lambda.new(
     settings.humans,
+    settings.config['lambda']['account'],
     settings.config['lambda']['key'],
     settings.config['lambda']['secret'],
     settings.config['lambda']['region'],

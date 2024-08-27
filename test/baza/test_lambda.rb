@@ -25,6 +25,7 @@
 require 'minitest/autorun'
 require 'fileutils'
 require 'loog'
+require 'yaml'
 require 'webmock/minitest'
 require 'net/ssh'
 require_relative '../test__helper'
@@ -37,9 +38,9 @@ require_relative '../../objects/baza/lambda'
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
 class Baza::LambdaTest < Minitest::Test
-  def test_live_deploy
+  def test_fake_deploy
     WebMock.disable_net_connect!
-    loog = Loog::NULL
+    loog = Loog::VERBOSE
     fake_pgsql.exec('DELETE FROM swarm')
     fake_human.swarms.add('j', 'zerocracy/j', 'master')
     stub('RunInstances', { instancesSet: { item: { instanceId: 'i-42424242' } } })
@@ -64,20 +65,33 @@ class Baza::LambdaTest < Minitest::Test
       assert_equal(0, $CHILD_STATUS.exitstatus)
       container = File.read(docker_log).split("\n").last.strip
       begin
-        sleep 2
-        Net::SSH.start('127.0.0.1', user, port:, keys: [], key_data: [File.read(id_rsa)], keys_only: true) do |ssh|
-          ssh.exec!("(echo 'echo $@' > docker && chmod a+x docker) 2>&1")
+        Net::SSH.start('127.0.0.1', user, port: when_ready(port), keys: [], key_data: [File.read(id_rsa)], keys_only: true) do |ssh|
+          ssh.exec!(
+            [
+              '(',
+              'echo "echo fake-\$0 \$@" > docker',
+              '&& echo "echo fake-\$0 \$@" > aws',
+              '&& chmod a+x docker aws',
+              ') 2>&1'
+            ].join
+          )
         end
-        zip = File.join(home, 'image.zip')
         Baza::Lambda.new(
           fake_humans,
-          'AKI..............XKU', # AWS key
-          'KmX8................................eUnE', # AWS secret
-          'us-east-1', # EC2 region
-          'sg-0ffb4444444440ed3', # EC2 security group
-          'subnet-0f8044444444e041e', # EC2 subnet
-          'ami-0187844444444301d', # EC2 image
-           # EC2 SSH private key
+          # AWS account ID
+          '',
+          # AWS key
+          'AKI..............XKU',
+          # AWS secret
+          'KmX8................................eUnE',
+          # EC2 region
+          'us-east-1',
+          # EC2 security group
+          'sg-0ffb4444444440ed3',
+          # EC2 subnet
+          'subnet-0f8044444444e041e',
+          # EC2 image
+          'ami-0187844444444301d',
           File.read(id_rsa),
           loog:, user:, port:
         ).deploy
@@ -85,6 +99,27 @@ class Baza::LambdaTest < Minitest::Test
         `docker rm -f #{container}`
       end
     end
+  end
+
+  def test_live_deploy
+    fake_pgsql.exec('DELETE FROM swarm')
+    yml = '/code/home/assets/zerocracy/baza.yml'
+    skip unless File.exist?(yml)
+    cfg = YAML.safe_load(File.open(yml))['lambda']
+    fake_human.swarms.add(fake_name, "#{fake_name}/#{fake_name}", fake_name).dirty!(true)
+    WebMock.enable_net_connect!
+    Baza::Lambda.new(
+      fake_humans,
+      cfg['account'],
+      cfg['key'],
+      cfg['secret'],
+      cfg['region'],
+      cfg['sgroup'],
+      cfg['subnet'],
+      cfg['image'],
+      cfg['ssh'],
+      loog: Loog::VERBOSE
+    ).deploy
   end
 
   private
@@ -99,6 +134,11 @@ class Baza::LambdaTest < Minitest::Test
   def to_xml(hash)
     hash.map do |k, v|
       "<#{k}>#{v.is_a?(Hash) ? to_xml(v) : v}</#{k}>"
-    end.join('')
+    end.join
+  end
+
+  def when_ready(port)
+    sleep 1
+    port
   end
 end

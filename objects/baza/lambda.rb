@@ -42,21 +42,24 @@ require 'openssl'
 class Baza::Lambda
   # Ctor.
   #
+  # @param [String] account AWS account ID
   # @param [String] key AWS authentication key (if empty, the object will NOT use AWS S3)
   # @param [String] secret AWS authentication secret
   # @param [String] region AWS region
   # @param [String] ssh SSH private key
   # @param [Loog] loog Logging facility
   # @param [Baza:Tbot] tbot Telegram bot
-  def initialize(humans, key, secret, region, sgroup, subnet, image, ssh,
-    tbot: Baza::Tbot::Fake.new, loog: Loog::NULL, user: 'ubuntu', port: 22)
+  def initialize(humans, account, key, secret, region, sgroup, subnet, image, ssh,
+    tbot: Baza::Tbot::Fake.new, loog: Loog::NULL, type: 't2.large', user: 'ubuntu', port: 22)
     @humans = humans
+    @account = account
     @key = key
     @secret = secret
     @region = region
     @sgroup = sgroup
     @subnet = subnet
     @image = image
+    @type = type
     ssh = ssh.gsub(/\n +/, "\n")
     OpenSSL::PKey.read(ssh) unless key.empty? # sanity check
     @ssh = ssh
@@ -67,7 +70,9 @@ class Baza::Lambda
   end
 
   # Deploy all swarms into AWS Lambda.
-  def deploy
+  #
+  # @param [String] tag Docker tag to use
+  def deploy(tag = 'latest')
     return unless dirty?
     Dir.mktmpdir do |home|
       zip = pack(File.join(home, 'image.zip'))
@@ -75,7 +80,7 @@ class Baza::Lambda
       break if aws_sha == sha
       instance_id = run_instance
       begin
-        build_and_publish(host_of(warm(instance_id)), zip)
+        build_and_publish(host_of(warm(instance_id)), zip, tag)
       ensure
         terminate(instance_id)
       end
@@ -87,27 +92,31 @@ class Baza::Lambda
 
   # Build a new Docker image in a new EC2 server and publish it to
   # Lambda function.
-  def build_and_publish(ip, zip)
-    Net::SSH.start(ip, @user, port: @port, keys: [], key_data: [@ssh], keys_only: true, logger: @loog) do |ssh|
+  def build_and_publish(ip, zip, tag)
+    Net::SSH.start(ip, @user, port: @port, keys: [], key_data: [@ssh], keys_only: true) do |ssh|
       begin
         @loog.debug("Logged into EC2 instance #{ip} as #{@user.inspect}")
-        ssh.scp.upload(zip, '/tmp/baza.zip')
-        @loog.debug("ZIP (#{File.size(zip)} bytes) uploaded to #{ip}")
+        path = '/tmp/baza.zip'
+        ssh.scp.upload(zip, path)
+        @loog.debug("ZIP (#{File.size(zip)} bytes) uploaded to #{path} at #{ip}")
         script = [
           'set -ex',
           'PATH=$PATH:$(pwd)',
           'cd /tmp',
+          'ls -al',
           'rm -rf baza',
           'mkdir baza',
           'unzip -qq baza.zip -d baza',
-          'docker build baza -t baza'
+          'docker build baza -t baza',
+          "aws ecr get-login-password --region #{@region} | docker login --username AWS --password-stdin #{@account}.dkr.ecr.#{@region}.amazonaws.com",
+          "docker tag baza #{@account}.dkr.ecr.#{@region}.amazonaws.com/zerocracy/baza:#{tag}",
+          "docker push #{@account}.dkr.ecr.#{@region}.amazonaws.com/zerocracy/baza:#{tag}"
         ].join(' && ')
         script = "( #{script} ) 2>&1"
         stdout = ''
         code = nil
         ssh.open_channel do |channel|
           channel.exec(script) do |ch, success|
-            failed |= !success
             ch.on_data do |_, data|
               stdout += data
             end
@@ -123,8 +132,7 @@ class Baza::Lambda
       end
       @loog.debug(stdout)
       raise "Failed with ##{code} on #{script.inspect}" unless code.zero?
-      @loog.debug("Docker image built successfully")
-      # 'docker push' to ECR
+      @loog.debug('Docker image built successfully')
       # update Lambda function to use new image
     end
   end
@@ -132,9 +140,11 @@ class Baza::Lambda
   def warm(id)
     elapsed(@loog, intro: 'Warmed up EC2 instance') do
       start = Time.now
+      attempt = 0
       loop do
         status = status_of(id)
-        @loog.debug("Status of #{id} is #{status.inspect}")
+        attempt += 1
+        @loog.debug("Status of #{id} is #{status.inspect}, attempt ##{attempt}")
         break if status == 'ok'
         raise "Looks like #{id} will never be OK" if Time.now - start > 60 * 10
         sleep 15
@@ -173,7 +183,7 @@ class Baza::Lambda
     elapsed(@loog, intro: 'Started new EC2 instance') do
       ec2.run_instances(
         image_id: @image,
-        instance_type: 't2.large',
+        instance_type: @type,
         max_count: 1,
         min_count: 1,
         security_group_ids: [@sgroup],
@@ -184,11 +194,11 @@ class Baza::Lambda
             tags: [
               {
                 key: 'Name',
-                value: 'baza-deploy',
-              },
-            ],
-          },
-        ],
+                value: 'baza-deploy'
+              }
+            ]
+          }
+        ]
       ).instances[0].instance_id
     end
   end
