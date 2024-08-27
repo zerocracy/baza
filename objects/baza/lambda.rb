@@ -88,13 +88,14 @@ class Baza::Lambda
   # Build a new Docker image in a new EC2 server and publish it to
   # Lambda function.
   def build_and_publish(ip, zip)
-    Net::SSH.start(ip, @user, port: @port, keys: [], key_data: [@ssh], keys_only: true) do |ssh|
+    Net::SSH.start(ip, @user, port: @port, keys: [], key_data: [@ssh], keys_only: true, logger: @loog) do |ssh|
       begin
         @loog.debug("Logged into EC2 instance #{ip} as #{@user.inspect}")
         ssh.scp.upload(zip, '/tmp/baza.zip')
         @loog.debug("ZIP (#{File.size(zip)} bytes) uploaded to #{ip}")
         script = [
           'set -ex',
+          'PATH=$PATH:$(pwd)',
           'cd /tmp',
           'rm -rf baza',
           'mkdir baza',
@@ -106,7 +107,6 @@ class Baza::Lambda
         code = nil
         ssh.open_channel do |channel|
           channel.exec(script) do |ch, success|
-            p success
             failed |= !success
             ch.on_data do |_, data|
               stdout += data

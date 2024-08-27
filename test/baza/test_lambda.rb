@@ -39,9 +39,9 @@ require_relative '../../objects/baza/lambda'
 class Baza::LambdaTest < Minitest::Test
   def test_live_deploy
     WebMock.disable_net_connect!
-    loog = Loog::VERBOSE
+    loog = Loog::NULL
     fake_pgsql.exec('DELETE FROM swarm')
-    fake_human.swarms.add(fake_name, 'zerocracy/j', 'master')
+    fake_human.swarms.add('j', 'zerocracy/j', 'master')
     stub('RunInstances', { instancesSet: { item: { instanceId: 'i-42424242' } } })
     stub('TerminateInstances', {})
     stub('DescribeInstanceStatus', { instanceStatusSet: { item: { instanceStatus: { status: 'ok' } } } })
@@ -64,10 +64,10 @@ class Baza::LambdaTest < Minitest::Test
       assert_equal(0, $CHILD_STATUS.exitstatus)
       container = File.read(docker_log).split("\n").last.strip
       begin
-        # Net::SSH.start('127.0.0.1', user, port:, keys: [], key_data: [File.read(id_rsa)], keys_only: true) do |ssh|
-        #   ssh.exec!("ls -al")
-        #   # ssh.exec!("echo 'echo $@' > /bin/docker")
-        # end
+        sleep 2
+        Net::SSH.start('127.0.0.1', user, port:, keys: [], key_data: [File.read(id_rsa)], keys_only: true) do |ssh|
+          ssh.exec!("(echo 'echo $@' > docker && chmod a+x docker) 2>&1")
+        end
         zip = File.join(home, 'image.zip')
         Baza::Lambda.new(
           fake_humans,
