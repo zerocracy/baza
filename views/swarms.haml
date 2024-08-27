@@ -12,13 +12,13 @@
     -# ID
     %col{style: 'width: 4em;'}
     -# Name
-    %col
+    %col{style: 'width: 14em;'}
     -# Repository
     %col{style: 'width: 14em;'}
     -# Branch
     %col{style: 'width: 14em;'}
-    -# SHA
-    %col{style: 'width: 14em;'}
+    -# Deployment
+    %col
     -# Created
     %col{style: 'width: 10em;'}
     -# Commands
@@ -34,7 +34,7 @@
       %th
         Branch
       %th
-        SHA
+        Deployment
       %th
         Created
       %th
@@ -45,14 +45,21 @@
         = "##{s[:id]}"
       %td.ff
         = s[:name]
+        - if s[:dirty]
+          %i.fa-regular.fa-envelope{title: "Changes arrived, waiting for deployment..."}
       %td.ff
         %a{href: "https://github.com/#{s[:repository]}/tree/#{s[:branch]}"}
           = s[:repository]
         %i.fa-brands.fa-github
       %td.ff
         = s[:branch]
-      %td.ff
-        != large_text(s[:sha])
+      %td
+        - if s[:exit].nil?
+          = '?'
+        - elsif s[:exit].zero?
+          %i.fa-regular.fa-thumbs-up.good
+        - else
+          %i.fa-solid.fa-triangle-exclamation.bad{title: 'The deployment failed'}
       %td
         != ago(s[:created])
       %td

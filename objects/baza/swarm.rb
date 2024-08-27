@@ -120,7 +120,7 @@ class Baza::Swarm
           branch: row['branch'],
           dirty: row['dirty'] == 't',
           stdout: row['stdout'],
-          exit: row['exit'].to_i,
+          exit: row['exit']&.to_i,
           created: Time.parse(row['created'])
         }
       end

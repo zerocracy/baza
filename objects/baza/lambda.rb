@@ -74,9 +74,7 @@ class Baza::Lambda
       break if aws_sha == sha
       instance_id = run_instance
       begin
-        ip = host_of(warm(instance_id))
-        @loog.debug("The IP of #{instance_id} is #{ip}")
-        build_and_publish(ip, zip)
+        build_and_publish(host_of(warm(instance_id)), zip)
       ensure
         terminate(instance_id)
       end

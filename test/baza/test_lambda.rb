@@ -38,6 +38,7 @@ require_relative '../../objects/baza/lambda'
 class Baza::LambdaTest < Minitest::Test
   def test_live_deploy
     WebMock.disable_net_connect!
+    loog = Loog::VERBOSE
     fake_pgsql.exec('DELETE FROM swarm')
     fake_human.swarms.add(fake_name, 'zerocracy/j', 'master')
     stub('RunInstances', { instancesSet: { item: { instanceId: 'i-42424242' } } })
@@ -48,7 +49,14 @@ class Baza::LambdaTest < Minitest::Test
       keys = File.join(home, 'authorized_keys')
       docker_log = File.join(home, 'docker.log')
       File.write(keys, 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDKqkTbKGd7ZHNJDFeVN/jwcAu+SFTt2bOdpc7njTXpWUxrq58b3KRrXkTToCTAN2Xz8ClBZ7fLHPvYnh89HBoYRFQxXXzUGLbwhVwRnF5THlPmwJpTyk22W1EeMC3P8bcERCyDAsqD7wbQTcZ8B4QtYAx3Oudr9UWBCABqM+WaAMjhTQOq9bGhuu2VXUztH7Z1caZHavWVlOrhils/jyXD+HYX9S8POu1ybf9VwAZfzyIKG7BOhLtcnxh4lh+mtJX7qwkaoSpSJNWWoQRK2YdPGRQCwIqHkxsgTBsPPp3SSLfJEuLwTyHbDe0vtOn7wS2PlE1DQvG39kheXo/Lwz6F yb@yb.local')
-      `docker run -d -p 2222:22 -v '#{keys}:/etc/authorized_keys/tester' -e SSH_USERS="tester:1001:1001" --name=fakeserver kabirbaidhya/fakeserver 2>&1 >#{docker_log}`
+      loog.debug(%x[
+        docker run -d -p 2222:22 \
+        -v '#{keys}:/etc/authorized_keys/tester' \
+        -e SSH_USERS="tester:1001:1001" \
+        --name=fakeserver \
+        kabirbaidhya/fakeserver 2>&1 >#{docker_log}
+      ])
+      assert_equal(0, $CHILD_STATUS.exitstatus)
       container = File.read(docker_log).split("\n").last.strip
       begin
         zip = File.join(home, 'image.zip')
@@ -88,8 +96,7 @@ class Baza::LambdaTest < Minitest::Test
           9VzsLtGNCzE0jXP/MIHAxqo8RYoVK49wS+I0cGXe6jKEftJJDNOhiZqhB/OaFj/W
           Pj1tA1+lww+nyLM1mw6zIFsnHrQZfKI5MO6wGyU9w8Ao6OAvRHgcHQ==
           -----END RSA PRIVATE KEY-----',
-          loog: Loog::VERBOSE,
-          user: 'tester', port: 2222
+          loog:, user: 'tester', port: 2222
         ).deploy
       ensure
         `docker rm -f #{container}`
