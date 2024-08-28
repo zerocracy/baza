@@ -26,7 +26,7 @@ source 'https://rubygems.org'
 ruby '~>3.2'
 
 gem 'always', '>0'
-gem 'aws-sdk-core', '3.201.5'
+gem 'aws-sdk-core', '3.202.0'
 gem 'aws-sdk-s3', '1.159.0'
 gem 'backtrace', '>0'
 gem 'capybara'
