@@ -77,7 +77,7 @@ class Baza::Locks
     ).empty?
   end
 
-  def lock(name, owner)
+  def lock(name, owner, ip)
     unless @human.account.balance.positive? || @human.extend(Baza::Human::Roles).tester?
       raise Baza::Urror, 'The balance is negative, you cannot lock jobs'
     end
@@ -85,11 +85,11 @@ class Baza::Locks
     begin
       pgsql.exec(
         [
-          'INSERT INTO lock (human, name, owner) ',
-          'VALUES ($1, $2, $3) ',
+          'INSERT INTO lock (human, name, owner, ip) ',
+          'VALUES ($1, $2, $3, %4) ',
           'ON CONFLICT (human, name, owner) DO UPDATE SET owner = lock.owner'
         ],
-        [@human.id, name.downcase, owner]
+        [@human.id, name.downcase, owner, ip]
       )
     rescue PG::UniqueViolation
       raise Busy, "The '#{name}' lock is occupied by another owner, '#{owner}' can't get it now"
