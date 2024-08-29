@@ -46,7 +46,7 @@
         %td.ff
           != large_text(lk[:owner])
         %td.ff
-          = "##{lk[:ip]}"
+          = lk[:ip]
         %td
           != ago(lk[:created])
           - if lk[:created] < Time.now - 2 * 60 * 60
