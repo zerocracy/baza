@@ -28,11 +28,11 @@ require 'backtrace'
 require 'elapsed'
 require 'fileutils'
 require 'digest/sha1'
-require 'aws-sdk-ec2'
 require 'aws-sdk-core'
 require 'net/ssh'
 require 'net/scp'
 require 'openssl'
+require_relative 'ec2'
 
 # Function in AWS Lambda.
 #
@@ -52,14 +52,11 @@ class Baza::Lambda
   def initialize(humans, account, key, secret, region, sgroup, subnet, image, ssh,
     tbot: Baza::Tbot::Fake.new, loog: Loog::NULL, type: 't2.xlarge', user: 'ubuntu', port: 22)
     @humans = humans
+    @ec2 = Baza::EC2.new(key, secret, region, sgroup, subnet, image, type:, loog:)
     @account = account
     @key = key
     @secret = secret
     @region = region
-    @sgroup = sgroup
-    @subnet = subnet
-    @image = image
-    @type = type
     ssh = ssh.gsub(/\n +/, "\n")
     OpenSSL::PKey.read(ssh) unless key.empty? # sanity check
     @ssh = ssh
@@ -78,11 +75,11 @@ class Baza::Lambda
       zip = pack(File.join(home, 'image.zip'))
       sha = Digest::SHA1.hexdigest(File.binread(zip))
       break if aws_sha == sha
-      instance_id = run_instance
+      instance_id = @ec2.run_instance
       begin
-        build_and_publish(host_of(warm(instance_id)), zip, tag)
+        build_and_publish(@ec2.host_of(@ec2.warm(instance_id)), zip, tag)
       ensure
-        terminate(instance_id)
+        @ec2.terminate(instance_id)
       end
       done!
     end
@@ -185,72 +182,6 @@ class Baza::Lambda
     retry
   end
 
-  def warm(id)
-    elapsed(@loog, intro: 'Warmed up EC2 instance') do
-      start = Time.now
-      attempt = 0
-      loop do
-        status = status_of(id)
-        attempt += 1
-        @loog.debug("Status of #{id} is #{status.inspect}, attempt ##{attempt}")
-        break if status == 'ok'
-        raise "Looks like #{id} will never be OK" if Time.now - start > 60 * 10
-        sleep 30
-      end
-      id
-    end
-  end
-
-  # Terminate one EC2 instance.
-  def terminate(id)
-    elapsed(@loog, intro: "Terminated EC2 instance #{id}") do
-      ec2.terminate_instances(instance_ids: [id])
-    end
-  end
-
-  # Get IP of the running EC2 instance.
-  def host_of(id)
-    elapsed(@loog, intro: "Found IP address of #{id}") do
-      ec2.describe_instances(instance_ids: [id])
-        .reservations[0]
-        .instances[0]
-        .public_ip_address
-    end
-  end
-
-  def status_of(id)
-    elapsed(@loog, intro: "Detected status of #{id}") do
-      ec2.describe_instance_status(instance_ids: [id], include_all_instances: true)
-        .instance_statuses[0]
-        .instance_status
-        .status
-    end
-  end
-
-  def run_instance
-    elapsed(@loog, intro: "Started new #{@type.inspect} EC2 instance") do
-      ec2.run_instances(
-        image_id: @image,
-        instance_type: @type,
-        max_count: 1,
-        min_count: 1,
-        security_group_ids: [@sgroup],
-        subnet_id: @subnet,
-        tag_specifications: [
-          {
-            resource_type: 'instance',
-            tags: [
-              {
-                key: 'Name',
-                value: 'baza-deploy'
-              }
-            ]
-          }
-        ]
-      ).instances[0].instance_id
-    end
-  end
-
   # What is the current SHA of the AWS lambda function?
   #
   # @return [String] The SHA or '' if no lambda function found
@@ -351,12 +282,5 @@ class Baza::Lambda
   # Mark all swarms as "not dirty any more".
   def done!
     @humans.pgsql.exec('UPDATE swarm SET dirty = FALSE')
-  end
-
-  def ec2
-    Aws::EC2::Client.new(
-      region: @region,
-      credentials: Aws::Credentials.new(@key, @secret),
-    )
   end
 end
