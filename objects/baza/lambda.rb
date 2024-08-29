@@ -51,18 +51,15 @@ class Baza::Lambda
   # @param [String] ssh SSH private key
   # @param [Loog] loog Logging facility
   # @param [Baza:Tbot] tbot Telegram bot
-  def initialize(humans, account, key, secret, region, sgroup, subnet, image, ssh,
+  def initialize(humans, account, key, secret, region, sgroup, subnet, image, ssh_key,
     tbot: Baza::Tbot::Fake.new, loog: Loog::NULL, type: 't2.xlarge', user: 'ubuntu', port: 22)
     @humans = humans
     @image = Baza::Image.new(humans, account, region, loog:)
     @ec2 = Baza::EC2.new(key, secret, region, sgroup, subnet, image, type:, loog:)
-    @shell = Baza::Shell.new(ssh, user, port, loog:) unless key.empty?
+    @shell = Baza::Shell.new(ssh_key, user, port, loog:) unless key.empty?
     @account = account
     @secret = secret
     @region = region
-    ssh = ssh.gsub(/\n +/, "\n")
-    OpenSSL::PKey.read(ssh) unless key.empty? # sanity check
-    @ssh = ssh
     @tbot = tbot
     @loog = loog
   end
