@@ -26,6 +26,7 @@ require 'minitest/autorun'
 require 'fileutils'
 require 'loog'
 require 'typhoeus'
+require 'random-port'
 require 'webmock/minitest'
 require_relative '../test__helper'
 require_relative '../../objects/baza'
@@ -39,29 +40,32 @@ require_relative '../../objects/baza/image'
 class Baza::ImageTest < Minitest::Test
   def test_fake_docker_run
     WebMock.enable_net_connect!
-    loog = Loog::NULL
+    loog = Loog::VERBOSE
     Dir.mktmpdir do |home|
       zip = File.join(home, 'image.zip')
       Baza::Image.new(fake_humans, '42424242', 'us-east-1', loog:,
         from: 'public.ecr.aws/lambda/ruby:3.2').pack(zip)
       Baza::Zip.new(zip).unpack(home)
       bash("docker build #{home} -t image-test", loog)
-      stdout = bash("docker run -d -p 9000:8080 image-test", loog)
-      container = stdout.split("\n")[-1]
-      loog.debug("Docker container started: #{container}")
-      begin
-        sleep 1
-        request = Typhoeus::Request.new(
-          "http://localhost:9000/2015-03-31/functions/function/invocations",
-          body: '{}',
-          method: :get
-        )
-        request.run
-        ret = request.response
-        bash("docker logs #{container}", loog)
-      ensure
-        bash("docker rm -f #{container}", loog)
-      end
+      ret =
+        RandomPort::Pool::SINGLETON.acquire do |port|
+          stdout = bash("docker run -d -p #{port}:8080 image-test", loog)
+          container = stdout.split("\n")[-1]
+          loog.debug("Docker container started: #{container}")
+          begin
+            sleep 1
+            request = Typhoeus::Request.new(
+              "http://localhost:#{port}/2015-03-31/functions/function/invocations",
+              body: '{}',
+              method: :get
+            )
+            request.run
+            bash("docker logs #{container}", loog)
+            request.response
+          ensure
+            bash("docker rm -f #{container}", loog)
+          end
+        end
       assert_equal(200, ret.response_code, ret.response_body)
       assert_equal('"Done!"', ret.response_body, ret.response_body)
     end
@@ -70,6 +74,7 @@ class Baza::ImageTest < Minitest::Test
   private
 
   def bash(cmd, loog)
+    loog.debug("+ #{cmd}")
     stdout = `#{cmd} 2>&1`
     loog.debug(stdout)
     assert_equal(0, $CHILD_STATUS.exitstatus)

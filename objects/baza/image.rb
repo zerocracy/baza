@@ -75,6 +75,7 @@ class Baza::Image
         target = File.join(home, sub)
         FileUtils.mkdir_p(File.dirname(target))
         FileUtils.copy_entry(dir, target)
+        FileUtils.rm_rf(File.join(target, '.git'))
         installs << install(target, sub)
       end
       dockerfile = Liquid::Template.parse(File.read(File.join(__dir__, '../../assets/lambda/Dockerfile'))).render(
@@ -95,7 +96,7 @@ class Baza::Image
   def install(dir, sub)
     gemfile = File.join(dir, 'Gemfile.lock')
     if File.exist?(gemfile)
-      "RUN bundle install --gemfile=#{sub}/Gemfile"
+      "RUN bundle install --gemfile=/z/#{sub}/Gemfile"
     else
       ''
     end

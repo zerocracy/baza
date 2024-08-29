@@ -529,6 +529,7 @@ DEPENDENCIES
   rack-ssl (= 1.4.1)
   rack-test (= 2.1.0)
   rake (= 13.2.1)
+  random-port (> 0)
   redcarpet (~> 3.5)
   rerun (= 0.14.0)
   retries (> 0)

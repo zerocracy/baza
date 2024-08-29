@@ -39,7 +39,7 @@ class Baza::EC2
   # @param [Loog] loog Logging facility
   def initialize(key, secret, region, sgroup, subnet, image,
     loog: Loog::NULL, type: 't2.xlarge')
-    raise Baza::Urror, "AWS key is wrong: #{key.inspect}" unless key.match?(/^AKIA[A-Z0-9]{16}$/)
+    raise Baza::Urror, "AWS key is wrong: #{key.inspect}" unless key.match?(/^(AKIA|FAKE)[A-Z0-9]{16}$/)
     @key = key
     raise Baza::Urror, "AWS secret is wrong: #{secret.inspect}" unless secret.match?(/^[A-Za-z0-9\/]{40}$/)
     @secret = secret

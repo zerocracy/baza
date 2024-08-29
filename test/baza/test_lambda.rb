@@ -32,6 +32,7 @@ require_relative '../test__helper'
 require_relative '../../objects/baza'
 require_relative '../../objects/baza/zip'
 require_relative '../../objects/baza/lambda'
+require_relative '../../objects/baza/shell'
 
 # Test for Lambda.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -65,12 +66,14 @@ class Baza::LambdaTest < Minitest::Test
       assert_equal(0, $CHILD_STATUS.exitstatus)
       container = File.read(docker_log).split("\n").last.strip
       begin
-        Net::SSH.start('127.0.0.1', user, port: when_ready(port), keys: [], key_data: [File.read(id_rsa)], keys_only: true) do |ssh|
-          ssh.exec!(
+        Baza::Shell.new(File.read(id_rsa), user, when_ready(port), loog:).connect('127.0.0.1') do |ssh|
+          ssh.exec(
             [
               '(',
-              'echo "echo fake-\$0 \$@" > docker',
-              '&& echo "echo fake-\$0 \$@" > aws',
+              'set -ex',
+              '&& cd /home/tester/',
+              '&& echo "echo fake-\$0 \$@" > docker',
+              '&& cp docker aws',
               '&& chmod a+x docker aws',
               ') 2>&1'
             ].join
@@ -81,7 +84,7 @@ class Baza::LambdaTest < Minitest::Test
           # AWS account ID
           '44444444444',
           # AWS key
-          'AKIAthisisfakekeyXXX',
+          'FAKEFAKEFAKEFAKEFAKE',
           # AWS secret
           'KmX8thisisfakesecret/thisisfakeeXXXXXXXX',
           # EC2 region
@@ -102,6 +105,7 @@ class Baza::LambdaTest < Minitest::Test
   end
 
   def test_live_deploy
+    skip # use if very very carefully!
     fake_pgsql.exec('DELETE FROM swarm')
     yml = '/code/home/assets/zerocracy/baza.yml'
     skip unless File.exist?(yml)

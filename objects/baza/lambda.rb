@@ -112,6 +112,7 @@ class Baza::Lambda
           script = [
             'set -ex',
             'PATH=$PATH:$(pwd)',
+            'env',
             'mkdir .aws',
             'mv credentials .aws',
             'mv config .aws',
@@ -119,12 +120,12 @@ class Baza::Lambda
             'mkdir --p baza',
             'rm -rf baza/*',
             'unzip -qq baza.zip -d baza',
-            'docker build baza -t baza',
+            'docker build baza -t baza --platform linux/amd64',
             "docker tag baza #{img}",
             "docker push #{img}",
             "aws lambda update-function-code --function-name baza --image-uri #{img} --publish"
-          ].join(') && (')
-          script = "( (#{script}) ) 2>&1"
+          ].join(' && ')
+          script = "( #{script} ) 2>&1"
           code = ssh.exec(script)
         rescue StandardError => e
           @loog.warn(Backtrace.new(e))

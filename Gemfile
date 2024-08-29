@@ -56,6 +56,7 @@ gem 'rack', '3.1.7'
 gem 'rack-ssl', '1.4.1'
 gem 'rack-test', '2.1.0'
 gem 'rake', '13.2.1', require: false
+gem 'random-port', '>0', require: false
 gem 'redcarpet', '~>3.5'
 gem 'rerun', '0.14.0', require: false
 gem 'retries', '>0'
