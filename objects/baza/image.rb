@@ -47,6 +47,7 @@ class Baza::Image
     @humans = humans
     @account = account
     @region = region
+    @from = from
     @loog = loog
   end
 

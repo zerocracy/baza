@@ -25,6 +25,7 @@
 require 'minitest/autorun'
 require 'fileutils'
 require 'loog'
+require 'typhoeus'
 require 'webmock/minitest'
 require_relative '../test__helper'
 require_relative '../../objects/baza'
@@ -41,10 +42,36 @@ class Baza::ImageTest < Minitest::Test
     loog = Loog::VERBOSE
     Dir.mktmpdir do |home|
       zip = File.join(home, 'image.zip')
-      Baza::Image.new(fake_humans, '42424242', 'us-east-1', loog:, from: 'ruby:3.2').pack(zip)
+      Baza::Image.new(fake_humans, '42424242', 'us-east-1', loog:,
+        from: 'public.ecr.aws/lambda/ruby:3.2').pack(zip)
       Baza::Zip.new(zip).unpack(home)
-      loog.debug(%x[docker build #{home} -t image-test 2>&1])
-      assert_equal(0, $CHILD_STATUS.exitstatus)
+      bash("docker build #{home} -t image-test", loog)
+      stdout = bash("docker run -d -p 9000:8080 image-test", loog)
+      container = stdout.split("\n")[-1]
+      loog.debug("Docker container started: #{container}")
+      begin
+        sleep 1
+        request = Typhoeus::Request.new(
+          "http://localhost:9000/2015-03-31/functions/function/invocations",
+          body: '{}',
+          method: :get
+        )
+        request.run
+        ret = request.response
+        bash("docker logs #{container}", loog)
+      ensure
+        bash("docker rm -f #{container}", loog)
+      end
+      assert_equal(200, ret.response_code, ret.response_body)
     end
+  end
+
+  private
+
+  def bash(cmd, loog)
+    stdout = `#{cmd} 2>&1`
+    loog.debug(stdout)
+    assert_equal(0, $CHILD_STATUS.exitstatus)
+    stdout
   end
 end
