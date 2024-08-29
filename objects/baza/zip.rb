@@ -41,6 +41,16 @@ class Baza::Zip
     @loog = loog
   end
 
+  def entries
+    list = []
+    Zip::File.open(@file) do |zip|
+      zip.each do |entry|
+        list << entry.name
+      end
+    end
+    list
+  end
+
   # Pack all files in the directory into the ZIP archive.
   #
   # @param [String] dir The path of the directory
@@ -48,9 +58,10 @@ class Baza::Zip
     FileUtils.rm_f(@file)
     entries = []
     Zip::File.open(@file, create: true) do |zip|
-      Dir[File.join(dir, '**/*')].each do |f|
+      Dir.glob(File.join(dir, '**/*'), File::FNM_DOTMATCH).each do |f|
         next if f == @file
         path = Pathname.new(f).relative_path_from(dir)
+        next if path.to_s == '.'
         zip.add(path, f)
         entries << "#{path}#{File.directory?(f) ? '/' : ": #{File.size(f)}"}"
       end

@@ -102,7 +102,6 @@ class Baza::LambdaTest < Minitest::Test
   end
 
   def test_live_deploy
-    skip
     fake_pgsql.exec('DELETE FROM swarm')
     yml = '/code/home/assets/zerocracy/baza.yml'
     skip unless File.exist?(yml)

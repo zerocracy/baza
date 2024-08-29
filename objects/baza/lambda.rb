@@ -94,48 +94,73 @@ class Baza::Lambda
   # Lambda function.
   def build_and_publish(ip, zip, tag)
     terminal(ip) do |ssh|
-      begin
-        @loog.debug("Logged into EC2 instance #{ip} as #{@user.inspect}")
-        path = 'baza.zip'
-        ssh.scp.upload!(zip, path)
-        @loog.debug("ZIP (#{File.size(zip)} bytes) uploaded to #{path} at #{ip}:#{@port}")
-        ssh.scp.download!(path, zip)
-        @loog.debug("ZIP (#{File.size(zip)} bytes) downloaded from #{path} of #{ip}:#{@port}")
-        script = [
-          'set -ex',
-          'PATH=$PATH:$(pwd)',
-          'ls -al',
-          'mkdir --p baza',
-          'rm -rf baza/*',
-          'unzip -qq baza.zip -d baza',
-          'docker build baza -t baza',
-          "aws ecr get-login-password --region #{@region} | docker login --username AWS --password-stdin #{@account}.dkr.ecr.#{@region}.amazonaws.com",
-          "docker tag baza #{@account}.dkr.ecr.#{@region}.amazonaws.com/zerocracy/baza:#{tag}",
-          "docker push #{@account}.dkr.ecr.#{@region}.amazonaws.com/zerocracy/baza:#{tag}"
-        ].join(' && ')
-        script = "( #{script} ) 2>&1"
-        stdout = ''
-        code = nil
-        ssh.open_channel do |channel|
-          channel.exec(script) do |ch, success|
-            ch.on_data do |_, data|
-              stdout += data
-            end
-            ch.on_request('exit-status') do |_, data|
-              code = data.read_long
-            end
+      code =
+        begin
+          @loog.debug("Logged into EC2 instance #{ip} as #{@user.inspect}")
+          upload(ssh, zip, 'baza.zip')
+          Tempfile.open do |f|
+            File.write(
+              f.path,
+              [
+                "aws_access_key_id=#{@key}",
+                "aws_secret_access_key=#{@secret}"
+              ].join("\n")
+            )
+            upload(ssh, f.path, 'credentials')
           end
+          code = push(ssh, tag)
+        rescue StandardError => e
+          @loog.warn(Backtrace.new(e))
+          raise e
         end
-        ssh.loop
-      rescue StandardError => e
-        @loog.warn(Backtrace.new(e))
-        raise e
-      end
-      @loog.debug(stdout)
       raise "Failed with ##{code} on #{script.inspect}" unless code.zero?
       @loog.debug('Docker image built successfully')
       # update Lambda function to use new image
     end
+  end
+
+  # Build a new Docker image in a new EC2 server and publish it to
+  # Lambda function.
+  def upload(ssh, file, path)
+    ssh.scp.upload!(file, path)
+    @loog.debug("#{File.basename(file)} (#{File.size(file)} bytes) uploaded to #{path}")
+  end
+
+  # @return [Integer] Exit code
+  def push(ssh, tag)
+    script = [
+      'set -ex',
+      'PATH=$PATH:$(pwd)',
+      'mkdir .aws',
+      'mv credentials .aws',
+      'mkdir --p baza',
+      'rm -rf baza/*',
+      'unzip -qq baza.zip -d baza',
+      'docker build baza -t baza',
+      "aws ecr get-login-password --region #{@region} | docker login --username AWS --password-stdin #{@account}.dkr.ecr.#{@region}.amazonaws.com",
+      "docker tag baza #{@account}.dkr.ecr.#{@region}.amazonaws.com/zerocracy/baza:#{tag}",
+      "docker push #{@account}.dkr.ecr.#{@region}.amazonaws.com/zerocracy/baza:#{tag}"
+    ].join(' && ')
+    script = "( #{script} ) 2>&1"
+    stdout = ''
+    code = nil
+    ssh.open_channel do |channel|
+      channel.exec(script) do |ch, success|
+        ch.on_data do |_, data|
+          stdout += data
+          lines = stdout.split(/\n/, -1)
+          lines[..-2].each do |ln|
+            @loog.debug(ln.strip)
+          end
+          stdout = lines[-1]
+        end
+        ch.on_request('exit-status') do |_, data|
+          code = data.read_long
+        end
+      end
+    end
+    ssh.loop
+    code
   end
 
   def terminal(ip)
@@ -233,6 +258,8 @@ class Baza::Lambda
       ].each do |f|
         FileUtils.copy(File.join(__dir__, f), File.join(home, File.basename(f)))
       end
+      FileUtils.mkdir_p(File.join(home, 'swarms'))
+      File.write(File.join(home, 'swarms/.gitkeep'), '')
       installs = []
       each_swarm do |swarm|
         dir = checkout(swarm)

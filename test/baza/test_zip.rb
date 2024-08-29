@@ -36,7 +36,7 @@ class Baza::ZipTest < Minitest::Test
   def test_packs_and_unpacks
     Dir.mktmpdir do |home|
       zip = File.join(home, 'foo.zip')
-      path = 'a/b/c/test.txt'
+      path = 'a/b/c/.test.txt'
       Dir.mktmpdir do |dir|
         txt = File.join(dir, path)
         FileUtils.mkdir_p(File.dirname(txt))
@@ -44,6 +44,7 @@ class Baza::ZipTest < Minitest::Test
         Baza::Zip.new(zip).pack(dir)
       end
       assert(File.exist?(zip))
+      assert_equal(4, Baza::Zip.new(zip).entries.size)
       Dir.mktmpdir do |dir|
         Baza::Zip.new(zip).unpack(dir)
         txt = File.join(dir, path)
