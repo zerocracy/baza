@@ -64,6 +64,7 @@ class Baza::Locks
         created: Time.parse(row['created']),
         name: row['name'],
         owner: row['owner'],
+        ip: row['ip'],
         jobs: row['jobs'].to_i
       }
       yield lk
