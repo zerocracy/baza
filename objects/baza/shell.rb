@@ -51,6 +51,7 @@ class Baza::Shell
   # @param [String] ip IP address of the server
   def connect(ip)
     Net::SSH.start(ip, @user, port: @port, keys: [], key_data: [@key], keys_only: true, timeout: 60_000) do |ssh|
+      @loog.debug("Logged into #{ip} as #{@user.inspect}")
       yield Session.new(ssh, @loog)
     end
   rescue Net::SSH::Disconnect => e

@@ -79,19 +79,19 @@ class Baza::LambdaTest < Minitest::Test
         Baza::Lambda.new(
           fake_humans,
           # AWS account ID
-          '',
+          '44444444444',
           # AWS key
-          'AKI..............XKU',
+          'AKIAthisisfakekeyXXX',
           # AWS secret
-          'KmX8................................eUnE',
+          'KmX8thisisfakesecret/thisisfakeeXXXXXXXX',
           # EC2 region
           'us-east-1',
           # EC2 security group
-          'sg-0ffb4444444440ed3',
+          'sg-44444444444444444',
           # EC2 subnet
-          'subnet-0f8044444444e041e',
+          'subnet-44444444444444444',
           # EC2 image
-          'ami-0187844444444301d',
+          'ami-44444444444444444',
           File.read(id_rsa),
           loog:, user:, port:
         ).deploy
@@ -120,17 +120,6 @@ class Baza::LambdaTest < Minitest::Test
       cfg['ssh'],
       loog: Loog::VERBOSE
     ).deploy
-  end
-
-  def test_live_publish
-    skip
-    WebMock.enable_net_connect!
-    Baza::Lambda.new(
-      fake_humans,
-      '', '', '', '', '', '', '',
-      File.read(File.join(ENV['HOME'], '.ssh/id_rsa')),
-      loog: Loog::VERBOSE
-    ).build_and_publish('3.219.39.28', __FILE__, 'latest')
   end
 
   private

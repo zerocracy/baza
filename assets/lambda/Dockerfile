@@ -34,9 +34,9 @@ RUN chmod a+x /tmp/install-pgsql.sh && /tmp/install-pgsql.sh
 
 COPY Gemfile ${LAMBDA_TASK_ROOT}/
 COPY Gemfile.lock ${LAMBDA_TASK_ROOT}/
-RUN gem install bundler && bundle install
+RUN cd ${LAMBDA_TASK_ROOT} && gem install bundler && bundle install
 
-WORKDIR /z
+RUN rm -rf /z
 COPY swarms/ /z/swarms
 {{ installs }}
 

@@ -57,6 +57,7 @@ class Baza::Lambda
     @image = Baza::Image.new(humans, account, region, loog:)
     @ec2 = Baza::EC2.new(key, secret, region, sgroup, subnet, image, type:, loog:)
     @shell = Baza::Shell.new(ssh_key, user, port, loog:) unless key.empty?
+    @key = key
     @account = account
     @secret = secret
     @region = region
@@ -91,7 +92,6 @@ class Baza::Lambda
     @shell.connect(ip) do |ssh|
       code =
         begin
-          @loog.debug("Logged into EC2 instance #{ip} as #{@user.inspect}")
           ssh.upload(zip, 'baza.zip')
           ssh.upload_file(
             'credentials',
@@ -108,6 +108,7 @@ class Baza::Lambda
               "region = #{@region}"
             ].join("\n")
           )
+          img = "#{@account}.dkr.ecr.#{@region}.amazonaws.com/zerocracy/baza:#{tag}"
           script = [
             'set -ex',
             'PATH=$PATH:$(pwd)',
@@ -119,11 +120,11 @@ class Baza::Lambda
             'rm -rf baza/*',
             'unzip -qq baza.zip -d baza',
             'docker build baza -t baza',
-            "docker tag baza #{@account}.dkr.ecr.#{@region}.amazonaws.com/zerocracy/baza:#{tag}",
-            "docker push #{@account}.dkr.ecr.#{@region}.amazonaws.com/zerocracy/baza:#{tag}"
-            # update Lambda function to use new image
-          ].join(' && ')
-          script = "( #{script} ) 2>&1"
+            "docker tag baza #{img}",
+            "docker push #{img}",
+            "aws lambda update-function-code --function-name baza --image-uri #{img} --publish"
+          ].join(') && (')
+          script = "( (#{script}) ) 2>&1"
           code = ssh.exec(script)
         rescue StandardError => e
           @loog.warn(Backtrace.new(e))

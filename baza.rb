@@ -83,16 +83,6 @@ configure do
       'region' => '', # SQS region
       'url' => ''
     },
-    'lambda' => {
-      'account' => '', # AWS account ID
-      'key' => '', # AWS authentication key
-      'secret' => '', # AWS secret
-      'region' => '', # EC2 region
-      'sgroup' => '', # EC2 security group
-      'subnet' => '', # EC2 subnet
-      'image' => '', # EC2 instance image name
-      'ssh' => '' # SSH private key
-    },
     'github' => {
       'id' => '',
       'secret' => '',
@@ -265,22 +255,22 @@ configure do
 end
 
 # Redeploy AWS lambda function:
-configure do
-  require_relative 'objects/baza/lambda'
-  lmbd = Baza::Lambda.new(
-    settings.humans,
-    settings.config['lambda']['account'],
-    settings.config['lambda']['key'],
-    settings.config['lambda']['secret'],
-    settings.config['lambda']['region'],
-    settings.config['lambda']['sgroup'],
-    settings.config['lambda']['subnet'],
-    settings.config['lambda']['image'],
-    settings.config['lambda']['ssh'],
-    loog: settings.loog
-  )
-  set :lambda, Always.new(1)
-  unless ENV['RACK_ENV'] == 'test'
+unless ENV['RACK_ENV'] == 'test'
+  configure do
+    require_relative 'objects/baza/lambda'
+    lmbd = Baza::Lambda.new(
+      settings.humans,
+      settings.config['lambda']['account'],
+      settings.config['lambda']['key'],
+      settings.config['lambda']['secret'],
+      settings.config['lambda']['region'],
+      settings.config['lambda']['sgroup'],
+      settings.config['lambda']['subnet'],
+      settings.config['lambda']['image'],
+      settings.config['lambda']['ssh'],
+      loog: settings.loog
+    )
+    set :lambda, Always.new(1)
     settings.lambda.start(5 * 60) do
       lmbd.deploy
     end

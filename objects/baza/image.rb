@@ -43,7 +43,7 @@ class Baza::Image
   # @param [String] region AWS region
   # @param [Loog] loog Logging facility
   def initialize(humans, account, region, loog: Loog::NULL,
-    from: "#{account}.dkr.ecr.#{region}.amazonaws.com/zerocracy/baza:basic")
+    from: "#{account}.dkr.ecr.#{region}.amazonaws.com/zerocracy/baza:latest")
     @humans = humans
     @account = account
     @region = region
