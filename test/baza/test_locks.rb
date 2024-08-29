@@ -60,4 +60,13 @@ class Baza::LocksTest < Minitest::Test
     human.locks.lock(name, owner, '192.168.1.1')
     assert(human.locks.locked?(name))
   end
+
+  def test_check_ip
+    human = fake_human
+    locks = human.locks
+    owner = "#{fake_name} #{fake_name} #{fake_name} --"
+    n = fake_name
+    locks.lock(n, owner, '192.168.1.1')
+    assert(locks.each.any? { |r| r[:ip] == '192.168.1.1' })
+  end
 end
