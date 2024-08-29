@@ -48,8 +48,8 @@ gem 'loog', '>0'
 gem 'minitest', '5.25.1', require: false
 gem 'minitest-reporters', '1.7.1', require: false
 gem 'net-ping', '2.0.8', require: false
-gem 'net-ssh', '7.2.3'
 gem 'net-scp', '4.0.0'
+gem 'net-ssh', '7.2.3'
 gem 'octokit', '>0'
 gem 'pgtk', '>0'
 gem 'rack', '3.1.7'

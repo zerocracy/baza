@@ -40,11 +40,11 @@ require_relative '../../objects/baza/image'
 class Baza::ImageTest < Minitest::Test
   def test_fake_docker_run
     WebMock.enable_net_connect!
-    loog = Loog::VERBOSE
+    loog = Loog::NULL
     Dir.mktmpdir do |home|
       zip = File.join(home, 'image.zip')
       Baza::Image.new(fake_humans, '42424242', 'us-east-1', loog:,
-        from: 'public.ecr.aws/lambda/ruby:3.2').pack(zip)
+                                                            from: 'public.ecr.aws/lambda/ruby:3.2').pack(zip)
       Baza::Zip.new(zip).unpack(home)
       bash("docker build #{home} -t image-test", loog)
       ret =

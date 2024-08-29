@@ -59,6 +59,7 @@ class Baza::Shell
     retry
   end
 
+  # Specific SSH session.
   class Session
     def initialize(ssh, loog)
       @ssh = ssh
@@ -85,10 +86,10 @@ class Baza::Shell
       stdout = ''
       code = nil
       @ssh.open_channel do |channel|
-        channel.exec(cmd) do |ch, success|
+        channel.exec(cmd) do |ch, _success|
           ch.on_data do |_, data|
             stdout += data
-            lines = stdout.split(/\n/, -1)
+            lines = stdout.split("\n", -1)
             lines[..-2].each do |ln|
               @loog.debug(ln.strip)
             end

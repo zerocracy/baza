@@ -108,7 +108,8 @@ class Baza::Lambda
               "region = #{@region}"
             ].join("\n")
           )
-          img = "#{@account}.dkr.ecr.#{@region}.amazonaws.com/zerocracy/baza:#{tag}"
+          repo = "#{@account}.dkr.ecr.#{@region}.amazonaws.com"
+          img = "#{repo}/zerocracy/baza:#{tag}"
           script = [
             'set -ex',
             'PATH=$PATH:$(pwd)',
@@ -116,7 +117,7 @@ class Baza::Lambda
             'mkdir .aws',
             'mv credentials .aws',
             'mv config .aws',
-            "aws ecr get-login-password --region #{@region} | docker login --username AWS --password-stdin #{@account}.dkr.ecr.#{@region}.amazonaws.com",
+            "aws ecr get-login-password --region #{@region} | docker login --username AWS --password-stdin #{repo}",
             'mkdir --p baza',
             'rm -rf baza/*',
             'unzip -qq baza.zip -d baza',
@@ -126,7 +127,7 @@ class Baza::Lambda
             "aws lambda update-function-code --function-name baza --image-uri #{img} --publish"
           ].join(' && ')
           script = "( #{script} ) 2>&1"
-          code = ssh.exec(script)
+          ssh.exec(script)
         rescue StandardError => e
           @loog.warn(Backtrace.new(e))
           raise e

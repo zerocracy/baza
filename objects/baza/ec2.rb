@@ -41,7 +41,7 @@ class Baza::EC2
     loog: Loog::NULL, type: 't2.xlarge')
     raise Baza::Urror, "AWS key is wrong: #{key.inspect}" unless key.match?(/^(AKIA|FAKE)[A-Z0-9]{16}$/)
     @key = key
-    raise Baza::Urror, "AWS secret is wrong: #{secret.inspect}" unless secret.match?(/^[A-Za-z0-9\/]{40}$/)
+    raise Baza::Urror, "AWS secret is wrong: #{secret.inspect}" unless secret.match?(%r{^[A-Za-z0-9/]{40}$})
     @secret = secret
     @region = region
     @sgroup = sgroup
@@ -120,7 +120,7 @@ class Baza::EC2
   def aws
     Aws::EC2::Client.new(
       region: @region,
-      credentials: Aws::Credentials.new(@key, @secret),
+      credentials: Aws::Credentials.new(@key, @secret)
     )
   end
 end

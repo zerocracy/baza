@@ -41,7 +41,7 @@ require_relative '../../objects/baza/shell'
 class Baza::LambdaTest < Minitest::Test
   def test_fake_deploy
     WebMock.disable_net_connect!
-    loog = Loog::VERBOSE
+    loog = Loog::NULL
     fake_pgsql.exec('DELETE FROM swarm')
     fake_human.swarms.add('j', 'zerocracy/j', 'master')
     stub('RunInstances', { instancesSet: { item: { instanceId: 'i-42424242' } } })
@@ -56,13 +56,13 @@ class Baza::LambdaTest < Minitest::Test
       user = 'tester'
       port = 2222
       docker_log = File.join(home, 'docker.log')
-      loog.debug(%x[
+      loog.debug(`
         docker run -d -p #{port}:22 \
         -v '#{id_rsa_pub}:/etc/authorized_keys/#{user}' \
         -e SSH_USERS="#{user}:1001:1001" \
         --name=fakeserver \
         kabirbaidhya/fakeserver 2>&1 >#{docker_log}
-      ])
+      `)
       assert_equal(0, $CHILD_STATUS.exitstatus)
       container = File.read(docker_log).split("\n").last.strip
       begin
