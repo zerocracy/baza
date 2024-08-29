@@ -55,6 +55,7 @@ class Baza::Tokens
       'INSERT INTO token (human, name, text) VALUES ($1, $2, $3) RETURNING id',
       [@human.id, name, uuid]
     )
+    @human.notify("✅ Token with the name '#{name}' has been created successfully.")
     get(rows[0]['id'].to_i)
   end
 
