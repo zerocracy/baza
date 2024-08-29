@@ -1,3 +1,4 @@
+#!/bin/bash
 # MIT License
 #
 # Copyright (c) 2009-2024 Zerocracy
@@ -20,26 +21,18 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-FROM {{ account }}.dkr.ecr.{{ region }}.amazonaws.com/zerocracy/baza:basic
+if psql --version; then
+  echo "PostgreSQL is already installed"
+  exit
+fi
 
-RUN yum update -y
-RUN yum install -y make automake gcc gcc-c++ kernel-devel \
-  gcc readline-devel libicu-devel zlib-devel \
-  openssl-devel openssl \
-  wget tar gzip \
-  libyaml libyaml-devel
+TMP=$(mktemp -d)
+cd "${TMP}"
 
-COPY install-pgsql.sh /tmp
-RUN chmod a+x /tmp/install-pgsql.sh && /tmp/install-pgsql.sh
-
-COPY Gemfile ${LAMBDA_TASK_ROOT}/
-COPY Gemfile.lock ${LAMBDA_TASK_ROOT}/
-COPY entry.rb ${LAMBDA_TASK_ROOT}/
-RUN gem install bundler && bundle install
-
-WORKDIR /z
-COPY swarms/ /z/swarms
-
-{{ installs }}
-
-CMD ["entry.rb"]
+wget https://ftp.postgresql.org/pub/source/v16.1/postgresql-16.1.tar.gz
+tar -xvzf postgresql-16.1.tar.gz
+cd postgresql-16.1
+./configure --bindir=/usr/bin --with-openssl
+make -C src/bin install
+make -C src/include install
+make -C src/interfaces install

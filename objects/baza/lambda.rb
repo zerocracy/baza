@@ -50,7 +50,7 @@ class Baza::Lambda
   # @param [Loog] loog Logging facility
   # @param [Baza:Tbot] tbot Telegram bot
   def initialize(humans, account, key, secret, region, sgroup, subnet, image, ssh,
-    tbot: Baza::Tbot::Fake.new, loog: Loog::NULL, type: 't2.small', user: 'ubuntu', port: 22)
+    tbot: Baza::Tbot::Fake.new, loog: Loog::NULL, type: 't2.xlarge', user: 'ubuntu', port: 22)
     @humans = humans
     @account = account
     @key = key
@@ -98,24 +98,36 @@ class Baza::Lambda
         begin
           @loog.debug("Logged into EC2 instance #{ip} as #{@user.inspect}")
           upload(ssh, zip, 'baza.zip')
-          Tempfile.open do |f|
-            File.write(
-              f.path,
-              [
-                "aws_access_key_id=#{@key}",
-                "aws_secret_access_key=#{@secret}"
-              ].join("\n")
-            )
-            upload(ssh, f.path, 'credentials')
-          end
+          upload_file(
+            ssh, 'credentials',
+            [
+              '[default]',
+              "aws_access_key_id = #{@key}",
+              "aws_secret_access_key = #{@secret}"
+            ].join("\n")
+          )
+          upload_file(
+            ssh, 'config',
+            [
+              '[default]',
+              "region = #{@region}"
+            ].join("\n")
+          )
           code = push(ssh, tag)
         rescue StandardError => e
           @loog.warn(Backtrace.new(e))
           raise e
         end
-      raise "Failed with ##{code} on #{script.inspect}" unless code.zero?
+      raise "Failed with ##{code}" unless code.zero?
       @loog.debug('Docker image built successfully')
       # update Lambda function to use new image
+    end
+  end
+
+  def upload_file(ssh, path, content)
+    Tempfile.open do |f|
+      File.write(f.path, content)
+      upload(ssh, f.path, path)
     end
   end
 
@@ -133,11 +145,12 @@ class Baza::Lambda
       'PATH=$PATH:$(pwd)',
       'mkdir .aws',
       'mv credentials .aws',
+      'mv config .aws',
+      "aws ecr get-login-password --region #{@region} | docker login --username AWS --password-stdin #{@account}.dkr.ecr.#{@region}.amazonaws.com",
       'mkdir --p baza',
       'rm -rf baza/*',
       'unzip -qq baza.zip -d baza',
       'docker build baza -t baza',
-      "aws ecr get-login-password --region #{@region} | docker login --username AWS --password-stdin #{@account}.dkr.ecr.#{@region}.amazonaws.com",
       "docker tag baza #{@account}.dkr.ecr.#{@region}.amazonaws.com/zerocracy/baza:#{tag}",
       "docker push #{@account}.dkr.ecr.#{@region}.amazonaws.com/zerocracy/baza:#{tag}"
     ].join(' && ')
@@ -254,7 +267,8 @@ class Baza::Lambda
       [
         '../../Gemfile',
         '../../Gemfile.lock',
-        '../../assets/lambda/entry.rb'
+        '../../assets/lambda/entry.rb',
+        '../../assets/lambda/install-pgsql.sh'
       ].each do |f|
         FileUtils.copy(File.join(__dir__, f), File.join(home, File.basename(f)))
       end
@@ -271,6 +285,8 @@ class Baza::Lambda
         installs << install(target, sub)
       end
       dockerfile = Liquid::Template.parse(File.read(File.join(__dir__, '../../assets/lambda/Dockerfile'))).render(
+        'account' => @account,
+        'region' => @region,
         'installs' => installs.join("\n")
       )
       File.write(File.join(home, 'Dockerfile'), dockerfile)
