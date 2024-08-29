@@ -36,11 +36,9 @@ COPY Gemfile ${LAMBDA_TASK_ROOT}/
 COPY Gemfile.lock ${LAMBDA_TASK_ROOT}/
 RUN gem install bundler && bundle install
 
-COPY entry.rb ${LAMBDA_TASK_ROOT}/
-
 WORKDIR /z
 COPY swarms/ /z/swarms
-
 {{ installs }}
 
+COPY entry.rb ${LAMBDA_TASK_ROOT}/
 CMD ["entry.go"]

@@ -24,4 +24,5 @@
 
 def go(x)
   puts 'hello!'
+  'Done!'
 end

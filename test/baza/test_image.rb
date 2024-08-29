@@ -63,6 +63,7 @@ class Baza::ImageTest < Minitest::Test
         bash("docker rm -f #{container}", loog)
       end
       assert_equal(200, ret.response_code, ret.response_body)
+      assert_equal('"Done!"', ret.response_body, ret.response_body)
     end
   end
 
