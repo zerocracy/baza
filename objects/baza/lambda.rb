@@ -273,7 +273,7 @@ class Baza::Lambda
         FileUtils.copy(File.join(__dir__, f), File.join(home, File.basename(f)))
       end
       FileUtils.mkdir_p(File.join(home, 'swarms'))
-      File.write(File.join(home, 'swarms/.gitkeep'), '')
+      File.write(File.join(home, 'swarms/.keep'), '')
       installs = []
       each_swarm do |swarm|
         dir = checkout(swarm)
