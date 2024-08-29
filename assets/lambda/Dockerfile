@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-FROM {{ account }}.dkr.ecr.{{ region }}.amazonaws.com/zerocracy/baza:basic
+FROM {{ from }}
 
 RUN yum update -y
 RUN yum install -y make automake gcc gcc-c++ kernel-devel \

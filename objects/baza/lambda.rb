@@ -285,8 +285,7 @@ class Baza::Lambda
         installs << install(target, sub)
       end
       dockerfile = Liquid::Template.parse(File.read(File.join(__dir__, '../../assets/lambda/Dockerfile'))).render(
-        'account' => @account,
-        'region' => @region,
+        'from' => "#{@account}.dkr.ecr.#{@region}.amazonaws.com/zerocracy/baza:basic",
         'installs' => installs.join("\n")
       )
       File.write(File.join(home, 'Dockerfile'), dockerfile)
