@@ -121,6 +121,7 @@ class Baza::Lambda
             'docker build baza -t baza',
             "docker tag baza #{@account}.dkr.ecr.#{@region}.amazonaws.com/zerocracy/baza:#{tag}",
             "docker push #{@account}.dkr.ecr.#{@region}.amazonaws.com/zerocracy/baza:#{tag}"
+            # update Lambda function to use new image
           ].join(' && ')
           script = "( #{script} ) 2>&1"
           code = ssh.exec(script)
@@ -130,7 +131,6 @@ class Baza::Lambda
         end
       raise "Failed with ##{code}" unless code.zero?
       @loog.debug('Docker image built successfully')
-      # update Lambda function to use new image
     end
   end
 

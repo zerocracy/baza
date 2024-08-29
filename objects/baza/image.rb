@@ -42,7 +42,8 @@ class Baza::Image
   # @param [String] account AWS account ID
   # @param [String] region AWS region
   # @param [Loog] loog Logging facility
-  def initialize(humans, account, region, loog: Loog::NULL)
+  def initialize(humans, account, region, loog: Loog::NULL,
+    from: "#{account}.dkr.ecr.#{region}.amazonaws.com/zerocracy/baza:basic")
     @humans = humans
     @account = account
     @region = region
@@ -76,7 +77,7 @@ class Baza::Image
         installs << install(target, sub)
       end
       dockerfile = Liquid::Template.parse(File.read(File.join(__dir__, '../../assets/lambda/Dockerfile'))).render(
-        'from' => "#{@account}.dkr.ecr.#{@region}.amazonaws.com/zerocracy/baza:basic",
+        'from' => @from,
         'installs' => installs.join("\n")
       )
       File.write(File.join(home, 'Dockerfile'), dockerfile)
