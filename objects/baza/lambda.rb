@@ -33,6 +33,7 @@ require 'net/ssh'
 require 'net/scp'
 require 'openssl'
 require_relative 'ec2'
+require_relative 'shell'
 
 # Function in AWS Lambda.
 #
@@ -53,8 +54,8 @@ class Baza::Lambda
     tbot: Baza::Tbot::Fake.new, loog: Loog::NULL, type: 't2.xlarge', user: 'ubuntu', port: 22)
     @humans = humans
     @ec2 = Baza::EC2.new(key, secret, region, sgroup, subnet, image, type:, loog:)
+    @shell = Baza::Shell.new(ssh, user, port, loog:) unless key.empty?
     @account = account
-    @key = key
     @secret = secret
     @region = region
     ssh = ssh.gsub(/\n +/, "\n")
@@ -62,8 +63,6 @@ class Baza::Lambda
     @ssh = ssh
     @tbot = tbot
     @loog = loog
-    @user = user
-    @port = port
   end
 
   # Deploy all swarms into AWS Lambda.
@@ -85,32 +84,47 @@ class Baza::Lambda
     end
   end
 
-  # private
+  private
 
   # Build a new Docker image in a new EC2 server and publish it to
   # Lambda function.
   def build_and_publish(ip, zip, tag)
-    terminal(ip) do |ssh|
+    @shell.connect(ip) do |ssh|
       code =
         begin
           @loog.debug("Logged into EC2 instance #{ip} as #{@user.inspect}")
-          upload(ssh, zip, 'baza.zip')
-          upload_file(
-            ssh, 'credentials',
+          ssh.upload(zip, 'baza.zip')
+          ssh.upload_file(
+            'credentials',
             [
               '[default]',
               "aws_access_key_id = #{@key}",
               "aws_secret_access_key = #{@secret}"
             ].join("\n")
           )
-          upload_file(
-            ssh, 'config',
+          ssh.upload_file(
+            'config',
             [
               '[default]',
               "region = #{@region}"
             ].join("\n")
           )
-          code = push(ssh, tag)
+          script = [
+            'set -ex',
+            'PATH=$PATH:$(pwd)',
+            'mkdir .aws',
+            'mv credentials .aws',
+            'mv config .aws',
+            "aws ecr get-login-password --region #{@region} | docker login --username AWS --password-stdin #{@account}.dkr.ecr.#{@region}.amazonaws.com",
+            'mkdir --p baza',
+            'rm -rf baza/*',
+            'unzip -qq baza.zip -d baza',
+            'docker build baza -t baza',
+            "docker tag baza #{@account}.dkr.ecr.#{@region}.amazonaws.com/zerocracy/baza:#{tag}",
+            "docker push #{@account}.dkr.ecr.#{@region}.amazonaws.com/zerocracy/baza:#{tag}"
+          ].join(' && ')
+          script = "( #{script} ) 2>&1"
+          code = ssh.exec(script)
         rescue StandardError => e
           @loog.warn(Backtrace.new(e))
           raise e
@@ -119,67 +133,6 @@ class Baza::Lambda
       @loog.debug('Docker image built successfully')
       # update Lambda function to use new image
     end
-  end
-
-  def upload_file(ssh, path, content)
-    Tempfile.open do |f|
-      File.write(f.path, content)
-      upload(ssh, f.path, path)
-    end
-  end
-
-  # Build a new Docker image in a new EC2 server and publish it to
-  # Lambda function.
-  def upload(ssh, file, path)
-    ssh.scp.upload!(file, path)
-    @loog.debug("#{File.basename(file)} (#{File.size(file)} bytes) uploaded to #{path}")
-  end
-
-  # @return [Integer] Exit code
-  def push(ssh, tag)
-    script = [
-      'set -ex',
-      'PATH=$PATH:$(pwd)',
-      'mkdir .aws',
-      'mv credentials .aws',
-      'mv config .aws',
-      "aws ecr get-login-password --region #{@region} | docker login --username AWS --password-stdin #{@account}.dkr.ecr.#{@region}.amazonaws.com",
-      'mkdir --p baza',
-      'rm -rf baza/*',
-      'unzip -qq baza.zip -d baza',
-      'docker build baza -t baza',
-      "docker tag baza #{@account}.dkr.ecr.#{@region}.amazonaws.com/zerocracy/baza:#{tag}",
-      "docker push #{@account}.dkr.ecr.#{@region}.amazonaws.com/zerocracy/baza:#{tag}"
-    ].join(' && ')
-    script = "( #{script} ) 2>&1"
-    stdout = ''
-    code = nil
-    ssh.open_channel do |channel|
-      channel.exec(script) do |ch, success|
-        ch.on_data do |_, data|
-          stdout += data
-          lines = stdout.split(/\n/, -1)
-          lines[..-2].each do |ln|
-            @loog.debug(ln.strip)
-          end
-          stdout = lines[-1]
-        end
-        ch.on_request('exit-status') do |_, data|
-          code = data.read_long
-        end
-      end
-    end
-    ssh.loop
-    code
-  end
-
-  def terminal(ip)
-    Net::SSH.start(ip, @user, port: @port, keys: [], key_data: [@ssh], keys_only: true, timeout: 60_000) do |ssh|
-      yield ssh
-    end
-  rescue Net::SSH::Disconnect => e
-    @loog.warn("There is a temporary error, will retry: #{e.message}")
-    retry
   end
 
   # What is the current SHA of the AWS lambda function?
