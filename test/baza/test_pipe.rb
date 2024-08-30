@@ -48,19 +48,15 @@ class Baza::PipeTest < Minitest::Test
       File.binwrite(input, Factbase.new.export)
       uri = fbs.save(input)
       job = fake_token.start(fake_name, uri, 1, 0, 'n/a', [], '1.1.1.1')
-      alt = job.jobs.human.alterations.add(job.name, 'ruby', { script: 'puts "hi!"' })
+      alt = job.jobs.human.alterations.add(job.name, 'ruby', { script: '42 + 1"' })
       pipe = Baza::Humans.new(fake_pgsql).pipe(fbs)
       zip = File.join(dir, 'foo.zip')
       pipe.pack(job, zip)
-      Zip::File.open(zip) do |z|
-        z.each do |entry|
-          entry.extract(File.join(dir, entry.name))
-        end
+      Baza::Zip.new(zip).unpack(dir)
+      ['job.json', 'input.fb', "alteration-#{alt}/alteration-#{alt}.rb"].each do |f|
+        assert(File.exist?(File.join(dir, f)), f)
       end
-      ['id.txt', "#{job.id}.json", "#{job.id}.fb", "alteration-#{alt}.rb"].each do |f|
-        assert(File.exist?(File.join(dir, f)))
-      end
-      json = JSON.parse(File.read(File.join(dir, "#{job.id}.json")))
+      json = JSON.parse(File.read(File.join(dir, 'job.json')))
       assert_equal(job.id, json['id'], json)
       assert_equal(job.name, json['name'], json)
     end
@@ -71,13 +67,10 @@ class Baza::PipeTest < Minitest::Test
     fbs = Baza::Factbases.new('', '', loog: Loog::NULL)
     pipe = Baza::Humans.new(fake_pgsql).pipe(fbs)
     Dir.mktmpdir do |dir|
-      output = File.join(dir, "#{job.id}.fb")
-      File.binwrite(output, Factbase.new.export)
-      stdout = File.join(dir, "#{job.id}.stdout")
-      File.write(stdout, 'Nothing interesting')
-      json = File.join(dir, "#{job.id}.json")
+      File.binwrite(File.join(dir, 'output.fb'), Factbase.new.export)
+      File.write(File.join(dir, 'stdout.txt'), 'Nothing interesting')
       File.write(
-        json,
+        File.join(dir, 'job.json'),
         JSON.pretty_generate(
           {
             id: job.id,
@@ -87,11 +80,7 @@ class Baza::PipeTest < Minitest::Test
         )
       )
       zip = File.join(dir, 'foo.zip')
-      Zip::File.open(zip, create: true) do |z|
-        z.add(File.basename(output), output)
-        z.add(File.basename(stdout), stdout)
-        z.add(File.basename(json), json)
-      end
+      Baza::Zip.new(zip).pack(dir)
       pipe.unpack(job, zip)
       assert(job.jobs.get(job.id).finished?)
     end

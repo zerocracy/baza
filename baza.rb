@@ -72,10 +72,16 @@ configure do
       'admin_chat' => ''
     },
     's3' => {
-      'key' => '',
-      'secret' => '',
-      'region' => '',
+      'key' => '', # AWS authentication key
+      'secret' => '', # AWS secret
+      'region' => '', # S3 region
       'bucket' => ''
+    },
+    'sqs' => {
+      'key' => '', # AWS authentication key
+      'secret' => '', # AWS secret
+      'region' => '', # SQS region
+      'url' => ''
     },
     'github' => {
       'id' => '',
@@ -163,6 +169,18 @@ configure do
   )
 end
 
+# Amazon SQS:
+configure do
+  require_relative 'objects/baza/sqs'
+  set :sqs, Baza::SQS.new(
+    settings.config['sqs']['key'],
+    settings.config['sqs']['secret'],
+    settings.config['sqs']['url'],
+    settings.config['sqs']['region'],
+    loog: settings.loog
+  )
+end
+
 # Pipeline:
 configure do
   lib = File.absolute_path(File.join(__dir__, ENV['RACK_ENV'] == 'test' ? 'target/j' : 'j'))
@@ -236,6 +254,29 @@ configure do
   end
 end
 
+# Redeploy AWS lambda function:
+unless ENV['RACK_ENV'] == 'test'
+  configure do
+    require_relative 'objects/baza/lambda'
+    lmbd = Baza::Lambda.new(
+      settings.humans,
+      settings.config['lambda']['account'],
+      settings.config['lambda']['key'],
+      settings.config['lambda']['secret'],
+      settings.config['lambda']['region'],
+      settings.config['lambda']['sgroup'],
+      settings.config['lambda']['subnet'],
+      settings.config['lambda']['image'],
+      settings.config['lambda']['ssh'],
+      loog: settings.loog
+    )
+    set :lambda, Always.new(1)
+    settings.lambda.start(5 * 60) do
+      lmbd.deploy
+    end
+  end
+end
+
 # Global in-memory cache.
 configure do
   set :zache, Zache.new
@@ -265,6 +306,7 @@ require_relative 'front/front_secrets'
 require_relative 'front/front_pipe'
 require_relative 'front/front_durables'
 require_relative 'front/front_alterations'
+require_relative 'front/front_swarms'
 require_relative 'front/front_push'
 require_relative 'front/front_assets'
 require_relative 'front/front_helpers'

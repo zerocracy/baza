@@ -22,23 +22,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require 'minitest/autorun'
-require 'factbase'
-require_relative '../test__helper'
-require_relative '../../objects/baza'
-require_relative '../../baza'
-
-class Baza::FrontJobsTest < Minitest::Test
-  def app
-    Sinatra::Application
-  end
-
-  def test_read_job
-    job = fake_job
-    fake_login(job.jobs.human.github)
-    get("/jobs/#{job.id}")
-    assert_status(200)
-    get("/jobs/#{job.id}/verified.txt")
-    assert_status(200)
-  end
+def go(x)
+  puts 'hello!'
+  'Done!'
 end

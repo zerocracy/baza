@@ -22,23 +22,40 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require 'minitest/autorun'
-require 'factbase'
-require_relative '../test__helper'
-require_relative '../../objects/baza'
-require_relative '../../baza'
+get '/swarms' do
+  admin_only
+  assemble(
+    :swarms,
+    :default,
+    title: '/swarms',
+    swarms: the_human.swarms,
+    offset: (params[:offset] || '0').to_i
+  )
+end
 
-class Baza::FrontJobsTest < Minitest::Test
-  def app
-    Sinatra::Application
-  end
+post '/swarms/webhook' do
+  # if it's not PUSH event, ignore it and return 200
+  json = {} # take it
+  repo = json[:repository]
+  branch = json[:branch]
+  swarm = settings.humans.find_swarm(repo, branch)
+  return "The swarm not found for #{repo}@#{branch}" if swarm.nil?
+  swarm.dirty!(true)
+  "The swarm ##{swarm.id} of #{repo}@#{branch} scheduled for deployment, thanks!"
+end
 
-  def test_read_job
-    job = fake_job
-    fake_login(job.jobs.human.github)
-    get("/jobs/#{job.id}")
-    assert_status(200)
-    get("/jobs/#{job.id}/verified.txt")
-    assert_status(200)
-  end
+get(%r{/swarms/([0-9]+)/remove}) do
+  admin_only
+  id = params['captures'].first.to_i
+  the_human.swarms.get(id).remove
+  flash(iri.cut('/swarms'), "The swarm ##{id} just removed")
+end
+
+post('/swarms/add') do
+  admin_only
+  n = params[:name]
+  repo = params[:repository]
+  branch = params[:branch]
+  id = the_human.swarms.add(n, repo, branch)
+  flash(iri.cut('/swarms'), "The swarm ##{id} #{repo}@#{branch} just added")
 end

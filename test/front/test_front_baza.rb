@@ -42,7 +42,7 @@ class Baza::AppTest < Minitest::Test
     get('/')
     assert_status(200)
     pages << last_response.body
-    login
+    fake_login
     get('/dash')
     assert_status(200)
     pages << last_response.body
@@ -97,7 +97,7 @@ class Baza::AppTest < Minitest::Test
       '/valves',
       '/account'
     ]
-    login
+    fake_login
     pages.each do |p|
       get(p)
       assert_status(200)
@@ -105,7 +105,7 @@ class Baza::AppTest < Minitest::Test
   end
 
   def test_creates_and_deletes_token
-    login
+    fake_login
     get('/tokens')
     post('/tokens/add', 'name=foo')
     assert_status(302)

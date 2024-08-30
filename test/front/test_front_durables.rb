@@ -33,7 +33,7 @@ class Baza::FrontDurablesTest < Minitest::Test
   end
 
   def test_full_cycle
-    login
+    fake_login
     body = 'hello, world!'
     place(fake_name, fake_name, body)
     assert_status(302)
@@ -56,7 +56,7 @@ class Baza::FrontDurablesTest < Minitest::Test
   end
 
   def test_place_twice
-    login
+    fake_login
     jname = fake_name
     file = fake_name
     place(jname, file, 'first')

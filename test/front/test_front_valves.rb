@@ -34,14 +34,14 @@ class Baza::FrontValvesTest < Minitest::Test
   end
 
   def test_add
-    login
+    fake_login
     post('/valves/add', 'name=hi&badge=abc&why=nothing')
     assert_status(302)
   end
 
   def test_reset
     n = fake_name
-    login(n)
+    fake_login(n)
     post('/valves/add', 'name=hi&badge=abc&why=nothing')
     assert_status(302)
     human = app.humans.ensure(n)
@@ -59,7 +59,7 @@ class Baza::FrontValvesTest < Minitest::Test
 
   def test_valves
     uname = 'tester'
-    login(uname)
+    fake_login(uname)
     get('/valves')
     assert_status(200)
     human = app.humans.ensure(uname)

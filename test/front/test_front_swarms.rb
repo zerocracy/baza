@@ -28,17 +28,38 @@ require_relative '../test__helper'
 require_relative '../../objects/baza'
 require_relative '../../baza'
 
-class Baza::FrontJobsTest < Minitest::Test
+class Baza::FrontAlterationsTest < Minitest::Test
   def app
     Sinatra::Application
   end
 
-  def test_read_job
-    job = fake_job
-    fake_login(job.jobs.human.github)
-    get("/jobs/#{job.id}")
+  def test_read_swarms
+    human = fake_job.jobs.human
+    fake_login(human.github)
+    swarms = human.swarms
+    n = fake_name
+    repo = "#{fake_name}/#{fake_name}"
+    branch = fake_name
+    swarm = swarms.add(n, repo, branch)
+    get('/swarms')
     assert_status(200)
-    get("/jobs/#{job.id}/verified.txt")
+    get("/swarms/#{swarm.id}/remove")
+    assert_status(302)
+  end
+
+  def test_swarms_webhook
+    human = fake_job.jobs.human
+    fake_login(human.github)
+    swarms = human.swarms
+    n = fake_name
+    repo = "#{fake_name}/#{fake_name}"
+    branch = fake_name
+    swarms.add(n, repo, branch)
+    post(
+      '/swarms/webhook',
+      JSON.pretty_generate({ repository: repo, branch: }),
+      'CONTENT_TYPE' => 'application/json'
+    )
     assert_status(200)
   end
 end

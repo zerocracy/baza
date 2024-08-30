@@ -12,8 +12,6 @@
       %col{style: 'width: 20em;'}
       -# Owner
       %col
-      -# IP
-      %col
       -# Created
       %col{style: 'width: 10em;'}
       -# Commands
@@ -26,8 +24,6 @@
           Name
         %th
           Owner
-        %th
-          IP
         %th
           Created
         %th
@@ -45,8 +41,6 @@
               = lk[:name]
         %td.ff
           != large_text(lk[:owner])
-        %td.ff
-          = lk[:ip]
         %td
           != ago(lk[:created])
           - if lk[:created] < Time.now - 2 * 60 * 60

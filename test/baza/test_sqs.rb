@@ -23,22 +23,26 @@
 # SOFTWARE.
 
 require 'minitest/autorun'
-require 'factbase'
+require 'webmock/minitest'
+require 'loog'
 require_relative '../test__helper'
 require_relative '../../objects/baza'
-require_relative '../../baza'
+require_relative '../../objects/baza/sqs'
 
-class Baza::FrontJobsTest < Minitest::Test
-  def app
-    Sinatra::Application
+# Test.
+# Author:: Yegor Bugayenko (yegor256@gmail.com)
+# Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
+# License:: MIT
+class Baza::SQSTest < Minitest::Test
+  def test_fake_usage
+    sqs = Baza::SQS.new('', '', '')
+    sqs.push('hello')
   end
 
-  def test_read_job
-    job = fake_job
-    fake_login(job.jobs.human.github)
-    get("/jobs/#{job.id}")
-    assert_status(200)
-    get("/jobs/#{job.id}/verified.txt")
-    assert_status(200)
+  def test_live_aws_usage
+    skip
+    WebMock.enable_net_connect!
+    sqs = Baza::SQS.new('AKIA...', 'KmX8e...', 'https://sqs.us-east-1.amazonaws.com/...', loog: Loog::NULL)
+    sqs.push('testing!')
   end
 end

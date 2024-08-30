@@ -22,16 +22,23 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 -->
-<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd" logicalFilePath="029-ip.xml">
-  <changeSet id="029" author="Suban05">
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd" logicalFilePath="029-swarm.xml">
+  <changeSet id="029" author="yegor256">
     <sql>
-      ALTER TABLE lock ADD COLUMN ip INET;
-    </sql>
-    <sql>
-      UPDATE lock SET ip = '0.0.0.0' WHERE ip IS NULL;
-    </sql>
-    <sql>
-      ALTER TABLE lock ALTER COLUMN ip SET NOT NULL;
+      CREATE TABLE swarm (
+        id SERIAL PRIMARY KEY,
+        human INT NOT NULL REFERENCES human(id),
+        name VARCHAR(32) NOT NULL,
+        repository VARCHAR(128) NOT NULL,
+        branch VARCHAR(128) NOT NULL,
+        dirty BOOL DEFAULT true,
+        stdout TEXT,
+        exit INT,
+        created TIMESTAMPTZ DEFAULT now() NOT NULL,
+        UNIQUE(name),
+        UNIQUE(repository, branch)
+      );
+      CREATE INDEX idx_swarm1 ON swarm(human, name);
     </sql>
   </changeSet>
 </databaseChangeLog>

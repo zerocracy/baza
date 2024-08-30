@@ -37,13 +37,13 @@ class Baza::LocksTest < Minitest::Test
     locks = human.locks
     owner = "#{fake_name} #{fake_name} #{fake_name} --"
     n = fake_name
-    locks.lock(n, owner, '192.168.1.1')
-    locks.lock(n, owner, '192.168.1.1')
-    e = assert_raises(Baza::Urror) { locks.lock(n, fake_name, '192.168.1.1') }
+    locks.lock(n, owner)
+    locks.lock(n, owner)
+    e = assert_raises(Baza::Urror) { locks.lock(n, fake_name) }
     assert(e.message.include?('is occupied by another owner'), e.message)
-    locks.lock(n, owner, '192.168.1.1')
+    locks.lock(n, owner)
     locks.unlock(n, owner)
-    locks.lock(n, owner, '192.168.1.1')
+    locks.lock(n, owner)
   end
 
   def test_lock_checks_job
@@ -54,16 +54,10 @@ class Baza::LocksTest < Minitest::Test
     assert(human.jobs.busy?(name))
     owner = "baza #{Baza::VERSION} #{Time.now.utc.iso8601}"
     assert_raises(Baza::Locks::Busy) do
-      human.locks.lock(name, owner, '192.168.1.1')
+      human.locks.lock(name, owner)
     end
     job.finish!(fake_name, 'stdout', 0, 544, 1, 0)
-    human.locks.lock(name, owner, '192.168.1.1')
+    human.locks.lock(name, owner)
     assert(human.locks.locked?(name))
-  end
-
-  def test_check_ip
-    locks = fake_human.locks
-    locks.lock(fake_name, "#{fake_name} --", '192.168.1.1')
-    assert(locks.each.any? { |r| r[:ip] == '192.168.1.1' })
   end
 end

@@ -36,7 +36,7 @@ class Baza::FrontAdminTest < Minitest::Test
       '/sql',
       '/gift'
     ]
-    login('yegor256')
+    fake_login('yegor256')
     pages.each do |p|
       get(p)
       assert_status(200)
@@ -44,7 +44,7 @@ class Baza::FrontAdminTest < Minitest::Test
   end
 
   def test_force_login
-    login('yegor256')
+    fake_login('yegor256')
     post('/relogin?u=tester')
     assert_status(302)
   end

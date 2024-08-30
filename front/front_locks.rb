@@ -39,7 +39,7 @@ get(%r{/lock/([a-z0-9-]+)}) do
   raise Baza::Urror, 'The "owner" is a mandatory query param' if owner.nil?
   raise Baza::Urror, 'The "owner" can\'t be empty' if owner.empty?
   begin
-    the_human.locks.lock(n, owner, request.ip)
+    the_human.locks.lock(n, owner)
     flash(iri.cut('/locks'), "The name '#{n}' just locked for '#{owner}'")
   rescue Baza::Locks::Busy => e
     status(409)

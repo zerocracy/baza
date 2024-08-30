@@ -23,22 +23,21 @@
 # SOFTWARE.
 
 require 'minitest/autorun'
-require 'factbase'
 require_relative '../test__helper'
 require_relative '../../objects/baza'
-require_relative '../../baza'
 
-class Baza::FrontJobsTest < Minitest::Test
-  def app
-    Sinatra::Application
-  end
-
-  def test_read_job
-    job = fake_job
-    fake_login(job.jobs.human.github)
-    get("/jobs/#{job.id}")
-    assert_status(200)
-    get("/jobs/#{job.id}/verified.txt")
-    assert_status(200)
+# Test.
+# Author:: Yegor Bugayenko (yegor256@gmail.com)
+# Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
+# License:: MIT
+class Baza::SwarmsTest < Minitest::Test
+  def test_simple_scenario
+    human = fake_human
+    swarms = human.swarms
+    swarms.add(fake_name, 'zerocracy/swarm', 'master')
+    s = swarms.each.to_a.first
+    assert_equal('master', s[:branch])
+    swarms.get(s[:id]).remove
+    assert(swarms.each.to_a.empty?)
   end
 end
