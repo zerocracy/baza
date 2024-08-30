@@ -77,7 +77,7 @@ class Baza::ImageTest < Minitest::Test
     loog.debug("+ #{cmd}")
     stdout = `#{cmd} 2>&1`
     loog.debug(stdout)
-    assert_equal(0, $CHILD_STATUS.exitstatus)
+    assert_equal(0, $CHILD_STATUS.exitstatus, stdout)
     stdout
   end
 end
