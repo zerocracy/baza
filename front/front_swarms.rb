@@ -51,6 +51,13 @@ get(%r{/swarms/([0-9]+)/remove}) do
   flash(iri.cut('/swarms'), "The swarm ##{id} just removed")
 end
 
+get(%r{/swarms/([0-9]+)/dirty}) do
+  admin_only
+  id = params['captures'].first.to_i
+  the_human.swarms.get(id).dirty!(true)
+  flash(iri.cut('/swarms'), "The swarm ##{id} is set to be dirty")
+end
+
 post('/swarms/add') do
   admin_only
   n = params[:name]

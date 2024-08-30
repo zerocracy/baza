@@ -1,8 +1,8 @@
 %form{method: 'post', action: iri.cut('/swarms/add')}
   %fieldset
-    %input{ type: 'text', name: 'name', tabindex: 1, placeholder: 'Name, e.g. "st"', size: 19, maxlength: 32, required: true, autofocus: true }
-    %input{ type: 'text', name: 'repository', tabindex: 2, placeholder: 'GitHub repo, e.g "zerocracy/swarm-template"', size: 36, maxlength: 64, required: true }
-    %input{ type: 'text', name: 'branch', tabindex: 3, placeholder: 'Branch. e.g. "master"', size: 15, size: 20, required: true }
+    %input{ type: 'text', name: 'name', tabindex: 1, placeholder: 'Name', size: 19, maxlength: 32, required: true, autofocus: true }
+    %input{ type: 'text', name: 'repository', tabindex: 2, placeholder: 'Repo, e.g zerocracy/swarm-template', size: 36, maxlength: 64, required: true }
+    %input{ type: 'text', name: 'branch', tabindex: 3, placeholder: 'Branch. e.g. master', size: 15, size: 20, required: true }
     %input{ type: 'submit', tabindex: 4, value: 'Add' }
 
 %p
@@ -69,3 +69,5 @@
       %td
         %a.ico{href: iri.cut('/swarms').append(s[:id]).append('remove'), title: "Remove swarm ##{s[:id]}", onclick: "return confirm('Are you sure you want to remove the swarm ##{s[:id]}?')"}
           %i.fa-regular.fa-trash-can
+        %a.ico{href: iri.cut('/swarms').append(s[:id]).append('dirty'), title: "Make swarm ##{s[:id]} dirty", onclick: "return confirm('Are you sure you want to make the swarm ##{s[:id]} dirty?')"}
+          %i.fa-solid.fa-lightbulb
