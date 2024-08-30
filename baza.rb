@@ -255,8 +255,9 @@ configure do
 end
 
 # Redeploy AWS lambda function:
-unless ENV['RACK_ENV'] == 'test'
-  configure do
+configure do
+  set :lambda, Always.new(1)
+  unless ENV['RACK_ENV'] == 'test'
     require_relative 'objects/baza/lambda'
     lmbd = Baza::Lambda.new(
       settings.humans,
@@ -270,7 +271,6 @@ unless ENV['RACK_ENV'] == 'test'
       settings.config['lambda']['ssh'],
       loog: settings.loog
     )
-    set :lambda, Always.new(1)
     settings.lambda.start(5 * 60) do
       lmbd.deploy
     end
