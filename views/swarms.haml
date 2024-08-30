@@ -1,8 +1,8 @@
 %form{method: 'post', action: iri.cut('/swarms/add')}
   %fieldset
-    %input{ type: 'text', name: 'name', tabindex: 1, placeholder: 'Name', size: 14, maxlength: 32, required: true, autofocus: true }
-    %input{ type: 'text', name: 'repository', tabindex: 2, placeholder: 'GitHub Repository', size: 30, maxlength: 64, required: true }
-    %input{ type: 'text', name: 'branch', tabindex: 3, placeholder: 'Branch', size: 15, size: 64, required: true }
+    %input{ type: 'text', name: 'name', tabindex: 1, placeholder: 'Name, e.g. "st"', size: 19, maxlength: 32, required: true, autofocus: true }
+    %input{ type: 'text', name: 'repository', tabindex: 2, placeholder: 'GitHub repo, e.g "zerocracy/swarm-template"', size: 36, maxlength: 64, required: true }
+    %input{ type: 'text', name: 'branch', tabindex: 3, placeholder: 'Branch. e.g. "master"', size: 15, size: 20, required: true }
     %input{ type: 'submit', tabindex: 4, value: 'Add' }
 
 %p
