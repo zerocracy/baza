@@ -46,7 +46,7 @@
       %td.ff
         = s[:name]
         - if s[:dirty]
-          %i.fa-regular.fa-envelope{title: "Changes arrived, waiting for deployment..."}
+          %i.fa-regular.fa-envelope.good{title: "Changes arrived, waiting for deployment..."}
       %td.ff
         %a{href: "https://github.com/#{s[:repository]}/tree/#{s[:branch]}"}<
           = s[:repository]
