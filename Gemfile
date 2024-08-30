@@ -39,7 +39,7 @@ gem 'faraday'
 gem 'fbe', '>0'
 gem 'get_process_mem', '~>1.0'
 gem 'glogin', '>0'
-gem 'haml', '6.3.0'
+gem 'haml', '~>6.3'
 gem 'iri', '>0'
 gem 'j', path: 'j' if File.exist?('j')
 gem 'judges', '>0'
@@ -52,9 +52,9 @@ gem 'net-scp', '~>4.0'
 gem 'net-ssh', '~>7.2'
 gem 'octokit', '>0'
 gem 'pgtk', '>0'
-gem 'rack', '3.1.7'
-gem 'rack-ssl', '1.4.1'
-gem 'rack-test', '2.1.0'
+gem 'rack', '~>3.1'
+gem 'rack-ssl', '~>1.4'
+gem 'rack-test', '~>2.1'
 gem 'rake', '~>13.2', require: false
 gem 'random-port', '>0', require: false
 gem 'redcarpet', '~>3.5'
@@ -64,7 +64,7 @@ gem 'rspec-rails', '~>6.1', require: false
 gem 'rubocop', '1.65.1', require: false
 gem 'rubocop-rspec', '3.0.4', require: false
 gem 'rubyzip', '>0'
-gem 'sass-embedded', '1.77.8'
+gem 'sass-embedded', '~>1.77'
 gem 'scss_lint', '0.60.0', require: false
 gem 'sentry-ruby', '~>5.18'
 gem 'simplecov', '~>0.22'
