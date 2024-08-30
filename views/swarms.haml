@@ -60,6 +60,10 @@
           %i.fa-regular.fa-thumbs-up.good
         - else
           %i.fa-solid.fa-triangle-exclamation.bad{title: 'The deployment failed'}
+        - unless s[:stdout].nil?
+          %i.fa-regular.fa-eye{onclick: "$(this).parent().parent().find('span').hide(); $(this).parent().parent().find('pre').show();", title: 'Click here to see the full deployment log', style: 'cursor: pointer;'}
+          %pre{style: 'display: none;'}<>
+            = s[:stdout]
       %td
         != ago(s[:created])
       %td
