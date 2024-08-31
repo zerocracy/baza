@@ -30,11 +30,11 @@ mv credentials .aws
 mv config .aws
 aws ecr get-login-password --region "{{ region }}" | docker login --username AWS --password-stdin "{{ repository }}"
 
-mkdir checkouts
-while IFS= read -r ln; do
-  name=$(echo "${ln}" | cut -f1 -d',')
-  repo=$(echo "${ln}" | cut -f2 -d',')
-  branch=$(echo "${ln}" | cut -f3 -d',')
+checkout() {
+  name=$1
+  repo=$2
+  branch=$3
+  mkdir checkouts
   (
     date
     git --version
@@ -45,10 +45,20 @@ while IFS= read -r ln; do
     home=swarms/${name}
     git clone -b "${branch}" --depth=1 --single-branch "${uri}" "${home}"
     git --git-dir "${home}/.git" rev-parse HEAD
-  ) | tee "checkouts/${name}"
+  ) 2>&1 | tee "checkouts/${name}"
+}
+
+mkdir exits
+while IFS= read -r ln; do
+  name=$(echo "${ln}" | cut -f1 -d',')
+  repo=$(echo "${ln}" | cut -f2 -d',')
+  branch=$(echo "${ln}" | cut -f3 -d',')
+  echo 0 > "exits/${name}"
+  checkout "${name}" "${repo}" "${branch}" || echo "$?" > "exits/${name}"
 done < swarms.csv
 
 docker build baza -t baza --platform linux/amd64
+
 docker tag baza "{{ repository }}/{{ image }}"
 docker push "{{ repository }}/{{ image }}"
 

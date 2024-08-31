@@ -40,7 +40,7 @@ require_relative '../../objects/baza/image'
 class Baza::ImageTest < Minitest::Test
   def test_fake_docker_run
     WebMock.enable_net_connect!
-    loog = Loog::NULL
+    loog = Loog::VERBOSE
     Dir.mktmpdir do |home|
       zip = File.join(home, 'image.zip')
       Baza::Image.new(
