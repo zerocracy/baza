@@ -81,7 +81,6 @@ class Baza::Lambda
       ensure
         @ec2.terminate(instance_id)
       end
-      done!
     end
   end
 
@@ -94,7 +93,7 @@ class Baza::Lambda
       code =
         begin
           ssh.upload(zip, 'baza.zip')
-          ssh.exec('unzip -qq baza.zip -d baza && /bin/bash baza/release.sh 2>&1')
+          ssh.exec('(unzip baza.zip && /bin/bash release.sh) 2>&1')
         rescue StandardError => e
           @loog.warn(Backtrace.new(e))
           raise e
@@ -107,11 +106,6 @@ class Baza::Lambda
   # Returns TRUE if at least one swarm is "dirty" and because of that
   # the entire pack must be re-deployed.
   def dirty?
-    !@humans.pgsql.exec('SELECT id FROM swarm WHERE dirty = TRUE').empty?
-  end
-
-  # Mark all swarms as "not dirty any more".
-  def done!
-    @humans.pgsql.exec('UPDATE swarm SET dirty = FALSE')
+    !@humans.pgsql.exec('SELECT id FROM swarm WHERE head != release').empty?
   end
 end

@@ -30,6 +30,7 @@ mv credentials .aws
 mv config .aws
 aws ecr get-login-password --region "{{ region }}" | docker login --username AWS --password-stdin "{{ repository }}"
 
+mkdir checkouts
 while IFS= read -r ln; do
   name=$(echo "${ln}" | cut -f1 -d',')
   repo=$(echo "${ln}" | cut -f2 -d',')
@@ -39,7 +40,7 @@ while IFS= read -r ln; do
     git --version
     git clone -b "${branch}" --depth=1 --single-branch "git@github.com:${repo}.git" "swarms/${name}"
     git --git-dir "${name}/.git" rev-parse HEAD
-  ) | tee "swarms/${name}-checkout.log"
+  ) | tee "checkouts/${name}"
 done < swarms.csv
 
 docker build baza -t baza --platform linux/amd64

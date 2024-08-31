@@ -41,9 +41,10 @@ require_relative '../../objects/baza/shell'
 class Baza::LambdaTest < Minitest::Test
   def test_fake_deploy
     WebMock.disable_net_connect!
-    loog = Loog::NULL
+    loog = Loog::VERBOSE
     fake_pgsql.exec('DELETE FROM swarm')
     fake_human.swarms.add('st', 'zerocracy/swarm-template', 'master')
+      .head!('4242424242424242424242424242424242424242')
     stub('RunInstances', { instancesSet: { item: { instanceId: 'i-42424242' } } })
     stub('TerminateInstances', {})
     stub('DescribeInstanceStatus', { instanceStatusSet: { item: { instanceStatus: { status: 'ok' } } } })
