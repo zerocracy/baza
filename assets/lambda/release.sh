@@ -38,8 +38,13 @@ while IFS= read -r ln; do
   (
     date
     git --version
-    git clone -b "${branch}" --depth=1 --single-branch "git@github.com:${repo}.git" "swarms/${name}"
-    git --git-dir "${name}/.git" rev-parse HEAD
+    uri=git@github.com:${repo}.git
+    if [ ! -e ~/.ssh/id_rsa ]; then
+      uri=https://github.com/${repo}
+    fi
+    home=swarms/${name}
+    git clone -b "${branch}" --depth=1 --single-branch "${uri}" "${home}"
+    git --git-dir "${home}/.git" rev-parse HEAD
   ) | tee "checkouts/${name}"
 done < swarms.csv
 
