@@ -1,3 +1,4 @@
+#!/bin/bash
 # MIT License
 #
 # Copyright (c) 2009-2024 Zerocracy
@@ -20,30 +21,30 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-FROM {{ from }}
+set -ex
 
-RUN yum update -y
-RUN yum install -y make automake gcc gcc-c++ kernel-devel \
-  gcc readline-devel libicu-devel zlib-devel \
-  openssl-devel openssl \
-  wget tar gzip \
-  libyaml libyaml-devel \
-  git
+PATH=$PATH:$(pwd)
 
-COPY install-pgsql.sh /tmp
-RUN /bin/bash /tmp/install-pgsql.sh
+mkdir -p .aws
+mv credentials .aws
+mv config .aws
+aws ecr get-login-password --region "{{ region }}" | docker login --username AWS --password-stdin "{{ repository }}"
 
-COPY Gemfile ${LAMBDA_TASK_ROOT}/
-RUN gem install bundler && bundle install --gemfile=${LAMBDA_TASK_ROOT}/Gemfile
+while IFS= read -r ln; do
+  name=$(echo "${ln}" | cut -f1 -d',')
+  repo=$(echo "${ln}" | cut -f2 -d',')
+  branch=$(echo "${ln}" | cut -f3 -d',')
+  (
+    date
+    git --version
+    git clone -b "${branch}" --depth=1 --single-branch "git@github.com:${repo}.git" "swarms/${name}"
+    git --git-dir "${name}/.git" rev-parse HEAD
+  ) | tee "swarms/${name}-checkout.log"
+done < swarms.csv
 
-RUN rm -rf /z
-COPY swarms/ /z/swarms
+docker build baza -t baza --platform linux/amd64
+docker tag baza "{{ repository }}/{{ image }}"
+docker push "{{ repository }}/{{ image }}"
 
-COPY install-swarms.sh /tmp
-RUN /bin/bash /tmp/install-swarms.sh
+aws lambda update-function-code --function-name baza --image-uri "{{ repository }}/{{ image }}" --publish
 
-COPY entry.rb ${LAMBDA_TASK_ROOT}/
-
-RUN rm -rf /tmp/*
-
-CMD ["entry.go"]

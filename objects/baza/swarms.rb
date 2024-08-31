@@ -68,7 +68,8 @@ class Baza::Swarms
         name: row['name'],
         repository: row['repository'],
         branch: row['branch'],
-        dirty: row['dirty'] == 't',
+        head: row['head'],
+        release: row['release'],
         exit: row['exit']&.to_i,
         stdout: row['stdout'],
         created: Time.parse(row['created'])

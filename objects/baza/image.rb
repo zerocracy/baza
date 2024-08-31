@@ -24,6 +24,7 @@
 
 require 'English'
 require 'liquid'
+require 'csv'
 require 'backtrace'
 require 'elapsed'
 require 'fileutils'
@@ -40,13 +41,20 @@ class Baza::Image
   #
   # @param [Baza::Humans] humans The humans
   # @param [String] account AWS account ID
+  # @param [String] key AWS authentication key (if empty, the object will NOT use AWS S3)
+  # @param [String] secret AWS authentication secret
   # @param [String] region AWS region
+  # @param [String] tag Docker image tag
   # @param [Loog] loog Logging facility
-  def initialize(humans, account, region, loog: Loog::NULL,
+  # @param [String] from The name of the Docker image, to use in the "FROM" of the Dockerfile
+  def initialize(humans, account, key, secret, region, tag: 'latest', loog: Loog::NULL,
     from: "#{account}.dkr.ecr.#{region}.amazonaws.com/zerocracy/baza:latest")
     @humans = humans
     @account = account
+    @key = key
+    @secret = secret
     @region = region
+    @tag = tag
     @from = from
     @loog = loog
   end
@@ -58,81 +66,62 @@ class Baza::Image
   def pack(file)
     Dir.mktmpdir do |home|
       [
-        '../../Gemfile',
-        '../../Gemfile.lock',
-        '../../assets/lambda/entry.rb',
-        '../../assets/lambda/install-pgsql.sh'
-      ].each do |f|
-        FileUtils.copy(File.join(__dir__, f), File.join(home, File.basename(f)))
-      end
-      FileUtils.mkdir_p(File.join(home, 'swarms'))
-      File.write(File.join(home, 'swarms/.keep'), '')
-      installs = []
-      each_swarm do |swarm|
-        dir = checkout(swarm)
-        next if dir.nil?
-        sub = "swarms/#{swarm.name}"
-        target = File.join(home, sub)
-        FileUtils.mkdir_p(File.dirname(target))
-        FileUtils.copy_entry(dir, target)
-        FileUtils.rm_rf(File.join(target, '.git'))
-        installs << install(target, sub)
-      end
-      dockerfile = Liquid::Template.parse(File.read(File.join(__dir__, '../../assets/lambda/Dockerfile'))).render(
-        'from' => @from,
-        'installs' => installs.join("\n")
+        'Gemfile',
+        'entry.rb',
+        'install-pgsql.sh',
+        'install-swarms.sh'
+      ].each { |f| copy_to(home, f) }
+      copy_to(
+        home,
+        'credentials',
+        'key' => @key,
+        'secret' => @secret
       )
-      File.write(File.join(home, 'Dockerfile'), dockerfile)
-      @loog.debug("This is the Dockerfile:\n#{dockerfile}")
+      copy_to(
+        home,
+        'config',
+        'region' => @region
+      )
+      copy_to(
+        home,
+        'release.sh',
+        'region' => @region,
+        'repository' => "#{@account}.dkr.ecr.#{@region}.amazonaws.com",
+        'image' => "zerocracy/baza:#{@tag}"
+      )
+      copy_to(
+        home,
+        'Dockerfile',
+        'from' => @from
+      )
+      File.write(
+        File.join(home, 'swarms.csv'),
+        CSV.generate do |csv|
+          swarms.each { |s| csv << [s.name, s.repository, s.branch] }
+        end
+      )
+      FileUtils.mkdir_p(File.join(home, 'swarms'))
       Baza::Zip.new(file, loog: @loog).pack(home)
     end
     file
   end
 
-  # Create install commands for Docker, from this directory.
-  #
-  # @param [String] dir The local directory with swarm content files, e.g. "/tmp/bar/foo-contents"
-  # @param [String] sub Subdirectory inside docker image, e.g. "swarms/foo"
-  def install(dir, sub)
-    gemfile = File.join(dir, 'Gemfile.lock')
-    if File.exist?(gemfile)
-      "RUN bundle install --gemfile=/z/#{sub}/Gemfile"
-    else
-      ''
-    end
-  end
+  private
 
-  # Checkout swarm and return the directory where it's located. Also,
-  # update its SHA if necessary.
-  #
-  # @param [Baza::Swarm] swarm The swarm
-  # @return [String] Path to location
-  def checkout(swarm)
-    elapsed(@loog, intro: "Checked out #{swarm.name} swarm") do
-      sub = "swarms/#{swarm.name}"
-      dir = File.join('/tmp', sub)
-      FileUtils.mkdir_p(File.dirname(dir))
-      git = ['set -ex', 'date', 'git --version']
-      if File.exist?(dir)
-        git += ["cd #{dir}", 'git pull']
-      else
-        git << "git clone -b #{swarm.branch} --depth=1 --single-branch git@github.com:#{swarm.repository}.git #{dir}"
-      end
-      git << 'git rev-parse HEAD'
-      stdout = `(#{git.join(' && ')}) 2>&1`
-      @loog.debug("Checkout log of #{swarm.name}:\n#{stdout}")
-      swarm.stdout!(stdout)
-      code = $CHILD_STATUS.exitstatus
-      swarm.exit!(code)
-      return nil unless code.zero?
-      dir
-    end
+  def copy_to(home, file, args = {})
+    dir = File.join(__dir__, '../../assets/lambda')
+    target = File.join(home, file)
+    File.write(
+      target,
+      Liquid::Template.parse(File.read(File.join(dir, file))).render(args)
+    )
+    @loog.debug("This is the #{file}:\n#{File.read(target)}")
   end
 
   # Iterate all swarms that need to be deployed.
-  def each_swarm
-    @humans.pgsql.exec('SELECT * FROM swarm').each do |row|
-      yield @humans.find_swarm(row['repository'], row['branch'])
+  def swarms
+    @humans.pgsql.exec('SELECT * FROM swarm').each.to_a.map do |row|
+      @humans.find_swarm(row['repository'], row['branch'])
     end
   end
 end

@@ -17,6 +17,10 @@
     %col{style: 'width: 14em;'}
     -# Branch
     %col{style: 'width: 14em;'}
+    -# Head
+    %col{style: 'width: 7em;'}
+    -# Release
+    %col{style: 'width: 7em;'}
     -# Deployment
     %col
     -# Created
@@ -33,6 +37,10 @@
         Repository
       %th
         Branch
+      %th
+        Head
+      %th
+        Release
       %th
         Deployment
       %th
@@ -53,6 +61,10 @@
         %i.fa-brands.fa-github
       %td.ff
         = s[:branch]
+      %td.ff
+        = s[:head][0..8]
+      %td.ff
+        = s[:release][0..8]
       %td
         - if s[:exit].nil?
           = '?'
@@ -69,5 +81,5 @@
       %td
         %a.ico{href: iri.cut('/swarms').append(s[:id]).append('remove'), title: "Remove swarm ##{s[:id]}", onclick: "return confirm('Are you sure you want to remove the swarm ##{s[:id]}?')"}
           %i.fa-regular.fa-trash-can
-        %a.ico{href: iri.cut('/swarms').append(s[:id]).append('dirty'), title: "Make swarm ##{s[:id]} dirty", onclick: "return confirm('Are you sure you want to make the swarm ##{s[:id]} dirty?')"}
+        %a.ico{href: iri.cut('/swarms').append(s[:id]).append('reset'), title: "Make swarm ##{s[:id]} dirty", onclick: "return confirm('Are you sure you want to reset the release SHA of the swarm ##{s[:id]}?')"}
           %i.fa-solid.fa-lightbulb

@@ -36,13 +36,23 @@ class Baza::Swarm
     @tbot = tbot
   end
 
-  # Change DIRTY status of the swarm.
+  # Change head SHA of the swarm.
   #
-  # @param [Bool] yes TRUE if it has to become dirty
-  def dirty!(yes)
+  # @param [String] sha The hash of the Git head
+  def head!(sha)
     swarms.pgsql.exec(
-      'UPDATE swarm SET dirty = $1 WHERE id = $2 AND human = $3',
-      [yes, @id, swarms.human.id]
+      'UPDATE swarm SET head = $1 WHERE id = $2 AND human = $3',
+      [sha, @id, swarms.human.id]
+    )
+  end
+
+  # Change release SHA of the swarm.
+  #
+  # @param [String] sha The hash of the Git head
+  def release!(sha)
+    swarms.pgsql.exec(
+      'UPDATE swarm SET release = $1 WHERE id = $2 AND human = $3',
+      [sha, @id, swarms.human.id]
     )
   end
 
@@ -98,9 +108,19 @@ class Baza::Swarm
     to_json[:exit]
   end
 
+  # Get its head SHA.
+  def head
+    to_json[:head]
+  end
+
+  # Get its release SHA.
+  def release
+    to_json[:release]
+  end
+
   # Get its dirty status.
-  def dirty
-    to_json[:dirty]
+  def dirty?
+    to_json[:head] != to_json[:release]
   end
 
   private
@@ -118,7 +138,8 @@ class Baza::Swarm
           name: row['name'],
           repository: row['repository'],
           branch: row['branch'],
-          dirty: row['dirty'] == 't',
+          head: row['head'],
+          release: row['release'],
           stdout: row['stdout'],
           exit: row['exit']&.to_i,
           created: Time.parse(row['created'])
