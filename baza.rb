@@ -272,11 +272,11 @@ configure do
     )
     settings.release.start(5 * 60) do
       settings.pgsql.exec('SELECT * FROM swarm').each do |row|
-        require_relative 'swarm'
+        require_relative 'objects/baza/swarm'
         swarm = Baza::Swarm.new(settings.humans.get(row['human'].to_i), row['id'].to_i, tbot: settings.tbot)
         next unless swarm.need_release?
         secret = SecureRandom.uuid
-        require_relative 'recipe'
+        require_relative 'objects/baza/recipe'
         instance = ec2.run_instance(
           Baza::Recipe.new(swarm).to_bash(cfg['account'], cfg['region'], 'latest', secret),
           swarm.name

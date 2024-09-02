@@ -59,6 +59,8 @@
       %td
         != ago(s.created)
       %td
+        %a.ico{href: iri.cut('/swarms').append(s.id).append('releaes'), title: "Releases of the swarm ##{s.id}"}
+          %i.fa-brand.fa-docker
         %a.ico{href: iri.cut('/swarms').append(s.id).append('remove'), title: "Remove swarm ##{s.id}", onclick: "return confirm('Are you sure you want to remove the swarm ##{s.id}?')"}
           %i.fa-regular.fa-trash-can
         %a.ico{href: iri.cut('/swarms').append(s.id).append('reset'), title: "Make swarm ##{s.id} dirty", onclick: "return confirm('Are you sure you want to reset the head SHA of the swarm ##{s.id}?')"}

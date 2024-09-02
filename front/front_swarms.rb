@@ -33,6 +33,19 @@ get '/swarms' do
   )
 end
 
+get(%r{/swarms/([0-9]+)/releases}) do
+  admin_only
+  id = params['captures'].first.to_i
+  swarm = the_human.swarms.get(id)
+  assemble(
+    :releases,
+    :default,
+    title: '/releases',
+    releases: swarm.releases,
+    offset: (params[:offset] || '0').to_i
+  )
+end
+
 put('/swarms/finish') do
   secret = params[:secret]
   return 'No secret? No update!' if secret.nil? || secret.empty?
