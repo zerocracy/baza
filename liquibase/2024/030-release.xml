@@ -34,19 +34,22 @@ SOFTWARE.
       ALTER TABLE swarm ADD CONSTRAINT head_format CHECK (head ~ '^[0-9A-Z]{40}$');
     </sql>
     <sql>
+      ALTER TABLE swarm ADD CONSTRAINT name_format CHECK (name ~ '^[a-z][a-z0-9-]{0,31}$');
+    </sql>
+    <sql>
       CREATE TABLE release (
         id SERIAL PRIMARY KEY,
         swarm INT NOT NULL REFERENCES swarm(id),
         instance VARCHAR(20) NOT NULL,
         secret VARCHAR(64) NOT NULL,
-        head VARCHAR(40);
+        head VARCHAR(40),
         tail TEXT,
         exit INT,
         msec INT,
         created TIMESTAMPTZ DEFAULT now() NOT NULL,
         UNIQUE(secret),
         UNIQUE(instance),
-        CONSTRAINT head_format CHECK (head ~ '^[0-9A-Z]{40}$');
+        CONSTRAINT head_format CHECK (head ~ '^[0-9A-Z]{40}$')
       );
     </sql>
   </changeSet>

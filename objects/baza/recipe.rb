@@ -45,7 +45,7 @@ class Baza::Recipe
   # Make it a bash script.
   #
   # @return [String] Bash script to use in EC2
-  def to_bash(account, region, tag, secret)
+  def to_bash(account, region, secret)
     file_of(
       'recipe.sh',
       'save_files' => [
@@ -54,14 +54,19 @@ class Baza::Recipe
         cat_of('entry.rb'),
         cat_of('install-pgsql.sh'),
         cat_of('install.sh'),
-        cat_of('Dockerfile', 'from' => "#{account}.dkr.ecr.#{region}.amazonaws.com/zerocracy/baza:#{tag}")
+        cat_of(
+          'Dockerfile',
+          'from' => secret.empty? \
+            ? 'public.ecr.aws/lambda/ruby:3.2'
+            : "#{account}.dkr.ecr.#{region}.amazonaws.com/zerocracy/baza:basic"
+        )
       ].join,
       'name' => @swarm.name,
       'github' => @swarm.repository,
       'branch' => @swarm.branch,
       'region' => region,
       'repository' => "#{account}.dkr.ecr.#{region}.amazonaws.com",
-      'image' => "zerocracy/baza:#{tag}",
+      'image' => "zerocracy/swarms:#{@swarm.name}",
       'secret' => secret
     )
   end

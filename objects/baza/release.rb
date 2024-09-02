@@ -22,64 +22,35 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# All releases of a swarm.
+# A single release of a swarm.
 #
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class Baza::Releases
-  attr_reader :swarm
+class Baza::Release
+  attr_reader :releases
 
-  def initialize(swarm, tbot: Baza::Tbot::Fake.new)
-    @swarm = swarm
+  def initialize(releases, id, tbot: Baza::Tbot::Fake.new)
+    @releases = releases
+    @id = id
     @tbot = tbot
   end
 
-  def pgsql
-    @swarm.pgsql
-  end
-
-  def get(id)
-    raise 'Release ID must be an integer' unless id.is_a?(Integer)
-    require_relative 'release'
-    Baza::Release.new(self, id, tbot: @tbot)
-  end
-
-  def each(offset: 0)
-    return to_enum(__method__, offset:) unless block_given?
-    rows = @swarm.pgsql.exec(
-      [
-        'SELECT * FROM release',
-        'WHERE swarm = $1',
-        "OFFSET #{offset.to_i}"
-      ],
-      [@swarm.id]
-    )
-    rows.each do |row|
-      r = {
-        id: row['id'].to_i,
-        exit: row['exit']&.to_i,
-        tail: row['tail'],
-        msec: row['msec']&.to_i,
-        created: Time.parse(row['created'])
-      }
-      yield r
-    end
-  end
-
-  # Start a new release to the swarm.
+  # Finish the release to the swarm.
   #
-  # @param [String] instance AWS EC2 instance ID
-  # @param [String] secret A secret
+  # @param [String] head SHA of the Git head just released
+  # @param [String] tail STDOUT tail
+  # @param [String] code Exit code
+  # @param [String] msec How many msec it took to build this one
   # @return [Integer] The ID of the added release
-  def start(instance, secret)
-    raise Baza::Urror, 'The "instance" cannot be NIL' if instance.nil?
-    raise Baza::Urror, 'The "secret" cannot be empty' if secret.nil?
-    get(
-      @swarm.pgsql.exec(
-        'INSERT INTO release (swarm, instance, secret) VALUES ($1, $2, $3) RETURNING id',
-        [@swarm.id, instance, secret]
-      )[0]['id'].to_i
+  def finish!(head, tail, code, msec)
+    raise Baza::Urror, 'The "head" cannot be NIL' if head.nil?
+    raise Baza::Urror, 'The "head" cannot be empty' if head.empty?
+    raise Baza::Urror, 'The "code" must be Integer' unless code.is_a?(Integer)
+    raise Baza::Urror, 'The "msec" must be Integer' unless msec.is_a?(Integer)
+    @releases.pgsql.exec(
+      'UPDATE release SET head = $2, tail = $3, exit = $4, msec = $5 WHERE id = $1 AND swarm = $6',
+      [@id, head, tail, code, msec, @swarm.id]
     )
   end
 end

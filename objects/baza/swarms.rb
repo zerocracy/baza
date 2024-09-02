@@ -63,18 +63,15 @@ class Baza::Swarms
       [@human.id]
     )
     rows.each do |row|
-      s = {
+      yield Veil.new(
+        get(row['id'].to_i),
         id: row['id'].to_i,
         name: row['name'],
         repository: row['repository'],
         branch: row['branch'],
         head: row['head'],
-        release: row['release'],
-        exit: row['exit']&.to_i,
-        stdout: row['stdout'],
         created: Time.parse(row['created'])
-      }
-      yield s
+      )
     end
   end
 

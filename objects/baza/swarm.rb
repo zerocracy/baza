@@ -36,6 +36,10 @@ class Baza::Swarm
     @tbot = tbot
   end
 
+  def pgsql
+    @swarms.pgsql
+  end
+
   # Change head SHA of the swarm.
   #
   # @param [String] sha The hash of the Git head
@@ -71,6 +75,11 @@ class Baza::Swarm
   # Get its head SHA.
   def head
     to_json[:head]
+  end
+
+  # Get its time of creation.
+  def created
+    to_json[:created]
   end
 
   # Get its release SHA.

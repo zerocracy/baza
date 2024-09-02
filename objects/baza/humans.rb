@@ -112,7 +112,7 @@ class Baza::Humans
     get(rows.first['human'].to_i).jobs.get(id)
   end
 
-  # Find swarm ID, if it exists.
+  # Find swarm, if it exists.
   #
   # @param [String] repo Name of repository
   # @param [String] branch Name of branch
@@ -124,6 +124,23 @@ class Baza::Humans
     )
     return nil if rows.empty?
     get(rows.first['human'].to_i).swarms.get(rows.first['id'].to_i)
+  end
+
+  # Find release, if it exists.
+  #
+  # @param [String] secret The secret
+  # @return [Baza::Release] The found release or NIL
+  def find_release(secret)
+    rows = @pgsql.exec(
+      [
+        'SELECT release.id, release.swarm, swarm.human FROM release',
+        'JOIN swarm ON swarm.id = release.swarm',
+        'WHERE release.secret = $1'
+      ],
+      [secret]
+    )
+    return nil if rows.empty?
+    get(rows.first['human'].to_i).swarms.get(rows.first['swarm'].to_i).releases.get(rows.first['id'].to_i)
   end
 
   # Donate to all accounts that are not funded enough (and eligible for donation).

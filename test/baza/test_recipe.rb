@@ -42,14 +42,16 @@ class Baza::RecipeTest < Minitest::Test
   end
 
   def test_generates_script
-    s = fake_human.swarms.add(fake_name, "#{fake_name}/#{fake_name}", 'master')
-    bash = Baza::Recipe.new(s, '').to_bash('accout', 'us-east-1', '0.0.0', 'sword-fish')
+    n = fake_name
+    s = fake_human.swarms.add(n, "#{fake_name}/#{fake_name}", 'master')
+    bash = Baza::Recipe.new(s, '').to_bash('424242', 'us-east-1a', 'sword-fish')
     [
-      'FROM accout.dkr.ecr.us-east-1.amazonaws.com/zerocracy/baza:0.0.0',
+      'FROM 424242.dkr.ecr.us-east-1a.amazonaws.com/zerocracy/baza:basic',
+      "424242.dkr.ecr.us-east-1a.amazonaws.com/zerocracy/swarms:#{n}",
       'RUN yum update -y',
       'gem \'aws-sdk-core\'',
       'cat > entry.rb <<EOT_'
-    ].each { |t| assert(bash.include?(t), t) }
+    ].each { |t| assert(bash.include?(t), bash) }
   end
 
   def test_runs_script
@@ -64,7 +66,7 @@ class Baza::RecipeTest < Minitest::Test
       sh = File.join(home, 'recipe.sh')
       File.write(
         sh,
-        Baza::Recipe.new(s, '').to_bash('accout', 'us-east-1', '0.0.0', 'sword-fish')
+        Baza::Recipe.new(s, '').to_bash('accout', 'us-east-1', '')
       )
       bash("/bin/bash #{sh}", loog)
     end
@@ -89,6 +91,20 @@ class Baza::RecipeTest < Minitest::Test
     )
     instance = ec2.run(Baza::Recipe.new(swarm).to_bash(cfg['account'], cfg['region'], 'latest', ''))
     assert(instance.start_with?('i-'))
+  end
+
+  def test_live_local_run
+    skip
+    loog = Loog::VERBOSE
+    s = fake_human.swarms.add('st', 'zerocracy/swarm-template', 'master')
+    Dir.mktmpdir do |home|
+      sh = File.join(home, 'recipe.sh')
+      File.write(
+        sh,
+        Baza::Recipe.new(s, '').to_bash('019644334823', 'us-east-1', '')
+      )
+      bash("/bin/bash #{sh}", loog)
+    end
   end
 
   def test_fake_docker_run
