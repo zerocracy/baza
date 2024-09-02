@@ -62,8 +62,6 @@
               = format('%.3f', Time.now - http_start)
             %li{title: 'The version of Ruby on the server'}
               = "rb:#{RUBY_VERSION}"
-            %li{title: 'The version of Git on the server'}
-              = "git:#{git_version}"
             %li{title: 'Current "load average" on the server', class: load_avg > 8 ? 'bad' : ''}
               = format('%0.2f', load_avg)
             %li{title: 'Currently consumed memory vs. total system memory, in Mb'}

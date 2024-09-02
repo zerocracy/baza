@@ -32,9 +32,6 @@ before '/*' do
     http_start: Time.now,
     github_login_link: settings.glogin.login_uri,
     request_ip: request.ip,
-    git_version: settings.zache.get(:git_version) do
-      `git --version | cut -d" " -f 3`
-    end,
     db_size: settings.zache.get(:db_size, lifetime: 30 * 60) do
       settings.pgsql.exec(
         'SELECT pg_size_pretty(pg_database_size(current_database())) AS s'

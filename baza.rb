@@ -278,7 +278,7 @@ configure do
         secret = SecureRandom.uuid
         require_relative 'objects/baza/recipe'
         instance = ec2.run_instance(
-          Baza::Recipe.new(swarm).to_bash(cfg['account'], cfg['region'], 'latest', secret),
+          Baza::Recipe.new(swarm).to_bash(cfg['account'], cfg['region'], secret),
           swarm.name
         )
         swarm.releases.start(instance, secret)
