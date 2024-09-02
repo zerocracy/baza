@@ -44,6 +44,26 @@ class Baza::TokensTest < Minitest::Test
     assert(!tokens.empty?)
   end
 
+  def test_notify_user_after_creating
+    loog = Loog::Buffer.new
+    human = Baza::Humans.new(fake_pgsql, tbot: Baza::Tbot::Fake.new(loog)).ensure(fake_name)
+    tokens = human.tokens
+    name = fake_name
+    token = tokens.add(name)
+    assert_equal(token.name, name)
+    assert_includes(loog.to_s, "Token with the name '#{name}' has been created successfully")
+  end
+
+  def test_does_not_notify_user_after_fail_creating
+    loog = Loog::Buffer.new
+    human = Baza::Humans.new(fake_pgsql, tbot: Baza::Tbot::Fake.new(loog)).ensure(fake_name)
+    tokens = human.tokens
+    assert_raises do
+      tokens.add(nil)
+    end
+    assert_empty(loog.to_s)
+  end
+
   def test_deactivates_token
     tokens = fake_human.tokens
     assert_equal(0, tokens.size)

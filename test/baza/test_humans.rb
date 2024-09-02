@@ -83,7 +83,7 @@ class Baza::HumansTest < Minitest::Test
     id = token.start(fake_name, fake_name, 1, 0, 'n/a', [], '192.168.1.1').id
     job = human.jobs.get(id)
     job.valve.enter('badge', 'why') { 42 }
-    assert_equal(1, passed.size)
+    assert_equal(2, passed.size)
   end
 
   def test_verify_one_job
