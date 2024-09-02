@@ -65,10 +65,7 @@ class Baza::SecretsTest < Minitest::Test
     loog = Loog::Buffer.new
     human = Baza::Humans.new(fake_pgsql, tbot: Baza::Tbot::Fake.new(loog)).ensure(fake_name)
     assert_raises do
-      n = nil
-      k = nil
-      v = nil
-      human.secrets.add(n, k, v)
+      human.secrets.add(nil, nil, nil)
     end
     assert_empty(loog.to_s)
   end
