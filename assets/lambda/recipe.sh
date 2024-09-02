@@ -23,25 +23,39 @@
 
 set -ex
 
+trap 'shutdown' EXIT
+
 PATH=$PATH:$(pwd)
+
+{{ save_files }}
+
+mkdir .ssh
+mv id_rsa .ssh/id_rsa
+chmod 600 .ssh/id_rsa
 
 aws ecr get-login-password --region "{{ region }}" | docker login --username AWS --password-stdin "{{ repository }}"
 
-date
-
-git --version
-
-uri=git@github.com:${repo}.git
-if [ ! -e ~/.ssh/id_rsa ]; then
-  uri=https://github.com/${repo}
+uri="git@github.com:{{ github }}.git"
+if [ ! -s ~/.ssh/id_rsa ]; then
+  uri="https://github.com/{{ github }}"
 fi
 git clone -b "{{ branch }}" --depth=1 --single-branch "${uri}" swarm
-git --git-dir swarm/.git rev-parse HEAD
+head=$(git --git-dir swarm/.git rev-parse HEAD)
 
-docker build baza -t baza --platform linux/amd64
+docker build baza -t baza --platform linux/amd64 2>&1 > docker.log || echo $? > exit.txt
+code=$(cat exit.txt)
 
-docker tag baza "{{ repository }}/{{ image }}"
-docker push "{{ repository }}/{{ image }}"
+if [ "${code}" == '0' ]; then
+  docker tag baza "{{ repository }}/{{ image }}"
+  docker push "{{ repository }}/{{ image }}"
 
-aws lambda update-function-code --function-name baza --image-uri "{{ repository }}/{{ image }}" --publish
+  func="baza-{{ name }}"
+  if ! aws lambda get-function --function-name "${func}"; then
+    aws lambda create-function --function-name "${func}"
+    # configure S3 to send events there
+    # give this function permissions to work with S3 bucket
+  fi
+  aws lambda update-function-code --function-name "${func}" --image-uri "{{ repository }}/{{ image }}" --publish
+fi
 
+curl -X PUT -d docker.log -H 'Content-Type: text/plain' "https://www.zerocracy.com/?secret={{ secret }}&head=${head}&exit=${code}"

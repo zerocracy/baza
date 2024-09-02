@@ -30,15 +30,19 @@ require 'webmock/minitest'
 require 'net/ssh'
 require_relative '../test__helper'
 require_relative '../../objects/baza'
-require_relative '../../objects/baza/zip'
-require_relative '../../objects/baza/lambda'
-require_relative '../../objects/baza/shell'
+require_relative '../../objects/baza/recipe'
 
-# Test for Lambda.
+# Test for Recipe.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class Baza::LambdaTest < Minitest::Test
+class Baza::RecipeTest < Minitest::Test
+  def test_generates_script
+    s = fake_human.swarms.add(fake_name, "#{fake_name}/#{fake_name}", 'master')
+    bash = Baza::Recipe.new(s).to_bash('accout', 'us-east-1', '0.0.0', 'sword-fish')
+    puts bash
+  end
+
   def test_fake_deploy
     WebMock.disable_net_connect!
     loog = Loog::VERBOSE
@@ -127,7 +131,50 @@ class Baza::LambdaTest < Minitest::Test
     ).deploy
   end
 
+  def test_fake_docker_run
+    WebMock.enable_net_connect!
+    loog = Loog::VERBOSE
+    Dir.mktmpdir do |home|
+      zip = File.join(home, 'image.zip')
+      Baza::Image.new(
+        fake_humans, '42424242', 'aws-key', 'aws-secret', 'us-east-1',
+        tag: 'latest', loog:, from: 'public.ecr.aws/lambda/ruby:3.2'
+      ).pack(zip)
+      Baza::Zip.new(zip).unpack(home)
+      bash("docker build #{home} -t image-test", loog)
+      ret =
+        RandomPort::Pool::SINGLETON.acquire do |port|
+          stdout = bash("docker run -d -p #{port}:8080 image-test", loog)
+          container = stdout.split("\n")[-1]
+          loog.debug("Docker container started: #{container}")
+          begin
+            sleep 1
+            request = Typhoeus::Request.new(
+              "http://localhost:#{port}/2015-03-31/functions/function/invocations",
+              body: '{}',
+              method: :get
+            )
+            request.run
+            bash("docker logs #{container}", loog)
+            request.response
+          ensure
+            bash("docker rm -f #{container}", loog)
+          end
+        end
+      assert_equal(200, ret.response_code, ret.response_body)
+      assert_equal('"Done!"', ret.response_body, ret.response_body)
+    end
+  end
+
   private
+
+  def bash(cmd, loog)
+    loog.debug("+ #{cmd}")
+    stdout = `#{cmd} 2>&1`
+    loog.debug(stdout)
+    assert_equal(0, $CHILD_STATUS.exitstatus, stdout)
+    stdout
+  end
 
   def stub(cmd, hash)
     xml = "<#{cmd}Response>#{to_xml(hash)}</#{cmd}Response>"

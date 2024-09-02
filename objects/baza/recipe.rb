@@ -22,14 +22,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require 'English'
 require 'liquid'
-require 'csv'
-require 'backtrace'
-require 'elapsed'
 require 'fileutils'
-require_relative 'ec2'
-require_relative 'shell'
 
 # Bash script for EC2 instance to build Docker image and publish to Lambda.
 #
@@ -49,54 +43,36 @@ class Baza::Recipe
   # Make it a bash script.
   #
   # @return [String] Bash script to use in EC2
-  def to_bash
-    Dir.mktmpdir do |home|
-      [
-        'Gemfile',
-        'entry.rb',
-        'install-pgsql.sh',
-        'install-swarms.sh'
-      ].each { |f| copy_to(home, f) }
-      copy_to(
-        home,
-        'release.sh',
-        'region' => @region,
-        'repository' => "#{@account}.dkr.ecr.#{@region}.amazonaws.com",
-        'image' => "zerocracy/baza:#{@tag}"
-      )
-      copy_to(
-        home,
-        'Dockerfile',
-        'from' => @from
-      )
-      File.write(
-        File.join(home, 'swarms.csv'),
-        CSV.generate do |csv|
-          swarms.each { |s| csv << [s.name, s.repository, s.branch] }
-        end
-      )
-      FileUtils.mkdir_p(File.join(home, 'swarms'))
-      Baza::Zip.new(file, loog: @loog).pack(home)
-    end
-    file
+  def to_bash(account, region, tag, secret)
+    file_of(
+      'recipe.sh',
+      'save_files' => [
+        cat('Gemfile'),
+        cat('entry.rb'),
+        cat('install-pgsql.sh'),
+        cat('install.sh'),
+        cat('Dockerfile', 'from' => "#{account}.dkr.ecr.#{region}.amazonaws.com")
+      ].join,
+      'name' => @swarm.name,
+      'github' => @swarm.repository,
+      'branch' => @swarm.branch,
+      'region' => region,
+      'repository' => "#{account}.dkr.ecr.#{region}.amazonaws.com",
+      'image' => "zerocracy/baza:#{tag}",
+      'secret' => secret
+    )
   end
 
   private
 
-  def copy_to(home, file, args = {})
+  def file_of(file, args = {})
     dir = File.join(__dir__, '../../assets/lambda')
-    target = File.join(home, file)
-    File.write(
-      target,
-      Liquid::Template.parse(File.read(File.join(dir, file))).render(args)
-    )
-    @loog.debug("This is the #{file}:\n#{File.read(target)}")
+    Liquid::Template.parse(File.read(File.join(dir, file))).render(args)
   end
 
-  # Iterate all swarms that need to be deployed.
-  def swarms
-    @humans.pgsql.exec('SELECT * FROM swarm').each.to_a.map do |row|
-      @humans.find_swarm(row['repository'], row['branch'])
-    end
+  def cat(file, args = {})
+    txt = file_of(file, args)
+    m = "EOT_#{SecureRandom.hex(8)}"
+    "\ncat > #{file} <<#{m}\n#{txt}\n#{m}\n"
   end
 end

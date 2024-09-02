@@ -260,25 +260,27 @@ configure do
   set :release, Always.new(1)
   unless ENV['RACK_ENV'] == 'test'
     require_relative 'objects/baza/ec2'
+    cfg = settings.config['lambda']
     ec2 = Baza::EC2.new(
       settings.humans,
-      settings.config['lambda']['key'],
-      settings.config['lambda']['secret'],
-      settings.config['lambda']['region'],
-      settings.config['lambda']['sgroup'],
-      settings.config['lambda']['subnet'],
-      settings.config['lambda']['image'],
+      cfg['key'],
+      cfg['secret'],
+      cfg['region'],
+      cfg['sgroup'],
+      cfg['subnet'],
+      cfg['image'],
       loog: settings.loog
     )
     settings.release.start(5 * 60) do
       settings.pgsql.exec('SELECT * FROM swarm').each do |row|
+        require_relative 'swarm'
         swarm = Baza::Swarm.new(settings.humans.get(row['human'].to_i), row['id'].to_i, tbot: settings.tbot)
         next unless swarm.need_release?
-        instance = ec2.run(Baza::Recipe.new(swarm).to_bash)
-        swarm.releases.start(instance, SecureRandom.uuid)
+        secret = SecureRandom.uuid
+        require_relative 'recipe'
+        instance = ec2.run(Baza::Recipe.new(swarm).to_bash(cfg['account'], cfg['region'], 'latest', secret))
+        swarm.releases.start(instance, secret)
       end
-      require_relative 'swarm'
-
     end
   end
 end
