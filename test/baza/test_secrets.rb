@@ -54,10 +54,7 @@ class Baza::SecretsTest < Minitest::Test
   def test_notify_user_after_creating
     loog = Loog::Buffer.new
     human = Baza::Humans.new(fake_pgsql, tbot: Baza::Tbot::Fake.new(loog)).ensure(fake_name)
-    n = fake_name
-    k = fake_name
-    v = fake_name * 10
-    id = human.secrets.add(n, k, v)
+    id = human.secrets.add(fake_name, fake_name, fake_name * 10)
     assert_includes(loog.to_s, "Secret with ID #{id} has been successfully added.")
   end
 
