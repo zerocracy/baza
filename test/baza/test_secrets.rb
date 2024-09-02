@@ -61,8 +61,28 @@ class Baza::SecretsTest < Minitest::Test
   def test_does_not_notify_user_after_fail_creating
     loog = Loog::Buffer.new
     human = Baza::Humans.new(fake_pgsql, tbot: Baza::Tbot::Fake.new(loog)).ensure(fake_name)
-    assert_raises do
-      human.secrets.add(nil, nil, nil)
+    assert_raises(Baza::Urror) do
+      human.secrets.add('', '', '')
+    end
+    assert_empty(loog.to_s)
+    assert_raises(Baza::Urror) do
+      human.secrets.add('0', '', '')
+    end
+    assert_empty(loog.to_s)
+    assert_raises(Baza::Urror) do
+      human.secrets.add(fake_name, '', '')
+    end
+    assert_empty(loog.to_s)
+    assert_raises(Baza::Urror) do
+      human.secrets.add(fake_name, '0', '')
+    end
+    assert_empty(loog.to_s)
+    assert_raises(Baza::Urror) do
+      human.secrets.add(fake_name, fake_name, '')
+    end
+    assert_empty(loog.to_s)
+    assert_raises(Baza::Urror) do
+      human.secrets.add(fake_name, fake_name, 'привет')
     end
     assert_empty(loog.to_s)
   end
