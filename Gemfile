@@ -61,7 +61,7 @@ gem 'redcarpet', '~>3.5'
 gem 'rerun', '~>0.14', require: false
 gem 'retries', '>0'
 gem 'rspec-rails', '~>7.0', require: false
-gem 'rubocop', '1.65.1', require: false
+gem 'rubocop', '1.66.0', require: false
 gem 'rubocop-rspec', '3.0.4', require: false
 gem 'rubyzip', '>0'
 gem 'sass-embedded', '~>1.77'
