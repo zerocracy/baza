@@ -62,6 +62,8 @@
               = format('%.3f', Time.now - http_start)
             %li{title: 'The version of Ruby on the server'}
               = "rb:#{RUBY_VERSION}"
+            %li{title: 'The version of Git on the server'}
+              = "git:#{git_version}"
             %li{title: 'Current "load average" on the server', class: load_avg > 8 ? 'bad' : ''}
               = format('%0.2f', load_avg)
             %li{title: 'Currently consumed memory vs. total system memory, in Mb'}
@@ -72,10 +74,10 @@
               = request.ip
           - if the_human.admin?
             %ul{style: 'font-family: monospace;'}
-              - %w[pipeline gc donations tbot verify].each do |s|
+              - %w[pipeline gc donations tbot verify lambda].each do |s|
                 %li
                   %span
                     != footer_status(s)
             %ul
-              - %w[Alterations Push SQL Gift Trails Relogin Reset].each do |c|
+              - %w[Alterations Swarms Push SQL Bash Gift Trails Relogin Reset].each do |c|
                 != menu("/#{c.downcase}", c)

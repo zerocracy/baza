@@ -23,47 +23,33 @@
 # SOFTWARE.
 
 require 'minitest/autorun'
+require 'fileutils'
 require_relative '../test__helper'
 require_relative '../../objects/baza'
-require_relative '../../objects/baza/locks'
+require_relative '../../objects/baza/zip'
 
-# Test.
+# Test for Zip.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class Baza::LocksTest < Minitest::Test
-  def test_simple_locking_scenario
-    human = fake_human
-    locks = human.locks
-    owner = "#{fake_name} #{fake_name} #{fake_name} --"
-    n = fake_name
-    locks.lock(n, owner, '192.168.1.1')
-    locks.lock(n, owner, '192.168.1.1')
-    e = assert_raises(Baza::Urror) { locks.lock(n, fake_name, '192.168.1.1') }
-    assert(e.message.include?('is occupied by another owner'), e.message)
-    locks.lock(n, owner, '192.168.1.1')
-    locks.unlock(n, owner)
-    locks.lock(n, owner, '192.168.1.1')
-  end
-
-  def test_lock_checks_job
-    human = fake_human
-    token = human.tokens.add(fake_name)
-    name = "#{fake_name}-a"
-    job = token.start(name, fake_name, 1, 0, 'n/a', [], '192.168.1.1')
-    assert(human.jobs.busy?(name))
-    owner = "baza #{Baza::VERSION} #{Time.now.utc.iso8601}"
-    assert_raises(Baza::Locks::Busy) do
-      human.locks.lock(name, owner, '192.168.1.1')
+class Baza::ZipTest < Minitest::Test
+  def test_packs_and_unpacks
+    Dir.mktmpdir do |home|
+      zip = File.join(home, 'foo.zip')
+      path = 'a/b/c/.test.txt'
+      Dir.mktmpdir do |dir|
+        txt = File.join(dir, path)
+        FileUtils.mkdir_p(File.dirname(txt))
+        File.write(txt, 'hello, world!')
+        Baza::Zip.new(zip).pack(dir)
+      end
+      assert(File.exist?(zip))
+      assert_equal(4, Baza::Zip.new(zip).entries.size)
+      Dir.mktmpdir do |dir|
+        Baza::Zip.new(zip).unpack(dir)
+        txt = File.join(dir, path)
+        assert(File.exist?(txt))
+      end
     end
-    job.finish!(fake_name, 'stdout', 0, 544, 1, 0)
-    human.locks.lock(name, owner, '192.168.1.1')
-    assert(human.locks.locked?(name))
-  end
-
-  def test_check_ip
-    locks = fake_human.locks
-    locks.lock(fake_name, "#{fake_name} --", '192.168.1.1')
-    assert(locks.each.any? { |r| r[:ip] == '192.168.1.1' })
   end
 end

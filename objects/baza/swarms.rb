@@ -22,92 +22,79 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# Locks of a human.
+# Swarms of a human.
+#
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class Baza::Locks
+class Baza::Swarms
   attr_reader :human
 
-  class Busy < Baza::Urror; end
-
-  def initialize(human)
+  def initialize(human, tbot: Baza::Tbot::Fake.new)
     @human = human
+    @tbot = tbot
   end
 
   def pgsql
     @human.pgsql
   end
 
+  def get(id)
+    raise 'Swarm ID must be an integer' unless id.is_a?(Integer)
+    require_relative 'swarm'
+    Baza::Swarm.new(self, id, tbot: @tbot)
+  end
+
   def empty?
     pgsql.exec(
-      'SELECT id FROM lock WHERE human = $1',
+      'SELECT id FROM swarm WHERE human = $1',
       [@human.id]
     ).empty?
   end
 
   def each(offset: 0)
     return to_enum(__method__, offset:) unless block_given?
-    pgsql.exec(
+    rows = pgsql.exec(
       [
-        'SELECT lock.*, COUNT(job.id) AS jobs FROM lock',
-        'LEFT JOIN job ON job.name = lock.name',
+        'SELECT * FROM swarm',
         'WHERE human = $1',
-        'GROUP BY lock.id',
-        'ORDER BY lock.created DESC',
         "OFFSET #{offset.to_i}"
       ],
       [@human.id]
-    ).each do |row|
-      lk = {
-        id: row['id'].to_i,
-        created: Time.parse(row['created']),
-        name: row['name'],
-        owner: row['owner'],
-        ip: row['ip'],
-        jobs: row['jobs'].to_i
-      }
-      yield lk
-    end
-  end
-
-  def locked?(name)
-    !pgsql.exec(
-      'SELECT id FROM lock WHERE human = $1 AND name = $2',
-      [@human.id, name.downcase]
-    ).empty?
-  end
-
-  def lock(name, owner, ip)
-    unless @human.account.balance.positive? || @human.extend(Baza::Human::Roles).tester?
-      raise Baza::Urror, 'The balance is negative, you cannot lock jobs'
-    end
-    raise Busy, "The #{name} job is busy" if @human.jobs.busy?(name)
-    begin
-      pgsql.exec(
-        [
-          'INSERT INTO lock (human, name, owner, ip) ',
-          'VALUES ($1, $2, $3, $4) ',
-          'ON CONFLICT (human, name, owner) DO UPDATE SET owner = lock.owner'
-        ],
-        [@human.id, name.downcase, owner, ip]
-      )
-    rescue PG::UniqueViolation
-      raise Busy, "The '#{name}' lock is occupied by another owner, '#{owner}' can't get it now"
-    end
-  end
-
-  def unlock(name, owner)
-    pgsql.exec(
-      'DELETE FROM lock WHERE human = $1 AND owner = $3 AND name = $2',
-      [@human.id, name.downcase, owner]
     )
+    rows.each do |row|
+      s = {
+        id: row['id'].to_i,
+        name: row['name'],
+        repository: row['repository'],
+        branch: row['branch'],
+        dirty: row['dirty'] == 't',
+        exit: row['exit']&.to_i,
+        stdout: row['stdout'],
+        created: Time.parse(row['created'])
+      }
+      yield s
+    end
   end
 
-  def delete(id)
-    pgsql.exec(
-      'DELETE FROM lock WHERE id = $1 AND human = $2',
-      [id, @human.id]
+  # Add new swarm and return its ID.
+  #
+  # @param [String] name Name of the swarm
+  # @param [String] repo Name of repository
+  # @param [String] branch Name of branch
+  # @return [Baza::Swarm] The added swarm
+  def add(name, repo, branch)
+    raise Baza::Urror, 'The "name" cannot be empty' if name.empty?
+    raise Baza::Urror, "The name #{name.inspect} is not valid" unless name.match?(/^[a-z0-9-]+$/)
+    raise Baza::Urror, 'The "repo" cannot be empty' if repo.empty?
+    unless repo.match?(%r{^[a-zA-Z][a-zA-Z0-9\-.]*/[a-zA-Z][a-z0-9\-.]*$})
+      raise Baza::Urror, "The repo #{repo.inspect} is not valid"
+    end
+    get(
+      pgsql.exec(
+        'INSERT INTO swarm (human, name, repository, branch) VALUES ($1, $2, $3, $4) RETURNING id',
+        [@human.id, name.downcase, repo, branch]
+      )[0]['id'].to_i
     )
   end
 end

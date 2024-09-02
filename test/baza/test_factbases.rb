@@ -105,6 +105,7 @@ class Baza::FactbasesTest < Minitest::Test
 
   def test_live_aws_usage
     skip
+    WebMock.enable_net_connect!
     fbs = Baza::Factbases.new('AKIAQJE...', 'KmX8eM...', loog: Loog::NULL)
     Dir.mktmpdir do |dir|
       input = File.join(dir, 'a.fb')

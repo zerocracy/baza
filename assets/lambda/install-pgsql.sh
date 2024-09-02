@@ -1,5 +1,4 @@
-# frozen_string_literal: true
-
+#!/bin/bash
 # MIT License
 #
 # Copyright (c) 2009-2024 Zerocracy
@@ -22,23 +21,18 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require 'minitest/autorun'
-require 'factbase'
-require_relative '../test__helper'
-require_relative '../../objects/baza'
-require_relative '../../baza'
+if psql --version; then
+  echo "PostgreSQL is already installed"
+  exit
+fi
 
-class Baza::FrontJobsTest < Minitest::Test
-  def app
-    Sinatra::Application
-  end
+TMP=$(mktemp -d)
+cd "${TMP}"
 
-  def test_read_job
-    job = fake_job
-    fake_login(job.jobs.human.github)
-    get("/jobs/#{job.id}")
-    assert_status(200)
-    get("/jobs/#{job.id}/verified.txt")
-    assert_status(200)
-  end
-end
+wget https://ftp.postgresql.org/pub/source/v16.1/postgresql-16.1.tar.gz
+tar -xvzf postgresql-16.1.tar.gz
+cd postgresql-16.1
+./configure --bindir=/usr/bin --with-openssl
+make -C src/bin install
+make -C src/include install
+make -C src/interfaces install

@@ -1,0 +1,73 @@
+%form{method: 'post', action: iri.cut('/swarms/add')}
+  %fieldset
+    %input{ type: 'text', name: 'name', tabindex: 1, placeholder: 'Name', size: 19, maxlength: 32, required: true, autofocus: true }
+    %input{ type: 'text', name: 'repository', tabindex: 2, placeholder: 'Repo, e.g zerocracy/swarm-template', size: 36, maxlength: 64, required: true }
+    %input{ type: 'text', name: 'branch', tabindex: 3, placeholder: 'Branch. e.g. master', size: 15, size: 20, required: true }
+    %input{ type: 'submit', tabindex: 4, value: 'Add' }
+
+%p
+  These are all swarms:
+%table
+  %colgroup
+    -# ID
+    %col{style: 'width: 4em;'}
+    -# Name
+    %col{style: 'width: 14em;'}
+    -# Repository
+    %col{style: 'width: 14em;'}
+    -# Branch
+    %col{style: 'width: 14em;'}
+    -# Deployment
+    %col
+    -# Created
+    %col{style: 'width: 10em;'}
+    -# Commands
+    %col{style: 'width: 6em;'}
+  %thead
+    %tr
+      %th
+        = '#'
+      %th
+        Name
+      %th
+        Repository
+      %th
+        Branch
+      %th
+        Deployment
+      %th
+        Created
+      %th
+  %tbody
+  - paging(swarms, offset:) do |s|
+    %tr
+      %td.ff
+        = "##{s[:id]}"
+      %td.ff
+        = s[:name]
+        - if s[:dirty]
+          %i.fa-regular.fa-envelope.good{title: "Changes arrived, waiting for deployment..."}
+      %td.ff
+        %a{href: "https://github.com/#{s[:repository]}/tree/#{s[:branch]}"}<
+          = s[:repository]
+        %i.fa-brands.fa-github
+      %td.ff
+        = s[:branch]
+      %td
+        - if s[:exit].nil?
+          = '?'
+        - elsif s[:exit].zero?
+          %i.fa-regular.fa-thumbs-up.good
+        - else
+          %i.fa-solid.fa-triangle-exclamation.bad{title: 'The deployment failed'}
+        - unless s[:stdout].nil?
+          %i.fa-regular.fa-eye{onclick: "$(this).parent().parent().find('span').hide(); $(this).parent().parent().find('pre').show();", title: 'Click here to see the full deployment log', style: 'cursor: pointer;'}
+          %pre{style: 'display: none;'}<>
+            = s[:stdout]
+      %td
+        != ago(s[:created])
+      %td
+        %a.ico{href: iri.cut('/swarms').append(s[:id]).append('remove'), title: "Remove swarm ##{s[:id]}", onclick: "return confirm('Are you sure you want to remove the swarm ##{s[:id]}?')"}
+          %i.fa-regular.fa-trash-can
+        %a.ico{href: iri.cut('/swarms').append(s[:id]).append('dirty'), title: "Make swarm ##{s[:id]} dirty", onclick: "return confirm('Are you sure you want to make the swarm ##{s[:id]} dirty?')"}
+          %i.fa-solid.fa-lightbulb

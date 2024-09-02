@@ -66,6 +66,18 @@ get '/sql' do
   )
 end
 
+get '/bash' do
+  admin_only
+  command = params[:command] || 'echo "Hello, world!"'
+  assemble(
+    :bash,
+    :default,
+    title: '/bash',
+    command:,
+    stdout: `set -ex; (#{command}) 2>&1`
+  )
+end
+
 get '/gift' do
   admin_only
   assemble(

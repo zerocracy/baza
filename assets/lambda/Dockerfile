@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 # MIT License
 #
 # Copyright (c) 2009-2024 Zerocracy
@@ -22,23 +20,25 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require 'minitest/autorun'
-require 'factbase'
-require_relative '../test__helper'
-require_relative '../../objects/baza'
-require_relative '../../baza'
+FROM {{ from }}
 
-class Baza::FrontJobsTest < Minitest::Test
-  def app
-    Sinatra::Application
-  end
+RUN yum update -y
+RUN yum install -y make automake gcc gcc-c++ kernel-devel \
+  gcc readline-devel libicu-devel zlib-devel \
+  openssl-devel openssl \
+  wget tar gzip \
+  libyaml libyaml-devel
 
-  def test_read_job
-    job = fake_job
-    fake_login(job.jobs.human.github)
-    get("/jobs/#{job.id}")
-    assert_status(200)
-    get("/jobs/#{job.id}/verified.txt")
-    assert_status(200)
-  end
-end
+COPY install-pgsql.sh /tmp
+RUN chmod a+x /tmp/install-pgsql.sh && /tmp/install-pgsql.sh
+
+COPY Gemfile ${LAMBDA_TASK_ROOT}/
+COPY Gemfile.lock ${LAMBDA_TASK_ROOT}/
+RUN cd ${LAMBDA_TASK_ROOT} && gem install bundler && bundle install
+
+RUN rm -rf /z
+COPY swarms/ /z/swarms
+{{ installs }}
+
+COPY entry.rb ${LAMBDA_TASK_ROOT}/
+CMD ["entry.go"]

@@ -41,8 +41,8 @@ module Baza::Helpers
     end
     @_out_buf << html_tag('tr') do
       html_tag('td', colspan: '4') do
-        html_tag('nav', style: 'text-align: left') do
-          html_tag('ul', style: 'margin-bottom: 0') do
+        html_tag('nav') do
+          html_tag('ul', style: 'margin-bottom: 0; text-align: left;') do
             [
               html_tag('li') do
                 params[:offset].zero? ? '' : html_tag('a', href: iri.del(:offset)) do

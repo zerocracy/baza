@@ -24,7 +24,9 @@
 
 require 'zip'
 require 'json'
+require 'fileutils'
 require_relative 'errors'
+require_relative 'zip'
 
 # Pipe of jobs.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -58,28 +60,27 @@ class Baza::Pipe
   # @param [String] file The path to .zip file to create
   def pack(job, file)
     Dir.mktmpdir do |dir|
-      Zip::File.open(file, create: true) do |zip|
-        File.write(File.join(dir, 'id.txt'), job.id.to_s)
-        @fbs.load(job.uri1, File.join(dir, "#{job.id}.fb"))
-        File.write(
-          File.join(dir, "#{job.id}.json"),
-          JSON.pretty_generate(
-            {
-              id: job.id,
-              name: job.name,
-              human: job.jobs.human.id
-            }
-          )
+      @fbs.load(job.uri1, File.join(dir, 'input.fb'))
+      alts = job.jobs.human.alterations.each(pending: true).to_a.select { |a| a[:name] == job.name }
+      File.write(
+        File.join(dir, 'job.json'),
+        JSON.pretty_generate(
+          {
+            id: job.id,
+            name: job.name,
+            human: job.jobs.human.id,
+            alterations: alts.map { |a| a[:id] },
+            options: job.options
+          }
         )
-        alts = job.jobs.human.alterations
-        alts.each(pending: true) do |a|
-          next if a[:name] != job.name
-          File.write(File.join(dir, "alteration-#{a[:id]}.rb"), a[:script])
-        end
-        Dir[File.join(dir, '**/*')].each do |f|
-          zip.add(File.basename(f), f)
-        end
+      )
+      alts.each do |a|
+        t = "alteration-#{a[:id]}"
+        rb = File.join(dir, "#{t}/#{t}.rb")
+        FileUtils.mkdir_p(File.dirname(rb))
+        File.write(rb, a[:script])
       end
+      Baza::Zip.new(file).pack(dir)
     end
   end
 
@@ -89,24 +90,20 @@ class Baza::Pipe
   # @param [String] file The path to .zip file to read
   def unpack(job, file)
     Dir.mktmpdir do |dir|
-      Zip::File.open(file) do |zip|
-        zip.each do |entry|
-          entry.extract(File.join(dir, entry.name))
-        end
-      end
-      %w[json fb stdout].each do |ext|
-        f = File.join(dir, "#{job.id}.#{ext}")
+      Baza::Zip.new(file).unpack(dir)
+      ['job.json', 'output.fb', 'stdout.txt'].each do |n|
+        f = File.join(dir, n)
         raise Baza::Urror, "The #{File.basename(f)} file is missing" unless File.exist?(f)
       end
-      meta = JSON.parse(File.read(File.join(dir, "#{job.id}.json")))
+      meta = JSON.parse(File.read(File.join(dir, 'job.json')))
       %w[exit msec].each do |a|
         raise Baza::Urror, "The '#{a}' is missing in JSON" if meta[a].nil?
       end
-      fb = File.join(dir, "#{job.id}.fb")
+      fb = File.join(dir, 'output.fb')
       uri = @fbs.save(fb)
       job.finish!(
         uri,
-        File.binread(File.join(dir, "#{job.id}.stdout")),
+        File.binread(File.join(dir, 'stdout.txt')),
         meta['exit'],
         meta['msec'],
         meta['exit'].zero? ? File.size(fb) : nil,

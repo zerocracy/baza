@@ -33,7 +33,7 @@ class Baza::FrontTrailsTest < Minitest::Test
   end
 
   def test_trails_list
-    login('yegor256')
+    fake_login('yegor256')
     get('/trails')
     assert_status(200)
     trails = Baza::Trails.new(fake_pgsql)

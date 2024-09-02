@@ -22,44 +22,47 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-get '/locks' do
+get '/swarms' do
+  admin_only
   assemble(
-    :locks,
+    :swarms,
     :default,
-    title: '/locks',
-    locks: the_human.locks,
+    title: '/swarms',
+    swarms: the_human.swarms,
     offset: (params[:offset] || '0').to_i
   )
 end
 
-# Lock the name of the job.
-get(%r{/lock/([a-z0-9-]+)}) do
-  n = params['captures'].first
-  owner = params[:owner]
-  raise Baza::Urror, 'The "owner" is a mandatory query param' if owner.nil?
-  raise Baza::Urror, 'The "owner" can\'t be empty' if owner.empty?
-  begin
-    the_human.locks.lock(n, owner, request.ip)
-    flash(iri.cut('/locks'), "The name '#{n}' just locked for '#{owner}'")
-  rescue Baza::Locks::Busy => e
-    status(409)
-    e.message
-  end
+post '/swarms/webhook' do
+  # if it's not PUSH event, ignore it and return 200
+  json = {} # take it
+  repo = json[:repository]
+  branch = json[:branch]
+  swarm = settings.humans.find_swarm(repo, branch)
+  return "The swarm not found for #{repo}@#{branch}" if swarm.nil?
+  swarm.dirty!(true)
+  "The swarm ##{swarm.id} of #{repo}@#{branch} scheduled for deployment, thanks!"
 end
 
-# Unlock the name of the job.
-get(%r{/unlock/([a-z0-9-]+)}) do
-  n = params['captures'].first
-  owner = params[:owner]
-  raise Baza::Urror, 'The "owner" is a mandatory query param' if owner.nil?
-  raise Baza::Urror, 'The "owner" can\'t be empty' if owner.empty?
-  the_human.locks.unlock(n, owner)
-  flash(iri.cut('/locks'), "The name '#{n}' just unlocked for '#{owner}'")
-end
-
-# Delete the lock.
-get(%r{/lock/([0-9]+)/delete}) do
+get(%r{/swarms/([0-9]+)/remove}) do
+  admin_only
   id = params['captures'].first.to_i
-  the_human.locks.delete(id)
-  flash(iri.cut('/locks'), "The lock ##{id} was removed")
+  the_human.swarms.get(id).remove
+  flash(iri.cut('/swarms'), "The swarm ##{id} just removed")
+end
+
+get(%r{/swarms/([0-9]+)/dirty}) do
+  admin_only
+  id = params['captures'].first.to_i
+  the_human.swarms.get(id).dirty!(true)
+  flash(iri.cut('/swarms'), "The swarm ##{id} is set to be dirty")
+end
+
+post('/swarms/add') do
+  admin_only
+  n = params[:name]
+  repo = params[:repository]
+  branch = params[:branch]
+  id = the_human.swarms.add(n, repo, branch)
+  flash(iri.cut('/swarms'), "The swarm ##{id} #{repo}@#{branch} just added")
 end

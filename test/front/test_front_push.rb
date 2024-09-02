@@ -47,9 +47,9 @@ class Baza::FrontPushTest < Minitest::Test
 
   def test_starts_job_via_post
     uname = fake_name
-    login('yegor256')
+    fake_login('yegor256')
     post('/gift', "human=#{uname}&zents=9999&summary=no")
-    login(uname)
+    fake_login(uname)
     get('/tokens')
     post('/tokens/add', 'name=foo')
     id = last_response.headers['X-Zerocracy-TokenId'].to_i
@@ -76,9 +76,9 @@ class Baza::FrontPushTest < Minitest::Test
 
   def test_rejects_file_upload
     uname = fake_name
-    login('yegor256')
+    fake_login('yegor256')
     post('/gift', "human=#{uname}&zents=9999&summary=no")
-    login(uname)
+    fake_login(uname)
     get('/tokens')
     post('/tokens/add', 'name=foo')
     id = last_response.headers['X-Zerocracy-TokenId'].to_i
@@ -103,9 +103,9 @@ class Baza::FrontPushTest < Minitest::Test
 
   def test_pushes_gzip_file
     uname = fake_name
-    login('yegor256')
+    fake_login('yegor256')
     post('/gift', "human=#{uname}&zents=9999&summary=no")
-    login(uname)
+    fake_login(uname)
     get('/tokens')
     post('/tokens/add', 'name=foo')
     id = last_response.headers['X-Zerocracy-TokenId'].to_i
@@ -114,7 +114,7 @@ class Baza::FrontPushTest < Minitest::Test
     get('/push')
     header('User-Agent', 'something')
     fb = Factbase.new
-    fb.insert.foo = 'booom \x01\x02\x03'
+    fb.insert.foo = 'booom % \x01\x02\x03'
     Tempfile.open do |f|
       Zlib::GzipWriter.open(f.path) do |gz|
         gz.write fb.export
@@ -142,7 +142,7 @@ class Baza::FrontPushTest < Minitest::Test
     token = make_valid_token
     fb = Factbase.new
     (0..100).each do |i|
-      fb.insert.foo = "booom \x01\x02\x03 #{i}"
+      fb.insert.foo = "booom % \x01\x02\x03 #{i}"
     end
     header('X-Zerocracy-Token', token)
     header('User-Agent', 'something')
@@ -154,7 +154,7 @@ class Baza::FrontPushTest < Minitest::Test
       ].join('  ')
     )
     name = fake_name
-    put("/push/#{name}", fb.export)
+    put("/push/#{name}", fb.export, 'CONTENT_TYPE' => 'application/octet-stream')
     assert_status(200)
     id = last_response.body.to_i
     assert(id.positive?)
@@ -232,9 +232,9 @@ class Baza::FrontPushTest < Minitest::Test
 
   def test_sends_ip_via_post
     uname = fake_name
-    login('yegor256')
+    fake_login('yegor256')
     post('/gift', "human=#{uname}&zents=9999&summary=no")
-    login(uname)
+    fake_login(uname)
     get('/tokens')
     post('/tokens/add', 'name=foo')
     id = last_response.headers['X-Zerocracy-TokenId'].to_i
@@ -253,9 +253,9 @@ class Baza::FrontPushTest < Minitest::Test
 
   def test_sends_ip_via_put
     uname = fake_name
-    login('yegor256')
+    fake_login('yegor256')
     post('/gift', "human=#{uname}&zents=9999&summary=no")
-    login(uname)
+    fake_login(uname)
     get('/tokens')
     post('/tokens/add', 'name=foo')
     id = last_response.headers['X-Zerocracy-TokenId'].to_i
@@ -286,9 +286,9 @@ class Baza::FrontPushTest < Minitest::Test
 
   def test_call_lock_via_put
     uname = fake_name
-    login('yegor256')
+    fake_login('yegor256')
     post('/gift', "human=#{uname}&zents=9999&summary=no")
-    login(uname)
+    fake_login(uname)
     get('/tokens')
     post('/tokens/add', 'name=foo')
     id = last_response.headers['X-Zerocracy-TokenId'].to_i
@@ -319,9 +319,9 @@ class Baza::FrontPushTest < Minitest::Test
 
   def test_call_lock_via_stdout
     uname = fake_name
-    login('yegor256')
+    fake_login('yegor256')
     post('/gift', "human=#{uname}&zents=9999&summary=no")
-    login(uname)
+    fake_login(uname)
     get('/tokens')
     post('/tokens/add', 'name=foo')
     id = last_response.headers['X-Zerocracy-TokenId'].to_i
@@ -353,9 +353,9 @@ class Baza::FrontPushTest < Minitest::Test
 
   def test_call_lock_via_finished
     uname = fake_name
-    login('yegor256')
+    fake_login('yegor256')
     post('/gift', "human=#{uname}&zents=9999&summary=no")
-    login(uname)
+    fake_login(uname)
     get('/tokens')
     post('/tokens/add', 'name=foo')
     id = last_response.headers['X-Zerocracy-TokenId'].to_i
@@ -394,9 +394,9 @@ class Baza::FrontPushTest < Minitest::Test
 
   def test_call_lock_via_exit
     uname = fake_name
-    login('yegor256')
+    fake_login('yegor256')
     post('/gift', "human=#{uname}&zents=9999&summary=no")
-    login(uname)
+    fake_login(uname)
     get('/tokens')
     post('/tokens/add', 'name=foo')
     id = last_response.headers['X-Zerocracy-TokenId'].to_i
@@ -431,9 +431,9 @@ class Baza::FrontPushTest < Minitest::Test
 
   def test_call_lock_via_pull
     uname = fake_name
-    login('yegor256')
+    fake_login('yegor256')
     post('/gift', "human=#{uname}&zents=9999&summary=no")
-    login(uname)
+    fake_login(uname)
     get('/tokens')
     post('/tokens/add', 'name=foo')
     id = last_response.headers['X-Zerocracy-TokenId'].to_i
@@ -465,9 +465,9 @@ class Baza::FrontPushTest < Minitest::Test
 
   def test_call_lock_via_inspect
     uname = fake_name
-    login('yegor256')
+    fake_login('yegor256')
     post('/gift', "human=#{uname}&zents=9999&summary=no")
-    login(uname)
+    fake_login(uname)
     get('/tokens')
     post('/tokens/add', 'name=foo')
     id = last_response.headers['X-Zerocracy-TokenId'].to_i
@@ -549,9 +549,9 @@ class Baza::FrontPushTest < Minitest::Test
 
   def make_valid_token
     uname = fake_name
-    login('yegor256')
+    fake_login('yegor256')
     post('/gift', "human=#{uname}&zents=555555&summary=no")
-    login(uname)
+    fake_login(uname)
     get('/tokens')
     post('/tokens/add', 'name=foo')
     id = last_response.headers['X-Zerocracy-TokenId'].to_i

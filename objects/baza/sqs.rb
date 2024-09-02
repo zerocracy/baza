@@ -22,23 +22,51 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require 'minitest/autorun'
-require 'factbase'
-require_relative '../test__helper'
-require_relative '../../objects/baza'
-require_relative '../../baza'
+require 'aws-sdk-sqs'
+require 'aws-sdk-core'
+require 'loog'
 
-class Baza::FrontJobsTest < Minitest::Test
-  def app
-    Sinatra::Application
+# SQS client.
+#
+# Author:: Yegor Bugayenko (yegor256@gmail.com)
+# Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
+# License:: MIT
+class Baza::SQS
+  # Ctor.
+  #
+  # @param [String] key AWS authentication key (if empty, the object will NOT use AWS S3)
+  # @param [String] secret AWS authentication secret
+  # @param [String] region AWS region
+  # @param [String] url The URL of the queue
+  # @param [Loog] loog Logging facility
+  def initialize(key, secret, url, region = 'us-east-1', loog: Loog::NULL)
+    @key = key
+    @secret = secret
+    @region = region
+    @url = url
+    @loog = loog
   end
 
-  def test_read_job
-    job = fake_job
-    fake_login(job.jobs.human.github)
-    get("/jobs/#{job.id}")
-    assert_status(200)
-    get("/jobs/#{job.id}/verified.txt")
-    assert_status(200)
+  # Create a new message with the given body.
+  #
+  # @param [String] body The body of the SQS message
+  # @return [Integer] The ID of the SQS message
+  def push(body)
+    if @key.empty?
+      42
+    else
+      id = aws.send_message(queue_url: @url, message_body: body).message_id
+      @loog.debug("SQS message ##{id} posted: #{body.inspect}")
+      id
+    end
+  end
+
+  private
+
+  def aws
+    Aws::SQS::Client.new(
+      region: @region,
+      credentials: Aws::Credentials.new(@key, @secret)
+    )
   end
 end
