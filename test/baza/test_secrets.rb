@@ -50,4 +50,26 @@ class Baza::SecretsTest < Minitest::Test
     assert(!secrets.exists?(n, k))
     assert(secrets.each.to_a.empty?)
   end
+
+  def test_notify_user_after_creating
+    loog = Loog::Buffer.new
+    human = Baza::Humans.new(fake_pgsql, tbot: Baza::Tbot::Fake.new(loog)).ensure(fake_name)
+    n = fake_name
+    k = fake_name
+    v = fake_name * 10
+    id = human.secrets.add(n, k, v)
+    assert_includes(loog.to_s, "Secret with ID #{id} has been successfully added.")
+  end
+
+  def test_does_not_notify_user_after_fail_creating
+    loog = Loog::Buffer.new
+    human = Baza::Humans.new(fake_pgsql, tbot: Baza::Tbot::Fake.new(loog)).ensure(fake_name)
+    assert_raises do
+      n = nil
+      k = nil
+      v = nil
+      human.secrets.add(n, k, v)
+    end
+    assert_empty(loog.to_s)
+  end
 end
