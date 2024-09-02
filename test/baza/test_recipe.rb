@@ -89,7 +89,10 @@ class Baza::RecipeTest < Minitest::Test
       cfg['image'],
       loog:
     )
-    instance = ec2.run(Baza::Recipe.new(swarm).to_bash(cfg['account'], cfg['region'], 'latest', ''))
+    instance = ec2.run_instance(
+      Baza::Recipe.new(swarm).to_bash(cfg['account'], cfg['region'], 'latest', ''),
+      swarm.name
+    )
     assert(instance.start_with?('i-'))
   end
 

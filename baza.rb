@@ -277,7 +277,10 @@ configure do
         next unless swarm.need_release?
         secret = SecureRandom.uuid
         require_relative 'recipe'
-        instance = ec2.run(Baza::Recipe.new(swarm).to_bash(cfg['account'], cfg['region'], 'latest', secret))
+        instance = ec2.run_instance(
+          Baza::Recipe.new(swarm).to_bash(cfg['account'], cfg['region'], 'latest', secret),
+          swarm.name
+        )
         swarm.releases.start(instance, secret)
       end
     end

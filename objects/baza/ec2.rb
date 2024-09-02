@@ -39,7 +39,7 @@ class Baza::EC2
   #
   # @param [Loog] loog Logging facility
   def initialize(key, secret, region, sgroup, subnet, image,
-    loog: Loog::NULL, type: 't2.xlarge', tags: {})
+    loog: Loog::NULL, type: 't2.xlarge')
     raise Baza::Urror, "AWS key is wrong: #{key.inspect}" unless key.match?(/^(AKIA|FAKE)[A-Z0-9]{16}$/)
     @key = key
     raise Baza::Urror, "AWS secret is wrong: #{secret.inspect}" unless secret.match?(%r{^[A-Za-z0-9/]{40}$})
@@ -52,7 +52,7 @@ class Baza::EC2
     @loog = loog
   end
 
-  def run(data)
+  def run_instance(name, data)
     elapsed(@loog, intro: "Started new #{@type.inspect} EC2 instance") do
       aws.run_instances(
         image_id: @image,
@@ -69,7 +69,7 @@ class Baza::EC2
             tags: [
               {
                 key: 'Name',
-                value: 'baza-release'
+                value: name
               }
             ]
           }
