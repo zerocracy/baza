@@ -22,76 +22,63 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# Swarms of a human.
+# All releases of a swarm.
 #
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class Baza::Swarms
-  attr_reader :human
+class Baza::Releases
+  attr_reader :swarm
 
-  def initialize(human, tbot: Baza::Tbot::Fake.new)
-    @human = human
+  def initialize(swarm, tbot: Baza::Tbot::Fake.new)
+    @swarm = swarm
     @tbot = tbot
   end
 
   def pgsql
-    @human.pgsql
+    @swarm.pgsql
   end
 
   def get(id)
-    raise 'Swarm ID must be an integer' unless id.is_a?(Integer)
-    require_relative 'swarm'
-    Baza::Swarm.new(self, id, tbot: @tbot)
-  end
-
-  def empty?
-    pgsql.exec(
-      'SELECT id FROM swarm WHERE human = $1',
-      [@human.id]
-    ).empty?
+    raise 'Release ID must be an integer' unless id.is_a?(Integer)
+    require_relative 'release'
+    Baza::Release.new(self, id, tbot: @tbot)
   end
 
   def each(offset: 0)
     return to_enum(__method__, offset:) unless block_given?
-    rows = pgsql.exec(
+    rows = @swarm.pgsql.exec(
       [
-        'SELECT * FROM swarm',
-        'WHERE human = $1',
+        'SELECT * FROM release',
+        'WHERE swarm = $1',
         "OFFSET #{offset.to_i}"
       ],
-      [@human.id]
+      [@swarm.id]
     )
     rows.each do |row|
-      yield Veil.new(
-        get(row['id'].to_i),
+      r = {
         id: row['id'].to_i,
-        name: row['name'],
-        repository: row['repository'],
-        branch: row['branch'],
-        head: row['head'],
+        exit: row['exit']&.to_i,
+        tail: row['tail'],
+        msec: row['msec']&.to_i,
         created: Time.parse(row['created'])
-      )
+      }
+      yield r
     end
   end
 
-  # Add new swarm and return its ID.
+  # Start a new release to the swarm.
   #
-  # @param [String] name Name of the swarm
-  # @param [String] repo Name of repository
-  # @param [String] branch Name of branch
-  # @return [Baza::Swarm] The added swarm
-  def add(name, repo, branch)
-    raise Baza::Urror, 'The "name" cannot be empty' if name.empty?
-    raise Baza::Urror, "The name #{name.inspect} is not valid" unless name.match?(/^[a-z0-9-]+$/)
-    raise Baza::Urror, 'The "repo" cannot be empty' if repo.empty?
-    unless repo.match?(%r{^[a-zA-Z][a-zA-Z0-9\-.]*/[a-zA-Z][a-z0-9\-.]*$})
-      raise Baza::Urror, "The repo #{repo.inspect} is not valid"
-    end
+  # @param [String] instance AWS EC2 instance ID
+  # @param [String] secret A secret
+  # @return [Integer] The ID of the added release
+  def start(instance, secret)
+    raise Baza::Urror, 'The "instance" cannot be NIL' if instance.nil?
+    raise Baza::Urror, 'The "secret" cannot be empty' if secret.nil?
     get(
-      pgsql.exec(
-        'INSERT INTO swarm (human, name, repository, branch) VALUES ($1, $2, $3, $4) RETURNING id',
-        [@human.id, name.downcase, repo, branch]
+      @swarm.pgsql.exec(
+        'INSERT INTO release (swarm, instance, secret) VALUES ($1, $2, $3) RETURNING id',
+        [@swarm.id, instance, secret]
       )[0]['id'].to_i
     )
   end

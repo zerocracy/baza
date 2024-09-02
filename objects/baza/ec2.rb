@@ -36,6 +36,7 @@ class Baza::EC2
   # @param [String] key AWS authentication key (if empty, the object will NOT use AWS S3)
   # @param [String] secret AWS authentication secret
   # @param [String] region AWS region
+  #
   # @param [Loog] loog Logging facility
   def initialize(key, secret, region, sgroup, subnet, image,
     loog: Loog::NULL, type: 't2.xlarge')
@@ -51,64 +52,24 @@ class Baza::EC2
     @loog = loog
   end
 
-  def warm(id)
-    elapsed(@loog, intro: 'Warmed up EC2 instance') do
-      start = Time.now
-      attempt = 0
-      loop do
-        status = status_of(id)
-        attempt += 1
-        @loog.debug("Status of #{id} is #{status.inspect}, attempt ##{attempt}")
-        break if status == 'ok'
-        raise "Looks like #{id} will never be OK" if Time.now - start > 60 * 10
-        sleep 30
-      end
-      id
-    end
-  end
-
-  # Terminate one EC2 instance.
-  def terminate(id)
-    elapsed(@loog, intro: "Terminated EC2 instance #{id}") do
-      aws.terminate_instances(instance_ids: [id])
-    end
-  end
-
-  # Get IP of the running EC2 instance.
-  def host_of(id)
-    elapsed(@loog, intro: "Found IP address of #{id}") do
-      aws.describe_instances(instance_ids: [id])
-        .reservations[0]
-        .instances[0]
-        .public_ip_address
-    end
-  end
-
-  def status_of(id)
-    elapsed(@loog, intro: "Detected status of #{id}") do
-      aws.describe_instance_status(instance_ids: [id], include_all_instances: true)
-        .instance_statuses[0]
-        .instance_status
-        .status
-    end
-  end
-
-  def run_instance
+  def run_instance(name, data)
     elapsed(@loog, intro: "Started new #{@type.inspect} EC2 instance") do
       aws.run_instances(
         image_id: @image,
         instance_type: @type,
         max_count: 1,
         min_count: 1,
+        user_data: data,
         security_group_ids: [@sgroup],
         subnet_id: @subnet,
+        instance_initiated_shutdown_behavior: 'terminate',
         tag_specifications: [
           {
             resource_type: 'instance',
             tags: [
               {
                 key: 'Name',
-                value: 'baza-deploy'
+                value: name
               }
             ]
           }

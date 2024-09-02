@@ -54,11 +54,11 @@ class Baza::Lambda
   def initialize(humans, account, key, secret, region, sgroup, subnet, image, ssh_key,
     tbot: Baza::Tbot::Fake.new, loog: Loog::NULL, type: 't2.xlarge', user: 'ubuntu', port: 22)
     @humans = humans
-    @image = Baza::Image.new(humans, account, region, loog:)
+    @image = Baza::Image.new(humans, account, key, secret, region, loog:)
     @ec2 = Baza::EC2.new(key, secret, region, sgroup, subnet, image, type:, loog:)
     @shell = Baza::Shell.new(ssh_key, user, port, loog:) unless key.empty?
-    @key = key
     @account = account
+    @key = key
     @secret = secret
     @region = region
     @tbot = tbot
@@ -71,87 +71,41 @@ class Baza::Lambda
   def deploy(tag = 'latest')
     return unless dirty?
     Dir.mktmpdir do |home|
-      zip = @image.pack(File.join(home, 'image.zip'))
-      sha = Digest::SHA1.hexdigest(File.binread(zip))
-      break if aws_sha == sha
       instance_id = @ec2.run_instance
       begin
-        build_and_publish(@ec2.host_of(@ec2.warm(instance_id)), zip, tag)
+        publish(
+          @ec2.host_of(@ec2.warm(instance_id)),
+          @image.pack(File.join(home, 'image.zip')),
+          tag
+        )
       ensure
         @ec2.terminate(instance_id)
       end
-      done!
     end
   end
 
   private
 
-  # Build a new Docker image in a new EC2 server and publish it to
+  # Build a new Docker image in a new EC2 server and publish it to the
   # Lambda function.
-  def build_and_publish(ip, zip, tag)
+  def publish(ip, zip, tag)
     @shell.connect(ip) do |ssh|
       code =
         begin
           ssh.upload(zip, 'baza.zip')
-          ssh.upload_file(
-            'credentials',
-            [
-              '[default]',
-              "aws_access_key_id = #{@key}",
-              "aws_secret_access_key = #{@secret}"
-            ].join("\n")
-          )
-          ssh.upload_file(
-            'config',
-            [
-              '[default]',
-              "region = #{@region}"
-            ].join("\n")
-          )
-          repo = "#{@account}.dkr.ecr.#{@region}.amazonaws.com"
-          img = "#{repo}/zerocracy/baza:#{tag}"
-          script = [
-            'set -ex',
-            'PATH=$PATH:$(pwd)',
-            'env',
-            'mkdir .aws',
-            'mv credentials .aws',
-            'mv config .aws',
-            "aws ecr get-login-password --region #{@region} | docker login --username AWS --password-stdin #{repo}",
-            'mkdir --p baza',
-            'rm -rf baza/*',
-            'unzip -qq baza.zip -d baza',
-            'docker build baza -t baza --platform linux/amd64',
-            "docker tag baza #{img}",
-            "docker push #{img}",
-            "aws lambda update-function-code --function-name baza --image-uri #{img} --publish"
-          ].join(' && ')
-          script = "( #{script} ) 2>&1"
-          ssh.exec(script)
+          ssh.exec('(unzip baza.zip && /bin/bash release.sh) 2>&1')
         rescue StandardError => e
           @loog.warn(Backtrace.new(e))
           raise e
         end
       raise "Failed with ##{code}" unless code.zero?
-      @loog.debug('Docker image built successfully')
+      @loog.debug("Uploaded #{File.size(zip)} bytes ZIP to #{ip} and deployed successfully as '#{tag}'")
     end
-  end
-
-  # What is the current SHA of the AWS lambda function?
-  #
-  # @return [String] The SHA or '' if no lambda function found
-  def aws_sha
-    ''
   end
 
   # Returns TRUE if at least one swarm is "dirty" and because of that
   # the entire pack must be re-deployed.
   def dirty?
-    !@humans.pgsql.exec('SELECT id FROM swarm WHERE dirty = TRUE').empty?
-  end
-
-  # Mark all swarms as "not dirty any more".
-  def done!
-    @humans.pgsql.exec('UPDATE swarm SET dirty = FALSE')
+    !@humans.pgsql.exec('SELECT id FROM swarm WHERE head != release').empty?
   end
 end

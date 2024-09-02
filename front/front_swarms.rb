@@ -33,6 +33,15 @@ get '/swarms' do
   )
 end
 
+put('/swarms/finish') do
+  secret = params[:secret]
+  return 'No secret? No update!' if secret.nil? || secret.empty?
+  request.body.rewind
+  r = the_human.find_release(secret)
+  r.finish!(params[:head], request.body, params[:code].to_i, params[:msec].to_i)
+  flash(iri.cut('/swarms'), "The release ##{r.id} was finished")
+end
+
 post '/swarms/webhook' do
   # if it's not PUSH event, ignore it and return 200
   json = {} # take it
@@ -40,7 +49,7 @@ post '/swarms/webhook' do
   branch = json[:branch]
   swarm = settings.humans.find_swarm(repo, branch)
   return "The swarm not found for #{repo}@#{branch}" if swarm.nil?
-  swarm.dirty!(true)
+  swarm.head!('00000000000000000000000000000000')
   "The swarm ##{swarm.id} of #{repo}@#{branch} scheduled for deployment, thanks!"
 end
 
@@ -51,11 +60,11 @@ get(%r{/swarms/([0-9]+)/remove}) do
   flash(iri.cut('/swarms'), "The swarm ##{id} just removed")
 end
 
-get(%r{/swarms/([0-9]+)/dirty}) do
+get(%r{/swarms/([0-9]+)/reset}) do
   admin_only
   id = params['captures'].first.to_i
-  the_human.swarms.get(id).dirty!(true)
-  flash(iri.cut('/swarms'), "The swarm ##{id} is set to be dirty")
+  the_human.swarms.get(id).head!('0000000000000000000000000000000000000000')
+  flash(iri.cut('/swarms'), "The release SHA of the swarm ##{id} was reset")
 end
 
 post('/swarms/add') do

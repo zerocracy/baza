@@ -36,33 +36,17 @@ class Baza::Swarm
     @tbot = tbot
   end
 
-  # Change DIRTY status of the swarm.
-  #
-  # @param [Bool] yes TRUE if it has to become dirty
-  def dirty!(yes)
-    swarms.pgsql.exec(
-      'UPDATE swarm SET dirty = $1 WHERE id = $2 AND human = $3',
-      [yes, @id, swarms.human.id]
-    )
+  def pgsql
+    @swarms.pgsql
   end
 
-  # Change exit code of the swarm.
+  # Change head SHA of the swarm.
   #
-  # @param [Integer] code The exit code of the deployment attempt
-  def exit!(code)
+  # @param [String] sha The hash of the Git head
+  def head!(sha)
     swarms.pgsql.exec(
-      'UPDATE swarm SET exit = $1 WHERE id = $2 AND human = $3',
-      [code, @id, swarms.human.id]
-    )
-  end
-
-  # Change STDOUT of the latest deployment of the swarm.
-  #
-  # @param [String] log The stdout of the deployment attempt of the swarm
-  def stdout!(log)
-    swarms.pgsql.exec(
-      'UPDATE swarm SET stdout = $1 WHERE id = $2 AND human = $3',
-      [log, @id, @swarms.human.id]
+      'UPDATE swarm SET head = $1 WHERE id = $2 AND human = $3',
+      [sha, @id, swarms.human.id]
     )
   end
 
@@ -88,19 +72,29 @@ class Baza::Swarm
     to_json[:branch]
   end
 
-  # Get its stdout.
-  def stdout
-    to_json[:stdout]
+  # Get its head SHA.
+  def head
+    to_json[:head]
   end
 
-  # Get its exit code.
-  def exit
-    to_json[:exit]
+  # Get its time of creation.
+  def created
+    to_json[:created]
   end
 
-  # Get its dirty status.
-  def dirty
-    to_json[:dirty]
+  # Get its release SHA.
+  def releases
+    require_relative 'releases'
+    Baza::Releases.new(self, tbot: @tbot)
+  end
+
+  # Does it need immediate release now?
+  def need_release?
+    first = nil
+    releases.each { |r| first = r }
+    return true if first.nil?
+    return false if first[:exit].nil?
+    first[:head] == head
   end
 
   private
@@ -118,9 +112,7 @@ class Baza::Swarm
           name: row['name'],
           repository: row['repository'],
           branch: row['branch'],
-          dirty: row['dirty'] == 't',
-          stdout: row['stdout'],
-          exit: row['exit']&.to_i,
+          head: row['head'],
           created: Time.parse(row['created'])
         }
       end

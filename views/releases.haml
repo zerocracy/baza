@@ -54,12 +54,24 @@
       %td.ff
         = s.branch
       %td.ff
-        %a{href: "https://github.com/#{s.repository}/commit/#{s.head}"}<
-          = s.head[0..8]
+        = s.head[0..8]
+      %td.ff
+        = s[:release][0..8]
       %td
-        != ago(s.created)
+        - if s[:exit].nil?
+          = '?'
+        - elsif s[:exit].zero?
+          %i.fa-regular.fa-thumbs-up.good
+        - else
+          %i.fa-solid.fa-triangle-exclamation.bad{title: 'The deployment failed'}
+        - unless s[:stdout].nil?
+          %i.fa-regular.fa-eye{onclick: "$(this).parent().parent().find('span').hide(); $(this).parent().parent().find('pre').show();", title: 'Click here to see the full deployment log', style: 'cursor: pointer;'}
+          %pre{style: 'display: none;'}<>
+            = s[:stdout]
       %td
-        %a.ico{href: iri.cut('/swarms').append(s.id).append('remove'), title: "Remove swarm ##{s.id}", onclick: "return confirm('Are you sure you want to remove the swarm ##{s.id}?')"}
+        != ago(s[:created])
+      %td
+        %a.ico{href: iri.cut('/swarms').append(s[:id]).append('remove'), title: "Remove swarm ##{s[:id]}", onclick: "return confirm('Are you sure you want to remove the swarm ##{s[:id]}?')"}
           %i.fa-regular.fa-trash-can
-        %a.ico{href: iri.cut('/swarms').append(s.id).append('reset'), title: "Make swarm ##{s.id} dirty", onclick: "return confirm('Are you sure you want to reset the head SHA of the swarm ##{s.id}?')"}
+        %a.ico{href: iri.cut('/swarms').append(s[:id]).append('reset'), title: "Make swarm ##{s[:id]} dirty", onclick: "return confirm('Are you sure you want to reset the release SHA of the swarm ##{s[:id]}?')"}
           %i.fa-solid.fa-lightbulb

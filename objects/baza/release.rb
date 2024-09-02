@@ -22,22 +22,35 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require 'minitest/autorun'
-require_relative '../test__helper'
-require_relative '../../objects/baza'
-
-# Test.
+# A single release of a swarm.
+#
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class Baza::SwarmsTest < Minitest::Test
-  def test_simple_scenario
-    human = fake_human
-    swarms = human.swarms
-    swarms.add(fake_name, 'zerocracy/swarm', 'master')
-    s = swarms.each.to_a.first
-    assert_equal('master', s.branch)
-    swarms.get(s.id).remove
-    assert(swarms.each.to_a.empty?)
+class Baza::Release
+  attr_reader :releases
+
+  def initialize(releases, id, tbot: Baza::Tbot::Fake.new)
+    @releases = releases
+    @id = id
+    @tbot = tbot
+  end
+
+  # Finish the release to the swarm.
+  #
+  # @param [String] head SHA of the Git head just released
+  # @param [String] tail STDOUT tail
+  # @param [String] code Exit code
+  # @param [String] msec How many msec it took to build this one
+  # @return [Integer] The ID of the added release
+  def finish!(head, tail, code, msec)
+    raise Baza::Urror, 'The "head" cannot be NIL' if head.nil?
+    raise Baza::Urror, 'The "head" cannot be empty' if head.empty?
+    raise Baza::Urror, 'The "code" must be Integer' unless code.is_a?(Integer)
+    raise Baza::Urror, 'The "msec" must be Integer' unless msec.is_a?(Integer)
+    @releases.pgsql.exec(
+      'UPDATE release SET head = $2, tail = $3, exit = $4, msec = $5 WHERE id = $1 AND swarm = $6',
+      [@id, head, tail, code, msec, @swarm.id]
+    )
   end
 end

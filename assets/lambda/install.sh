@@ -1,3 +1,4 @@
+#!/bin/bash
 # MIT License
 #
 # Copyright (c) 2009-2024 Zerocracy
@@ -20,29 +21,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-FROM {{ from }}
+home=/swarm
+if [ -e "${home}/Gemfile" ]; then
+  bundle install --gemfile "${home}/Gemfile"
+fi
 
-RUN yum update -y
-RUN yum install -y make automake gcc gcc-c++ kernel-devel \
-  gcc readline-devel libicu-devel zlib-devel \
-  openssl-devel openssl \
-  wget tar gzip \
-  libyaml libyaml-devel \
-  git
-
-COPY install-pgsql.sh /tmp
-RUN /bin/bash /tmp/install-pgsql.sh
-
-COPY Gemfile ${LAMBDA_TASK_ROOT}/
-RUN gem install bundler && bundle install --gemfile=${LAMBDA_TASK_ROOT}/Gemfile
-
-COPY swarm/ /swarm
-
-COPY install.sh /tmp
-RUN /bin/bash /tmp/install.sh
-
-COPY entry.rb ${LAMBDA_TASK_ROOT}/
-
-RUN rm -rf /tmp/*
-
-CMD ["entry.go"]
