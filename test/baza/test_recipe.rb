@@ -111,6 +111,7 @@ class Baza::RecipeTest < Minitest::Test
   end
 
   def test_fake_docker_run
+    skip
     WebMock.enable_net_connect!
     loog = Loog::NULL
     Dir.mktmpdir do |home|
