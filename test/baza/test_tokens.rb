@@ -56,8 +56,16 @@ class Baza::TokensTest < Minitest::Test
   def test_does_not_notify_user_after_fail_creating
     loog = Loog::Buffer.new
     human = Baza::Humans.new(fake_pgsql, tbot: Baza::Tbot::Fake.new(loog)).ensure(fake_name)
-    assert_raises do
-      human.tokens.add(nil)
+    assert_raises(Baza::Urror) do
+      human.tokens.add('')
+    end
+    assert_empty(loog.to_s)
+    assert_raises(Baza::Urror) do
+      human.tokens.add(fake_name * 10)
+    end
+    assert_empty(loog.to_s)
+    assert_raises(Baza::Urror) do
+      human.tokens.add('0')
     end
     assert_empty(loog.to_s)
   end
