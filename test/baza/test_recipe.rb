@@ -22,14 +22,15 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require 'minitest/autorun'
 require 'fileutils'
 require 'loog'
-require 'yaml'
+require 'minitest/autorun'
+require 'random-port'
 require 'webmock/minitest'
-require_relative '../test__helper'
+require 'yaml'
 require_relative '../../objects/baza'
 require_relative '../../objects/baza/recipe'
+require_relative '../test__helper'
 
 # Test for Recipe.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -92,17 +93,19 @@ class Baza::RecipeTest < Minitest::Test
 
   def test_fake_docker_run
     WebMock.enable_net_connect!
-    loog = Loog::VERBOSE
+    loog = Loog::NULL
     Dir.mktmpdir do |home|
       File.write(
         File.join(home, 'Dockerfile'),
         Liquid::Template.parse(
           File.read(File.join(__dir__, '../../assets/lambda/Dockerfile'))
-        ).render('from' => '')
+        ).render('from' => 'public.ecr.aws/lambda/ruby:3.2')
       )
       ['install-pgsql.sh', 'install.sh', 'entry.rb', 'Gemfile'].each do |f|
         FileUtils.copy(File.join(File.join(__dir__, '../../assets/lambda'), f), File.join(home, f))
       end
+      FileUtils.mkdir_p(File.join(home, 'swarm'))
+      File.write(File.join(home, 'swarm/Gemfile'), "source 'https://rubygems.org'\ngem 'tago'")
       bash("docker build #{home} -t image-test", loog)
       ret =
         RandomPort::Pool::SINGLETON.acquire do |port|
