@@ -25,37 +25,18 @@ set -ex
 
 PATH=$PATH:$(pwd)
 
-mkdir -p .aws
-mv credentials .aws
-mv config .aws
 aws ecr get-login-password --region "{{ region }}" | docker login --username AWS --password-stdin "{{ repository }}"
 
-checkout() {
-  name=$1
-  repo=$2
-  branch=$3
-  mkdir checkouts
-  (
-    date
-    git --version
-    uri=git@github.com:${repo}.git
-    if [ ! -e ~/.ssh/id_rsa ]; then
-      uri=https://github.com/${repo}
-    fi
-    home=swarms/${name}
-    git clone -b "${branch}" --depth=1 --single-branch "${uri}" "${home}"
-    git --git-dir "${home}/.git" rev-parse HEAD
-  ) 2>&1 | tee "checkouts/${name}"
-}
+date
 
-mkdir exits
-while IFS= read -r ln; do
-  name=$(echo "${ln}" | cut -f1 -d',')
-  repo=$(echo "${ln}" | cut -f2 -d',')
-  branch=$(echo "${ln}" | cut -f3 -d',')
-  echo 0 > "exits/${name}"
-  checkout "${name}" "${repo}" "${branch}" || echo "$?" > "exits/${name}"
-done < swarms.csv
+git --version
+
+uri=git@github.com:${repo}.git
+if [ ! -e ~/.ssh/id_rsa ]; then
+  uri=https://github.com/${repo}
+fi
+git clone -b "{{ branch }}" --depth=1 --single-branch "${uri}" swarm
+git --git-dir swarm/.git rev-parse HEAD
 
 docker build baza -t baza --platform linux/amd64
 

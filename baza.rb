@@ -25,16 +25,17 @@
 $stdout.sync = true
 
 require 'always'
+require 'cgi'
+require 'fileutils'
 require 'glogin'
 require 'glogin/codec'
 require 'haml'
 require 'iri'
-require 'fileutils'
-require 'loog'
 require 'json'
-require 'cgi'
+require 'loog'
 require 'pgtk'
 require 'pgtk/pool'
+require 'securerandom'
 require 'sinatra'
 require 'sinatra/cookies'
 require 'time'
@@ -254,25 +255,30 @@ configure do
   end
 end
 
-# Redeploy AWS lambda function:
+# Release all swarms:
 configure do
-  set :lambda, Always.new(1)
+  set :release, Always.new(1)
   unless ENV['RACK_ENV'] == 'test'
-    require_relative 'objects/baza/lambda'
-    lmbd = Baza::Lambda.new(
+    require_relative 'objects/baza/ec2'
+    ec2 = Baza::EC2.new(
       settings.humans,
-      settings.config['lambda']['account'],
       settings.config['lambda']['key'],
       settings.config['lambda']['secret'],
       settings.config['lambda']['region'],
       settings.config['lambda']['sgroup'],
       settings.config['lambda']['subnet'],
       settings.config['lambda']['image'],
-      settings.config['lambda']['ssh'],
       loog: settings.loog
     )
-    settings.lambda.start(5 * 60) do
-      lmbd.deploy
+    settings.release.start(5 * 60) do
+      settings.pgsql.exec('SELECT * FROM swarm').each do |row|
+        swarm = Baza::Swarm.new(settings.humans.get(row['human'].to_i), row['id'].to_i, tbot: settings.tbot)
+        next unless swarm.need_release?
+        instance = ec2.run(Baza::Recipe.new(swarm).to_bash)
+        swarm.releases.start(instance, SecureRandom.uuid)
+      end
+      require_relative 'swarm'
+
     end
   end
 end

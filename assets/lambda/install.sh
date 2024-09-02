@@ -21,10 +21,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-while IFS= read -r swarm; do
-  home=/z/swarms/${swarm}
-  if [ -e "${home}/Gemfile" ]; then
-    bundle install --gemfile "${home}/Gemfile" > "/z/install/${swarm}"
-  fi
-done < <(find /z/swarms -type d -max-depth 1)
+home=/swarm
+if [ -e "${home}/Gemfile" ]; then
+  bundle install --gemfile "${home}/Gemfile"
+fi
 

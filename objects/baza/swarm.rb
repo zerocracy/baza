@@ -46,36 +46,6 @@ class Baza::Swarm
     )
   end
 
-  # Change release SHA of the swarm.
-  #
-  # @param [String] sha The hash of the Git head
-  def release!(sha)
-    swarms.pgsql.exec(
-      'UPDATE swarm SET release = $1 WHERE id = $2 AND human = $3',
-      [sha, @id, swarms.human.id]
-    )
-  end
-
-  # Change exit code of the swarm.
-  #
-  # @param [Integer] code The exit code of the deployment attempt
-  def exit!(code)
-    swarms.pgsql.exec(
-      'UPDATE swarm SET exit = $1 WHERE id = $2 AND human = $3',
-      [code, @id, swarms.human.id]
-    )
-  end
-
-  # Change STDOUT of the latest deployment of the swarm.
-  #
-  # @param [String] log The stdout of the deployment attempt of the swarm
-  def stdout!(log)
-    swarms.pgsql.exec(
-      'UPDATE swarm SET stdout = $1 WHERE id = $2 AND human = $3',
-      [log, @id, @swarms.human.id]
-    )
-  end
-
   def remove
     swarms.pgsql.exec(
       'DELETE FROM swarm WHERE id = $1 AND human = $2',
@@ -98,29 +68,24 @@ class Baza::Swarm
     to_json[:branch]
   end
 
-  # Get its stdout.
-  def stdout
-    to_json[:stdout]
-  end
-
-  # Get its exit code.
-  def exit
-    to_json[:exit]
-  end
-
   # Get its head SHA.
   def head
     to_json[:head]
   end
 
   # Get its release SHA.
-  def release
-    to_json[:release]
+  def releases
+    require_relative 'releases'
+    Baza::Releases.new(self, tbot: @tbot)
   end
 
-  # Get its dirty status.
-  def dirty?
-    to_json[:head] != to_json[:release]
+  # Does it need immediate release now?
+  def need_release?
+    first = nil
+    releases.each { |r| first = r }
+    return true if first.nil?
+    return false if first[:exit].nil?
+    first[:head] == head
   end
 
   private
@@ -139,9 +104,6 @@ class Baza::Swarm
           repository: row['repository'],
           branch: row['branch'],
           head: row['head'],
-          release: row['release'],
-          stdout: row['stdout'],
-          exit: row['exit']&.to_i,
           created: Time.parse(row['created'])
         }
       end

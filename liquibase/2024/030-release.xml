@@ -25,15 +25,29 @@ SOFTWARE.
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd" logicalFilePath="030-swarm-sha.xml">
   <changeSet id="030" author="yegor256">
     <sql>
-      ALTER TABLE swarm ADD COLUMN head VARCHAR(40) NOT NULL DEFAULT '0000000000000000000000000000000000000000';
-      ALTER TABLE swarm ADD CONSTRAINT head_size CHECK (head ~ '^[0-9A-Z]{40}$');
-    </sql>
-    <sql>
-      ALTER TABLE swarm ADD COLUMN release VARCHAR(40) NOT NULL DEFAULT '0000000000000000000000000000000000000000';
-      ALTER TABLE swarm ADD CONSTRAINT release_size CHECK (release ~ '^[0-9A-Z]{40}$');
-    </sql>
-    <sql>
       ALTER TABLE swarm DROP COLUMN dirty;
+      ALTER TABLE swarm DROP COLUMN stdout;
+      ALTER TABLE swarm DROP COLUMN exit;
+    </sql>
+    <sql>
+      ALTER TABLE swarm ADD COLUMN head VARCHAR(40) NOT NULL DEFAULT '0000000000000000000000000000000000000000';
+      ALTER TABLE swarm ADD CONSTRAINT head_format CHECK (head ~ '^[0-9A-Z]{40}$');
+    </sql>
+    <sql>
+      CREATE TABLE release (
+        id SERIAL PRIMARY KEY,
+        swarm INT NOT NULL REFERENCES swarm(id),
+        instance VARCHAR(20) NOT NULL,
+        secret VARCHAR(64) NOT NULL,
+        head VARCHAR(40);
+        tail TEXT,
+        exit INT,
+        msec INT,
+        created TIMESTAMPTZ DEFAULT now() NOT NULL,
+        UNIQUE(secret),
+        UNIQUE(instance),
+        CONSTRAINT head_format CHECK (head ~ '^[0-9A-Z]{40}$');
+      );
     </sql>
   </changeSet>
 </databaseChangeLog>

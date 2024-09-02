@@ -36,11 +36,10 @@ RUN /bin/bash /tmp/install-pgsql.sh
 COPY Gemfile ${LAMBDA_TASK_ROOT}/
 RUN gem install bundler && bundle install --gemfile=${LAMBDA_TASK_ROOT}/Gemfile
 
-RUN rm -rf /z
-COPY swarms/ /z/swarms
+COPY swarm/ /swarm
 
-COPY install-swarms.sh /tmp
-RUN /bin/bash /tmp/install-swarms.sh
+COPY install.sh /tmp
+RUN /bin/bash /tmp/install.sh
 
 COPY entry.rb ${LAMBDA_TASK_ROOT}/
 
