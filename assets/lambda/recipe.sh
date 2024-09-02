@@ -23,15 +23,19 @@
 
 set -ex
 
+cd "$(dirname "$0")"
+
 trap 'shutdown' EXIT
 
-PATH=$PATH:$(pwd)
+PATH=$(pwd):$PATH
 
 {{ save_files }}
 
 mkdir .ssh
 mv id_rsa .ssh/id_rsa
 chmod 600 .ssh/id_rsa
+
+ls -al .
 
 aws ecr get-login-password --region "{{ region }}" | docker login --username AWS --password-stdin "{{ repository }}"
 
@@ -42,6 +46,7 @@ fi
 git clone -b "{{ branch }}" --depth=1 --single-branch "${uri}" swarm
 head=$(git --git-dir swarm/.git rev-parse HEAD)
 
+printf '0' > exit.txt
 docker build baza -t baza --platform linux/amd64 2>&1 > docker.log || echo $? > exit.txt
 code=$(cat exit.txt)
 

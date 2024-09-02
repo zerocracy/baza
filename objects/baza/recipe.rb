@@ -34,9 +34,11 @@ class Baza::Recipe
   # Ctor.
   #
   # @param [Baza::Swarm] swarm The swarm
+  # @param [String] id_rsa RSA private key
   # @param [Loog] loog Logging facility
-  def initialize(swarm, loog: Loog::NULL)
+  def initialize(swarm, id_rsa, loog: Loog::NULL)
     @swarm = swarm
+    @id_rsa = id_rsa
     @loog = loog
   end
 
@@ -47,11 +49,12 @@ class Baza::Recipe
     file_of(
       'recipe.sh',
       'save_files' => [
-        cat('Gemfile'),
-        cat('entry.rb'),
-        cat('install-pgsql.sh'),
-        cat('install.sh'),
-        cat('Dockerfile', 'from' => "#{account}.dkr.ecr.#{region}.amazonaws.com")
+        cat('id_rsa', @id_rsa),
+        cat_of('Gemfile'),
+        cat_of('entry.rb'),
+        cat_of('install-pgsql.sh'),
+        cat_of('install.sh'),
+        cat_of('Dockerfile', 'from' => "#{account}.dkr.ecr.#{region}.amazonaws.com/zerocracy/baza:#{tag}")
       ].join,
       'name' => @swarm.name,
       'github' => @swarm.repository,
@@ -70,8 +73,12 @@ class Baza::Recipe
     Liquid::Template.parse(File.read(File.join(dir, file))).render(args)
   end
 
-  def cat(file, args = {})
+  def cat_of(file, args = {})
     txt = file_of(file, args)
+    cat(file, txt)
+  end
+
+  def cat(file, txt)
     m = "EOT_#{SecureRandom.hex(8)}"
     "\ncat > #{file} <<#{m}\n#{txt}\n#{m}\n"
   end

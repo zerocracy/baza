@@ -27,7 +27,6 @@ require 'fileutils'
 require 'loog'
 require 'yaml'
 require 'webmock/minitest'
-require 'net/ssh'
 require_relative '../test__helper'
 require_relative '../../objects/baza'
 require_relative '../../objects/baza/recipe'
@@ -37,110 +36,73 @@ require_relative '../../objects/baza/recipe'
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
 class Baza::RecipeTest < Minitest::Test
-  def test_generates_script
-    s = fake_human.swarms.add(fake_name, "#{fake_name}/#{fake_name}", 'master')
-    bash = Baza::Recipe.new(s).to_bash('accout', 'us-east-1', '0.0.0', 'sword-fish')
-    puts bash
+  def setup
+    fake_pgsql.exec('DELETE FROM swarm')
   end
 
-  def test_fake_deploy
-    WebMock.disable_net_connect!
-    loog = Loog::VERBOSE
-    fake_pgsql.exec('DELETE FROM swarm')
-    fake_human.swarms.add('st', 'zerocracy/swarm-template', 'master')
-      .head!('4242424242424242424242424242424242424242')
-    stub('RunInstances', { instancesSet: { item: { instanceId: 'i-42424242' } } })
-    stub('TerminateInstances', {})
-    stub('DescribeInstanceStatus', { instanceStatusSet: { item: { instanceStatus: { status: 'ok' } } } })
-    stub('DescribeInstances', { reservationSet: { item: { instancesSet: { item: { ipAddress: '127.0.0.1' } } } } })
+  def test_generates_script
+    s = fake_human.swarms.add(fake_name, "#{fake_name}/#{fake_name}", 'master')
+    bash = Baza::Recipe.new(s, '').to_bash('accout', 'us-east-1', '0.0.0', 'sword-fish')
+    [
+      'FROM accout.dkr.ecr.us-east-1.amazonaws.com/zerocracy/baza:0.0.0',
+      'RUN yum update -y',
+      'gem \'aws-sdk-core\'',
+      'cat > entry.rb <<EOT_'
+    ].each { |t| assert(bash.include?(t), t) }
+  end
+
+  def test_runs_script
+    loog = Loog::NULL
+    s = fake_human.swarms.add('st', 'zerocracy/swarm-template', 'master')
     Dir.mktmpdir do |home|
-      id_rsa = File.join(home, 'id_rsa')
-      FileUtils.copy(File.join(__dir__, '../../fixtures/ssh/id_rsa'), id_rsa)
-      id_rsa_pub = File.join(home, 'id_rsa.pub')
-      FileUtils.copy(File.join(__dir__, '../../fixtures/ssh/id_rsa.pub'), id_rsa_pub)
-      user = 'tester'
-      port = 2222
-      docker_log = File.join(home, 'docker.log')
-      loog.debug(`
-        docker run -d -p #{port}:22 \
-        -v '#{id_rsa_pub}:/etc/authorized_keys/#{user}' \
-        -e SSH_USERS="#{user}:1001:1001" \
-        --name=fakeserver \
-        kabirbaidhya/fakeserver 2>&1 >#{docker_log}
-      `)
-      assert_equal(0, $CHILD_STATUS.exitstatus)
-      container = File.read(docker_log).split("\n").last.strip
-      begin
-        Baza::Shell.new(File.read(id_rsa), user, when_ready(port), loog:).connect('127.0.0.1') do |ssh|
-          ssh.exec(
-            [
-              '(',
-              'set -ex',
-              '&& cd /home/tester/',
-              '&& echo "echo fake-\$0 \$@" > docker',
-              '&& cp docker aws',
-              '&& chmod a+x docker aws',
-              ') 2>&1'
-            ].join
-          )
-        end
-        Baza::Lambda.new(
-          fake_humans,
-          # AWS account ID
-          '44444444444',
-          # AWS key
-          'FAKEFAKEFAKEFAKEFAKE',
-          # AWS secret
-          'KmX8thisisfakesecret/thisisfakeeXXXXXXXX',
-          # EC2 region
-          'us-east-1',
-          # EC2 security group
-          'sg-44444444444444444',
-          # EC2 subnet
-          'subnet-44444444444444444',
-          # EC2 image
-          'ami-44444444444444444',
-          File.read(id_rsa),
-          loog:, user:, port:
-        ).deploy
-      ensure
-        `docker rm -f #{container}`
+      %w[aws docker shutdown curl].each do |f|
+        sh = File.join(home, f)
+        File.write(sh, 'echo FAKE-$(basename $0) $@')
+        FileUtils.chmod('+x', sh)
       end
+      sh = File.join(home, 'recipe.sh')
+      File.write(
+        sh,
+        Baza::Recipe.new(s, '').to_bash('accout', 'us-east-1', '0.0.0', 'sword-fish')
+      )
+      bash("/bin/bash #{sh}", loog)
     end
   end
 
   def test_live_deploy
     skip # use if very very carefully!
-    fake_pgsql.exec('DELETE FROM swarm')
+    loog = Loog::VERBOSE
     yml = '/code/home/assets/zerocracy/baza.yml'
     skip unless File.exist?(yml)
     cfg = YAML.safe_load(File.open(yml))['lambda']
-    fake_human.swarms.add(fake_name, "#{fake_name}/#{fake_name}", fake_name).dirty!(true)
+    swarm = fake_human.swarms.add('st', 'zerocracy/swarm-template', 'master')
     WebMock.enable_net_connect!
-    Baza::Lambda.new(
-      fake_humans,
-      cfg['account'],
+    ec2 = Baza::EC2.new(
       cfg['key'],
       cfg['secret'],
       cfg['region'],
       cfg['sgroup'],
       cfg['subnet'],
       cfg['image'],
-      cfg['ssh'],
-      loog: Loog::VERBOSE
-    ).deploy
+      loog:
+    )
+    instance = ec2.run(Baza::Recipe.new(swarm).to_bash(cfg['account'], cfg['region'], 'latest', ''))
+    assert(instance.start_with?('i-'))
   end
 
   def test_fake_docker_run
     WebMock.enable_net_connect!
     loog = Loog::VERBOSE
     Dir.mktmpdir do |home|
-      zip = File.join(home, 'image.zip')
-      Baza::Image.new(
-        fake_humans, '42424242', 'aws-key', 'aws-secret', 'us-east-1',
-        tag: 'latest', loog:, from: 'public.ecr.aws/lambda/ruby:3.2'
-      ).pack(zip)
-      Baza::Zip.new(zip).unpack(home)
+      File.write(
+        File.join(home, 'Dockerfile'),
+        Liquid::Template.parse(
+          File.read(File.join(__dir__, '../../assets/lambda/Dockerfile'))
+        ).render('from' => '')
+      )
+      ['install-pgsql.sh', 'install.sh', 'entry.rb', 'Gemfile'].each do |f|
+        FileUtils.copy(File.join(File.join(__dir__, '../../assets/lambda'), f), File.join(home, f))
+      end
       bash("docker build #{home} -t image-test", loog)
       ret =
         RandomPort::Pool::SINGLETON.acquire do |port|

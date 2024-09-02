@@ -262,7 +262,6 @@ configure do
     require_relative 'objects/baza/ec2'
     cfg = settings.config['lambda']
     ec2 = Baza::EC2.new(
-      settings.humans,
       cfg['key'],
       cfg['secret'],
       cfg['region'],
