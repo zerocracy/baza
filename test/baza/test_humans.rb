@@ -87,7 +87,7 @@ class Baza::HumansTest < Minitest::Test
   end
 
   def test_verify_one_job
-    WebMock.disable_net_connect!
+    WebMock.allow_net_connect!
     job = fake_job
     job.jobs.human.humans.verify_one_job do |_job, verdict|
       assert(verdict.start_with?('FAKE: '))

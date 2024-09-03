@@ -139,6 +139,7 @@ class Baza::FrontPushTest < Minitest::Test
   end
 
   def test_starts_job_via_put
+    WebMock.allow_net_connect!
     token = make_valid_token
     fb = Factbase.new
     (0..100).each do |i|
