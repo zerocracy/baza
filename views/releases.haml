@@ -1,3 +1,11 @@
+- wn = releases.swarm.why_not
+- if wn.nil?
+  %p
+    The swarm will soon be deployed.
+  %p
+    The swarm won't be deployed any time soon:
+    = wn.inspect
+
 %p
   The swarm
   %span.ff

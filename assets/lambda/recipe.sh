@@ -51,9 +51,9 @@ SECONDS=0
   git clone -b "{{ branch }}" --depth=1 --single-branch "${uri}" swarm
   git --git-dir swarm/.git rev-parse HEAD | tr '[:lower:]' '[:upper:]' > head.txt
 
-  docker build . -t baza --platform linux/amd64
-
   aws ecr get-login-password --region "{{ region }}" | docker login --username AWS --password-stdin "{{ repository }}"
+
+  docker build . -t baza --platform linux/amd64
 
   docker tag baza "{{ repository }}/{{ image }}"
   docker push "{{ repository }}/{{ image }}"
