@@ -85,5 +85,14 @@ class Baza::SecretsTest < Minitest::Test
       human.secrets.add(fake_name, fake_name, 'привет')
     end
     assert_empty(loog.to_s)
+
+    name = fake_name
+    key = fake_name
+    human.secrets.add(name, key, fake_name * 10)
+    assert_equal(1, loog.to_s.split("\n").size)
+    assert_raises(Baza::Urror) do
+      human.secrets.add(name, key, fake_name * 10)
+    end
+    assert_equal(1, loog.to_s.split("\n").size)
   end
 end
