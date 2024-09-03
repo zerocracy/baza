@@ -33,6 +33,8 @@ PATH=$(pwd):$PATH
 
 printf '0000000000000000000000000000000000000000' > head.txt
 
+SECONDS=0
+
 (
   mkdir .ssh
   mv id_rsa .ssh/id_rsa
@@ -70,4 +72,4 @@ printf '0000000000000000000000000000000000000000' > head.txt
   fi
 ) 2>&1 > stdout.log || echo $? > exit.txt
 
-curl -X PUT -d stdout.log -H 'Content-Type: text/plain' "https://www.zerocracy.com/?secret={{ secret }}&head=$(cat head.txt)&exit=$(cat exit.txt)"
+curl -X PUT -d stdout.log -H 'Content-Type: text/plain' "https://www.zerocracy.com/?secret={{ secret }}&head=$(cat head.txt)&exit=$(cat exit.txt)&sec=${SECONDS}"

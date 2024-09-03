@@ -58,8 +58,15 @@ put('/swarms/finish') do
   secret = params[:secret]
   return 'No secret? No update!' if secret.nil? || secret.empty?
   request.body.rewind
-  r = the_human.find_release(secret)
-  r.finish!(params[:head], request.body, params[:code].to_i, params[:msec].to_i)
+  r = settings.humans.find_release(secret)
+  raise Baza::Urror, 'The "secret" is not valid, cannot find a release' if r.nil?
+  head = params[:head]
+  raise Baza::Urror, 'The "head" HTTP param is mandatory' if head.nil?
+  code = params[:exit]
+  raise Baza::Urror, 'The "exit" HTTP param is mandatory' if code.nil?
+  sec = params[:sec]
+  raise Baza::Urror, 'The "sec" HTTP param is mandatory' if sec.nil?
+  r.finish!(head, request.body, code.to_i, 1000 * sec.to_i)
   flash(iri.cut('/swarms'), "The release ##{r.id} was finished")
 end
 

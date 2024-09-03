@@ -62,4 +62,19 @@ class Baza::FrontSwarmsTest < Minitest::Test
     )
     assert_status(200)
   end
+
+  def test_swarms_finish
+    human = fake_job.jobs.human
+    fake_login(human.github)
+    swarms = human.swarms
+    s = swarms.add(fake_name, "#{fake_name}/#{fake_name}", fake_name)
+    secret = 'the-super-secret'
+    s.releases.start('tail', secret)
+    put(
+      "/swarms/finish?head=4242424242424242424242424242424242424242&exit=0&sec=42&secret=#{secret}",
+      'this is stdout',
+      'CONTENT_TYPE' => 'text/plain'
+    )
+    assert_status(302)
+  end
 end
