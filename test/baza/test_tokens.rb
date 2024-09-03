@@ -78,7 +78,6 @@ class Baza::TokensTest < Minitest::Test
       human.tokens.add(fake_name * 10)
     end
     assert_empty(loog.to_s)
-
   end
 
   def test_does_not_notify_user_when_name_is_not_valid
@@ -94,7 +93,7 @@ class Baza::TokensTest < Minitest::Test
     loog = Loog::Buffer.new
     human = Baza::Humans.new(fake_pgsql, tbot: Baza::Tbot::Fake.new(loog)).ensure(fake_name)
     name = fake_name
-    token = human.tokens.add(name)
+    human.tokens.add(name)
     assert_equal(1, loog.to_s.split("\n").size)
     assert_raises(Baza::Urror) do
       human.tokens.add(name)
