@@ -66,13 +66,15 @@ SECONDS=0
   docker push "{{ repository }}/{{ image }}"
 
   func="baza-{{ name }}"
-  if aws lambda get-function --function-name "${func}"; then
+  if aws lambda get-function --function-name "${func}" --region "{{ region }}"; then
     aws lambda update-function-code --function-name "${func}" \
+      --region "{{ region }}" \
       --image-uri "{{ repository }}/{{ image }}" \
       --publish
   else
     role=arn:aws:iam::{{ account }}:role/baza-lambda
     aws lambda create-function --function-name "${func}" \
+      --region "{{ region }}" \
       --package-type Image \
       --code "ImageUri=${uri}" \
       --role "${role}"

@@ -55,11 +55,14 @@
         = "##{r[:id]}"
       - if r[:head].nil?
         %td.orange{colspan: 3}
-          Not yet
+          Waiting...
       - else
         - if r[:head] == 'F' * 40
           %td.orange
-            Empty
+            Invalid
+        - elsif r[:head] == '0' * 40
+          %td.orange
+            Zero
         - else
           %td.ff
             %a{href: "https://github.com/#{releases.swarm.repository}/commit/#{r[:head]}"}<
