@@ -45,6 +45,13 @@
         = "##{s.id}"
       %td.ff
         = s.name
+        - if s.exit.nil?
+          %i.fa-solid.fa-hourglass-start
+        - elsif s.exit.zero?
+          %i.fa-regular.fa-thumbs-up.good
+        - else
+          %a.ico{href: iri.cut('/swarms').append(s.id).append('releases'), title: "Releases of the swarm ##{s.id}"}
+            %i.fa-solid.fa-triangle-exclamation.bad{title: 'The latest release was not successful'}
         - why = s.why_not
         - if why.nil?
           %i.fa-regular.fa-envelope.good{title: 'This swarm will be released in a few minutes...'}

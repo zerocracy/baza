@@ -123,13 +123,19 @@ class Baza::Swarm
     @to_json ||=
       begin
         row = swarms.pgsql.exec(
-          'SELECT * FROM swarm WHERE id = $1 AND human = $2',
+          [
+            'SELECT s.*,',
+            '(SELECT exit FROM release WHERE swarm = s.id ORDER BY release.id LIMIT 1) AS exit',
+            'FROM swarm AS s',
+            'WHERE s.id = $1 AND s.human = $2'
+          ],
           [@id, @swarms.human.id]
         ).first
         raise Baza::Urror, "There is no swarm ##{@id}" if row.nil?
         {
           id: @id,
           name: row['name'],
+          exit: row['exit']&.to_i,
           enabled: row['enabled'] == 't',
           repository: row['repository'],
           branch: row['branch'],
