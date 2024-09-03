@@ -25,6 +25,7 @@
 require 'tago'
 require 'cgi'
 require 'securerandom'
+require_relative '../objects/baza/ipgeolocation'
 
 # Front helpers.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -232,6 +233,10 @@ module Baza::Helpers
     id = the_human.id
     settings.telegramers[id] = the_human.telegram? if settings.telegramers[id].nil?
     settings.telegramers[id]
+  end
+
+  def country_flag(ip)
+    Baza::IpGeolocation.new(token: ENV['IPGEOLOCATION_TOKEN']).ipgeo(ip:)['country_flag']
   end
 end
 
