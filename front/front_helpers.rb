@@ -236,7 +236,7 @@ module Baza::Helpers
   end
 
   def country_flag(ip)
-    Baza::IpGeolocation.new(token: ENV['IPGEOLOCATION_TOKEN']).ipgeo(ip:)['country_flag']
+    Baza::IpGeolocation.new(token: ENV.fetch('IPGEOLOCATION_TOKEN', nil)).ipgeo(ip:)['country_flag']
   end
 end
 
