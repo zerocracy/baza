@@ -64,4 +64,8 @@ class Baza::FrontHelpersTest < Minitest::Test
   def test_secret_without_an_eye
     assert_equal('<span>swor</span><span class="gray">*****</span>', secret('swordfish', eye: false))
   end
+
+  def test_country_flag
+    assert_equal('https://ipgeolocation.io/static/flags/us_64.png', country_flag('8.8.8.8'))
+  end
 end

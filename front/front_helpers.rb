@@ -236,7 +236,12 @@ module Baza::Helpers
   end
 
   def country_flag(ip)
-    Baza::IpGeolocation.new(token: ENV.fetch('IPGEOLOCATION_TOKEN', nil)).ipgeo(ip:)['country_flag']
+    token = ENV.fetch('IPGEOLOCATION_TOKEN', nil)
+    Baza::IpGeolocation.new(
+      token:,
+      connection: ENV['RACK_ENV'] == 'test' && token.nil? ?
+      Baza::IpGeolocation::FakeConnection.new : Faraday.new(url: Baza::IpGeolocation.host)
+    ).ipgeo(ip:)['country_flag']
   end
 end
 
