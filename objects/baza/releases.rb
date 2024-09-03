@@ -58,6 +58,7 @@ class Baza::Releases
     rows.each do |row|
       r = {
         id: row['id'].to_i,
+        head: row['head'],
         exit: row['exit']&.to_i,
         tail: row['tail'],
         msec: row['msec']&.to_i,

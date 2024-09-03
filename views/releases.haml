@@ -32,9 +32,12 @@
   - paging(releases, offset:) do |r|
     %tr
       %td.ff
-        = "##{r.id}"
+        = "##{r[:id]}"
       %td.ff
-        = r[:head][0..8]
+        - if r[:head].nil?
+          = '?'
+        - else
+          = r[:head][0..8]
       %td.ff
         = r[:code]
       %td.ff

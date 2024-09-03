@@ -23,28 +23,22 @@
 # SOFTWARE.
 
 require 'minitest/autorun'
-require 'webmock/minitest'
-require_relative '../../objects/baza'
-require_relative '../../objects/baza/ec2'
+require 'factbase'
 require_relative '../test__helper'
+require_relative '../../objects/baza'
+require_relative '../../baza'
 
-# Test for EC2.
-# Author:: Yegor Bugayenko (yegor256@gmail.com)
-# Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
-# License:: MIT
-class Baza::EC2Test < Minitest::Test
-  def test_run_instance
-    ec2 = Baza::EC2.new(
-      'FAKEFAKEFAKEFAKEFAKE',
-      'fakefakefakefakefakefakefakefakefakefake',
-      'us-east-1',
-      'sg-424242',
-      'sn-42424242',
-      't2.large',
-      loog: Loog::NULL
-    )
-    fake_aws('RunInstances', { instancesSet: { item: { instanceId: 'i-42424242' } } })
-    i = ec2.run_instance('some-fake-name', "#!/bin/bash\necho test\n")
-    assert_equal('i-42424242', i)
+class Baza::FrontReleasesTest < Minitest::Test
+  def app
+    Sinatra::Application
+  end
+
+  def test_read_releases
+    human = fake_job.jobs.human
+    fake_login(human.github)
+    swarm = human.swarms.add(fake_name, "#{fake_name}/#{fake_name}", fake_name)
+    swarm.releases.start('tail', 'secret')
+    get("/swarms/#{swarm.id}/releases")
+    assert_status(200)
   end
 end
