@@ -76,7 +76,7 @@ SECONDS=0
     aws lambda create-function --function-name "${func}" \
       --region "{{ region }}" \
       --package-type Image \
-      --code "ImageUri=${uri}" \
+      --code "ImageUri={{ repository }}/{{ image }}" \
       --role "${role}"
     # swarms--use1-az4--x-s3
     # give this function permissions to work with S3 bucket
