@@ -51,7 +51,7 @@ function this() {
   mkdir .ssh
   mv id_rsa .ssh/id_rsa
   chmod 600 .ssh/id_rsa
-  printf "Host *\n  StrictHostKeyChecking no\n  UserKnownHostsFile=/dev/null\n" > .ssh/config
+  ssh-keyscan -t rsa github.com >> .ssh/known_hosts
 
   uri="git@github.com:{{ github }}.git"
   if [ ! -s .ssh/id_rsa ]; then
