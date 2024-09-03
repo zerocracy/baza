@@ -98,23 +98,6 @@ class Baza::PipelineTest < Minitest::Test
     end
   end
 
-  def test_with_fatal_error
-    finish_all_jobs
-    fbs = Baza::Factbases.new('', '', loog: Loog::NULL)
-    Dir.mktmpdir do |home|
-      token = fake_token
-      job = token.start(fake_name, fake_name, 1, 0, 'n/a', [], '192.168.1.1')
-      human = token.human
-      assert_raises { process_all(home, human.humans, fbs) }
-      assert(human.jobs.get(job.id).finished?)
-      job = human.jobs.get(job.id)
-      assert(!job.result.nil?)
-      assert(!job.result.exit.zero?)
-      assert(job.result.stdout.include?('No such file or directory'), job.result.stdout)
-      assert(!human.locks.locked?(job.name))
-    end
-  end
-
   def test_with_two_alterations
     finish_all_jobs
     humans = Baza::Humans.new(fake_pgsql)

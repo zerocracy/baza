@@ -30,6 +30,15 @@ cd "$(dirname "$0")"
 
 PATH=$(pwd):$PATH
 
+# If the "aws" file exists right here, it's a testing mode:
+if [ ! -e aws ]; then
+  AWS_TOKEN=$(curl -X PUT 'http://169.254.169.254/latest/api/token' -H 'X-aws-ec2-metadata-token-ttl-seconds: 21600')
+  AWS_JSON=$(curl -H "X-aws-ec2-metadata-token: ${TOKEN}" http://169.254.169.254/latest/meta-data/iam/security-credentials/baza-release)
+  export AWS_ACCESS_KEY_ID=$(echo $AWS_JSON | jq -r '.AccessKeyId')
+  export AWS_SECRET_ACCESS_KEY=$(echo $AWS_JSON | jq -r '.SecretAccessKey')
+  export AWS_SESSION_TOKEN=$(echo $AWS_JSON | jq -r '.Token')
+fi
+
 {{ save_files }}
 
 printf '0000000000000000000000000000000000000000' > head.txt

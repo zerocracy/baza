@@ -89,7 +89,12 @@ class Baza::Factbases
     raise 'File name can\'t be nil' if file.nil?
     if @key.empty?
       FileUtils.mkdir_p(File.dirname(file))
-      File.binwrite(file, File.binread(fake(uuid)))
+      f = fake(uuid)
+      if File.exist?(f)
+        File.binwrite(file, File.binread(f))
+      else
+        File.binwrite(file, Factbase.new.export)
+      end
       @loog.debug("Fake loaded #{uuid} into #{file} (#{File.size(file)} bytes)")
     else
       key = oname(uuid)
