@@ -35,7 +35,7 @@ require_relative '../../objects/baza/ipgeolocation'
 # License:: MIT
 class Baza::IpGeolocationTest < Minitest::Test
   def test_create_client
-    client = Baza::IpGeolocation.new(token: 'token')
+    client = Baza::IpGeolocation.new(token: 'token', connection: Faraday.new(url: Baza::IpGeolocation.host))
     assert_instance_of(Baza::IpGeolocation, client)
   end
 
@@ -55,7 +55,7 @@ class Baza::IpGeolocationTest < Minitest::Test
   def test_call_ipgeo
     skip # it's a "live" test, run it manually if you need it
     WebMock.allow_net_connect!
-    client = Baza::IpGeolocation.new(token: 'token')
+    client = Baza::IpGeolocation.new(token: 'token', connection: Faraday.new(url: Baza::IpGeolocation.host))
     result = client.ipgeo(ip: '8.8.8.8')
     assert_equal('8.8.8.8', result['ip'])
     assert_equal('United States', result['country_name'])
@@ -64,7 +64,7 @@ class Baza::IpGeolocationTest < Minitest::Test
 
   def test_call_ipgeo_with_invalid_token
     WebMock.allow_net_connect!
-    client = Baza::IpGeolocation.new(token: nil)
+    client = Baza::IpGeolocation.new(token: nil, connection: Faraday.new(url: Baza::IpGeolocation.host))
     result = client.ipgeo(ip: '8.8.8.8')
     assert_nil(result['ip'])
   end
