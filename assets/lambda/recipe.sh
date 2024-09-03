@@ -45,7 +45,7 @@ printf '0' > exit.txt
 
 SECONDS=0
 
-(
+function this() {
   mkdir .ssh
   mv id_rsa .ssh/id_rsa
   chmod 600 .ssh/id_rsa
@@ -81,7 +81,9 @@ SECONDS=0
     # swarms--use1-az4--x-s3
     # give this function permissions to work with S3 bucket
   fi
-) 2>&1 | tail -200 | tee stdout.log || echo $? > exit.txt
+}
+
+this 2>&1 | tail -200 | tee stdout.log || echo $? > exit.txt
 
 if [ ! -e head.txt -o ! -s head.txt ]; then
   printf '0000000000000000000000000000000000000000' > head.txt
