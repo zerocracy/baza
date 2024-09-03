@@ -124,7 +124,7 @@ module Baza::Helpers
           style: 'display: none',
           onclick: js_copy
         ) { html_tag('i', class: 'fa-regular fa-copy') },
-        html_tag('span', style: 'display: none;') { 'Copied to clipboard!' }
+        html_tag('span', class: 'gray', style: 'display: none;') { 'Copied to clipboard!' }
       ].join('&nbsp;')
     end
   end

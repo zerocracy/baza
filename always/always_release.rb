@@ -27,6 +27,7 @@ require_relative '../objects/baza/swarm'
 require_relative '../objects/baza/recipe'
 
 cfg = settings.config['lambda']
+type = 't2.xlarge'
 ec2 = Baza::EC2.new(
   cfg['key'],
   cfg['secret'],
@@ -34,6 +35,7 @@ ec2 = Baza::EC2.new(
   cfg['sgroup'],
   cfg['subnet'],
   cfg['image'],
+  type:,
   loog: settings.loog
 )
 settings.pgsql.exec('SELECT * FROM swarm').each do |row|
@@ -44,5 +46,5 @@ settings.pgsql.exec('SELECT * FROM swarm').each do |row|
     "baza/#{swarm.name}",
     Baza::Recipe.new(swarm, cfg['id_rsa']).to_bash(cfg['account'], cfg['region'], secret)
   )
-  swarm.releases.start("Started AWS EC2 #{cfg['image'].inspect} instance #{instance.inspect}...", secret)
+  swarm.releases.start("Started AWS EC2 #{type.inspect} instance #{instance.inspect}...", secret)
 end

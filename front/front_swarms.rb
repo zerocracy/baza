@@ -137,6 +137,6 @@ post('/swarms/add') do
   n = params[:name]
   repo = params[:repository]
   branch = params[:branch]
-  id = the_human.swarms.add(n, repo, branch)
-  flash(iri.cut('/swarms'), "The swarm ##{id} #{repo}@#{branch} just added")
+  s = the_human.swarms.add(n, repo, branch)
+  flash(iri.cut('/swarms'), "The swarm ##{s.id} #{repo}@#{branch} just added")
 end

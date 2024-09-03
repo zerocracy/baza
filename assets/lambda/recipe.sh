@@ -41,7 +41,6 @@ fi
 
 {{ save_files }}
 
-printf '0000000000000000000000000000000000000000' > head.txt
 printf '0' > exit.txt
 
 SECONDS=0
@@ -52,7 +51,7 @@ SECONDS=0
   chmod 600 .ssh/id_rsa
 
   uri="git@github.com:{{ github }}.git"
-  if [ ! -s ~/.ssh/id_rsa ]; then
+  if [ ! -s .ssh/id_rsa ]; then
     uri="https://github.com/{{ github }}"
   fi
   git clone -b "{{ branch }}" --depth=1 --single-branch "${uri}" swarm
@@ -81,7 +80,11 @@ SECONDS=0
     # swarms--use1-az4--x-s3
     # give this function permissions to work with S3 bucket
   fi
-) 2>&1 | tail -200 > stdout.log || echo $? > exit.txt
+) 2>&1 | tail -200 | tee stdout.log || echo $? > exit.txt
+
+if [ ! -e head.txt -o ! -s head.txt ]; then
+  printf '0000000000000000000000000000000000000000' > head.txt
+fi
 
 curl -X PUT --data-binary '@stdout.log' -H 'Content-Type: text/plain' \
   "{{ host }}/swarms/finish?secret={{ secret }}&head=$(cat head.txt)&exit=$(cat exit.txt)&sec=${SECONDS}"
