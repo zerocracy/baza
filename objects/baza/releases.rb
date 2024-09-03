@@ -59,6 +59,7 @@ class Baza::Releases
       r = {
         id: row['id'].to_i,
         head: row['head'],
+        secret: row['secret'],
         exit: row['exit']&.to_i,
         tail: row['tail'],
         msec: row['msec']&.to_i,

@@ -28,7 +28,7 @@
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
 class Baza::Release
-  attr_reader :releases
+  attr_reader :releases, :id
 
   def initialize(releases, id, tbot: Baza::Tbot::Fake.new)
     @releases = releases
@@ -50,7 +50,7 @@ class Baza::Release
     raise Baza::Urror, 'The "msec" must be Integer' unless msec.is_a?(Integer)
     @releases.pgsql.exec(
       'UPDATE release SET head = $2, tail = $3, exit = $4, msec = $5 WHERE id = $1 AND swarm = $6',
-      [@id, head, tail, code, msec, @swarm.id]
+      [@id, head, tail, code, msec, @releases.swarm.id]
     )
   end
 end

@@ -46,6 +46,14 @@ get(%r{/swarms/([0-9]+)/releases}) do
   )
 end
 
+get(%r{/swarms/([0-9]+)/releases/([0-9]+)/stop}) do
+  admin_only
+  swarm = the_human.swarms.get(params['captures'].first.to_i)
+  r = swarm.releases.get(params['captures'][1].to_i)
+  r.finish!('0000000000000000000000000000000000000000', "stopped by @#{the_human.github}", 1, 42)
+  flash(iri.cut('/swarms').append(swarm.id).append('releases'), "The release ##{r.id} was stopped")
+end
+
 put('/swarms/finish') do
   secret = params[:secret]
   return 'No secret? No update!' if secret.nil? || secret.empty?
@@ -62,7 +70,7 @@ post '/swarms/webhook' do
   branch = json[:branch]
   swarm = settings.humans.find_swarm(repo, branch)
   return "The swarm not found for #{repo}@#{branch}" if swarm.nil?
-  swarm.head!('00000000000000000000000000000000')
+  swarm.head!('0000000000000000000000000000000000000000')
   "The swarm ##{swarm.id} of #{repo}@#{branch} scheduled for deployment, thanks!"
 end
 

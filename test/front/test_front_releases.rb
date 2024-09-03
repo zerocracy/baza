@@ -37,8 +37,17 @@ class Baza::FrontReleasesTest < Minitest::Test
     human = fake_job.jobs.human
     fake_login(human.github)
     swarm = human.swarms.add(fake_name, "#{fake_name}/#{fake_name}", fake_name)
-    swarm.releases.start('tail', 'secret')
+    swarm.releases.start('tail', fake_name)
     get("/swarms/#{swarm.id}/releases")
     assert_status(200)
+  end
+
+  def test_stop_release
+    human = fake_job.jobs.human
+    fake_login(human.github)
+    swarm = human.swarms.add(fake_name, "#{fake_name}/#{fake_name}", fake_name)
+    r = swarm.releases.start('tail', fake_name)
+    get("/swarms/#{swarm.id}/releases/#{r.id}/stop")
+    assert_status(302)
   end
 end

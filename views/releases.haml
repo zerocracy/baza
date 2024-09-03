@@ -1,5 +1,7 @@
 %p
-  These are all releases:
+  The swarm
+  = "#{releases.swarm.name} (##{releases.swarm.id})"
+  has the following releases:
 %table
   %colgroup
     -# ID
@@ -12,8 +14,12 @@
     %col{style: 'width: 3em;'}
     -# Tail
     %col
+    -# Secret
+    %col{style: 'width: 15em;'}
     -# Created
     %col{style: 'width: 10em;'}
+    -# Commands
+    %col{style: 'width: 6em;'}
   %thead
     %tr
       %th
@@ -27,7 +33,10 @@
       %th
         Tail
       %th
+        Secret
+      %th
         Created
+      %th
   %tbody
   - paging(releases, offset:) do |r|
     %tr
@@ -39,13 +48,18 @@
       - else
         %td.ff
           = r[:head][0..8]
-        %td.ff
+        %td.ff.right
           = r[:code]
-        %td.ff
+        %td.ff.right
           = r[:msec]
       %td
-        %i.fa-regular.fa-eye{onclick: "$(this).parent().parent().find('span').hide(); $(this).parent().parent().find('pre').show();", title: 'Click here to see the full deployment log', style: 'cursor: pointer;'}
+        %i.fa-regular.fa-eye{onclick: "$(this).parent().find('pre').show();", title: 'Click here to see the full deployment log', style: 'cursor: pointer;'}
         %pre{style: 'display: none;'}<>
           = r[:tail]
       %td
+        != secret(r[:secret])
+      %td
         != ago(r[:created])
+      %td
+        %a.ico{href: iri.cut('/swarms').append(releases.swarm.id).append('releases').append(r[:id]).append('stop'), title: "Stop release ##{r[:id]}", onclick: "return confirm('Are you sure you want to stop the release ##{r[:id]}?')"}
+          %i.fa-brands.fa-docker
