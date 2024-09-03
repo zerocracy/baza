@@ -42,8 +42,6 @@ SECONDS=0
   mv id_rsa .ssh/id_rsa
   chmod 600 .ssh/id_rsa
 
-  ls -al .
-
   uri="git@github.com:{{ github }}.git"
   if [ ! -s ~/.ssh/id_rsa ]; then
     uri="https://github.com/{{ github }}"

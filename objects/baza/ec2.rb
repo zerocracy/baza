@@ -73,6 +73,10 @@ class Baza::EC2
         security_group_ids: [@sgroup],
         subnet_id: @subnet,
         instance_initiated_shutdown_behavior: 'terminate',
+        iam_instance_profile: {
+          arn: 'arn:aws:iam::019644334823:instance-profile/baza-release',
+          name: 'baza-release'
+        },
         tag_specifications: [
           {
             resource_type: 'instance',
