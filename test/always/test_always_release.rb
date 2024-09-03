@@ -23,6 +23,7 @@
 # SOFTWARE.
 
 require 'minitest/autorun'
+require 'webmock/minitest'
 require_relative '../test__helper'
 require_relative '../../baza'
 
@@ -32,6 +33,7 @@ class Baza::AlwaysReleaseTest < Minitest::Test
   end
 
   def test_simple
+    WebMock.disable_net_connect!
     app.set :config, {
       'lambda' => {
         'key' => 'FAKEFAKEFAKEFAKEFAKE',
@@ -39,9 +41,10 @@ class Baza::AlwaysReleaseTest < Minitest::Test
         'region' => 'us-east-1',
         'sgroup' => 'sg-424242',
         'subnet' => 'sn-42424242',
-        'image' => 't2.large',
+        'image' => 't2.large'
       }
     }
+    fake_aws('RunInstances', { instancesSet: { item: { instanceId: 'i-58585858' } } })
     fake_human.swarms.add(fake_name, "zerocracy/#{fake_name}", 'master')
     load(File.join(__dir__, '../../always/always_release.rb'))
   end

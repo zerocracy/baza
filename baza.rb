@@ -246,8 +246,6 @@ configure do
   end
 end
 
-
-
 # Global in-memory cache.
 configure do
   set :zache, Zache.new

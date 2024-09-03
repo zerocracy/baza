@@ -38,7 +38,7 @@ require_relative '../test__helper'
 # License:: MIT
 class Baza::RecipeTest < Minitest::Test
   def setup
-    fake_pgsql.exec('DELETE FROM swarm')
+    fake_pgsql.exec('TRUNCATE swarm CASCADE')
   end
 
   def test_generates_script

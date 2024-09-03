@@ -72,13 +72,13 @@ class Baza::Releases
   # @param [String] instance AWS EC2 instance ID
   # @param [String] secret A secret
   # @return [Integer] The ID of the added release
-  def start(instance, secret)
-    raise Baza::Urror, 'The "instance" cannot be NIL' if instance.nil?
+  def start(tail, secret)
+    raise Baza::Urror, 'The "tail" cannot be NIL' if tail.nil?
     raise Baza::Urror, 'The "secret" cannot be empty' if secret.nil?
     get(
       @swarm.pgsql.exec(
-        'INSERT INTO release (swarm, instance, secret) VALUES ($1, $2, $3) RETURNING id',
-        [@swarm.id, instance, secret]
+        'INSERT INTO release (swarm, tail, secret) VALUES ($1, $2, $3) RETURNING id',
+        [@swarm.id, tail, secret]
       )[0]['id'].to_i
     )
   end

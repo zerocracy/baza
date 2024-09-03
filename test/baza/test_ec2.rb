@@ -43,22 +43,8 @@ class Baza::EC2Test < Minitest::Test
       't2.large',
       loog: Loog::VERBOSE
     )
+    fake_aws('RunInstances', { instancesSet: { item: { instanceId: 'i-42424242' } } })
     i = ec2.run_instance('some-fake-name', "#!/bin/bash\necho test\n")
-    assert_equal('i-4242', i)
-  end
-
-  private
-
-  def stub(cmd, hash)
-    xml = "<#{cmd}Response>#{to_xml(hash)}</#{cmd}Response>"
-    stub_request(:post, 'https://ec2.us-east-1.amazonaws.com/')
-      .with(body: /#{cmd}/)
-      .to_return(body: xml)
-  end
-
-  def to_xml(hash)
-    hash.map do |k, v|
-      "<#{k}>#{v.is_a?(Hash) ? to_xml(v) : v}</#{k}>"
-    end.join
+    assert_equal('i-42424242', i)
   end
 end

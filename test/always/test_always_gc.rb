@@ -22,27 +22,16 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require_relative '../objects/baza/ec2'
-require_relative '../objects/baza/swarm'
-require_relative '../objects/baza/recipe'
+require 'minitest/autorun'
+require_relative '../test__helper'
+require_relative '../../baza'
 
-cfg = settings.config['lambda']
-ec2 = Baza::EC2.new(
-  cfg['key'],
-  cfg['secret'],
-  cfg['region'],
-  cfg['sgroup'],
-  cfg['subnet'],
-  cfg['image'],
-  loog: settings.loog
-)
-settings.pgsql.exec('SELECT * FROM swarm').each do |row|
-  swarm = Baza::Swarm.new(settings.humans.get(row['human'].to_i).swarms, row['id'].to_i, tbot: settings.tbot)
-  next unless swarm.need_release?
-  secret = SecureRandom.uuid
-  instance = ec2.run_instance(
-    Baza::Recipe.new(swarm, cfg['id_rsa']).to_bash(cfg['account'], cfg['region'], secret),
-    swarm.name
-  )
-  swarm.releases.start("Started AWS EC2 instance #{instance}...", secret)
+class Baza::AlwaysGcTest < Minitest::Test
+  def app
+    Sinatra::Application
+  end
+
+  def test_simple
+    load(File.join(__dir__, '../../always/always_gc.rb'))
+  end
 end
