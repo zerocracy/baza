@@ -22,6 +22,7 @@
 # SOFTWARE.
 
 set -ex
+set -o pipefail
 
 cd "$(dirname "$0")"
 
@@ -32,6 +33,7 @@ PATH=$(pwd):$PATH
 {{ save_files }}
 
 printf '0000000000000000000000000000000000000000' > head.txt
+printf '0' > exit.txt
 
 SECONDS=0
 
@@ -70,6 +72,7 @@ SECONDS=0
     # swarms--use1-az4--x-s3
     # give this function permissions to work with S3 bucket
   fi
-) 2>&1 > stdout.log || echo $? > exit.txt
+) 2>&1 | tail -1000 > stdout.log || echo $? > exit.txt
 
-curl -X PUT -d stdout.log -H 'Content-Type: text/plain' "https://www.zerocracy.com/?secret={{ secret }}&head=$(cat head.txt)&exit=$(cat exit.txt)&sec=${SECONDS}"
+curl -X PUT -d stdout.log -H 'Content-Type: text/plain' \
+  "https://www.zerocracy.com/?secret={{ secret }}&head=$(cat head.txt)&exit=$(cat exit.txt)&sec=${SECONDS}"

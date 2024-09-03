@@ -66,7 +66,7 @@ put('/swarms/finish') do
   raise Baza::Urror, 'The "exit" HTTP param is mandatory' if code.nil?
   sec = params[:sec]
   raise Baza::Urror, 'The "sec" HTTP param is mandatory' if sec.nil?
-  r.finish!(head, request.body, code.to_i, 1000 * sec.to_i)
+  r.finish!(head, request.body.read, code.to_i, 1000 * sec.to_i)
   flash(iri.cut('/swarms'), "The release ##{r.id} was finished")
 end
 

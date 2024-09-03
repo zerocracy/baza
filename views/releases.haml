@@ -12,8 +12,8 @@
     %col{style: 'width: 10em;'}
     -# Exit
     %col{style: 'width: 4em;'}
-    -# Msec
-    %col{style: 'width: 4em;'}
+    -# Seconds
+    %col{style: 'width: 5em;'}
     -# Tail
     %col
     -# Secret
@@ -31,7 +31,7 @@
       %th
         Code
       %th
-        Msec
+        Seconds
       %th
         Tail
       %th
@@ -58,7 +58,7 @@
               = format('%03d', r[:exit])
             %i.fa-solid.fa-triangle-exclamation.bad{title: 'The swarm release finished with an error (see the log!)'}
         %td.ff.right
-          = r[:msec]
+          = format('%d', r[:msec] / 1000)
       %td
         %i.fa-regular.fa-eye{onclick: "$(this).parent().find('pre').show();", title: 'Click here to see the full deployment log', style: 'cursor: pointer;'}
         %pre{style: 'display: none;'}<>

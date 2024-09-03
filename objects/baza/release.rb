@@ -53,4 +53,45 @@ class Baza::Release
       [@id, head, tail, code, msec, @releases.swarm.id]
     )
   end
+
+  # Get its head SHA.
+  def head
+    to_json[:head]
+  end
+
+  # Get its tail.
+  def tail
+    to_json[:tail]
+  end
+
+  # Get its exit code.
+  def exit
+    to_json[:exit]
+  end
+
+  # Get its msec.
+  def msec
+    to_json[:msec]
+  end
+
+  private
+
+  def to_json(*_args)
+    @to_json ||=
+      begin
+        row = @releases.pgsql.exec(
+          'SELECT * FROM release WHERE id = $1',
+          [@id]
+        ).first
+        raise Baza::Urror, "There is no release ##{@id}" if row.nil?
+        {
+          id: @id,
+          head: row['head'],
+          tail: row['tail'],
+          exit: row['exit']&.to_i,
+          msec: row['msec']&.to_i,
+          created: Time.parse(row['created'])
+        }
+      end
+  end
 end

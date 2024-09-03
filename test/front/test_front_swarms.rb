@@ -69,12 +69,13 @@ class Baza::FrontSwarmsTest < Minitest::Test
     swarms = human.swarms
     s = swarms.add(fake_name, "#{fake_name}/#{fake_name}", fake_name)
     secret = 'the-super-secret'
-    s.releases.start('tail', secret)
+    r = s.releases.start('tail', secret)
     put(
       "/swarms/finish?head=4242424242424242424242424242424242424242&exit=0&sec=42&secret=#{secret}",
       'this is stdout',
       'CONTENT_TYPE' => 'text/plain'
     )
     assert_status(302)
+    assert(s.releases.get(r.id).tail.include?('this is'))
   end
 end
