@@ -49,5 +49,7 @@ class Baza::FrontReleasesTest < Minitest::Test
     r = swarm.releases.start('tail', fake_name)
     get("/swarms/#{swarm.id}/releases/#{r.id}/stop")
     assert_status(302)
+    get("/swarms/#{swarm.id}/releases/#{r.id}/reset")
+    assert_status(302)
   end
 end

@@ -36,6 +36,17 @@ class Baza::Release
     @tbot = tbot
   end
 
+  # Change head SHA of the relewase.
+  #
+  # @param [String] sha The hash of the Git head
+  def head!(sha)
+    @releases.pgsql.exec(
+      'UPDATE release SET head = $1 WHERE id = $2',
+      [sha, @id]
+    )
+    @to_json = nil
+  end
+
   # Finish the release to the swarm.
   #
   # @param [String] head SHA of the Git head just released

@@ -70,5 +70,5 @@
         - else
           %a.ico{href: iri.cut('/swarms').append(s.id).append('enable'), title: "Enable swarm ##{s.id}", onclick: "return confirm('Are you sure you want to enable the swarm ##{s.id}?')"}
             %i.fa-solid.fa-circle-play
-        %a.ico{href: iri.cut('/swarms').append(s.id).append('reset'), title: "Make swarm ##{s.id} dirty", onclick: "return confirm('Are you sure you want to reset the head SHA of the swarm ##{s.id}?')"}
+        %a.ico{href: iri.cut('/swarms').append(s.id).append('reset'), title: "Reset the head SHA of the swarm ##{s.id}", onclick: "return confirm('Are you sure you want to reset the head SHA of the swarm ##{s.id}?')"}
           %i.fa-solid.fa-lightbulb
