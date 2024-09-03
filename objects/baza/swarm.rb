@@ -106,8 +106,7 @@ class Baza::Swarm
   # @return [String] Explanation of why we don't release now (or NIL if we can release)
   def why_not(hours: 24)
     return 'The swarm is disabled' unless enabled?
-    last = nil
-    releases.each { |r| last = r }
+    last = releases.each.to_a.first
     return nil if last.nil?
     return "Release ##{last[:id]} is not yet finished" if last[:exit].nil?
     return "The SHA of the head of the release ##{last[:id]} equals to the head of the swarm" if last[:head] == head
