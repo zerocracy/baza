@@ -33,15 +33,16 @@
     %tr
       %td.ff
         = "##{r[:id]}"
-      %td.ff
-        - if r[:head].nil?
-          = '?'
-        - else
+      - if r[:head].nil?
+        %td.orange{colspan: 3}
+          Not yet
+      - else
+        %td.ff
           = r[:head][0..8]
-      %td.ff
-        = r[:code]
-      %td.ff
-        = r[:msec]
+        %td.ff
+          = r[:code]
+        %td.ff
+          = r[:msec]
       %td
         %i.fa-regular.fa-eye{onclick: "$(this).parent().parent().find('span').hide(); $(this).parent().parent().find('pre').show();", title: 'Click here to see the full deployment log', style: 'cursor: pointer;'}
         %pre{style: 'display: none;'}<>
