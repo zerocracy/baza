@@ -40,14 +40,21 @@ class Baza::EC2
   # @param [Loog] loog Logging facility
   def initialize(key, secret, region, sgroup, subnet, image,
     loog: Loog::NULL, type: 't2.xlarge')
+    raise Baza::Urror, 'AWS key is nil' if key.nil?
     raise Baza::Urror, "AWS key is wrong: #{key.inspect}" unless key.match?(/^(AKIA|FAKE)[A-Z0-9]{16}$/)
     @key = key
+    raise Baza::Urror, 'AWS secret is nil' if secret.nil?
     raise Baza::Urror, "AWS secret is wrong: #{secret.inspect}" unless secret.match?(%r{^[A-Za-z0-9/]{40}$})
     @secret = secret
+    raise Baza::Urror, 'AWS region is nil' if region.nil?
     @region = region
+    raise Baza::Urror, 'AWS security group is nil' if sgroup.nil?
     @sgroup = sgroup
+    raise Baza::Urror, 'AWS subnet is nil' if subnet.nil?
     @subnet = subnet
+    raise Baza::Urror, 'AWS image is nil' if image.nil?
     @image = image
+    raise Baza::Urror, 'AWS image type is nil' if type.nil?
     @type = type
     @loog = loog
   end

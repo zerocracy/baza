@@ -202,28 +202,9 @@ end
 configure do
   set :gc, Always.new(1)
   set :expiration_days, 14
-  settings.gc.start(30) do
-    settings.humans.gc.ready_to_expire(settings.expiration_days) do |j|
-      j.expire!(settings.fbs)
-      settings.loog.debug("Job ##{j.id} is garbage, expired")
-    end
-    settings.humans.gc.stuck(60) do |j|
-      j.expire!(settings.fbs)
-      settings.loog.debug("Job ##{j.id} was stuck, expired")
-    end
-    settings.humans.gc.tests(4 * 60) do |j|
-      j.expire!(settings.fbs)
-      settings.loog.debug("Job ##{j.id} was a test, expired")
-    end
-    begin
-      tester = settings.humans.his_token(Baza::Tokens::TESTER).human
-      tester.durables(settings.fbs).each do |d|
-        next if d[:created] > Time.now - (2 * 24 * 60 * 60)
-        tester.durables(settings.fbs).get(d[:id]).delete
-        settings.loog.debug("Durable ##{d[:id]} was a test, deleted")
-      end
-    rescue Baza::Humans::TokenNotFound
-      settings.loog.warn('There is not tester in the system')
+  unless ENV['RACK_ENV'] == 'test'
+    settings.gc.start(30) do
+      require_relative 'always/always_gc'
     end
   end
 end
@@ -259,33 +240,13 @@ end
 configure do
   set :release, Always.new(1)
   unless ENV['RACK_ENV'] == 'test'
-    require_relative 'objects/baza/ec2'
-    cfg = settings.config['lambda']
-    ec2 = Baza::EC2.new(
-      cfg['key'],
-      cfg['secret'],
-      cfg['region'],
-      cfg['sgroup'],
-      cfg['subnet'],
-      cfg['image'],
-      loog: settings.loog
-    )
     settings.release.start(5 * 60) do
-      settings.pgsql.exec('SELECT * FROM swarm').each do |row|
-        require_relative 'objects/baza/swarm'
-        swarm = Baza::Swarm.new(settings.humans.get(row['human'].to_i).swarms, row['id'].to_i, tbot: settings.tbot)
-        next unless swarm.need_release?
-        secret = SecureRandom.uuid
-        require_relative 'objects/baza/recipe'
-        instance = ec2.run_instance(
-          Baza::Recipe.new(swarm, cfg['id_rsa']).to_bash(cfg['account'], cfg['region'], secret),
-          swarm.name
-        )
-        swarm.releases.start(instance, secret)
-      end
+      require_relative 'always/always_release'
     end
   end
 end
+
+
 
 # Global in-memory cache.
 configure do

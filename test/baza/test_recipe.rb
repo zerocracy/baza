@@ -160,22 +160,4 @@ class Baza::RecipeTest < Minitest::Test
     assert_equal(0, $CHILD_STATUS.exitstatus, stdout)
     stdout
   end
-
-  def stub(cmd, hash)
-    xml = "<#{cmd}Response>#{to_xml(hash)}</#{cmd}Response>"
-    stub_request(:post, 'https://ec2.us-east-1.amazonaws.com/')
-      .with(body: /#{cmd}/)
-      .to_return(body: xml)
-  end
-
-  def to_xml(hash)
-    hash.map do |k, v|
-      "<#{k}>#{v.is_a?(Hash) ? to_xml(v) : v}</#{k}>"
-    end.join
-  end
-
-  def when_ready(port)
-    sleep 1
-    port
-  end
 end
