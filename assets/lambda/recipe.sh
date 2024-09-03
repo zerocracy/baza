@@ -81,7 +81,7 @@ SECONDS=0
     # swarms--use1-az4--x-s3
     # give this function permissions to work with S3 bucket
   fi
-) 2>&1 | tail -1000 > stdout.log || echo $? > exit.txt
+) 2>&1 | tail -200 > stdout.log || echo $? > exit.txt
 
 curl -X PUT --data-binary '@stdout.log' -H 'Content-Type: text/plain' \
   "{{ host }}/swarms/finish?secret={{ secret }}&head=$(cat head.txt)&exit=$(cat exit.txt)&sec=${SECONDS}"

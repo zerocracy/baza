@@ -70,6 +70,7 @@ class Baza::Recipe
       'github' => @swarm.repository,
       'branch' => @swarm.branch,
       'region' => region,
+      'account' => account,
       'repository' => "#{account}.dkr.ecr.#{region}.amazonaws.com",
       'image' => "zerocracy/swarms:#{@swarm.name}",
       'secret' => secret
