@@ -49,6 +49,7 @@ SECONDS=0
   mkdir .ssh
   mv id_rsa .ssh/id_rsa
   chmod 600 .ssh/id_rsa
+  printf "Host *\n  StrictHostKeyChecking no\n  UserKnownHostsFile=/dev/null" > .ssh/config
 
   uri="git@github.com:{{ github }}.git"
   if [ ! -s .ssh/id_rsa ]; then
