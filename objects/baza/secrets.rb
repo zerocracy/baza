@@ -88,10 +88,12 @@ class Baza::Secrets
     raise Baza::Urror, 'The value cannot be empty' if value.empty?
     raise Baza::Urror, 'The value is not ASCII' unless value.ascii_only?
     raise Baza::Urror, 'A secret with these name+key already exists' if exists?(name, key)
-    pgsql.exec(
+    id = pgsql.exec(
       'INSERT INTO secret (human, name, key, value) VALUES ($1, $2, $3, $4) RETURNING id',
       [@human.id, name.downcase, key, value]
     )[0]['id'].to_i
+    @human.notify("✅ Secret with ID #{id} has been successfully added.")
+    id
   end
 
   def remove(id)
