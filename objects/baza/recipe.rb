@@ -44,8 +44,12 @@ class Baza::Recipe
 
   # Make it a bash script.
   #
+  # @param [String] account AWS account number
+  # @param [String] region AWS region
+  # @param [String] secret Secret of the release
+  # @param [String] host Host to CURL results back to
   # @return [String] Bash script to use in EC2
-  def to_bash(account, region, secret)
+  def to_bash(account, region, secret, host: 'https://www.zerocracy.com')
     file_of(
       'recipe.sh',
       'save_files' => [
@@ -61,6 +65,7 @@ class Baza::Recipe
             : "#{account}.dkr.ecr.#{region}.amazonaws.com/zerocracy/baza:basic"
         )
       ].join,
+      'host' => host,
       'name' => @swarm.name,
       'github' => @swarm.repository,
       'branch' => @swarm.branch,

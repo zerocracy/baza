@@ -56,20 +56,34 @@ class Baza::RecipeTest < Minitest::Test
 
   def test_runs_script
     loog = Loog::NULL
-    s = fake_human.swarms.add('st', 'zerocracy/swarm-template', 'master')
+    swarm = fake_human.swarms.add('st', 'zerocracy/swarm-template', 'master')
+    secret = fake_name
+    r = swarm.releases.start('just start', secret)
     Dir.mktmpdir do |home|
-      %w[aws docker shutdown curl].each do |f|
+      %w[aws docker shutdown].each do |f|
         sh = File.join(home, f)
         File.write(sh, 'echo FAKE-$(basename $0) $@')
         FileUtils.chmod('+x', sh)
       end
-      sh = File.join(home, 'recipe.sh')
-      File.write(
-        sh,
-        Baza::Recipe.new(s, '').to_bash('accout', 'us-east-1', '')
-      )
-      bash("/bin/bash #{sh}", loog)
+      RandomPort::Pool::SINGLETON.acquire do |port|
+        sleep 2
+        server =
+          Thread.new do
+            `ruby baza.rb -p #{port} 2>&1`
+          end
+        begin
+          sh = File.join(home, 'recipe.sh')
+          File.write(
+            sh,
+            Baza::Recipe.new(swarm, '').to_bash('accout', 'us-east-1', secret, host: "http://localhost:#{port}")
+          )
+          bash("/bin/bash #{sh}", loog)
+        ensure
+          server.terminate
+        end
+      end
     end
+    assert(swarm.releases.get(r.id).exit.zero?)
   end
 
   def test_live_deploy

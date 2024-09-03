@@ -24,9 +24,9 @@
 set -ex
 set -o pipefail
 
-cd "$(dirname "$0")"
-
 trap 'shutdown' EXIT
+
+cd "$(dirname "$0")"
 
 PATH=$(pwd):$PATH
 
@@ -49,7 +49,7 @@ SECONDS=0
     uri="https://github.com/{{ github }}"
   fi
   git clone -b "{{ branch }}" --depth=1 --single-branch "${uri}" swarm
-  git --git-dir swarm/.git rev-parse HEAD > head.txt
+  git --git-dir swarm/.git rev-parse HEAD | tr '[:lower:]' '[:upper:]' > head.txt
 
   docker build . -t baza --platform linux/amd64
 
@@ -75,4 +75,4 @@ SECONDS=0
 ) 2>&1 | tail -1000 > stdout.log || echo $? > exit.txt
 
 curl -X PUT --data-binary '@stdout.log' -H 'Content-Type: text/plain' \
-  "https://www.zerocracy.com/?secret={{ secret }}&head=$(cat head.txt)&exit=$(cat exit.txt)&sec=${SECONDS}"
+  "{{ host }}/swarms/finish?secret={{ secret }}&head=$(cat head.txt)&exit=$(cat exit.txt)&sec=${SECONDS}"
