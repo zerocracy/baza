@@ -22,6 +22,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+require 'json'
+
 get '/swarms' do
   admin_only
   assemble(
@@ -71,13 +73,31 @@ put('/swarms/finish') do
 end
 
 post '/swarms/webhook' do
-  # if it's not PUSH event, ignore it and return 200
-  json = {} # take it
-  repo = json[:repository]
-  branch = json[:branch]
+  request.body.rewind
+  json =
+    JSON.parse(
+      case request.content_type
+      when 'application/x-www-form-urlencoded'
+        payload = params[:payload]
+        # see https://docs.github.com/en/webhooks/using-webhooks/creating-webhooks
+        if payload.nil?
+          return [400, 'URL-encoded content is expected in the "payload" query parameter, but it is not provided']
+        end
+        payload
+      when 'application/json'
+        request.body.read
+      else
+        return [400, "Invalid content-type: #{request.content_type.inspect}"]
+      end
+    )
+  repo = json['repository']['full_name']
+  ref = json['ref']
+  return "There is no 'ref'" if ref.nil?
+  branch = ref.split('/')[2]
+  sha = json['after']
   swarm = settings.humans.find_swarm(repo, branch)
-  return "The swarm not found for #{repo}@#{branch}" if swarm.nil?
-  swarm.head!('0000000000000000000000000000000000000000')
+  return [400, "The swarm not found for #{repo}@#{branch}"] if swarm.nil?
+  swarm.head!(sha)
   "The swarm ##{swarm.id} of #{repo}@#{branch} scheduled for deployment, thanks!"
 end
 

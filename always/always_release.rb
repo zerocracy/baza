@@ -44,5 +44,5 @@ settings.pgsql.exec('SELECT * FROM swarm').each do |row|
     "baza/#{swarm.name}",
     Baza::Recipe.new(swarm, cfg['id_rsa']).to_bash(cfg['account'], cfg['region'], secret)
   )
-  swarm.releases.start("Started AWS EC2 instance #{instance}...", secret)
+  swarm.releases.start("Started AWS EC2 #{cfg['image'].inspect} instance #{instance.inspect}...", secret)
 end

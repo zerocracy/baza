@@ -57,7 +57,13 @@ class Baza::FrontSwarmsTest < Minitest::Test
     swarms.add(n, repo, branch)
     post(
       '/swarms/webhook',
-      JSON.pretty_generate({ repository: repo, branch: }),
+      JSON.pretty_generate(
+        {
+          ref: "refs/head/#{branch}",
+          after: '3737373737373737373737373737373737373737',
+          repository: { full_name: repo }
+        }
+      ),
       'CONTENT_TYPE' => 'application/json'
     )
     assert_status(200)
