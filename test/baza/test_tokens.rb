@@ -56,7 +56,7 @@ class Baza::TokensTest < Minitest::Test
   def test_does_not_notify_user_when_name_is_nil
     loog = Loog::Buffer.new
     human = Baza::Humans.new(fake_pgsql, tbot: Baza::Tbot::Fake.new(loog)).ensure(fake_name)
-    assert_raises(Baza::Urror) do
+    assert_raises(RuntimeError) do
       human.tokens.add(nil)
     end
     assert_empty(loog.to_s)
