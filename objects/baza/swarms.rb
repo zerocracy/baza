@@ -57,7 +57,7 @@ class Baza::Swarms
     rows = pgsql.exec(
       [
         'SELECT s.*,',
-        '(SELECT exit FROM release WHERE swarm = s.id ORDER BY release.id LIMIT 1) AS exit',
+        '(SELECT exit FROM release WHERE swarm = s.id ORDER BY release.id DESC LIMIT 1) AS exit',
         'FROM swarm AS s',
         'WHERE human = $1',
         'ORDER BY s.name',
