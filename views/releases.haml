@@ -57,9 +57,13 @@
         %td.orange{colspan: 3}
           Not yet
       - else
-        %td.ff
-          %a{href: "https://github.com/#{releases.swarm.repository}/commit/#{r[:head]}"}<
-            = r[:head][0..8]
+        - if r[:head] == 'F' * 40
+          %td.orange
+            Empty
+        - else
+          %td.ff
+            %a{href: "https://github.com/#{releases.swarm.repository}/commit/#{r[:head]}"}<
+              = r[:head][0..8]
         %td.ff.right
           - if r[:exit].zero?
             %i.fa-regular.fa-thumbs-up.good

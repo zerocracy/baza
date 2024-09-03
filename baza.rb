@@ -228,10 +228,6 @@ configure do
   set :donation_period, 30
   unless ENV['RACK_ENV'] == 'test'
     settings.donations.start(60) do
-      settings.humans.donate(
-        amount: settings.donation_amount,
-        days: settings.donation_period
-      )
     end
   end
 end
