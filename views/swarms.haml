@@ -6,7 +6,7 @@
     %input{ type: 'submit', tabindex: 4, value: 'Add' }
 
 %p
-  These are all swarms:
+  These are all your swarms:
 %table
   %colgroup
     -# ID
@@ -45,8 +45,11 @@
         = "##{s.id}"
       %td.ff
         = s.name
-        - if s.need_release?
-          %i.fa-regular.fa-envelope.good{title: "Changes arrived, waiting for deployment..."}
+        - why = s.why_not
+        - if why.nil?
+          %i.fa-regular.fa-envelope.good{title: 'This swarm will be released in a few minutes...'}
+        - else
+          %i.fa-solid.fa-circle-pause{title: why}
       %td.ff
         %a{href: "https://github.com/#{s.repository}/tree/#{s.branch}"}<
           = s.repository

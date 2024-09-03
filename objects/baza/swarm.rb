@@ -22,6 +22,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+require 'tago'
+
 # A swarm of a human.
 #
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -88,13 +90,18 @@ class Baza::Swarm
     Baza::Releases.new(self, tbot: @tbot)
   end
 
-  # Does it need immediate release now?
-  def need_release?
-    first = nil
-    releases.each { |r| first = r }
-    return true if first.nil?
-    return false if first[:exit].nil?
-    first[:head] == head
+  # Explain why we are not releasing now or return NIL if ready to release.
+  def why_not(hours: 24)
+    last = nil
+    releases.each { |r| last = r }
+    return nil if last.nil?
+    return "Release ##{last[:id]} is not yet finished" if last[:exit].nil?
+    return "The SHA of the head of the release ##{last[:id]} equals to the head of the swarm" if last[:head] == head
+    return nil if last[:head] == 'F' * 40
+    if !last[:exit].zero? && Time.now - (hours * 60 * 60) < last[:created]
+      return "The latest release ##{last[:id]} failed just #{last[:created].tago} ago, we must wait until tomorrow"
+    end
+    nil
   end
 
   private

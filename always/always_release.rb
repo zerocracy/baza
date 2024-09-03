@@ -38,7 +38,7 @@ ec2 = Baza::EC2.new(
 )
 settings.pgsql.exec('SELECT * FROM swarm').each do |row|
   swarm = Baza::Swarm.new(settings.humans.get(row['human'].to_i).swarms, row['id'].to_i, tbot: settings.tbot)
-  next unless swarm.need_release?
+  next unless swarm.why_not.nil?
   secret = SecureRandom.uuid
   instance = ec2.run_instance(
     "baza/#{swarm.name}",

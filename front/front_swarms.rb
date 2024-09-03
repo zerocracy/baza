@@ -50,7 +50,7 @@ get(%r{/swarms/([0-9]+)/releases/([0-9]+)/stop}) do
   admin_only
   swarm = the_human.swarms.get(params['captures'].first.to_i)
   r = swarm.releases.get(params['captures'][1].to_i)
-  r.finish!('0000000000000000000000000000000000000000', "stopped by @#{the_human.github}", 1, 42)
+  r.finish!('FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF', "stopped by @#{the_human.github}", 1, 42)
   flash(iri.cut('/swarms').append(swarm.id).append('releases'), "The release ##{r.id} was stopped")
 end
 

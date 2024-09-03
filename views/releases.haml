@@ -1,6 +1,8 @@
 %p
   The swarm
-  = "#{releases.swarm.name} (##{releases.swarm.id})"
+  %span.ff
+    = releases.swarm.name
+  = "(##{releases.swarm.id})"
   has the following releases:
 %table
   %colgroup
@@ -49,7 +51,12 @@
         %td.ff
           = r[:head][0..8]
         %td.ff.right
-          = r[:code]
+          - if r[:exit].zero?
+            %i.fa-regular.fa-thumbs-up.good
+          - else
+            %span.bad
+              = format('%03d', r[:exit])
+            %i.fa-solid.fa-triangle-exclamation.bad{title: 'The swarm release finished with an error (see the log!)'}
         %td.ff.right
           = r[:msec]
       %td
@@ -62,4 +69,4 @@
         != ago(r[:created])
       %td
         %a.ico{href: iri.cut('/swarms').append(releases.swarm.id).append('releases').append(r[:id]).append('stop'), title: "Stop release ##{r[:id]}", onclick: "return confirm('Are you sure you want to stop the release ##{r[:id]}?')"}
-          %i.fa-brands.fa-docker
+          %i.fa-regular.fa-circle-stop

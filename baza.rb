@@ -240,7 +240,7 @@ end
 configure do
   set :release, Always.new(1)
   unless ENV['RACK_ENV'] == 'test'
-    settings.release.start(5 * 60) do
+    settings.release.start(60) do
       require_relative 'always/always_release'
     end
   end

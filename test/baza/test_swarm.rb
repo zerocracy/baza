@@ -40,4 +40,12 @@ class Baza::SwarmTest < Minitest::Test
     assert(s.repository.start_with?('zerocracy/'))
     assert_equal('master', s.branch)
   end
+
+  def test_why_not
+    human = fake_human
+    s = human.swarms.add(fake_name.downcase, "zerocracy/#{fake_name}", 'master')
+    assert_nil(s.why_not)
+    s.releases.start('no tail', fake_name)
+    assert(!s.why_not.nil?)
+  end
 end

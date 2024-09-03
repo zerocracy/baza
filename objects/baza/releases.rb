@@ -51,6 +51,7 @@ class Baza::Releases
       [
         'SELECT * FROM release',
         'WHERE swarm = $1',
+        'ORDER BY created DESC',
         "OFFSET #{offset.to_i}"
       ],
       [@swarm.id]

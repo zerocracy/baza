@@ -58,6 +58,7 @@ class Baza::Swarms
       [
         'SELECT * FROM swarm',
         'WHERE human = $1',
+        'ORDER BY name',
         "OFFSET #{offset.to_i}"
       ],
       [@human.id]
