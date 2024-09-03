@@ -95,6 +95,8 @@ post '/swarms/webhook' do
   return "There is no 'ref'" if ref.nil?
   branch = ref.split('/')[2]
   sha = json['after']
+  return [400, 'The after SHA not found'] if sha.nil?
+  sha.upcase!
   swarm = settings.humans.find_swarm(repo, branch)
   return [400, "The swarm not found for #{repo}@#{branch}"] if swarm.nil?
   swarm.head!(sha)

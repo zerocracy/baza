@@ -22,6 +22,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+require 'open3'
 require 'fileutils'
 require 'loog'
 require 'minitest/autorun'
@@ -66,20 +67,13 @@ class Baza::RecipeTest < Minitest::Test
         FileUtils.chmod('+x', sh)
       end
       RandomPort::Pool::SINGLETON.acquire do |port|
-        sleep 2
-        server =
-          Thread.new do
-            `ruby baza.rb -p #{port} 2>&1`
-          end
-        begin
+        with_front(port, loog) do |host|
           sh = File.join(home, 'recipe.sh')
           File.write(
             sh,
-            Baza::Recipe.new(swarm, '').to_bash('accout', 'us-east-1', secret, host: "http://localhost:#{port}")
+            Baza::Recipe.new(swarm, '').to_bash('accout', 'us-east-1', secret, host:)
           )
           bash("/bin/bash #{sh}", loog)
-        ensure
-          server.terminate
         end
       end
     end
@@ -166,6 +160,24 @@ class Baza::RecipeTest < Minitest::Test
   end
 
   private
+
+  def with_front(port, loog)
+    Open3.popen2e({}, "ruby baza.rb -p #{port}") do |stdin, stdout, thr|
+      stdin.close
+      until stdout.eof?
+        begin
+          line = stdout.gets
+        rescue IOError => e
+          line = Backtrace.new(e).to_s
+        end
+        loog.debug(line)
+        next unless line.include?("port=#{port}")
+        sleep 0.5
+        yield "http://localhost:#{port}"
+        `kill -9 #{thr.pid}`
+      end
+    end
+  end
 
   def bash(cmd, loog)
     loog.debug("+ #{cmd}")
