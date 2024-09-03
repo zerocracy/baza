@@ -53,7 +53,7 @@ class Baza::IpGeolocationTest < Minitest::Test
   end
 
   def test_call_ipgeo
-    skip
+    skip # it's a "live" test, run it manually if you need it
     WebMock.allow_net_connect!
     client = Baza::IpGeolocation.new(token: 'token')
     result = client.ipgeo(ip: '8.8.8.8')
