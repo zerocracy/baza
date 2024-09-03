@@ -68,6 +68,18 @@ class Baza::TokensTest < Minitest::Test
       human.tokens.add('0')
     end
     assert_empty(loog.to_s)
+    name = fake_name
+    token = human.tokens.add(name)
+    assert_equal(1, loog.to_s.split("\n").size)
+    assert_raises(Baza::Urror) do
+      human.tokens.add(name)
+    end
+    assert_equal(1, loog.to_s.split("\n").size)
+    token.deactivate!
+    assert_raises(Baza::Urror) do
+      human.tokens.add(name)
+    end
+    assert_equal(1, loog.to_s.split("\n").size)
   end
 
   def test_deactivates_token
