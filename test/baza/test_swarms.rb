@@ -37,7 +37,5 @@ class Baza::SwarmsTest < Minitest::Test
     swarms.add(fake_name, 'zerocracy/swarm', 'master')
     s = swarms.each.to_a.first
     assert_equal('master', s.branch)
-    swarms.get(s.id).remove
-    assert(swarms.each.to_a.empty?)
   end
 end

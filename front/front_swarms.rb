@@ -74,11 +74,18 @@ post '/swarms/webhook' do
   "The swarm ##{swarm.id} of #{repo}@#{branch} scheduled for deployment, thanks!"
 end
 
-get(%r{/swarms/([0-9]+)/remove}) do
+get(%r{/swarms/([0-9]+)/enable}) do
   admin_only
   id = params['captures'].first.to_i
-  the_human.swarms.get(id).remove
-  flash(iri.cut('/swarms'), "The swarm ##{id} just removed")
+  the_human.swarms.get(id).enable!(true)
+  flash(iri.cut('/swarms'), "The swarm ##{id} was enabled")
+end
+
+get(%r{/swarms/([0-9]+)/disable}) do
+  admin_only
+  id = params['captures'].first.to_i
+  the_human.swarms.get(id).enable!(false)
+  flash(iri.cut('/swarms'), "The swarm ##{id} was disabled")
 end
 
 get(%r{/swarms/([0-9]+)/reset}) do

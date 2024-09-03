@@ -48,4 +48,13 @@ class Baza::SwarmTest < Minitest::Test
     s.releases.start('no tail', fake_name)
     assert(!s.why_not.nil?)
   end
+
+  def test_enable_disable
+    human = fake_human
+    s = human.swarms.add(fake_name.downcase, "zerocracy/#{fake_name}", 'master')
+    s.enable!(true)
+    assert(s.enabled?)
+    s.enable!(false)
+    assert(!s.enabled?)
+  end
 end

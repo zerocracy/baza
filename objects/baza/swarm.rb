@@ -50,13 +50,18 @@ class Baza::Swarm
       'UPDATE swarm SET head = $1 WHERE id = $2 AND human = $3',
       [sha, @id, swarms.human.id]
     )
+    @to_json = nil
   end
 
-  def remove
+  # Either enable it or disable.
+  #
+  # @param [Boolean] yes TRUE if it must be enabled
+  def enable!(yes)
     swarms.pgsql.exec(
-      'DELETE FROM swarm WHERE id = $1 AND human = $2',
-      [@id, @swarms.human.id]
+      'UPDATE swarm SET enabled = $3 WHERE id = $1 AND human = $2',
+      [@id, @swarms.human.id, yes]
     )
+    @to_json = nil
   end
 
   # Get its name.
@@ -79,6 +84,11 @@ class Baza::Swarm
     to_json[:head]
   end
 
+  # Get its enabled status.
+  def enabled?
+    to_json[:enabled]
+  end
+
   # Get its time of creation.
   def created
     to_json[:created]
@@ -91,7 +101,11 @@ class Baza::Swarm
   end
 
   # Explain why we are not releasing now or return NIL if ready to release.
+  #
+  # @param [Integer] hours How many hours to wait between retries on failure
+  # @return [String] Explanation of why we don't release now (or NIL if we can release)
   def why_not(hours: 24)
+    return 'The swarm is disabled' unless enabled?
     last = nil
     releases.each { |r| last = r }
     return nil if last.nil?
@@ -117,6 +131,7 @@ class Baza::Swarm
         {
           id: @id,
           name: row['name'],
+          enabled: row['enabled'] == 't',
           repository: row['repository'],
           branch: row['branch'],
           head: row['head'],

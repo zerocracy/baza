@@ -68,6 +68,7 @@ class Baza::Swarms
         get(row['id'].to_i),
         id: row['id'].to_i,
         name: row['name'],
+        enabled: row['enabled'] == 't',
         repository: row['repository'],
         branch: row['branch'],
         head: row['head'],

@@ -204,7 +204,7 @@ configure do
   set :expiration_days, 14
   unless ENV['RACK_ENV'] == 'test'
     settings.gc.start(30) do
-      require_relative 'always/always_gc'
+      load('always/always_gc.rb', true)
     end
   end
 end
@@ -241,7 +241,7 @@ configure do
   set :release, Always.new(1)
   unless ENV['RACK_ENV'] == 'test'
     settings.release.start(60) do
-      require_relative 'always/always_release'
+      load('always/always_release.rb', true)
     end
   end
 end

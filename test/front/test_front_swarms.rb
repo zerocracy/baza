@@ -43,7 +43,7 @@ class Baza::FrontSwarmsTest < Minitest::Test
     swarm = swarms.add(n, repo, branch)
     get('/swarms')
     assert_status(200)
-    get("/swarms/#{swarm.id}/remove")
+    get("/swarms/#{swarm.id}/disable")
     assert_status(302)
   end
 

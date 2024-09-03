@@ -64,7 +64,11 @@
       %td
         %a.ico{href: iri.cut('/swarms').append(s.id).append('releases'), title: "Releases of the swarm ##{s.id}"}
           %i.fa-brands.fa-docker
-        %a.ico{href: iri.cut('/swarms').append(s.id).append('remove'), title: "Remove swarm ##{s.id}", onclick: "return confirm('Are you sure you want to remove the swarm ##{s.id}?')"}
-          %i.fa-regular.fa-trash-can
+        - if s.enabled?
+          %a.ico{href: iri.cut('/swarms').append(s.id).append('disable'), title: "Disable swarm ##{s.id}", onclick: "return confirm('Are you sure you want to disable the swarm ##{s.id}?')"}
+            %i.fa-solid.fa-circle-stop
+        - else
+          %a.ico{href: iri.cut('/swarms').append(s.id).append('enable'), title: "Enable swarm ##{s.id}", onclick: "return confirm('Are you sure you want to enable the swarm ##{s.id}?')"}
+            %i.fa-solid.fa-circle-play
         %a.ico{href: iri.cut('/swarms').append(s.id).append('reset'), title: "Make swarm ##{s.id} dirty", onclick: "return confirm('Are you sure you want to reset the head SHA of the swarm ##{s.id}?')"}
           %i.fa-solid.fa-lightbulb
