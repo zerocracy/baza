@@ -24,7 +24,6 @@
 
 require 'fileutils'
 require 'factbase'
-require 'base64'
 require 'zlib'
 require_relative '../objects/baza/urror'
 require_relative '../objects/baza/errors'

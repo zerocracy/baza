@@ -24,6 +24,7 @@
 
 require 'aws-sdk-ec2'
 require 'aws-sdk-core'
+require 'base64'
 
 # AWS EC2.
 #
@@ -60,13 +61,15 @@ class Baza::EC2
   end
 
   def run_instance(tag, data)
+    raise Baza::Urror, 'AWS image tag is nil' if tag.nil?
+    raise Baza::Urror, 'AWS image user_data is nil' if data.nil?
     elapsed(@loog, intro: "Started new #{@type.inspect} EC2 instance") do
       aws.run_instances(
         image_id: @image,
         instance_type: @type,
         max_count: 1,
         min_count: 1,
-        user_data: data,
+        user_data: Base64.encode64(data),
         security_group_ids: [@sgroup],
         subnet_id: @subnet,
         instance_initiated_shutdown_behavior: 'terminate',
