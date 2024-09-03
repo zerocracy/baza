@@ -208,9 +208,7 @@ configure do
   set :verify, Always.new(1)
   unless ENV['RACK_ENV'] == 'test'
     settings.verify.start(60) do
-      settings.humans.verify_one_job do |j, verdict|
-        settings.loog.debug("Job ##{j.id} was verified as #{verdict.inspect}")
-      end
+      load('always/always_verify.rb', true)
     end
   end
 end
