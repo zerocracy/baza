@@ -53,27 +53,60 @@ class Baza::TokensTest < Minitest::Test
     assert_includes(loog.to_s, "Token with the name '#{name}' has been created successfully")
   end
 
-  def test_does_not_notify_user_after_fail_creating
+  def test_does_not_notify_user_when_name_is_nil
+    loog = Loog::Buffer.new
+    human = Baza::Humans.new(fake_pgsql, tbot: Baza::Tbot::Fake.new(loog)).ensure(fake_name)
+    assert_raises(Baza::Urror) do
+      human.tokens.add(nil)
+    end
+    assert_empty(loog.to_s)
+  end
+
+  def test_does_not_notify_user_when_name_is_empty
     loog = Loog::Buffer.new
     human = Baza::Humans.new(fake_pgsql, tbot: Baza::Tbot::Fake.new(loog)).ensure(fake_name)
     assert_raises(Baza::Urror) do
       human.tokens.add('')
     end
     assert_empty(loog.to_s)
+  end
+
+  def test_does_not_notify_user_when_name_is_too_long
+    loog = Loog::Buffer.new
+    human = Baza::Humans.new(fake_pgsql, tbot: Baza::Tbot::Fake.new(loog)).ensure(fake_name)
     assert_raises(Baza::Urror) do
       human.tokens.add(fake_name * 10)
     end
     assert_empty(loog.to_s)
+
+  end
+
+  def test_does_not_notify_user_when_name_is_not_valid
+    loog = Loog::Buffer.new
+    human = Baza::Humans.new(fake_pgsql, tbot: Baza::Tbot::Fake.new(loog)).ensure(fake_name)
     assert_raises(Baza::Urror) do
       human.tokens.add('0')
     end
     assert_empty(loog.to_s)
+  end
+
+  def test_does_not_notify_user_when_too_many_active_tokens
+    loog = Loog::Buffer.new
+    human = Baza::Humans.new(fake_pgsql, tbot: Baza::Tbot::Fake.new(loog)).ensure(fake_name)
     name = fake_name
     token = human.tokens.add(name)
     assert_equal(1, loog.to_s.split("\n").size)
     assert_raises(Baza::Urror) do
       human.tokens.add(name)
     end
+    assert_equal(1, loog.to_s.split("\n").size)
+  end
+
+  def test_does_not_notify_user_when_token_already_exists
+    loog = Loog::Buffer.new
+    human = Baza::Humans.new(fake_pgsql, tbot: Baza::Tbot::Fake.new(loog)).ensure(fake_name)
+    name = fake_name
+    token = human.tokens.add(name)
     assert_equal(1, loog.to_s.split("\n").size)
     token.deactivate!
     assert_raises(Baza::Urror) do
