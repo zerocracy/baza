@@ -184,16 +184,10 @@ end
 
 # Pipeline:
 configure do
-  lib = File.absolute_path(File.join(__dir__, ENV['RACK_ENV'] == 'test' ? 'target/j' : 'j'))
-  ['', 'lib', 'judges'].each { |d| FileUtils.mkdir_p(File.join(lib, d)) }
   set(:pipeline, Always.new(1).on_error { |e, _| settings.loog.error(Backtrace.new(e)) })
   unless ENV['RACK_ENV'] == 'test'
     settings.pipeline.start(5) do
-      require_relative 'objects/baza/pipeline'
-      Baza::Pipeline.new(
-        lib, settings.humans, settings.fbs,
-        settings.loog, settings.trails
-      ).process_one
+      load('always/always_pipeline.rb', true)
     end
   end
 end
@@ -228,6 +222,7 @@ configure do
   set :donation_period, 30
   unless ENV['RACK_ENV'] == 'test'
     settings.donations.start(60) do
+      load('always/always_donations.rb', true)
     end
   end
 end
