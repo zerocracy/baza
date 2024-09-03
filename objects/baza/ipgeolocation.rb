@@ -26,13 +26,17 @@ require 'faraday'
 
 # The IP Geolocation client (https://ipgeolocation.io/)
 class Baza::IpGeolocation
-  def initialize(token:, connection: Faraday.new(url: 'https://api.ipgeolocation.io'))
+  def initialize(token:, connection:)
     @token = token
     @connection = connection
   end
 
   def ipgeo(ip:)
     JSON.parse(@connection.get("ipgeo?apiKey=#{@token}&ip=#{ip}").body)
+  end
+
+  def self.host
+    'https://api.ipgeolocation.io'
   end
 
   # Fake connection
