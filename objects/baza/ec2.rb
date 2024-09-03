@@ -59,7 +59,7 @@ class Baza::EC2
     @loog = loog
   end
 
-  def run_instance(name, data)
+  def run_instance(tag, data)
     elapsed(@loog, intro: "Started new #{@type.inspect} EC2 instance") do
       aws.run_instances(
         image_id: @image,
@@ -76,7 +76,7 @@ class Baza::EC2
             tags: [
               {
                 key: 'Name',
-                value: name
+                value: tag
               }
             ]
           }

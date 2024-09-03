@@ -41,8 +41,8 @@ settings.pgsql.exec('SELECT * FROM swarm').each do |row|
   next unless swarm.need_release?
   secret = SecureRandom.uuid
   instance = ec2.run_instance(
-    Baza::Recipe.new(swarm, cfg['id_rsa']).to_bash(cfg['account'], cfg['region'], secret),
-    swarm.name
+    swarm.name,
+    Baza::Recipe.new(swarm, cfg['id_rsa']).to_bash(cfg['account'], cfg['region'], secret)
   )
   swarm.releases.start("Started AWS EC2 instance #{instance}...", secret)
 end
