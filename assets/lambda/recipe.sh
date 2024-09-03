@@ -74,5 +74,5 @@ SECONDS=0
   fi
 ) 2>&1 | tail -1000 > stdout.log || echo $? > exit.txt
 
-curl -X PUT -d stdout.log -H 'Content-Type: text/plain' \
+curl -X PUT --data-binary '@stdout.log' -H 'Content-Type: text/plain' \
   "https://www.zerocracy.com/?secret={{ secret }}&head=$(cat head.txt)&exit=$(cat exit.txt)&sec=${SECONDS}"
