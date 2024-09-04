@@ -53,6 +53,7 @@ class Baza::Recipe
   def to_bash(script, account, region, secret, host: 'https://www.zerocracy.com')
     sh = file_of(
       'recipe.sh',
+      'script' => script.to_s,
       'host' => safe(host),
       'secret' => safe(secret),
       'save_files' => [

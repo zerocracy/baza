@@ -59,7 +59,7 @@ printf '0' > exit.txt
 
 SECONDS=0
 
-/bin/bash release.sh 2>&1 | tail -200 | tee stdout.log || echo $? > exit.txt
+/bin/bash "{{ script }}.sh" 2>&1 | tail -200 | tee stdout.log || echo $? > exit.txt
 
 if [ ! -e head.txt -o ! -s head.txt ]; then
   printf '0000000000000000000000000000000000000000' > head.txt

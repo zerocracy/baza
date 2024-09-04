@@ -54,7 +54,8 @@ class Baza::RecipeTest < Minitest::Test
       'RUN yum update -y',
       'gem \'aws-sdk-core\'',
       'cat > entry.rb <<EOT_',
-      '"\${uri}"'
+      '"\${uri}"',
+      'release.sh'
     ].each { |t| assert(bash.include?(t), "Can't find #{t.inspect} in:\n#{bash}") }
   end
 
