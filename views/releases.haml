@@ -85,7 +85,8 @@
       %td
         != ago(r[:created])
       %td
-        %a.ico{href: iri.cut('/swarms').append(releases.swarm.id).append('releases').append(r[:id]).append('stop'), title: "Stop release ##{r[:id]}", onclick: "return confirm('Are you sure you want to stop the release ##{r[:id]}?')"}
-          %i.fa-regular.fa-circle-stop
+        - if r[:head].nil?
+          %a.ico{href: iri.cut('/swarms').append(releases.swarm.id).append('releases').append(r[:id]).append('stop'), title: "Stop release ##{r[:id]}", onclick: "return confirm('Are you sure you want to stop the release ##{r[:id]}?')"}
+            %i.fa-regular.fa-circle-stop
         %a.ico{href: iri.cut('/swarms').append(releases.swarm.id).append('releases').append(r[:id]).append('reset'), title: "Reset the head SHA of the release ##{r[:id]}", onclick: "return confirm('Are you sure you want to reset the head SHA of the release ##{r[:id]}?')"}
           %i.fa-solid.fa-lightbulb
