@@ -41,6 +41,10 @@ fi
 
 {{ save_files }}
 
+if [ -z "${HOME}" ]; then
+  export HOME=$(pwd)
+fi
+
 if [ -e "${HOME}/.ssh/id_rsa" ]; then
   echo "The private RSA key already exists, most probably you are doing something wrong"
   exit 1
