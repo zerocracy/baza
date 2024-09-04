@@ -77,7 +77,9 @@
         %td.ff.right
           = format('%d', r[:msec] / 1000)
       %td
-        %i.fa-regular.fa-eye{onclick: "$(this).parent().find('pre').show();", title: 'Click here to see the full deployment log', style: 'cursor: pointer;'}
+        %span.ff
+          = r[:tail].split("\n").first
+        %i.fa-regular.fa-eye{onclick: "$(this).parent().find('span').hide(); $(this).parent().find('pre').show();", title: 'Click here to see the full deployment log', style: 'cursor: pointer;'}
         %pre{style: 'display: none;'}<>
           = r[:tail]
       %td
