@@ -42,7 +42,7 @@ fi
 {{ save_files }}
 
 if [ -z "${HOME}" ]; then
-  export HOME=$(pwd)
+  export HOME=$(echo ~)
 fi
 
 if [ -e "${HOME}/.ssh/id_rsa" ]; then

@@ -29,8 +29,6 @@ if [ ! -s "${HOME}/.ssh/id_rsa" ]; then
   uri="https://github.com/{{ github }}"
 fi
 
-ls -al "${HOME}/.ssh"
-
 GIT_SSH_COMMAND="ssh -v" git clone -b "{{ branch }}" --depth=1 --single-branch "${uri}" swarm
 git --git-dir swarm/.git rev-parse HEAD | tr '[:lower:]' '[:upper:]' > head.txt
 
