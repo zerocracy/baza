@@ -25,7 +25,7 @@
 require_relative '../objects/baza/swarm'
 
 settings.pgsql.exec('SELECT * FROM swarm').each do |row|
-  swarm = Baza::Swarm.new(settings.humans.get(row['human'].to_i).swarms, row['id'].to_i, tbot: settings.tbot)
+  swarm = Baza::Swarm.new(settings.humans.get(row['human'].to_i).swarms, row['id'].to_i)
   next unless swarm.why_not.nil?
   settings.ops.release(swarm)
 end

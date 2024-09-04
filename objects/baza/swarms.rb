@@ -32,9 +32,8 @@ require 'veil'
 class Baza::Swarms
   attr_reader :human
 
-  def initialize(human, tbot: Baza::Tbot::Fake.new)
+  def initialize(human)
     @human = human
-    @tbot = tbot
   end
 
   def pgsql
@@ -44,7 +43,7 @@ class Baza::Swarms
   def get(id)
     raise 'Swarm ID must be an integer' unless id.is_a?(Integer)
     require_relative 'swarm'
-    Baza::Swarm.new(self, id, tbot: @tbot)
+    Baza::Swarm.new(self, id)
   end
 
   def empty?

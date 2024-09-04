@@ -32,10 +32,9 @@ require 'tago'
 class Baza::Swarm
   attr_reader :swarms, :id
 
-  def initialize(swarms, id, tbot: Baza::Tbot::Fake.new)
+  def initialize(swarms, id)
     @swarms = swarms
     @id = id
-    @tbot = tbot
   end
 
   def pgsql
@@ -97,7 +96,7 @@ class Baza::Swarm
   # Get its release SHA.
   def releases
     require_relative 'releases'
-    Baza::Releases.new(self, tbot: @tbot)
+    Baza::Releases.new(self)
   end
 
   # Explain why we are not releasing now or return NIL if ready to release.

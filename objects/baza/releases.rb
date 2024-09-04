@@ -30,9 +30,8 @@
 class Baza::Releases
   attr_reader :swarm
 
-  def initialize(swarm, tbot: Baza::Tbot::Fake.new)
+  def initialize(swarm)
     @swarm = swarm
-    @tbot = tbot
   end
 
   def pgsql
@@ -42,7 +41,7 @@ class Baza::Releases
   def get(id)
     raise 'Release ID must be an integer' unless id.is_a?(Integer)
     require_relative 'release'
-    Baza::Release.new(self, id, tbot: @tbot)
+    Baza::Release.new(self, id)
   end
 
   def each(offset: 0)

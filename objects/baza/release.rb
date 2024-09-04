@@ -30,10 +30,9 @@
 class Baza::Release
   attr_reader :releases, :id
 
-  def initialize(releases, id, tbot: Baza::Tbot::Fake.new)
+  def initialize(releases, id)
     @releases = releases
     @id = id
-    @tbot = tbot
   end
 
   # Change head SHA of the relewase.
@@ -62,6 +61,13 @@ class Baza::Release
     @releases.pgsql.exec(
       'UPDATE release SET head = $2, tail = $3, exit = $4, msec = $5 WHERE id = $1 AND swarm = $6',
       [@id, head, tail, code, msec, @releases.swarm.id]
+    )
+    @releases.swarm.swarms.human.notify(
+      code.zero? ? '🫐' : '🍕',
+      "The release ##{@id} of the swarm ##{@releases.swarm.id} (`#{@releases.swarm.name}`)",
+      code.zero? ? "successfully published `#{head[0..8]}`" : 'failed',
+      "after #{format('%.2f', msec.to_f / (60 * 1000))} minutes of work,",
+      "the log is [here](//swarms/#{@releases.swarm.id}/releases)."
     )
   end
 
