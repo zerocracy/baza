@@ -53,10 +53,14 @@
         - else
           %i.fa-solid.fa-triangle-exclamation.bad{title: 'The latest release was not successful'}
         - why = s.why_not
-        - if why.nil?
-          %i.fa-regular.fa-envelope.good{title: 'This swarm will be released in a few minutes...'}
-        - else
-          %i.fa-solid.fa-circle-pause{title: why}
+        %br
+        %span.small
+          - if why.nil?
+            %span.good
+              This swarm will be released in a few minutes...
+          - else
+            %span.bad
+              = why
       %td.ff
         %a{href: "https://github.com/#{s.repository}/tree/#{s.branch}"}<
           = s.repository
@@ -73,7 +77,7 @@
       %td
         - if s.enabled?
           %a.ico{href: iri.cut('/swarms').append(s.id).append('disable'), title: "Disable swarm ##{s.id}", onclick: "return confirm('Are you sure you want to disable the swarm ##{s.id}?')"}
-            %i.fa-solid.fa-circle-stop
+            %i.fa-solid.fa-ban
         - else
           %a.ico{href: iri.cut('/swarms').append(s.id).append('enable'), title: "Enable swarm ##{s.id}", onclick: "return confirm('Are you sure you want to enable the swarm ##{s.id}?')"}
             %i.fa-solid.fa-circle-play
