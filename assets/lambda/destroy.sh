@@ -24,8 +24,8 @@
 set -ex
 set -o pipefail
 
-if aws ecr get-repository-policy --repository-name "{{ repository }}/{{ image }}"; then
-  aws ecr delete-repository --repository-name "{{ repository }}/{{ image }}"
+if aws ecr get-repository-policy --repository-name "{{ image }}"; then
+  aws ecr delete-repository --repository-name "{{ image }}"
 fi
 
 func="baza-{{ name }}"

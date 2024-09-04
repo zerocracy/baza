@@ -43,8 +43,8 @@
     %tr
       %td.ff
         = "##{s.id}"
-      %td.ff
-        %a{href: iri.cut('/swarms').append(s.id).append('releases'), title: "Releases of the swarm ##{s.id}"}<
+      %td
+        %a.ff{href: iri.cut('/swarms').append(s.id).append('releases'), title: "Releases of the swarm ##{s.id}"}<
           = s.name
         - if s.exit.nil?
           %i.fa-solid.fa-hourglass-start.orange
@@ -53,8 +53,7 @@
         - else
           %i.fa-solid.fa-triangle-exclamation.bad{title: 'The latest release was not successful'}
         - why = s.why_not
-        %br
-        %span.smaller
+        %p.smaller
           - if why.nil?
             %span.good
               This swarm will be released in a few minutes...
