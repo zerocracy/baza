@@ -53,7 +53,7 @@
         - else
           %i.fa-solid.fa-triangle-exclamation.bad{title: 'The latest release was not successful'}
         - why = s.why_not
-        %p.smaller
+        %p.smaller{style: 'margin-bottom: 0; line-height: 1.1em;'}
           - if why.nil?
             %span.good
               This swarm will be released in a few minutes...

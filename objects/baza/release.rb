@@ -63,7 +63,7 @@ class Baza::Release
       [@id, head, tail, code, msec, @releases.swarm.id]
     )
     @releases.swarm.swarms.human.notify(
-      code.zero? ? '🫐' : '🍕',
+      code.zero? ? '🫐' : '⚠️',
       "The release ##{@id} of the swarm ##{@releases.swarm.id} (`#{@releases.swarm.name}`)",
       code.zero? ? "successfully published `#{head[0..8]}`" : 'failed',
       "after #{format('%.2f', msec.to_f / (60 * 1000))} minutes of work,",
