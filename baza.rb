@@ -84,6 +84,16 @@ configure do
       'region' => '', # SQS region
       'url' => ''
     },
+    'lambda' => {
+      'account' => '42424242',
+      'key' => 'FAKEFAKEFAKEFAKEFAKE',
+      'secret' => 'fakefakefakefakefakefakefakefakefakefake',
+      'region' => 'us-east-1',
+      'sgroup' => 'sg-42',
+      'subnet' => 'sn-42',
+      'image' => 'ami-42',
+      'id_rsa' => ''
+    },
     'github' => {
       'id' => '',
       'secret' => '',
@@ -180,6 +190,24 @@ configure do
     settings.config['sqs']['region'],
     loog: settings.loog
   )
+end
+
+# Ops with swarms:
+configure do
+  require_relative 'objects/baza/ec2'
+  cfg = settings.config['lambda']
+  ec2 = Baza::EC2.new(
+    cfg['key'],
+    cfg['secret'],
+    cfg['region'],
+    cfg['sgroup'],
+    cfg['subnet'],
+    cfg['image'],
+    type: 't2.xlarge',
+    loog: settings.loog
+  )
+  require_relative 'objects/baza/ops'
+  set :ops, Baza::Ops.new(ec2, cfg['account'], cfg['id_rsa'])
 end
 
 # Pipeline:

@@ -48,8 +48,9 @@ class Baza::RecipeTest < Minitest::Test
     s = fake_human.swarms.add(n, "#{fake_name}/#{fake_name}", 'master')
     bash = Baza::Recipe.new(s, '').to_bash(:release, '424242', 'us-east-1a', 'sword-fish')
     [
+      "#!/bin/bash\n",
       'FROM 424242.dkr.ecr.us-east-1a.amazonaws.com/zerocracy/baza:basic',
-      "424242.dkr.ecr.us-east-1a.amazonaws.com/zerocracy/swarms:#{n}",
+      "424242.dkr.ecr.us-east-1a.amazonaws.com/baza/#{n}",
       'RUN yum update -y',
       'gem \'aws-sdk-core\'',
       'cat > entry.rb <<EOT_',

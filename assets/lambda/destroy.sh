@@ -1,5 +1,4 @@
-# frozen_string_literal: true
-
+#!/bin/bash
 # MIT License
 #
 # Copyright (c) 2009-2024 Zerocracy
@@ -22,10 +21,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require_relative '../objects/baza/swarm'
+set -ex
+set -o pipefail
 
-settings.pgsql.exec('SELECT * FROM swarm').each do |row|
-  swarm = Baza::Swarm.new(settings.humans.get(row['human'].to_i).swarms, row['id'].to_i, tbot: settings.tbot)
-  next unless swarm.why_not.nil?
-  settings.ops.release(swarm)
-end
+if aws ecr get-repository-policy --repository-name "{{ repository }}/{{ image }}"; then
+  aws ecr delete-repository --repository-name "{{ repository }}/{{ image }}"
+fi
+
+func="baza-{{ name }}"
+if aws lambda get-function --function-name "${func}" --region "{{ region }}"; then
+  aws lambda delete-function --function-name "${func}" --region "{{ region }}"
+fi

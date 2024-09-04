@@ -51,7 +51,7 @@ class Baza::Recipe
   # @param [String] host Host to CURL results back to
   # @return [String] Bash script to use in EC2
   def to_bash(script, account, region, secret, host: 'https://www.zerocracy.com')
-    file_of(
+    sh = file_of(
       'recipe.sh',
       'host' => safe(host),
       'secret' => safe(secret),
@@ -65,7 +65,7 @@ class Baza::Recipe
           'region' => safe(region),
           'account' => safe(account),
           'repository' => safe("#{account}.dkr.ecr.#{region}.amazonaws.com"),
-          'image' => safe("zerocracy/swarms:#{@swarm.name}")
+          'image' => safe("baza/#{@swarm.name}")
         ),
         cat_of('Gemfile'),
         cat_of('entry.rb'),
@@ -79,6 +79,7 @@ class Baza::Recipe
         )
       ].join
     ).gsub(/^#.*\n/, '')
+    "#!/bin/bash\n\n#{sh}"
   end
 
   private

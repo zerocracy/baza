@@ -32,6 +32,8 @@ require 'base64'
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
 class Baza::EC2
+  attr_reader :type, :region
+
   # Ctor.
   #
   # @param [String] key AWS authentication key (if empty, the object will NOT use AWS S3)
@@ -42,7 +44,7 @@ class Baza::EC2
   def initialize(key, secret, region, sgroup, subnet, image,
     loog: Loog::NULL, type: 't2.xlarge')
     raise Baza::Urror, 'AWS key is nil' if key.nil?
-    raise Baza::Urror, "AWS key is wrong: #{key.inspect}" unless key.match?(/^(AKIA|FAKE)[A-Z0-9]{16}$/)
+    raise Baza::Urror, "AWS key is wrong: #{key.inspect}" unless key.match?(/^(AKIA|FAKE|STUB)[A-Z0-9]{16}$/)
     @key = key
     raise Baza::Urror, 'AWS secret is nil' if secret.nil?
     raise Baza::Urror, "AWS secret is wrong: #{secret.inspect}" unless secret.match?(%r{^[A-Za-z0-9/]{40}$})
@@ -63,6 +65,7 @@ class Baza::EC2
   def run_instance(tag, data)
     raise Baza::Urror, 'AWS image tag is nil' if tag.nil?
     raise Baza::Urror, 'AWS image user_data is nil' if data.nil?
+    return 'i-42424242' if @key.start_with?('FAKE')
     elapsed(@loog, intro: "Started new #{@type.inspect} EC2 instance") do
       aws.run_instances(
         image_id: @image,

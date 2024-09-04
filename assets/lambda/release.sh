@@ -38,6 +38,10 @@ aws ecr get-login-password --region "{{ region }}" | docker login --username AWS
 
 docker build . -t baza --platform linux/amd64
 
+if ! aws ecr get-repository-policy --repository-name "{{ repository }}/{{ image }}"; then
+  aws ecr create-repository --repository-name "{{ repository }}/{{ image }}" --image-tag-mutability MUTABLE
+fi
+
 docker tag baza "{{ repository }}/{{ image }}"
 docker push "{{ repository }}/{{ image }}"
 

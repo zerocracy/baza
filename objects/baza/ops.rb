@@ -22,29 +22,51 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require 'minitest/autorun'
-require 'webmock/minitest'
-require_relative '../../objects/baza'
-require_relative '../../objects/baza/ec2'
-require_relative '../test__helper'
+require 'liquid'
+require 'fileutils'
 
-# Test for EC2.
+# Operations with swarms and their releases.
+#
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class Baza::EC2Test < Minitest::Test
-  def test_run_instance
-    ec2 = Baza::EC2.new(
-      'STUBSTUBSTUBSTUBSTUB',
-      'fakefakefakefakefakefakefakefakefakefake',
-      'us-east-1',
-      'sg-424242',
-      'sn-42424242',
-      't2.large',
-      loog: Loog::NULL
+class Baza::Ops
+  # Ctor.
+  #
+  # @param [Baza::Swarm] swarm The swarm
+  # @param [Loog] loog Logging facility
+  def initialize(ec2, account, id_rsa, loog: Loog::NULL)
+    @ec2 = ec2
+    @account = account
+    @id_rsa = id_rsa
+    @loog = loog
+  end
+
+  # Release this swarm.
+  #
+  # @param [Baza::Swarm] swarm The swarm
+  def release(swarm)
+    secret = SecureRandom.uuid
+    instance = @ec2.run_instance(
+      "baza/#{swarm.name}",
+      Baza::Recipe.new(swarm, @id_rsa.gsub(/\n +/, "\n")).to_bash(
+        :release, @account, @ec2.region, secret
+      )
     )
-    fake_aws('RunInstances', { instancesSet: { item: { instanceId: 'i-42424242' } } })
-    i = ec2.run_instance('some-fake-name', "#!/bin/bash\necho test\n")
-    assert_equal('i-42424242', i)
+    swarm.releases.start("Releasing AWS EC2 #{@ec2.type.inspect} instance #{instance.inspect}...", secret)
+  end
+
+  # Destroy this swarm.
+  #
+  # @param [Baza::Swarm] swarm The swarm
+  def destroy(swarm)
+    secret = SecureRandom.uuid
+    instance = @ec2.run_instance(
+      "baza/#{swarm.name}",
+      Baza::Recipe.new(swarm, @id_rsa.gsub(/\n +/, "\n")).to_bash(
+        :destroy, @account, @ec2.region, secret
+      )
+    )
+    swarm.releases.start("Destroying in EC2 #{@ec2.type.inspect} instance #{instance.inspect}...", secret)
   end
 end

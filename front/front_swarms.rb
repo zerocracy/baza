@@ -121,8 +121,10 @@ end
 get(%r{/swarms/([0-9]+)/disable}) do
   admin_only
   id = params['captures'].first.to_i
-  the_human.swarms.get(id).enable!(false)
-  flash(iri.cut('/swarms'), "The swarm ##{id} was disabled")
+  swarm = the_human.swarms.get(id)
+  settings.ops.destroy(swarm)
+  swarm.enable!(false)
+  flash(iri.cut('/swarms'), "The swarm ##{id} was disabled and will be destroyed soon")
 end
 
 get(%r{/swarms/([0-9]+)/reset}) do
