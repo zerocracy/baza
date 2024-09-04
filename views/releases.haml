@@ -90,4 +90,4 @@
             %i.fa-regular.fa-circle-stop
         - if r[:head] == 'F' * 40 || r[:head] == '0' * 40
           %a.ico{href: iri.cut('/swarms').append(releases.swarm.id).append('releases').append(r[:id]).append('reset'), title: "Reset the head SHA of the release ##{r[:id]}", onclick: "return confirm('Are you sure you want to reset the head SHA of the release ##{r[:id]}?')"}
-            %i.fa-solid.fa-lightbulb
+            %i.fa-solid.fa-trash-arrow-up
