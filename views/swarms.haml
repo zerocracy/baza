@@ -12,15 +12,15 @@
     -# ID
     %col{style: 'width: 4em;'}
     -# Name
-    %col{style: 'width: 14em;'}
+    %col{style: 'width: 18em;'}
     -# Repository
     %col{style: 'width: 14em;'}
     -# Branch
-    %col{style: 'width: 14em;'}
+    %col{style: 'width: 10em;'}
     -# Head
     %col{style: 'width: 7em;'}
     -# Created
-    %col{style: 'width: 10em;'}
+    %col{style: 'width: 8em;'}
     -# Commands
     %col{style: 'width: 6em;'}
   %thead
@@ -54,12 +54,12 @@
           %i.fa-solid.fa-triangle-exclamation.bad{title: 'The latest release was not successful'}
         - why = s.why_not
         %br
-        %span.small
+        %span.smaller
           - if why.nil?
             %span.good
               This swarm will be released in a few minutes...
           - else
-            %span.bad
+            %span
               = why
       %td.ff
         %a{href: "https://github.com/#{s.repository}/tree/#{s.branch}"}<
