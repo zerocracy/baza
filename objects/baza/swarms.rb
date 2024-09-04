@@ -22,6 +22,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+require 'veil'
+
 # Swarms of a human.
 #
 # Author:: Yegor Bugayenko (yegor256@gmail.com)

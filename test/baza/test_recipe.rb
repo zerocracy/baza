@@ -22,10 +22,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require 'open3'
+require 'backtrace'
 require 'fileutils'
 require 'loog'
 require 'minitest/autorun'
+require 'open3'
 require 'random-port'
 require 'webmock/minitest'
 require 'yaml'
@@ -51,8 +52,9 @@ class Baza::RecipeTest < Minitest::Test
       "424242.dkr.ecr.us-east-1a.amazonaws.com/zerocracy/swarms:#{n}",
       'RUN yum update -y',
       'gem \'aws-sdk-core\'',
-      'cat > entry.rb <<EOT_'
-    ].each { |t| assert(bash.include?(t), bash) }
+      'cat > entry.rb <<EOT_',
+      '"\${uri}"'
+    ].each { |t| assert(bash.include?(t), "Can't find #{t.inspect} in:\n#{bash}") }
   end
 
   def test_runs_script
@@ -60,21 +62,43 @@ class Baza::RecipeTest < Minitest::Test
     swarm = fake_human.swarms.add('st', 'zerocracy/swarm-template', 'master')
     secret = fake_name
     r = swarm.releases.start('just start', secret)
+    id_rsa_file = File.join(Dir.home, '.ssh/id_rsa')
+    id_rsa = File.exist?(id_rsa_file) ? File.read(id_rsa_file) : ''
     Dir.mktmpdir do |home|
       %w[aws docker shutdown].each do |f|
         sh = File.join(home, f)
         File.write(sh, 'echo FAKE-$(basename $0) $@')
         FileUtils.chmod('+x', sh)
       end
-      RandomPort::Pool::SINGLETON.acquire do |port|
-        with_front(port, loog) do |host|
-          sh = File.join(home, 'recipe.sh')
-          File.write(
-            sh,
-            Baza::Recipe.new(swarm, '').to_bash('accout', 'us-east-1', secret, host:)
-          )
-          bash("/bin/bash #{sh}", loog)
+      FileUtils.mkdir_p(File.join(home, '.docker'))
+      File.write(
+        File.join(home, '.docker/Dockerfile'),
+        '
+        FROM ubuntu
+        RUN apt-get -y update
+        RUN apt-get -y install ssh-client git curl
+        WORKDIR /r
+        ENTRYPOINT ["/bin/bash", "recipe.sh"]
+        '
+      )
+      img = 'test_recipe'
+      bash("docker build #{File.join(home, '.docker')} -t #{img}", loog)
+      begin
+        RandomPort::Pool::SINGLETON.acquire do |port|
+          with_front(port, loog) do
+            sh = File.join(home, 'recipe.sh')
+            File.write(
+              sh,
+              Baza::Recipe.new(swarm, id_rsa).to_bash(
+                'accout', 'us-east-1', secret,
+                host: "http://host.docker.internal:#{port}"
+              )
+            )
+            bash("docker run --rm -v #{home}:/r #{img}", loog)
+          end
         end
+      ensure
+        bash("docker rmi #{img}", loog)
       end
     end
     assert(swarm.releases.get(r.id).exit.zero?)
@@ -162,20 +186,36 @@ class Baza::RecipeTest < Minitest::Test
   private
 
   def with_front(port, loog)
-    Open3.popen2e({}, "ruby baza.rb -p #{port}") do |stdin, stdout, thr|
-      stdin.close
-      until stdout.eof?
-        begin
-          line = stdout.gets
-        rescue IOError => e
-          line = Backtrace.new(e).to_s
+    started = false
+    pid = nil
+    server =
+      Thread.new do
+        Open3.popen2e({}, "ruby baza.rb -p #{port}") do |stdin, stdout, thr|
+          pid = thr.pid
+          stdin.close
+          until stdout.eof?
+            begin
+              ln = stdout.gets
+            rescue IOError => e
+              ln = Backtrace.new(e).to_s
+            end
+            loog.debug(ln)
+            started |= ln.include?("has taken the stage on #{port}")
+          end
         end
-        loog.debug(line)
-        next unless line.include?("port=#{port}")
-        sleep 0.5
-        yield "http://localhost:#{port}"
-        `kill -9 #{thr.pid}`
+      rescue StandardError => e
+        loog.error(Backtrace.new(e))
+        raise e
       end
+    loop do
+      sleep 0.1
+      break if started
+    end
+    begin
+      yield
+    ensure
+      Process.kill('QUIT', pid)
+      server.join
     end
   end
 

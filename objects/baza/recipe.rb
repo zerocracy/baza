@@ -52,8 +52,20 @@ class Baza::Recipe
   def to_bash(account, region, secret, host: 'https://www.zerocracy.com')
     file_of(
       'recipe.sh',
+      'host' => safe(host),
+      'secret' => safe(secret),
       'save_files' => [
         cat('id_rsa', @id_rsa),
+        cat_of(
+          'release.sh',
+          'name' => safe(@swarm.name),
+          'github' => safe(@swarm.repository),
+          'branch' => safe(@swarm.branch),
+          'region' => safe(region),
+          'account' => safe(account),
+          'repository' => safe("#{account}.dkr.ecr.#{region}.amazonaws.com"),
+          'image' => safe("zerocracy/swarms:#{@swarm.name}")
+        ),
         cat_of('Gemfile'),
         cat_of('entry.rb'),
         cat_of('install-pgsql.sh'),
@@ -62,22 +74,18 @@ class Baza::Recipe
           'Dockerfile',
           'from' => secret.empty? \
             ? 'public.ecr.aws/lambda/ruby:3.2'
-            : "#{account}.dkr.ecr.#{region}.amazonaws.com/zerocracy/baza:basic"
+            : safe("#{account}.dkr.ecr.#{region}.amazonaws.com/zerocracy/baza:basic")
         )
-      ].join,
-      'host' => host,
-      'name' => @swarm.name,
-      'github' => @swarm.repository,
-      'branch' => @swarm.branch,
-      'region' => region,
-      'account' => account,
-      'repository' => "#{account}.dkr.ecr.#{region}.amazonaws.com",
-      'image' => "zerocracy/swarms:#{@swarm.name}",
-      'secret' => secret
+      ].join
     )
   end
 
   private
+
+  def safe(txt)
+    raise "Unsafe value #{txt.inspect} for bash" if txt.match?(/[\n\r\t"']/)
+    txt
+  end
 
   def file_of(file, args = {})
     dir = File.join(__dir__, '../../assets/lambda')
@@ -91,6 +99,6 @@ class Baza::Recipe
 
   def cat(file, txt)
     m = "EOT_#{SecureRandom.hex(8)}"
-    "\ncat > #{file} <<#{m}\n#{txt}\n#{m}\n"
+    "\ncat > #{file} <<#{m}\n#{txt.gsub('$', '\\$')}#{txt.empty? ? '' : "\n"}#{m}\n"
   end
 end

@@ -41,53 +41,25 @@ fi
 
 {{ save_files }}
 
+if [ -e "${HOME}/.ssh/id_rsa" ]; then
+  echo "The private RSA key already exists, most probably you are doing something wrong"
+  exit 1
+fi
+
+mkdir "${HOME}/.ssh"
+mv id_rsa "${HOME}/.ssh/id_rsa"
+ssh-keyscan -t rsa github.com >> "${HOME}/.ssh/known_hosts"
+chmod 600 "${HOME}/.ssh"/*
+
 printf '0' > exit.txt
 
 SECONDS=0
 
-function this() {
-  mkdir .ssh
-  mv id_rsa .ssh/id_rsa
-  ssh-keyscan -t rsa github.com >> .ssh/known_hosts
-  chmod 600 .ssh/*
-
-  uri="git@github.com:{{ github }}.git"
-  if [ ! -s .ssh/id_rsa ]; then
-    uri="https://github.com/{{ github }}"
-  fi
-  git clone -b "{{ branch }}" --depth=1 --single-branch "${uri}" swarm
-  git --git-dir swarm/.git rev-parse HEAD | tr '[:lower:]' '[:upper:]' > head.txt
-
-  aws ecr get-login-password --region "{{ region }}" | docker login --username AWS --password-stdin "{{ repository }}"
-
-  docker build . -t baza --platform linux/amd64
-
-  docker tag baza "{{ repository }}/{{ image }}"
-  docker push "{{ repository }}/{{ image }}"
-
-  func="baza-{{ name }}"
-  if aws lambda get-function --function-name "${func}" --region "{{ region }}"; then
-    aws lambda update-function-code --function-name "${func}" \
-      --region "{{ region }}" \
-      --image-uri "{{ repository }}/{{ image }}" \
-      --publish
-  else
-    role=arn:aws:iam::{{ account }}:role/baza-lambda
-    aws lambda create-function --function-name "${func}" \
-      --region "{{ region }}" \
-      --package-type Image \
-      --code "ImageUri={{ repository }}/{{ image }}" \
-      --role "${role}"
-    # swarms--use1-az4--x-s3
-    # give this function permissions to work with S3 bucket
-  fi
-}
-
-this 2>&1 | tail -200 | tee stdout.log || echo $? > exit.txt
+/bin/bash release.sh 2>&1 | tail -200 | tee stdout.log || echo $? > exit.txt
 
 if [ ! -e head.txt -o ! -s head.txt ]; then
   printf '0000000000000000000000000000000000000000' > head.txt
 fi
 
-curl -X PUT --data-binary '@stdout.log' -H 'Content-Type: text/plain' \
+curl -s -X PUT --data-binary '@stdout.log' -H 'Content-Type: text/plain' \
   "{{ host }}/swarms/finish?secret={{ secret }}&head=$(cat head.txt)&exit=$(cat exit.txt)&sec=${SECONDS}"

@@ -36,12 +36,14 @@ class Baza::AlwaysReleaseTest < Minitest::Test
     WebMock.disable_net_connect!
     app.set :config, {
       'lambda' => {
+        'account' => '42424242',
         'key' => 'FAKEFAKEFAKEFAKEFAKE',
         'secret' => 'fakefakefakefakefakefakefakefakefakefake',
         'region' => 'us-east-1',
         'sgroup' => 'sg-424242',
         'subnet' => 'sn-42424242',
-        'image' => 't2.large'
+        'image' => 't2.large',
+        'id_rsa' => ''
       }
     }
     fake_aws('RunInstances', { instancesSet: { item: { instanceId: 'i-58585858' } } })
