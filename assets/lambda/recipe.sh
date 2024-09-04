@@ -50,10 +50,10 @@ if [ -e "${HOME}/.ssh/id_rsa" ]; then
   exit 1
 fi
 
-mkdir "${HOME}/.ssh"
+mkdir -p "${HOME}/.ssh"
 mv id_rsa "${HOME}/.ssh/id_rsa"
+chmod 600 "${HOME}/.ssh/id_rsa"
 ssh-keyscan -t rsa github.com >> "${HOME}/.ssh/known_hosts"
-chmod 600 "${HOME}/.ssh"/*
 
 printf '0' > exit.txt
 
