@@ -60,13 +60,13 @@ class Baza::Recipe
         cat('id_rsa', @id_rsa),
         cat_of(
           "#{script}.sh",
-          'name' => safe(@swarm.name),
+          'name' => safe("baza-#{@swarm.name}"),
           'github' => safe(@swarm.repository),
           'branch' => safe(@swarm.branch),
           'region' => safe(region),
           'account' => safe(account),
           'repository' => safe("#{account}.dkr.ecr.#{region}.amazonaws.com"),
-          'image' => safe("baza/#{@swarm.name}")
+          'bucket' => 'swarms--use1-az4--x-s3'
         ),
         cat_of('Gemfile'),
         cat_of('entry.rb'),

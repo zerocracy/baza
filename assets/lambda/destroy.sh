@@ -24,11 +24,18 @@
 set -ex
 set -o pipefail
 
-if aws ecr get-repository-policy --repository-name "{{ image }}"; then
-  aws ecr delete-repository --repository-name "{{ image }}"
+if aws ecr get-repository-policy --repository-name "{{ name }}"; then
+  aws ecr delete-repository --repository-name "{{ name }}"
 fi
 
-func="baza-{{ name }}"
-if aws lambda get-function --function-name "${func}" --region "{{ region }}"; then
-  aws lambda delete-function --function-name "${func}" --region "{{ region }}"
+if aws lambda get-function --function-name "{{ name }}" --region "{{ region }}"; then
+  aws lambda delete-function --function-name "{{ name }}" --region "{{ region }}"
+fi
+
+if aws sqs get-queue-url --queue-name "{{ name }}" --region "{{ region }}"; then
+  aws sqs delete-queue --queue-name "{{ name }}" --region "{{ region }}"
+fi
+
+if aws iam get-role --role-name "{{ name }}"; then
+  aws iam delete-role --role-name "{{ name }}"
 fi

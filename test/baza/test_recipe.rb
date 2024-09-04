@@ -50,7 +50,7 @@ class Baza::RecipeTest < Minitest::Test
     [
       "#!/bin/bash\n",
       'FROM 424242.dkr.ecr.us-east-1a.amazonaws.com/zerocracy/baza:basic',
-      "424242.dkr.ecr.us-east-1a.amazonaws.com/baza/#{n}",
+      "424242.dkr.ecr.us-east-1a.amazonaws.com/baza-#{n}",
       'RUN yum update -y',
       'gem \'aws-sdk-core\'',
       'cat > entry.rb <<EOT_',
@@ -104,30 +104,6 @@ class Baza::RecipeTest < Minitest::Test
       end
     end
     assert(swarm.releases.get(r.id).exit.zero?)
-  end
-
-  def test_live_deploy
-    skip # use if very very carefully!
-    loog = Loog::VERBOSE
-    yml = '/code/home/assets/zerocracy/baza.yml'
-    skip unless File.exist?(yml)
-    cfg = YAML.safe_load(File.open(yml))['lambda']
-    swarm = fake_human.swarms.add('st', 'zerocracy/swarm-template', 'master')
-    WebMock.enable_net_connect!
-    ec2 = Baza::EC2.new(
-      cfg['key'],
-      cfg['secret'],
-      cfg['region'],
-      cfg['sgroup'],
-      cfg['subnet'],
-      cfg['image'],
-      loog:
-    )
-    instance = ec2.run_instance(
-      Baza::Recipe.new(swarm).to_bash(:release, cfg['account'], cfg['region'], 'latest', ''),
-      swarm.name
-    )
-    assert(instance.start_with?('i-'))
   end
 
   def test_live_local_run

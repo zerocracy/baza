@@ -71,6 +71,18 @@ class Baza::FrontSwarmsTest < Minitest::Test
       '/swarms/webhook',
       JSON.pretty_generate(
         {
+          ref: 'refs/head/another-branch',
+          after: '3737373737373737373737373737373737373737',
+          repository: { full_name: repo }
+        }
+      ),
+      'CONTENT_TYPE' => 'application/json'
+    )
+    assert_status(200)
+    post(
+      '/swarms/webhook',
+      JSON.pretty_generate(
+        {
           ref: "refs/head/#{branch}",
           after: '3737373737373737373737373737373737373737',
           repository: { full_name: 'wrong-org/wrong-repo' }

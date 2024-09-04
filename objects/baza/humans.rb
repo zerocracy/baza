@@ -115,12 +115,11 @@ class Baza::Humans
   # Find swarm, if it exists.
   #
   # @param [String] repo Name of repository
-  # @param [String] branch Name of branch
   # @return [Baza::Swarm] The found swarm or NIL
-  def find_swarm(repo, branch)
+  def find_swarm(repo)
     rows = @pgsql.exec(
-      'SELECT id, human FROM swarm WHERE repository = $1 and branch = $2',
-      [repo, branch]
+      'SELECT id, human FROM swarm WHERE repository = $1',
+      [repo]
     )
     return nil if rows.empty?
     get(rows.first['human'].to_i).swarms.get(rows.first['id'].to_i)
