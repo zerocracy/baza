@@ -38,7 +38,7 @@ docker build . -t baza --platform linux/amd64
 
 this="baza-{{ name }}"
 
-if ! aws ecr get-repository-policy --repository-name "{{ name }}" --region "{{ region }}"; then
+if ! aws ecr describe-repositories --repository-names "{{ name }}" --region "{{ region }}"; then
   aws ecr create-repository --repository-name "{{ name }}" --region "{{ region }}" --image-tag-mutability MUTABLE
 fi
 
@@ -55,8 +55,7 @@ if aws lambda get-function --function-name "{{ name }}" --region "{{ region }}";
 else
   # Create new IAM role, which will be assumed by Lambda function executions:
   aws iam create-role --role-name "{{ name }}" \
-    --assume-role-policy-document '
-      {
+    --assume-role-policy-document '{
         "Version": "2012-10-17",
         "Statement": [
           {
@@ -69,13 +68,12 @@ else
 
   # Allow this role to read/write SQS events:
   aws iam put-role-policy --role-name "{{ name }}" \
-    --policy-name 'Read/write SQS messages' \
-    --policy-document '
-      {
+    --policy-name 'SQS-read-write' \
+    --policy-document '{
         "Version": "2012-10-17",
         "Statement": [
           {
-            "Action": ["sqs:*"],
+            "Action": [ "sqs:*" ],
             "Effect": "Allow",
             "Resource": "arn:aws:sqs:{{ region }}:{{ account }}:{{ name }}"
           }
@@ -84,9 +82,8 @@ else
 
   # Allow this role to read/write S3 objects:
   aws iam put-role-policy --role-name "{{ name }}" \
-    --policy-name 'Read/write S3 objects' \
-    --policy-document '
-      {
+    --policy-name 'S3-read-write' \
+    --policy-document '{
         "Version": "2012-10-17",
         "Statement": [
           {
@@ -97,7 +94,7 @@ else
           {
             "Effect": "Allow",
             "Action": [
-              "s3:ListBucket"
+              "s3:ListBucket",
               "s3:GetObject",
               "s3:PutObject"
             ],

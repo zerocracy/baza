@@ -12,9 +12,9 @@
     -# ID
     %col{style: 'width: 4em;'}
     -# Name
-    %col{style: 'width: 18em;'}
+    %col{style: 'width: 15em;'}
     -# Repository
-    %col{style: 'width: 14em;'}
+    %col{style: 'width: 16em;'}
     -# Branch
     %col{style: 'width: 10em;'}
     -# Head
@@ -68,7 +68,7 @@
         = s.branch
       %td.ff
         %a{href: "https://github.com/#{s.repository}/commit/#{s.head}"}<
-          = s.head[0..8]
+          = s.head[0..8].downcase
         %a.ico{href: iri.cut('/swarms').append(s.id).append('reset'), title: "Reset the head SHA of the swarm ##{s.id}", onclick: "return confirm('Are you sure you want to reset the head SHA of the swarm ##{s.id}?')"}
           %i.fa-solid.fa-trash-arrow-up
       %td

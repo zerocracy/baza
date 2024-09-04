@@ -67,11 +67,7 @@ class Baza::RecipeTest < Minitest::Test
     id_rsa_file = File.join(Dir.home, '.ssh/id_rsa')
     id_rsa = File.exist?(id_rsa_file) ? File.read(id_rsa_file) : ''
     Dir.mktmpdir do |home|
-      %w[aws docker shutdown].each do |f|
-        sh = File.join(home, f)
-        File.write(sh, 'echo FAKE-$(basename $0) $@')
-        FileUtils.chmod('+x', sh)
-      end
+      %w[aws docker shutdown].each { |f| stub_cli(home, f) }
       FileUtils.mkdir_p(File.join(home, '.docker'))
       File.write(
         File.join(home, '.docker/Dockerfile'),
@@ -107,21 +103,27 @@ class Baza::RecipeTest < Minitest::Test
   end
 
   def test_live_local_run
-    skip
     loog = Loog::VERBOSE
+    creds = File.join(Dir.home, '.aws/credentials')
+    skip unless File.exist?(creds)
     s = fake_human.swarms.add('st', 'zerocracy/swarm-template', 'master')
     Dir.mktmpdir do |home|
+      %w[curl shutdown].each { |f| stub_cli(home, f) }
+      FileUtils.mkdir_p(File.join(home, '.aws'))
+      FileUtils.copy(creds, File.join(home, '.aws/credentials'))
       sh = File.join(home, 'recipe.sh')
-      File.write(
-        sh,
-        Baza::Recipe.new(s, '').to_bash(:release, '019644334823', 'us-east-1', '')
-      )
-      bash("/bin/bash #{sh}", loog)
+      [:destroy, :release].each do |step|
+        File.write(
+          sh,
+          Baza::Recipe.new(s, '').to_bash(step, '019644334823', 'us-east-1', 'fake')
+        )
+        stdout = bash("/bin/bash #{sh}", loog)
+        assert(stdout.include?('exit=0&'))
+      end
     end
   end
 
   def test_fake_docker_run
-    skip
     WebMock.enable_net_connect!
     loog = Loog::NULL
     Dir.mktmpdir do |home|
@@ -197,11 +199,27 @@ class Baza::RecipeTest < Minitest::Test
     end
   end
 
-  def bash(cmd, loog)
-    loog.debug("+ #{cmd}")
-    stdout = `#{cmd} 2>&1`
-    loog.debug(stdout)
-    assert_equal(0, $CHILD_STATUS.exitstatus, stdout)
-    stdout
+  def bash(cmd, loog, env = {})
+    buf = ''
+    Open3.popen2e(env, cmd) do |stdin, stdout, thr|
+      stdin.close
+      until stdout.eof?
+        begin
+          ln = stdout.gets
+        rescue IOError => e
+          ln = Backtrace.new(e).to_s
+        end
+        loog.debug(ln)
+        buf += ln
+      end
+      assert(thr.value.to_i.zero?)
+    end
+    buf
+  end
+
+  def stub_cli(home, name)
+    sh = File.join(home, name)
+    File.write(sh, 'echo FAKE-$(basename $0) $@')
+    FileUtils.chmod('+x', sh)
   end
 end

@@ -46,24 +46,25 @@ if [ -z "${HOME}" ]; then
 fi
 
 if [ -e "${HOME}/.ssh/id_rsa" ]; then
-  echo "The private RSA key already exists, most probably you are doing something wrong"
-  exit 1
+  echo "The private RSA key already exists, most probably you are testing..."
+else
+  mkdir -p "${HOME}/.ssh"
+  mv id_rsa "${HOME}/.ssh/id_rsa"
+  chmod 600 "${HOME}/.ssh/id_rsa"
+  ssh-keyscan -t rsa github.com >> "${HOME}/.ssh/known_hosts"
 fi
-
-mkdir -p "${HOME}/.ssh"
-mv id_rsa "${HOME}/.ssh/id_rsa"
-chmod 600 "${HOME}/.ssh/id_rsa"
-ssh-keyscan -t rsa github.com >> "${HOME}/.ssh/known_hosts"
 
 printf '0' > exit.txt
 
 SECONDS=0
 
-/bin/bash "{{ script }}.sh" 2>&1 | tail -200 | tee stdout.log || echo $? > exit.txt
+/bin/bash "{{ script }}.sh" 2>&1 | tee stdout.log || echo $? > exit.txt
+
+tail -200 stdout.log > tail.log
 
 if [ ! -e head.txt -o ! -s head.txt ]; then
   printf '0000000000000000000000000000000000000000' > head.txt
 fi
 
-curl -s -X PUT --data-binary '@stdout.log' -H 'Content-Type: text/plain' \
+curl -s -X PUT --data-binary '@tail.log' -H 'Content-Type: text/plain' \
   "{{ host }}/swarms/finish?secret={{ secret }}&head=$(cat head.txt)&exit=$(cat exit.txt)&sec=${SECONDS}"

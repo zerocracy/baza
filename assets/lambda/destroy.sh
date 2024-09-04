@@ -37,5 +37,9 @@ if aws sqs get-queue-url --queue-name "{{ name }}" --region "{{ region }}"; then
 fi
 
 if aws iam get-role --role-name "{{ name }}"; then
+  while IFS= read -r policy; do
+    aws iam delete-role-policy --role-name "{{ name }}" --policy-name "${policy}"
+  done < <( aws iam list-role-policies --role-name "{{ name }}" --output json | jq -r '.PolicyNames.[]' )
   aws iam delete-role --role-name "{{ name }}"
 fi
+
