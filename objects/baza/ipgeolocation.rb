@@ -28,20 +28,21 @@ require 'faraday'
 class Baza::IpGeolocation
   def initialize(token:, connection:)
     @token = token
-    @connection = connection
+    @connection = connection.new(url: 'https://api.ipgeolocation.io')
   end
 
   def ipgeo(ip:)
     JSON.parse(@connection.get("ipgeo?apiKey=#{@token}&ip=#{ip}").body)
   end
 
-  def self.host
-    'https://api.ipgeolocation.io'
-  end
-
   # Fake connection
   class FakeConnection
     GetResponse = Data.define(:body)
+
+    def initialize(url:)
+      @url = url
+    end
+
     def get(_url)
       GetResponse.new(
         body: JSON.dump(

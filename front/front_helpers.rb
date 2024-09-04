@@ -240,7 +240,7 @@ module Baza::Helpers
     Baza::IpGeolocation.new(
       token:,
       connection: ENV['RACK_ENV'] == 'test' && token.nil? ?
-      Baza::IpGeolocation::FakeConnection.new : Faraday.new(url: Baza::IpGeolocation.host)
+      Baza::IpGeolocation::FakeConnection : Faraday
     ).ipgeo(ip:)['country_flag']
   end
 end
