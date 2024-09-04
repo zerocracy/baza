@@ -53,7 +53,7 @@ class Baza::Ops
         :release, @account, @ec2.region, secret
       )
     )
-    swarm.releases.start("Releasing AWS EC2 #{@ec2.type.inspect} instance #{instance.inspect}...", secret)
+    swarm.releases.start(greeting('releasing', instance), secret)
   end
 
   # Destroy this swarm.
@@ -67,6 +67,16 @@ class Baza::Ops
         :destroy, @account, @ec2.region, secret
       )
     )
-    swarm.releases.start("Destroying in EC2 #{@ec2.type.inspect} instance #{instance.inspect}...", secret)
+    swarm.releases.start(greeting('destroying', instance), secret)
+  end
+
+  private
+
+  def greeting(action, instance)
+    [
+      "We are #{action} in EC2 #{@ec2.type.inspect} instance #{instance.inspect}...",
+      'Run this command in the console, to get the logs from AWS EC2:',
+      "aws ec2 get-console-output --instance-id #{instance} --output text"
+    ].join("\n")
   end
 end
