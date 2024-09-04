@@ -44,7 +44,7 @@
       %td.ff
         = "##{s.id}"
       %td.ff
-        %a{href: iri.cut('/swarms').append(s.id).append('releases'), title: "Releases of the swarm ##{s.id}"}
+        %a{href: iri.cut('/swarms').append(s.id).append('releases'), title: "Releases of the swarm ##{s.id}"}<
           = s.name
         - if s.exit.nil?
           %i.fa-solid.fa-hourglass-start.orange
@@ -67,7 +67,7 @@
         %a{href: "https://github.com/#{s.repository}/commit/#{s.head}"}<
           = s.head[0..8]
         %a.ico{href: iri.cut('/swarms').append(s.id).append('reset'), title: "Reset the head SHA of the swarm ##{s.id}", onclick: "return confirm('Are you sure you want to reset the head SHA of the swarm ##{s.id}?')"}
-          %i.fa-solid.fa-lightbulb
+          %i.fa-solid.fa-trash-arrow-up
       %td
         != ago(s.created)
       %td

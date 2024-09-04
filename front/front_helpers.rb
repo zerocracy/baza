@@ -44,22 +44,22 @@ module Baza::Helpers
         html_tag('nav') do
           html_tag('ul', style: 'margin-bottom: 0; text-align: left;') do
             [
-              html_tag('li') do
-                params[:offset].zero? ? '' : html_tag('a', href: iri.del(:offset)) do
+              params[:offset].zero? ? '' : html_tag('li') do
+                html_tag('a', href: iri.del(:offset)) do
                   [
                     html_tag('i', class: 'fa-solid fa-backward'),
                     html_tag('span', style: 'margin-left: .5em') { 'Back' }
                   ].join
                 end
               end,
-              html_tag('li') do
-                total > max ? html_tag('a', href: iri.over(offset: params[:offset] + max)) do
+              total > max ? html_tag('li') do
+                html_tag('a', href: iri.over(offset: params[:offset] + max)) do
                   [
                     html_tag('span', style: 'margin-right: .5em') { 'More' },
                     html_tag('i', class: 'fa-solid fa-forward')
                   ].join
-                end : ''
-              end
+                end
+              end : ''
             ].join
           end
         end
