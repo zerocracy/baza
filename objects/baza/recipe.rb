@@ -77,7 +77,7 @@ class Baza::Recipe
             : safe("#{account}.dkr.ecr.#{region}.amazonaws.com/zerocracy/baza:basic")
         )
       ].join
-    )
+    ).gsub(/^#.*\n/, '')
   end
 
   private

@@ -24,6 +24,8 @@
 set -ex
 set -o pipefail
 
+env
+
 uri="git@github.com:{{ github }}.git"
 if [ ! -s "${HOME}/.ssh/id_rsa" ]; then
   uri="https://github.com/{{ github }}"
