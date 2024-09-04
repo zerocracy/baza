@@ -102,7 +102,6 @@ class Baza::RecipeTest < Minitest::Test
       ensure
         bash("docker rmi #{img}", loog)
       end
-      bash("rm -rf #{home}/*", loog)
     end
     assert(swarm.releases.get(r.id).exit.zero?)
   end

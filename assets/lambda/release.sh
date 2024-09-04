@@ -24,14 +24,14 @@
 set -ex
 set -o pipefail
 
-env
-
 uri="git@github.com:{{ github }}.git"
 if [ ! -s "${HOME}/.ssh/id_rsa" ]; then
   uri="https://github.com/{{ github }}"
 fi
 
-git clone -b "{{ branch }}" --depth=1 --single-branch "${uri}" swarm
+ls -al "${HOME}/.ssh"
+
+GIT_SSH_COMMAND="ssh -v" git clone -b "{{ branch }}" --depth=1 --single-branch "${uri}" swarm
 git --git-dir swarm/.git rev-parse HEAD | tr '[:lower:]' '[:upper:]' > head.txt
 
 aws ecr get-login-password --region "{{ region }}" | docker login --username AWS --password-stdin "{{ repository }}"
