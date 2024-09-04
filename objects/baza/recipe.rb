@@ -44,12 +44,13 @@ class Baza::Recipe
 
   # Make it a bash script.
   #
+  # @param [Symbol] script The script to use (:release or :destroy)
   # @param [String] account AWS account number
   # @param [String] region AWS region
   # @param [String] secret Secret of the release
   # @param [String] host Host to CURL results back to
   # @return [String] Bash script to use in EC2
-  def to_bash(account, region, secret, host: 'https://www.zerocracy.com')
+  def to_bash(script, account, region, secret, host: 'https://www.zerocracy.com')
     file_of(
       'recipe.sh',
       'host' => safe(host),
@@ -57,7 +58,7 @@ class Baza::Recipe
       'save_files' => [
         cat('id_rsa', @id_rsa),
         cat_of(
-          'release.sh',
+          "#{script}.sh",
           'name' => safe(@swarm.name),
           'github' => safe(@swarm.repository),
           'branch' => safe(@swarm.branch),

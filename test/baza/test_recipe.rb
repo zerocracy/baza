@@ -46,7 +46,7 @@ class Baza::RecipeTest < Minitest::Test
   def test_generates_script
     n = fake_name
     s = fake_human.swarms.add(n, "#{fake_name}/#{fake_name}", 'master')
-    bash = Baza::Recipe.new(s, '').to_bash('424242', 'us-east-1a', 'sword-fish')
+    bash = Baza::Recipe.new(s, '').to_bash(:release, '424242', 'us-east-1a', 'sword-fish')
     [
       'FROM 424242.dkr.ecr.us-east-1a.amazonaws.com/zerocracy/baza:basic',
       "424242.dkr.ecr.us-east-1a.amazonaws.com/zerocracy/swarms:#{n}",
@@ -90,7 +90,7 @@ class Baza::RecipeTest < Minitest::Test
             File.write(
               sh,
               Baza::Recipe.new(swarm, id_rsa).to_bash(
-                'accout', 'us-east-1', secret,
+                :release, 'accout', 'us-east-1', secret,
                 host: "http://host.docker.internal:#{port}"
               )
             )
@@ -122,7 +122,7 @@ class Baza::RecipeTest < Minitest::Test
       loog:
     )
     instance = ec2.run_instance(
-      Baza::Recipe.new(swarm).to_bash(cfg['account'], cfg['region'], 'latest', ''),
+      Baza::Recipe.new(swarm).to_bash(:release, cfg['account'], cfg['region'], 'latest', ''),
       swarm.name
     )
     assert(instance.start_with?('i-'))
@@ -136,7 +136,7 @@ class Baza::RecipeTest < Minitest::Test
       sh = File.join(home, 'recipe.sh')
       File.write(
         sh,
-        Baza::Recipe.new(s, '').to_bash('019644334823', 'us-east-1', '')
+        Baza::Recipe.new(s, '').to_bash(:release, '019644334823', 'us-east-1', '')
       )
       bash("/bin/bash #{sh}", loog)
     end
