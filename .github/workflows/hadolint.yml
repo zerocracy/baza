@@ -31,4 +31,4 @@ jobs:
       - uses: actions/checkout@v4
       - uses: hadolint/hadolint-action@v3.1.0
         with:
-          dockerfile: asserts/lambda/Dockerfile
+          dockerfile: assets/lambda/Dockerfile
