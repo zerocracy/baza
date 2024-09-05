@@ -24,12 +24,12 @@
 set -ex
 set -o pipefail
 
-# if aws ecr describe-repositories --repository-names "{{ name }}"; then
-#   aws ecr delete-repository \
-#     --repository-name "{{ name }}" \
-#     --force \
-#     --color off
-# fi
+if aws ecr describe-repositories --repository-names "{{ name }}"; then
+  aws ecr delete-repository \
+    --repository-name "{{ name }}" \
+    --force \
+    --color off
+fi
 
 if aws lambda get-function --function-name "{{ name }}" --region "{{ region }}"; then
   aws lambda delete-function \
