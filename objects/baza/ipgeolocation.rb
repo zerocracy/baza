@@ -25,6 +25,10 @@
 require 'faraday'
 
 # The IP Geolocation client (https://ipgeolocation.io/)
+#
+# Author:: Yegor Bugayenko (yegor256@gmail.com)
+# Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
+# License:: MIT
 class Baza::IpGeolocation
   def initialize(token:, connection:)
     @token = token

@@ -29,6 +29,10 @@ require_relative '../../baza'
 class Baza::FrontHelpersTest < Minitest::Test
   include Baza::Helpers
 
+  def app
+    Sinatra::Application
+  end
+
   def test_large_text
     t = large_text('hello, world!')
     assert_equal(14, t.scan('span').count, t)
@@ -66,6 +70,9 @@ class Baza::FrontHelpersTest < Minitest::Test
   end
 
   def test_country_flag
-    assert_equal('https://ipgeolocation.io/static/flags/us_64.png', country_flag('8.8.8.8'))
+    assert_equal(
+      'https://ipgeolocation.io/static/flags/us_64.png',
+      country_flag('8.8.8.8', sts: app.settings)
+    )
   end
 end

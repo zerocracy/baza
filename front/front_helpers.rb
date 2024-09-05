@@ -235,13 +235,8 @@ module Baza::Helpers
     settings.telegramers[id]
   end
 
-  def country_flag(ip)
-    token = ENV.fetch('IPGEOLOCATION_TOKEN', nil)
-    Baza::IpGeolocation.new(
-      token:,
-      connection: ENV['RACK_ENV'] == 'test' && token.nil? ?
-      Baza::IpGeolocation::FakeConnection : Faraday
-    ).ipgeo(ip:)['country_flag']
+  def country_flag(ip, sts: settings)
+    sts.ipgeolocation.ipgeo(ip:)['country_flag']
   end
 end
 

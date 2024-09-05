@@ -48,7 +48,7 @@ class Baza::Ops
   def release(swarm)
     secret = SecureRandom.uuid
     instance = @ec2.run_instance(
-      "baza/#{swarm.name}",
+      "#{swarm.id}-release-baza/#{swarm.name}",
       Baza::Recipe.new(swarm, @id_rsa.gsub(/\n +/, "\n")).to_bash(
         :release, @account, @ec2.region, secret
       )
@@ -62,7 +62,7 @@ class Baza::Ops
   def destroy(swarm)
     secret = SecureRandom.uuid
     instance = @ec2.run_instance(
-      "baza/#{swarm.name}",
+      "#{swarm.id}-destroy-#baza/#{swarm.name}",
       Baza::Recipe.new(swarm, @id_rsa.gsub(/\n +/, "\n")).to_bash(
         :destroy, @account, @ec2.region, secret
       )

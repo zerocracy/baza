@@ -68,6 +68,7 @@ end
 configure do
   config = {
     'sentry' => '',
+    'ipgeolocation' => '',
     'tg' => {
       'token' => '',
       'admin_chat' => ''
@@ -218,6 +219,16 @@ configure do
       load('always/always_pipeline.rb', true)
     end
   end
+end
+
+# IPGeolocation client:
+configure do
+  token = settings.config['ipgeolocation']
+  require_relative 'objects/baza/ipgeolocation'
+  set :ipgeolocation, Baza::IpGeolocation.new(
+    token:,
+    connection: ENV['RACK_ENV'] == 'test' && token.empty? ? Baza::IpGeolocation::FakeConnection : Faraday
+  )
 end
 
 # Garbage collection:
