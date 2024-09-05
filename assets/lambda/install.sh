@@ -23,6 +23,7 @@
 
 home=/swarm
 if [ -e "${home}/Gemfile" ]; then
-  bundle install --gemfile "${home}/Gemfile" --without development test
+  bundle config set without development
+  bundle install --gemfile "${home}/Gemfile"
 fi
 

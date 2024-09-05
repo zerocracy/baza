@@ -24,22 +24,38 @@
 set -ex
 set -o pipefail
 
-if aws ecr get-repository-policy --repository-name "{{ name }}"; then
-  aws ecr delete-repository --repository-name "{{ name }}"
-fi
+# if aws ecr describe-repositories --repository-names "{{ name }}"; then
+#   aws ecr delete-repository \
+#     --repository-name "{{ name }}" \
+#     --force \
+#     --color off
+# fi
 
 if aws lambda get-function --function-name "{{ name }}" --region "{{ region }}"; then
-  aws lambda delete-function --function-name "{{ name }}" --region "{{ region }}"
+  aws lambda delete-function \
+    --function-name "{{ name }}" \
+    --region "{{ region }}" \
+    --color off
 fi
 
 if aws sqs get-queue-url --queue-name "{{ name }}" --region "{{ region }}"; then
-  aws sqs delete-queue --queue-name "{{ name }}" --region "{{ region }}"
+  aws sqs delete-queue \
+    --queue-url "https://sqs.{{ region }}.amazonaws.com/{{ account }}/{{ name }}" \
+    --region "{{ region }}" \
+    --color off
+  echo "Now, we have to wait a bit, to make sure SQS queue deleted entirely..."
+  sleep 60
 fi
 
 if aws iam get-role --role-name "{{ name }}"; then
   while IFS= read -r policy; do
-    aws iam delete-role-policy --role-name "{{ name }}" --policy-name "${policy}"
+    aws iam delete-role-policy \
+      --role-name "{{ name }}" \
+      --policy-name "${policy}" \
+      --color off
   done < <( aws iam list-role-policies --role-name "{{ name }}" --output json | jq -r '.PolicyNames.[]' )
-  aws iam delete-role --role-name "{{ name }}"
+  aws iam delete-role \
+    --role-name "{{ name }}" \
+    --color off
 fi
 

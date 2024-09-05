@@ -24,6 +24,7 @@
 
 require 'liquid'
 require 'fileutils'
+require 'securerandom'
 
 # Bash script for EC2 instance to build Docker image and publish to Lambda.
 #
@@ -60,6 +61,7 @@ class Baza::Recipe
         cat('id_rsa', @id_rsa),
         cat_of(
           "#{script}.sh",
+          'swarm' => @swarm.id.to_s,
           'name' => safe("baza-#{@swarm.name}"),
           'github' => safe(@swarm.repository),
           'branch' => safe(@swarm.branch),
@@ -72,12 +74,7 @@ class Baza::Recipe
         cat_of('entry.rb'),
         cat_of('install-pgsql.sh'),
         cat_of('install.sh'),
-        cat_of(
-          'Dockerfile',
-          'from' => secret.empty? \
-            ? 'public.ecr.aws/lambda/ruby:3.2'
-            : safe("#{account}.dkr.ecr.#{region}.amazonaws.com/zerocracy/baza:basic")
-        )
+        cat_of('Dockerfile')
       ].join
     ).gsub(/^#.*\n/, '')
     "#!/bin/bash\n\n#{sh}"

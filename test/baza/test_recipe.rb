@@ -49,7 +49,6 @@ class Baza::RecipeTest < Minitest::Test
     bash = Baza::Recipe.new(s, '').to_bash(:release, '424242', 'us-east-1a', 'sword-fish')
     [
       "#!/bin/bash\n",
-      'FROM 424242.dkr.ecr.us-east-1a.amazonaws.com/zerocracy/baza:basic',
       "424242.dkr.ecr.us-east-1a.amazonaws.com/baza-#{n}",
       'RUN yum update -y',
       'gem \'aws-sdk-core\'',
@@ -102,7 +101,14 @@ class Baza::RecipeTest < Minitest::Test
     assert(swarm.releases.get(r.id).exit.zero?)
   end
 
+  # This test is reproducing the entire destroy-and-release scenario
+  # using real AWS account of the user who is running the test (locally).
+  # It is expected that you have .aws/credentials file on your machine
+  # and the account that is configured there has full access to all AWS
+  # resources. The test should not make any hard. It just destroys the
+  # function if it exists and then creates it again.
   def test_live_local_run
+    skip
     loog = Loog::VERBOSE
     creds = File.join(Dir.home, '.aws/credentials')
     skip unless File.exist?(creds)
@@ -112,7 +118,7 @@ class Baza::RecipeTest < Minitest::Test
       FileUtils.mkdir_p(File.join(home, '.aws'))
       FileUtils.copy(creds, File.join(home, '.aws/credentials'))
       sh = File.join(home, 'recipe.sh')
-      [:destroy, :release].each do |step|
+      %i[destroy release].each do |step|
         File.write(
           sh,
           Baza::Recipe.new(s, '').to_bash(step, '019644334823', 'us-east-1', 'fake')

@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-FROM {{ from }}
+FROM --platform=linux/arm64 public.ecr.aws/lambda/ruby:3.2
 
 RUN yum update -y
 RUN yum install -y make automake gcc gcc-c++ kernel-devel \
