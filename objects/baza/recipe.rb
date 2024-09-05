@@ -58,6 +58,7 @@ class Baza::Recipe
       'host' => safe(host),
       'secret' => safe(secret),
       'save_files' => [
+        "\n",
         cat('id_rsa', @id_rsa),
         cat_of(
           "#{script}.sh",

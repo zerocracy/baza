@@ -24,7 +24,7 @@
 set -e
 set -x
 
-cd $(dirname $0)
+cd "$(dirname "$0")"
 
 if [ ! -e /code/z/j ]; then
   echo "You should git clone git@github.com:zerocracy/j.git to /code/z/j"

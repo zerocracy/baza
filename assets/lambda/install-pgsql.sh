@@ -27,11 +27,11 @@ if psql --version; then
 fi
 
 TMP=$(mktemp -d)
-cd "${TMP}"
+cd "${TMP}" || exit 1
 
 wget https://ftp.postgresql.org/pub/source/v16.1/postgresql-16.1.tar.gz
 tar -xvzf postgresql-16.1.tar.gz
-cd postgresql-16.1
+cd postgresql-16.1 || exit 1
 ./configure --bindir=/usr/bin --with-openssl
 make -C src/bin install
 make -C src/include install

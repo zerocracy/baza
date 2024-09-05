@@ -46,8 +46,6 @@ rm -rf swarm/.git
 
 aws ecr get-login-password --region "{{ region }}" | docker login --username AWS --password-stdin "{{ repository }}"
 
-this="baza-{{ name }}"
-
 if ! aws ecr describe-repositories --repository-names "{{ name }}" --region "{{ region }}"; then
   aws ecr create-repository \
     --color off \
