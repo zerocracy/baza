@@ -24,6 +24,9 @@
 set -ex
 set -o pipefail
 
+# This should either be "arm64" or "x86_64"
+arch=x86_64
+
 uri="git@github.com:{{ github }}.git"
 if [ ! -s "${HOME}/.ssh/id_rsa" ]; then
   uri="https://github.com/{{ github }}"
@@ -53,8 +56,8 @@ if ! aws ecr describe-repositories --repository-names "{{ name }}" --region "{{ 
 fi
 
 image="{{ repository }}/{{ name }}:latest"
-docker build . -t "${image}" --platform linux/arm64
-docker push "${image}" --platform linux/arm64
+docker build . -t "${image}" --platform "linux/${arch}"
+docker push "${image}" --platform "linux/${arch}"
 
 # Create new IAM role, which will be assumed by Lambda function executions:
 if ! aws iam get-role --role-name "{{ name }}"; then
@@ -159,7 +162,7 @@ if aws lambda get-function --function-name "{{ name }}" --region "{{ region }}";
   aws lambda update-function-code \
     --color off \
     --function-name "{{ name }}" \
-    --architectures arm64 \
+    --architectures "${arch}" \
     --region "{{ region }}" \
     --image-uri "${image}" \
     --publish
@@ -168,7 +171,7 @@ else
     --color off \
     --function-name "{{ name }}" \
     --region "{{ region }}" \
-    --architectures arm64 \
+    --architectures "${arch}" \
     --description "Process jobs of swarm #{{ swarm }} at {{ github }}" \
     --package-type Image \
     --code "ImageUri=${image}" \
