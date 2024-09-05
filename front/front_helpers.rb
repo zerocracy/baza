@@ -236,8 +236,8 @@ module Baza::Helpers
   end
 
   def country_flag(ip, sts: settings)
-    href = sts.ipgeolocation.ipgeo(ip:)['country_flag']
-    html_tag('img', style: 'width: 1em', href:) { '' }
+    src = sts.ipgeolocation.ipgeo(ip:)['country_flag']
+    html_tag('img', style: 'width: 1em', src:) { '' }
   end
 end
 
