@@ -69,13 +69,13 @@ class Baza::Release
       code.zero? ? '🫐' : '⚠️',
       "The release ##{@id} of the swarm ##{s.id} (`#{s.name}`)",
       code.zero? ?
-        "successfully published [#{head[0..8]}](https://github.com/#{s.repository}/commit/#{head})" :
+        "successfully published [#{head[0..8].downcase}](https://github.com/#{s.repository}/commit/#{head.downcase})" :
         'failed',
       "after #{format('%.2f', msec.to_f / (60 * 1000))} minutes of work,",
       "the log is [here](//swarms/#{s.id}/releases).",
       head == s.head || !code.zero? ? '' : [
         'Pay attention that the head of the swarm ',
-        "[#{s.head[0..8]}](https://github.com/#{s.repository}/commit/#{s.head}) is different ",
+        "[#{s.head[0..8].downcase}](https://github.com/#{s.repository}/commit/#{s.head.downcase}) is different ",
         'from what the release has published — this situation will trigger a new release soon.'
       ].join
     )
