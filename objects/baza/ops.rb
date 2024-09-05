@@ -62,7 +62,7 @@ class Baza::Ops
   def destroy(swarm)
     secret = SecureRandom.uuid
     instance = @ec2.run_instance(
-      "#{swarm.id}-destroy-#baza/#{swarm.name}",
+      "#{swarm.id}-destroy-baza/#{swarm.name}",
       Baza::Recipe.new(swarm, @id_rsa.gsub(/\n +/, "\n")).to_bash(
         :destroy, @account, @ec2.region, secret
       )
