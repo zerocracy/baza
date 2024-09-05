@@ -53,7 +53,7 @@ if aws iam get-role --role-name "{{ name }}"; then
       --role-name "{{ name }}" \
       --policy-name "${policy}" \
       --color off
-  done < <( aws iam list-role-policies --role-name "{{ name }}" --output json | jq -r '.PolicyNames.[]' )
+  done < <( aws iam list-role-policies --role-name "{{ name }}" --output json | jq -r '.PolicyNames[]' )
   aws iam delete-role \
     --role-name "{{ name }}" \
     --color off
