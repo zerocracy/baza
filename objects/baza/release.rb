@@ -62,12 +62,22 @@ class Baza::Release
       'UPDATE release SET head = $2, tail = $3, exit = $4, msec = $5 WHERE id = $1 AND swarm = $6',
       [@id, head, tail, code, msec, @releases.swarm.id]
     )
-    @releases.swarm.swarms.human.notify(
+    s = @releases.swarm
+    human = s.swarms.human
+    human.account.top_up(-(human.price * msec * 16).to_i, "Swarm release ##{@id} (#{s.repository})")
+    human.notify(
       code.zero? ? '🫐' : '⚠️',
-      "The release ##{@id} of the swarm ##{@releases.swarm.id} (`#{@releases.swarm.name}`)",
-      code.zero? ? "successfully published `#{head[0..8]}`" : 'failed',
+      "The release ##{@id} of the swarm ##{s.id} (`#{s.name}`)",
+      code.zero? ?
+        "successfully published [#{head[0..8]}](https://github.com/#{s.repository}/commit/#{head})" :
+        'failed',
       "after #{format('%.2f', msec.to_f / (60 * 1000))} minutes of work,",
-      "the log is [here](//swarms/#{@releases.swarm.id}/releases)."
+      "the log is [here](//swarms/#{s.id}/releases).",
+      head == s.head ? '' : [
+        'Pay attention that the head of the swarm ',
+        "[#{s.head[0..8]}](https://github.com/#{s.repository}/commit/#{s.head}) is different ",
+        'from what the release has published — this situation will trigger a new release soon.'
+      ].join
     )
   end
 
