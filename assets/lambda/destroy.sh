@@ -58,4 +58,3 @@ if aws iam get-role --role-name "{{ name }}"; then
     --role-name "{{ name }}" \
     --color off
 fi
-
