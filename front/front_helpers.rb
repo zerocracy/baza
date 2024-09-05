@@ -236,7 +236,14 @@ module Baza::Helpers
   end
 
   def country_flag(ip, sts: settings)
-    src = sts.ipgeolocation.ipgeo(ip:)['country_flag']
+    unless sts.zache.exists?(:ipgeolocation)
+      sts.zache.put(:ipgeolocation, {})
+    end
+    src = sts.zache.get(:ipgeolocation)[ip]
+    if src.nil?
+      src = sts.ipgeolocation.ipgeo(ip:)['country_flag']
+      sts.zache.get(:ipgeolocation)[ip] = src
+    end
     html_tag('img', style: 'width: 1em', src:) { '' }
   end
 end
