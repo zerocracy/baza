@@ -64,7 +64,11 @@ class Baza::Release
     )
     s = @releases.swarm
     human = s.swarms.human
-    human.account.top_up(-(human.price * msec * 16).to_i, "Swarm release ##{@id} (#{s.repository})")
+    human.account.top_up(
+      -(human.price * msec * 16).to_i,
+      "Swarm release ##{@id} (#{s.repository})",
+      message: ''
+    )
     human.notify(
       code.zero? ? '🫐' : '⚠️',
       "The release ##{@id} of the swarm ##{s.id} (`#{s.name}`)",

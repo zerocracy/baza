@@ -125,7 +125,6 @@ if ! aws iam get-role-policy --role-name "{{ name }}" --policy-name 'access'; th
               "iam:ListRolePolicies",
               "iam:ListRoles",
               "lambda:*",
-              "logs:DescribeLogGroups",
               "states:DescribeStateMachine",
               "states:ListStateMachines",
               "tag:GetResources",

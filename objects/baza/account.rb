@@ -91,15 +91,17 @@ class Baza::Account
   # @param [String] summary The description of the transaction
   # @param [Time] created The time of the transaction
   # @return [Integer] The ID of the transaction
-  def top_up(amount, summary, created: Time.now)
+  def top_up(amount, summary, created: Time.now, message: nil)
     id = pgsql.exec(
       'INSERT INTO receipt (human, zents, summary, created) VALUES ($1, $2, $3, $4) RETURNING id',
       [@human.id, amount, summary, created]
     )[0]['id']
-    @human.notify(
-      "🍏 Because we love you, we topped up [your account](//account) by #{amount.zents}.",
-      "Now, the balance is #{balance.zents}. Thanks for staying with us!"
-    )
+    if message.nil?
+      message =
+        "🍏 Because we love you, we topped up [your account](//account) by #{amount.zents}. " \
+        "Now, the balance is #{balance.zents}. Thanks for staying with us!"
+    end
+    @human.notify(message) unless message.empty?
     id
   end
 
