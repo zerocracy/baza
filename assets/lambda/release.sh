@@ -189,7 +189,7 @@ fi
 # Make sure all new SQS events trigger Lambda function execution:
 arn="arn:aws:sqs:{{ region }}:{{ account }}:{{ name }}"
 fn="arn:aws:lambda:{{ region }}:{{ account }}:function:{{ name }}"
-if ! aws lambda list-event-source-mappings --event-source-arn "${arn}" --function-name "${fn}" --region "{{ region }}"; then
+if ! ( aws lambda list-event-source-mappings --event-source-arn "${arn}" --function-name "${fn}" --region "{{ region }}" | grep "\"${fn}\"" ); then
   aws lambda create-event-source-mapping \
     --color off \
     --event-source-arn "${arn}" \
