@@ -32,7 +32,7 @@
     %a{href: Iri.new('https://iplocation.io/ip').append(job.ip)}<
       %span.ff<
         = job.ip
-    %img{src: country_flag(job.ip), width: "16", height: "16"}
+    != country_flag(job.ip)
   %p
     Created:
     %br
