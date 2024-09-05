@@ -56,6 +56,7 @@ if ! aws ecr describe-repositories --repository-names "{{ name }}" --region "{{ 
 fi
 
 image="{{ repository }}/{{ name }}:latest"
+docker pull "${image}" --platform "linux/${arch}" || echo 'Maybe it is absent'
 docker build . -t "${image}" --platform "linux/${arch}"
 docker push "${image}" --platform "linux/${arch}"
 
