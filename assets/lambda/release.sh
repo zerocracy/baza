@@ -24,7 +24,8 @@
 set -ex
 set -o pipefail
 
-# This should either be "arm64" or "x86_64"
+# This should either be "arm64" or "x86_64". If you change this value,
+# make sure the EC2 image that you are using is of the same architecture.
 arch=x86_64
 
 uri="git@github.com:{{ github }}.git"
