@@ -76,4 +76,14 @@ class Baza::FrontHelpersTest < Minitest::Test
       )
     )
   end
+
+  def test_country_flag_is_cached
+    ip = '8.8.8.8'
+    img = 'https://ipgeolocation.io/static/flags/us_64.png'
+    app.settings.zache.get(:ipgeolocation).clear
+    assert_empty(app.settings.zache.get(:ipgeolocation))
+    assert_includes(country_flag(ip, sts: app.settings), img)
+    assert_equal(img, app.settings.zache.get(:ipgeolocation)[ip])
+    assert_includes(country_flag(ip, sts: app.settings), app.settings.zache.get(:ipgeolocation)[ip])
+  end
 end
