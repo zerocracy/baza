@@ -49,7 +49,11 @@ fi
 
 if [ -z "${HOME}" ]; then
   # shellcheck disable=SC2116
-  HOME=$(echo "~")
+  HOME=$(echo ~)
+  if [ ! -e "${HOME}" ]; then
+    echo "For some reason, there is no HOME directory in the system: '${HOME}'"
+    exit 1
+  fi
   export HOME
 fi
 
@@ -68,7 +72,7 @@ SECONDS=0
 
 /bin/bash "{{ script }}.sh" 2>&1 | tee stdout.log || echo $? > exit.txt
 
-tail -200 stdout.log > tail.log
+tail -1000 stdout.log > tail.log
 
 if [ ! -e head.txt ] || [ ! -s head.txt ]; then
   printf '0000000000000000000000000000000000000000' > head.txt

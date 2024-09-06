@@ -109,7 +109,7 @@ class Baza::RecipeTest < Minitest::Test
   # function if it exists and then creates it again.
   def test_live_local_run
     skip
-    loog = Loog::VERBOSE
+    loog = Loog::NULL
     creds = File.join(Dir.home, '.aws/credentials')
     skip unless File.exist?(creds)
     s = fake_human.swarms.add('st', 'zerocracy/swarm-template', 'master')
@@ -130,7 +130,7 @@ class Baza::RecipeTest < Minitest::Test
   end
 
   def test_build_docker_image
-    loog = Loog::VERBOSE
+    loog = Loog::NULL
     Dir.mktmpdir do |home|
       ['Dockerfile', 'Gemfile', 'entry.rb', 'install-pgsql.sh', 'install.sh'].each do |f|
         FileUtils.copy(

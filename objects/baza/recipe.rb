@@ -77,7 +77,7 @@ class Baza::Recipe
         cat_of('install.sh'),
         cat_of('Dockerfile')
       ].join
-    ).gsub(/^#.*\n/, '')
+    ).gsub(/^ *#.*\n/, '')
     "#!/bin/bash\n\n#{sh}"
   end
 
