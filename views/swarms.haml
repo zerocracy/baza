@@ -16,10 +16,6 @@
     %col{style: 'width: 15em;'}
     -# Repository
     %col{style: 'width: 16em;'}
-    -# Branch
-    %col{style: 'width: 10em;'}
-    -# Directory
-    %col{style: 'width: 8em;'}
     -# Head
     %col{style: 'width: 7em;'}
     -# Secret
@@ -36,10 +32,6 @@
         Name
       %th
         Repository
-      %th
-        Branch
-      %th
-        Dir
       %th
         Head
       %th
@@ -70,13 +62,16 @@
             %span
               = why
       %td.ff
-        %a{href: "https://github.com/#{s.repository}/tree/#{s.branch}"}<
+        %a{href: "https://github.com/#{s.repository}"}<
           = s.repository
         %i.fa-brands.fa-github
-      %td.ff
-        = s.branch
-      %td.ff
-        != large_text(s.directory)
+        %p.smaller{style: 'margin-bottom: 0; line-height: 1.1em;'}
+          in
+          %a{href: "https://github.com/#{s.repository}/tree/#{s.branch}"}<
+            = s.branch
+          at
+          %a{href: "https://github.com/#{s.repository}/tree/#{s.branch}#{s.directory}"}<
+            = s.directory
       %td.ff
         %a{href: "https://github.com/#{s.repository}/commit/#{s.head}"}<
           = s.head[0..8].downcase
