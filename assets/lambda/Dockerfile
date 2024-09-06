@@ -24,7 +24,7 @@ FROM public.ecr.aws/lambda/ruby:3.2
 
 # hadolint ignore=DL3033
 RUN yum update -y \
-  && yum install -y \
+  && yum install -q -y \
     make-* automake gcc gcc-c++ kernel-devel \
     gcc readline-devel libicu-devel zlib-devel \
     openssl-devel openssl \

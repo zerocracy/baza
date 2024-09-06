@@ -112,8 +112,9 @@ class Baza::Swarm
   # Explain why we are not releasing now or return NIL if ready to release.
   #
   # @param [Integer] hours How many hours to wait between retries on failure
+  # @param [Integer] minutes How many minutes to wait between successful releases
   # @return [String] Explanation of why we don't release now (or NIL if we can release)
-  def why_not(hours: 24)
+  def why_not(hours: 24, minutes: 60)
     return "The swarm ##{@id} is disabled." unless enabled?
     last = releases.each.to_a.first
     return nil if last.nil?
@@ -130,6 +131,13 @@ class Baza::Swarm
         "The latest release ##{last[:id]} failed just #{last[:created].ago} ago, " \
         "we must wait #{(last[:created] + delay).ago} " \
         'and then make another release attempt.'
+    end
+    pause = minutes * 60
+    if Time.now - pause < last[:created]
+      return \
+        "The latest successfull release ##{last[:id]} just happened #{last[:created].ago} ago, " \
+        "we'll wait #{(last[:created] + pause).ago} " \
+        'and only then will release again.'
     end
     nil
   end
