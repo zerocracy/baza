@@ -112,17 +112,15 @@ class Baza::Humans
     get(rows.first['human'].to_i).jobs.get(id)
   end
 
-  # Find swarm, if it exists.
+  # Find all swarms for this repo.
   #
   # @param [String] repo Name of repository
-  # @return [Baza::Swarm] The found swarm or NIL
-  def find_swarm(repo)
-    rows = @pgsql.exec(
+  # @return [Array<Baza::Swarm>] The found swarms or empty array
+  def find_swarms(repo)
+    @pgsql.exec(
       'SELECT id, human FROM swarm WHERE repository = $1',
       [repo]
-    )
-    return nil if rows.empty?
-    get(rows.first['human'].to_i).swarms.get(rows.first['id'].to_i)
+    ).map { |r| get(r['human'].to_i).swarms.get(r['id'].to_i) }
   end
 
   # Find release, if it exists.

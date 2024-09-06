@@ -105,11 +105,16 @@ post '/swarms/webhook' do
   sha = json['after']
   return [400, 'The after SHA not found'] if sha.nil?
   sha.upcase!
-  swarm = settings.humans.find_swarm(repo)
-  return [400, "The swarm not found for #{repo.inspect}"] if swarm.nil?
-  return "The swarm ##{swarm.id} doesn't watch branch #{branch.inspect}" if swarm.branch != branch
-  swarm.head!(sha)
-  "The swarm ##{swarm.id} of #{repo.inspect} scheduled for deployment due to changes in #{branch.inspect}"
+  swarms = settings.humans.find_swarms(repo)
+  return [400, "No swarms found for #{repo.inspect}"] if swarms.empty?
+  swarms.each do |swarm|
+    if swarm.branch == branch
+      swarm.head!(sha)
+      "The swarm ##{swarm.id} of #{repo.inspect} scheduled for deployment due to changes in #{branch.inspect}"
+    else
+      "The swarm ##{swarm.id} doesn't watch branch #{branch.inspect}"
+    end
+  end.join('; ')
 end
 
 get(%r{/swarms/([0-9]+)/enable}) do
