@@ -22,6 +22,7 @@
 
 FROM public.ecr.aws/lambda/ruby:3.2
 
+# hadolint ignore=DL3033
 RUN yum update -y \
   && yum install -y \
     make-* automake gcc gcc-c++ kernel-devel \
@@ -33,10 +34,11 @@ RUN yum update -y \
   && yum clean all
 
 COPY install-pgsql.sh /tmp
-RUN /bin/bash /tmp/install-pgsql.sh
+RUN /bin/bash /tmp/install-pgsql.sh > /dev/null
 
 COPY Gemfile ${LAMBDA_TASK_ROOT}/
-RUN gem install bundler -v 2.5.18 && bundle install "--gemfile=${LAMBDA_TASK_ROOT}/Gemfile"
+RUN gem install --quiet bundler -v 2.5.18 \
+  && bundle install --quiet "--gemfile=${LAMBDA_TASK_ROOT}/Gemfile"
 
 COPY swarm/ /swarm
 

@@ -23,6 +23,7 @@
 # SOFTWARE.
 
 require 'veil'
+require 'securerandom'
 
 # Swarms of a human.
 #
@@ -76,6 +77,7 @@ class Baza::Swarms
         repository: row['repository'],
         directory: row['directory'],
         branch: row['branch'],
+        secret: row['secret'],
         head: row['head'],
         created: Time.parse(row['created'])
       )
@@ -97,10 +99,15 @@ class Baza::Swarms
     unless repo.match?(%r{^[a-zA-Z][a-zA-Z0-9\-.]*/[a-zA-Z][a-z0-9\-.]*$})
       raise Baza::Urror, "The repo #{repo.inspect} is not valid"
     end
+    secret = SecureRandom.uuid
     get(
       pgsql.exec(
-        'INSERT INTO swarm (human, name, repository, branch, directory) VALUES ($1, $2, $3, $4, $5) RETURNING id',
-        [@human.id, name.downcase, repo, branch, directory]
+        [
+          'INSERT INTO swarm',
+          '(human, name, repository, branch, directory, secret)',
+          'VALUES ($1, $2, $3, $4, $5, $6) RETURNING id'
+        ],
+        [@human.id, name.downcase, repo, branch, directory, secret]
       )[0]['id'].to_i
     )
   end

@@ -22,6 +22,8 @@
     %col{style: 'width: 8em;'}
     -# Head
     %col{style: 'width: 7em;'}
+    -# Secret
+    %col{style: 'width: 15em;'}
     -# Created
     %col{style: 'width: 8em;'}
     -# Commands
@@ -40,6 +42,8 @@
         Dir
       %th
         Head
+      %th
+        Secret
       %th
         Created
       %th
@@ -78,6 +82,8 @@
           = s.head[0..8].downcase
         %a.ico{href: iri.cut('/swarms').append(s.id).append('reset'), title: "Reset the head SHA of the swarm ##{s.id}", onclick: "return confirm('Are you sure you want to reset the head SHA of the swarm ##{s.id}?')"}
           %i.fa-solid.fa-trash-arrow-up
+      %td.ff
+        != secret(s.secret)
       %td
         != ago(s.created)
       %td

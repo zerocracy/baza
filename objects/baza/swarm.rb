@@ -83,6 +83,11 @@ class Baza::Swarm
     to_json[:directory]
   end
 
+  # Get its secret.
+  def secret
+    to_json[:secret]
+  end
+
   # Get its head SHA.
   def head
     to_json[:head]
@@ -152,6 +157,7 @@ class Baza::Swarm
           repository: row['repository'],
           branch: row['branch'],
           directory: row['directory'],
+          secret: row['secret'],
           head: row['head'],
           created: Time.parse(row['created'])
         }
