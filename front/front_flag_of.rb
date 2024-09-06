@@ -35,5 +35,5 @@ end
 
 get(%r{/flag-of/(.*)}) do
   content_type 'image/png'
-  URI.open(path_to_flag(params['captures'].first, settings)).read
+  URI.parse(path_to_flag(params['captures'].first, settings)).open.read
 end
