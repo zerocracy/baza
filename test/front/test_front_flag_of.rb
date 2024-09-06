@@ -26,52 +26,32 @@ require 'minitest/autorun'
 require_relative '../test__helper'
 require_relative '../../baza'
 
-class Baza::FrontHelpersTest < Minitest::Test
-  include Baza::Helpers
-
+class Baza::FrontFlagOfTest < Minitest::Test
   def app
     Sinatra::Application
   end
 
-  def test_large_text
-    t = large_text('hello, world!')
-    assert_equal(14, t.scan('span').count, t)
+  def test_returns_image_as_binary_data
+    WebMock.disable_net_connect!
+    body = 'image data'
+    stub_request(:get, 'https://ipgeolocation.io/static/flags/us_64.png')
+      .to_return(
+        status: 200,
+        body:
+      )
+    get('flag-of/8.8.8.8')
+    assert_status(200)
+    assert_equal('image/png', last_response.headers['Content-type'])
+    assert_equal(body, last_response.body)
   end
 
-  def test_html_tag
-    assert_equal('<i>hello!</i>', html_tag('i') { 'hello!' })
-    assert_equal('<i class="x">hello!</i>', html_tag('i', class: 'x') { 'hello!' })
-    assert_equal('<i class="x" data="1">hello!</i>', html_tag('i', class: 'x', data: 1) { 'hello!' })
-  end
-
-  def test_bytes
-    assert(bytes(42).include?('42B'))
-    assert(bytes(42_000).include?('42kB'))
-    assert(bytes(42_000_000).include?('42MB'))
-  end
-
-  def test_zents
-    assert(zents(42_000).include?('+0.4200'))
-    assert(zents(123_000).start_with?('<span class="good"'))
-    assert(zents(-10_000).start_with?('<span class="bad"'))
-  end
-
-  def test_ago
-    assert(ago(Time.now).start_with?('<span title='))
-    assert(ago(Time.now - (5 * 60)).include?('5m0s ago'))
-  end
-
-  def test_secret
-    assert(secret('swordfish').include?('<span>swor</span>'))
-  end
-
-  def test_secret_without_an_eye
-    assert_equal('<span>swor</span><span class="gray">*****</span>', secret('swordfish', eye: false))
-  end
-
-  def test_country_flag
-    assert_includes(
-      country_flag('8.8.8.8'), '/flag-of/8.8.8.8'
-    )
+  def test_path_to_flag_is_cached
+    ip = '8.8.8.8'
+    img = 'https://ipgeolocation.io/static/flags/us_64.png'
+    app.settings.zache.get(:ipgeolocation).clear
+    assert_empty(app.settings.zache.get(:ipgeolocation))
+    assert_includes(path_to_flag(ip, app.settings), img)
+    assert_equal(img, app.settings.zache.get(:ipgeolocation)[ip])
+    assert_includes(path_to_flag(ip, app.settings), app.settings.zache.get(:ipgeolocation)[ip])
   end
 end
