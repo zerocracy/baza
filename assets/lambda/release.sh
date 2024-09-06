@@ -55,9 +55,9 @@ if ! aws ecr describe-repositories --repository-names "{{ name }}" --region "{{ 
 fi
 
 image="{{ repository }}/{{ name }}:latest"
-docker pull "${image}" --platform "linux/${arch}" || echo 'Maybe it is absent'
+docker pull "${image}" --quiet --platform "linux/${arch}" || echo 'Maybe it is absent'
 docker build . -t "${image}" --platform "linux/${arch}"
-docker push "${image}" --platform "linux/${arch}"
+docker push "${image}" --quiet --platform "linux/${arch}"
 
 # Create new IAM role, which will be assumed by Lambda function executions:
 if ! aws iam get-role --role-name "{{ name }}"; then

@@ -29,10 +29,10 @@ fi
 TMP=$(mktemp -d)
 cd "${TMP}" || exit 1
 
-wget https://ftp.postgresql.org/pub/source/v16.1/postgresql-16.1.tar.gz
+wget --quiet https://ftp.postgresql.org/pub/source/v16.1/postgresql-16.1.tar.gz
 tar -xvzf postgresql-16.1.tar.gz
 cd postgresql-16.1 || exit 1
 ./configure --bindir=/usr/bin --with-openssl
-make -C src/bin install
-make -C src/include install
-make -C src/interfaces install
+make --quiet -C src/bin install
+make --quiet -C src/include install
+make --quiet -C src/interfaces install
