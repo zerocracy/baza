@@ -236,9 +236,6 @@ module Baza::Helpers
   end
 
   def country_flag(ip, sts: settings)
-    unless sts.zache.exists?(:ipgeolocation)
-      sts.zache.put(:ipgeolocation, {})
-    end
     src = sts.zache.get(:ipgeolocation)[ip]
     if src.nil?
       src = sts.ipgeolocation.ipgeo(ip:)['country_flag']
