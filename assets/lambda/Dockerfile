@@ -24,7 +24,7 @@ FROM public.ecr.aws/lambda/ruby:3.2
 
 RUN yum update -y \
   && yum install -y \
-    make automake gcc gcc-c++ kernel-devel \
+    make-* automake gcc gcc-c++ kernel-devel \
     gcc readline-devel libicu-devel zlib-devel \
     openssl-devel openssl \
     wget tar gzip \
@@ -36,7 +36,7 @@ COPY install-pgsql.sh /tmp
 RUN /bin/bash /tmp/install-pgsql.sh
 
 COPY Gemfile ${LAMBDA_TASK_ROOT}/
-RUN gem install bundler:2.15.18 && bundle install "--gemfile=${LAMBDA_TASK_ROOT}/Gemfile"
+RUN gem install bundler -v 2.5.18 && bundle install "--gemfile=${LAMBDA_TASK_ROOT}/Gemfile"
 
 COPY swarm/ /swarm
 

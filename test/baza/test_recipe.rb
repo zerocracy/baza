@@ -129,6 +129,22 @@ class Baza::RecipeTest < Minitest::Test
     end
   end
 
+  def test_build_docker_image
+    loog = Loog::VERBOSE
+    Dir.mktmpdir do |home|
+      ['Dockerfile', 'Gemfile', 'entry.rb', 'install-pgsql.sh', 'install.sh'].each do |f|
+        FileUtils.copy(
+          File.join(File.join(__dir__, '../../assets/lambda'), f),
+          File.join(home, f)
+        )
+      end
+      FileUtils.mkdir_p(File.join(home, 'swarm'))
+      bash("docker build #{home} -t test_recipe", loog)
+    ensure
+      bash('docker rmi -f test_recipe', loog)
+    end
+  end
+
   def test_fake_docker_run
     skip
     WebMock.enable_net_connect!
@@ -207,6 +223,7 @@ class Baza::RecipeTest < Minitest::Test
   end
 
   def bash(cmd, loog, env = {})
+    loog.debug("+ #{cmd}")
     buf = ''
     Open3.popen2e(env, cmd) do |stdin, stdout, thr|
       stdin.close
