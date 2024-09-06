@@ -103,10 +103,16 @@ class Baza::Swarm
     to_json[:created]
   end
 
-  # Get its release SHA.
+  # Get its releases.
   def releases
     require_relative 'releases'
     Baza::Releases.new(self)
+  end
+
+  # Get its invocations.
+  def invocations
+    require_relative 'invocations'
+    Baza::Invocations.new(self)
   end
 
   # Explain why we are not releasing now or return NIL if ready to release.

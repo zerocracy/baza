@@ -105,7 +105,21 @@ class Baza::FrontSwarmsTest < Minitest::Test
       'this is stdout',
       'CONTENT_TYPE' => 'text/plain'
     )
-    assert_status(302)
+    assert_status(200)
     assert(s.releases.get(r.id).tail.include?('this is'))
+  end
+
+  def test_register_invocation
+    job = fake_job
+    human = job.jobs.human
+    swarms = human.swarms
+    s = swarms.add(fake_name, "#{fake_name}/#{fake_name}", fake_name, '/')
+    put(
+      "/swarms/#{s.id}/invocation?job=#{job.id}&secret=#{s.secret}",
+      'this is stdout',
+      'CONTENT_TYPE' => 'text/plain'
+    )
+    assert_status(200)
+    assert(s.invocations.each.to_a.first[:stdout].include?('this is'))
   end
 end

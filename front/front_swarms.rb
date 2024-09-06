@@ -77,7 +77,7 @@ put('/swarms/finish') do
   sec = params[:sec]
   raise Baza::Urror, 'The "sec" HTTP param is mandatory' if sec.nil?
   r.finish!(head, request.body.read, code.to_i, 1000 * sec.to_i)
-  flash(iri.cut('/swarms'), "The release ##{r.id} was finished")
+  "The release ##{r.id} was finished"
 end
 
 post '/swarms/webhook' do
@@ -138,6 +138,17 @@ get(%r{/swarms/([0-9]+)/reset}) do
   id = params['captures'].first.to_i
   the_human.swarms.get(id).head!('0000000000000000000000000000000000000000')
   flash(iri.cut('/swarms'), "The release SHA of the swarm ##{id} was reset")
+end
+
+put(%r{/swarms/([0-9]+)/invocation}) do
+  id = params['captures'].first.to_i
+  swarm = settings.humans.swarm_by_id(id)
+  secret = params[:secret]
+  return [401, "Invalid secret for the swarm ##{swarm.id}"] if swarm.secret != secret
+  job = settings.humans.job_by_id(params[:job].to_i)
+  request.body.rewind
+  id = swarm.invocations.register(job, request.body.read)
+  "Invocation ##{id} registered for swarm ##{swarm.id}, job ##{job.id}"
 end
 
 post('/swarms/add') do

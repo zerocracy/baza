@@ -112,6 +112,17 @@ class Baza::Humans
     get(rows.first['human'].to_i).jobs.get(id)
   end
 
+  # Get one swarm by its ID.
+  def swarm_by_id(id)
+    rows = @pgsql.exec(
+      'SELECT id, human FROM swarm WHERE id = $1',
+      [id]
+    )
+    raise Baza::Urror, "Swarm ##{id} not found" if rows.empty?
+    require_relative 'swarms'
+    Baza::Swarms.new(get(rows.first['human'].to_i)).get(rows.first['id'].to_i)
+  end
+
   # Find all swarms for this repo.
   #
   # @param [String] repo Name of repository
