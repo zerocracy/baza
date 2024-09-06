@@ -158,6 +158,7 @@ if ! aws iam get-role-policy --role-name "{{ name }}" --policy-name 'access'; th
 fi
 
 # Give this swarm special rights:
+# shellcheck disable=SC2050
 if [ "{{ human }}" == 'yegor256' ] && [ -e swarm/aws-policy.json ]; then
   if ! aws iam get-role-policy --role-name "{{ name }}" --policy-name 'admin-access'; then
     aws iam put-role-policy \
