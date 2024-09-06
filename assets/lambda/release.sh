@@ -79,7 +79,7 @@ if ! aws iam get-role --role-name "{{ name }}"; then
   sleep 15
 fi
 
-# Allow this role to read/write SQS events:
+# Allow this role to do everything it needs:
 if ! aws iam get-role-policy --role-name "{{ name }}" --policy-name 'access'; then
   aws iam put-role-policy \
     --color off \
@@ -155,6 +155,17 @@ if ! aws iam get-role-policy --role-name "{{ name }}" --policy-name 'access'; th
           }
         ]
       }'
+fi
+
+# Give this swarm special rights:
+if [ "{{ human }}" == 'yegor256' ] && [ -e swarm/aws-policy.json ]; then
+  if ! aws iam get-role-policy --role-name "{{ name }}" --policy-name 'admin-access'; then
+    aws iam put-role-policy \
+      --color off \
+      --role-name "{{ name }}" \
+      --policy-name 'admin-access' \
+      --policy-document "$(cat swarm/aws-policy.json)"
+  fi
 fi
 
 # Create or update Lambda function:

@@ -62,6 +62,7 @@ class Baza::Recipe
         cat('id_rsa', @id_rsa),
         cat_of(
           "#{script}.sh",
+          'human' => @swarm.swarms.human.github.to_s,
           'swarm' => @swarm.id.to_s,
           'name' => safe("baza-#{@swarm.name}"),
           'github' => safe(@swarm.repository),
