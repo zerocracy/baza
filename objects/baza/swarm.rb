@@ -114,10 +114,12 @@ class Baza::Swarm
         'equals to the SHA of the head of the swarm, no need to release.'
     end
     return nil if last[:head] == 'F' * 40
-    if !last[:exit].zero? && Time.now - (hours * 60 * 60) < last[:created]
+    delay = hours * 60 * 60
+    if !last[:exit].zero? && Time.now - delay < last[:created]
       return \
         "The latest release ##{last[:id]} failed just #{last[:created].ago} ago, " \
-        'we must wait until tomorrow and then make another release attempt.'
+        "we must wait #{(last[:created] + delay).ago} " \
+        'and then make another release attempt.'
     end
     nil
   end
