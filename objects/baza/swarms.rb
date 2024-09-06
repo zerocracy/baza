@@ -74,6 +74,7 @@ class Baza::Swarms
         exit: row['exit']&.to_i,
         enabled: row['enabled'] == 't',
         repository: row['repository'],
+        directory: row['directory'],
         branch: row['branch'],
         head: row['head'],
         created: Time.parse(row['created'])
@@ -86,18 +87,20 @@ class Baza::Swarms
   # @param [String] name Name of the swarm
   # @param [String] repo Name of repository
   # @param [String] branch Name of branch
+  # @param [String] directory Name of directory in the Git branch (use '/' for root)
   # @return [Baza::Swarm] The added swarm
-  def add(name, repo, branch)
+  def add(name, repo, branch, directory)
     raise Baza::Urror, 'The "name" cannot be empty' if name.empty?
     raise Baza::Urror, "The name #{name.inspect} is not valid" unless name.match?(/^[a-z0-9-]+$/)
     raise Baza::Urror, 'The "repo" cannot be empty' if repo.empty?
+    raise Baza::Urror, 'The "directory" cannot be empty' if directory.empty?
     unless repo.match?(%r{^[a-zA-Z][a-zA-Z0-9\-.]*/[a-zA-Z][a-z0-9\-.]*$})
       raise Baza::Urror, "The repo #{repo.inspect} is not valid"
     end
     get(
       pgsql.exec(
-        'INSERT INTO swarm (human, name, repository, branch) VALUES ($1, $2, $3, $4) RETURNING id',
-        [@human.id, name.downcase, repo, branch]
+        'INSERT INTO swarm (human, name, repository, branch, directory) VALUES ($1, $2, $3, $4, $5) RETURNING id',
+        [@human.id, name.downcase, repo, branch, directory]
       )[0]['id'].to_i
     )
   end

@@ -2,8 +2,9 @@
   %fieldset
     %input{ type: 'text', name: 'name', tabindex: 1, placeholder: 'Name', size: 19, maxlength: 32, required: true, autofocus: true }
     %input{ type: 'text', name: 'repository', tabindex: 2, placeholder: 'Repo, e.g zerocracy/swarm-template', size: 36, maxlength: 64, required: true }
-    %input{ type: 'text', name: 'branch', tabindex: 3, placeholder: 'Branch. e.g. master', size: 15, size: 20, required: true }
-    %input{ type: 'submit', tabindex: 4, value: 'Add' }
+    %input{ type: 'text', name: 'branch', tabindex: 3, placeholder: 'Branch. e.g. master', size: 15, required: true }
+    %input{ type: 'text', name: 'directory', tabindex: 4, placeholder: 'Directory. e.g. /', size: 12, required: true }
+    %input{ type: 'submit', tabindex: 5, value: 'Add' }
 
 %p
   These are all your swarms:
@@ -17,6 +18,8 @@
     %col{style: 'width: 16em;'}
     -# Branch
     %col{style: 'width: 10em;'}
+    -# Directory
+    %col{style: 'width: 8em;'}
     -# Head
     %col{style: 'width: 7em;'}
     -# Created
@@ -33,6 +36,8 @@
         Repository
       %th
         Branch
+      %th
+        Dir
       %th
         Head
       %th
@@ -66,6 +71,8 @@
         %i.fa-brands.fa-github
       %td.ff
         = s.branch
+      %td.ff
+        != large_text(s.directory)
       %td.ff
         %a{href: "https://github.com/#{s.repository}/commit/#{s.head}"}<
           = s.head[0..8].downcase

@@ -66,6 +66,7 @@ class Baza::Recipe
           'name' => safe("baza-#{@swarm.name}"),
           'github' => safe(@swarm.repository),
           'branch' => safe(@swarm.branch),
+          'directory' => safe(@swarm.directory.delete_prefix('/')),
           'region' => safe(region),
           'account' => safe(account),
           'repository' => safe("#{account}.dkr.ecr.#{region}.amazonaws.com"),

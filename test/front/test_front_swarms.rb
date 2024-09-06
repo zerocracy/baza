@@ -40,7 +40,7 @@ class Baza::FrontSwarmsTest < Minitest::Test
     n = fake_name
     repo = "#{fake_name}/#{fake_name}"
     branch = fake_name
-    swarm = swarms.add(n, repo, branch)
+    swarm = swarms.add(n, repo, branch, '/')
     get('/swarms')
     assert_status(200)
     get("/swarms/#{swarm.id}/disable")
@@ -54,7 +54,7 @@ class Baza::FrontSwarmsTest < Minitest::Test
     n = fake_name
     repo = "#{fake_name}/#{fake_name}"
     branch = fake_name
-    swarms.add(n, repo, branch)
+    swarms.add(n, repo, branch, '/')
     post(
       '/swarms/webhook',
       JSON.pretty_generate(
@@ -97,7 +97,7 @@ class Baza::FrontSwarmsTest < Minitest::Test
     human = fake_job.jobs.human
     fake_login(human.github)
     swarms = human.swarms
-    s = swarms.add(fake_name, "#{fake_name}/#{fake_name}", fake_name)
+    s = swarms.add(fake_name, "#{fake_name}/#{fake_name}", fake_name, '/')
     secret = 'the-super-secret'
     r = s.releases.start('tail', secret)
     put(

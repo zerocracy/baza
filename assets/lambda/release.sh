@@ -35,14 +35,15 @@ fi
 
 attempt=0
 while true; do
-  git clone -b "{{ branch }}" --depth=1 --single-branch "${uri}" swarm && break
+  git clone -b "{{ branch }}" --depth=1 --single-branch "${uri}" clone && break
   ((++attempt))
   if [ "${attempt}" -gt 8 ]; then exit 1; fi
   sleep "${attempt}"
 done
-git --git-dir swarm/.git rev-parse HEAD | tr '[:lower:]' '[:upper:]' > head.txt
-version=$(git --git-dir swarm/.git rev-parse --short HEAD)
-rm -rf swarm/.git
+git --git-dir clone/.git rev-parse HEAD | tr '[:lower:]' '[:upper:]' > head.txt
+version=$(git --git-dir clone/.git rev-parse --short HEAD)
+rm -rf clone/.git
+cp -R "clone/{{ directory }}" swarm
 
 aws ecr get-login-password --region "{{ region }}" | docker login --username AWS --password-stdin "{{ repository }}"
 

@@ -35,7 +35,7 @@ class Baza::SwarmTest < Minitest::Test
     human = fake_human
     swarms = human.swarms
     n = fake_name.downcase
-    s = swarms.add(n, "zerocracy/#{fake_name}", 'master')
+    s = swarms.add(n, "zerocracy/#{fake_name}", 'master', '/')
     assert_equal(n, s.name)
     assert(s.repository.start_with?('zerocracy/'))
     assert_equal('master', s.branch)
@@ -43,7 +43,7 @@ class Baza::SwarmTest < Minitest::Test
 
   def test_why_not
     human = fake_human
-    s = human.swarms.add(fake_name.downcase, "zerocracy/#{fake_name}", 'master')
+    s = human.swarms.add(fake_name.downcase, "zerocracy/#{fake_name}", 'master', '/')
     assert_nil(s.why_not)
     s.releases.start('no tail', fake_name)
     assert(!s.why_not.nil?)
@@ -51,7 +51,7 @@ class Baza::SwarmTest < Minitest::Test
 
   def test_pick_latest
     human = fake_human
-    s = human.swarms.add(fake_name.downcase, "zerocracy/#{fake_name}", 'master')
+    s = human.swarms.add(fake_name.downcase, "zerocracy/#{fake_name}", 'master', '/')
     assert_nil(s.why_not)
     r = s.releases.start('no tail', fake_name)
     r.finish!('4242424242424242424242424242424242424242', 'tail', 0, 42)
@@ -61,7 +61,7 @@ class Baza::SwarmTest < Minitest::Test
 
   def test_enable_disable
     human = fake_human
-    s = human.swarms.add(fake_name.downcase, "zerocracy/#{fake_name}", 'master')
+    s = human.swarms.add(fake_name.downcase, "zerocracy/#{fake_name}", 'master', '/')
     s.enable!(true)
     assert(s.enabled?)
     s.enable!(false)

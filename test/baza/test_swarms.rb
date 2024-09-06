@@ -34,7 +34,7 @@ class Baza::SwarmsTest < Minitest::Test
   def test_simple_scenario
     human = fake_human
     swarms = human.swarms
-    swarms.add(fake_name, 'zerocracy/swarm', 'master')
+    swarms.add(fake_name, 'zerocracy/swarm', 'master', '/')
     s = swarms.each.to_a.first
     assert_equal('master', s.branch)
   end

@@ -45,7 +45,7 @@ class Baza::RecipeTest < Minitest::Test
 
   def test_generates_script
     n = fake_name
-    s = fake_human.swarms.add(n, "#{fake_name}/#{fake_name}", 'master')
+    s = fake_human.swarms.add(n, "#{fake_name}/#{fake_name}", 'master', '/')
     bash = Baza::Recipe.new(s, '').to_bash(:release, '424242', 'us-east-1a', 'sword-fish')
     [
       "#!/bin/bash\n",
@@ -60,7 +60,7 @@ class Baza::RecipeTest < Minitest::Test
 
   def test_runs_script
     loog = Loog::NULL
-    swarm = fake_human.swarms.add('st', 'zerocracy/swarm-template', 'master')
+    swarm = fake_human.swarms.add('st', 'zerocracy/swarm-template', 'master', '/')
     secret = fake_name
     r = swarm.releases.start('just start', secret)
     id_rsa_file = File.join(Dir.home, '.ssh/id_rsa')
@@ -112,7 +112,7 @@ class Baza::RecipeTest < Minitest::Test
     loog = Loog::NULL
     creds = File.join(Dir.home, '.aws/credentials')
     skip unless File.exist?(creds)
-    s = fake_human.swarms.add('st', 'zerocracy/swarm-template', 'master')
+    s = fake_human.swarms.add('st', 'zerocracy/swarm-template', 'master', '/')
     Dir.mktmpdir do |home|
       %w[curl shutdown].each { |f| stub_cli(home, f) }
       FileUtils.mkdir_p(File.join(home, '.aws'))

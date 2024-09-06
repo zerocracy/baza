@@ -47,7 +47,7 @@ class Baza::AlwaysReleaseTest < Minitest::Test
       }
     }
     fake_aws('RunInstances', { instancesSet: { item: { instanceId: 'i-58585858' } } })
-    fake_human.swarms.add(fake_name, "zerocracy/#{fake_name}", 'master')
+    fake_human.swarms.add(fake_name, "zerocracy/#{fake_name}", 'master', '/')
     load(File.join(__dir__, '../../always/always_release.rb'))
   end
 end
