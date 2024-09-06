@@ -236,7 +236,7 @@ module Baza::Helpers
   end
 
   def country_flag(ip)
-    html_tag('img', style: 'width: 1em', src: "/flag-of/#{ip}") { '' }
+    html_tag('img', style: 'width: 1em', src: "/flag-of/#{ip}")
   end
 end
 

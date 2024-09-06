@@ -25,12 +25,9 @@
 require 'open-uri'
 
 def path_to_flag(ip, settings)
-  src = settings.zache.get(:ipgeolocation)[ip]
-  if src.nil?
-    src = settings.ipgeolocation.ipgeo(ip:)['country_flag']
-    settings.zache.get(:ipgeolocation)[ip] = src
+  settings.ipgeolocation_cache.get(ip) do
+    settings.ipgeolocation.ipgeo(ip:)['country_flag']
   end
-  src
 end
 
 get(%r{/flag-of/(.*)}) do

@@ -229,6 +229,7 @@ configure do
     token:,
     connection: ENV['RACK_ENV'] == 'test' && token.empty? ? Baza::IpGeolocation::FakeConnection : Faraday
   )
+  set :ipgeolocation_cache, Zache.new
 end
 
 # Garbage collection:
@@ -277,7 +278,6 @@ end
 # Global in-memory cache.
 configure do
   set :zache, Zache.new
-  settings.zache.put(:ipgeolocation, {}) unless settings.zache.exists?(:ipgeolocation)
 end
 
 get '/' do

@@ -33,7 +33,7 @@ class Baza::FrontFlagOfTest < Minitest::Test
 
   def test_returns_image_as_binary_data
     WebMock.disable_net_connect!
-    body = 'image data'
+    body = SecureRandom.bytes(100)
     stub_request(:get, 'https://ipgeolocation.io/static/flags/us_64.png')
       .to_return(
         status: 200,
@@ -42,16 +42,16 @@ class Baza::FrontFlagOfTest < Minitest::Test
     get('flag-of/8.8.8.8')
     assert_status(200)
     assert_equal('image/png', last_response.headers['Content-type'])
-    assert_equal(body, last_response.body)
+    assert_equal(body.bytes, last_response.body.bytes)
   end
 
   def test_path_to_flag_is_cached
     ip = '8.8.8.8'
     img = 'https://ipgeolocation.io/static/flags/us_64.png'
-    app.settings.zache.get(:ipgeolocation).clear
-    assert_empty(app.settings.zache.get(:ipgeolocation))
+    app.settings.ipgeolocation_cache.remove_all
+    assert_empty(app.settings.ipgeolocation_cache)
     assert_includes(path_to_flag(ip, app.settings), img)
-    assert_equal(img, app.settings.zache.get(:ipgeolocation)[ip])
-    assert_includes(path_to_flag(ip, app.settings), app.settings.zache.get(:ipgeolocation)[ip])
+    assert_equal(img, app.settings.ipgeolocation_cache.get(ip))
+    assert_includes(path_to_flag(ip, app.settings), app.settings.ipgeolocation_cache.get(ip))
   end
 end
