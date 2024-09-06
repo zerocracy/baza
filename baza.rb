@@ -277,9 +277,7 @@ end
 # Global in-memory cache.
 configure do
   set :zache, Zache.new
-  unless settings.zache.exists?(:ipgeolocation)
-    settings.zache.put(:ipgeolocation, {})
-  end
+  settings.zache.put(:ipgeolocation, {}) unless settings.zache.exists?(:ipgeolocation)
 end
 
 get '/' do
