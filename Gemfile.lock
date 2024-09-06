@@ -144,7 +144,7 @@ GEM
     faraday-retry (1.0.3)
     faraday_middleware (1.2.0)
       faraday (~> 1.0)
-    fbe (0.0.64)
+    fbe (0.0.65)
       backtrace (> 0)
       decoor (> 0)
       factbase (> 0)
