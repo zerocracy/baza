@@ -121,5 +121,8 @@ class Baza::FrontSwarmsTest < Minitest::Test
     )
     assert_status(200)
     assert(s.invocations.each.to_a.first[:stdout].include?('this is'))
+    fake_login(human.github)
+    get("/swarms/#{s.id}/invocations")
+    assert_status(200)
   end
 end

@@ -48,6 +48,19 @@ get(%r{/swarms/([0-9]+)/releases}) do
   )
 end
 
+get(%r{/swarms/([0-9]+)/invocations}) do
+  admin_only
+  id = params['captures'].first.to_i
+  swarm = the_human.swarms.get(id)
+  assemble(
+    :invocations,
+    :default,
+    title: '/invocations',
+    invocations: swarm.invocations,
+    offset: (params[:offset] || '0').to_i
+  )
+end
+
 get(%r{/swarms/([0-9]+)/releases/([0-9]+)/stop}) do
   admin_only
   swarm = the_human.swarms.get(params['captures'].first.to_i)

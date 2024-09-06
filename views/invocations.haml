@@ -1,0 +1,33 @@
+%p
+  The swarm
+  %span.ff<
+    = invocations.swarm.name
+  = "(##{invocations.swarm.id})"
+  has the following invocations:
+%table
+  %colgroup
+    -# ID
+    %col{style: 'width: 4em;'}
+    -# Stdout
+    %col
+    -# Created
+    %col{style: 'width: 10em;'}
+  %thead
+    %tr
+      %th
+        = '#'
+      %th
+        Stdout
+      %th
+        Created
+  %tbody
+  - paging(invocations, offset:) do |i|
+    %tr
+      %td.ff
+        = "##{i[:id]}"
+      %td
+        %i.fa-regular.fa-eye{onclick: "$(this).hide(); $(this).parent().find('span').hide(); $(this).parent().find('pre').show();", title: 'Click here to see the full invocation log', style: 'cursor: pointer;'}
+        %pre{style: 'display: none;'}<>
+          = i[:stdout]
+      %td
+        != ago(i[:created])

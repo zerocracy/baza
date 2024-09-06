@@ -59,7 +59,8 @@ class Baza::Swarms
     rows = pgsql.exec(
       [
         'SELECT s.*,',
-        '(SELECT exit FROM release WHERE swarm = s.id ORDER BY release.id DESC LIMIT 1) AS exit',
+        '(SELECT exit FROM release WHERE swarm = s.id ORDER BY release.id DESC LIMIT 1) AS exit,',
+        '(SELECT created FROM invocation WHERE swarm = s.id ORDER BY invocation.id DESC LIMIT 1) AS invoked',
         'FROM swarm AS s',
         'WHERE human = $1',
         'ORDER BY s.name',
@@ -79,6 +80,7 @@ class Baza::Swarms
         branch: row['branch'],
         secret: row['secret'],
         head: row['head'],
+        invoked: row['invoked'].nil? ? nil : Time.parse(row['invoked']),
         created: Time.parse(row['created'])
       )
     end

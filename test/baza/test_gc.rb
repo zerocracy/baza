@@ -26,6 +26,7 @@ require 'minitest/autorun'
 require_relative '../test__helper'
 require_relative '../../objects/baza'
 require_relative '../../objects/baza/humans'
+require_relative '../../objects/baza/tokens'
 require_relative '../../objects/baza/factbases'
 
 # Test.

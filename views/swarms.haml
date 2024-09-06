@@ -15,13 +15,15 @@
     -# Name
     %col{style: 'width: 15em;'}
     -# Repository
-    %col{style: 'width: 16em;'}
+    %col
     -# Head
     %col{style: 'width: 7em;'}
     -# Secret
     %col{style: 'width: 15em;'}
+    -# Invoked
+    %col{style: 'width: 7em;'}
     -# Created
-    %col{style: 'width: 8em;'}
+    %col{style: 'width: 7em;'}
     -# Commands
     %col{style: 'width: 6em;'}
   %thead
@@ -36,6 +38,8 @@
         Head
       %th
         Secret
+      %th
+        Invoked
       %th
         Created
       %th
@@ -79,6 +83,13 @@
           %i.fa-solid.fa-trash-arrow-up
       %td.ff
         != secret(s.secret)
+      %td
+        - if s.invoked.nil?
+          %span.orange
+            Not yet
+        - else
+          %a.ff{href: iri.cut('/swarms').append(s.id).append('invocations'), title: "Invocations of the swarm ##{s.id}"}<
+            != ago(s.invoked)
       %td
         != ago(s.created)
       %td

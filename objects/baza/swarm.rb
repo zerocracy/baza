@@ -103,6 +103,11 @@ class Baza::Swarm
     to_json[:created]
   end
 
+  # Get the time of the recent invocation.
+  def invoked
+    to_json[:invoked]
+  end
+
   # Get its releases.
   def releases
     require_relative 'releases'
@@ -159,7 +164,8 @@ class Baza::Swarm
         row = swarms.pgsql.exec(
           [
             'SELECT s.*,',
-            '(SELECT exit FROM release WHERE swarm = s.id ORDER BY release.id DESC LIMIT 1) AS exit',
+            '(SELECT exit FROM release WHERE swarm = s.id ORDER BY release.id DESC LIMIT 1) AS exit,',
+            '(SELECT created FROM invocation WHERE swarm = s.id ORDER BY invocation.id DESC LIMIT 1) AS invoked',
             'FROM swarm AS s',
             'WHERE s.id = $1 AND s.human = $2'
           ],
@@ -176,6 +182,7 @@ class Baza::Swarm
           directory: row['directory'],
           secret: row['secret'],
           head: row['head'],
+          invoked: row['invoked'].nil? ? nil : Time.parse(row['invoked']),
           created: Time.parse(row['created'])
         }
       end
