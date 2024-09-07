@@ -24,21 +24,21 @@
 set -ex
 set -o pipefail
 
-if aws ecr describe-repositories --repository-names "{{ name }}"; then
+if aws ecr describe-repositories --repository-names "{{ name }}" >/dev/null; then
   aws ecr delete-repository \
     --repository-name "{{ name }}" \
     --force \
     --color off
 fi
 
-if aws lambda get-function --function-name "{{ name }}" --region "{{ region }}"; then
+if aws lambda get-function --function-name "{{ name }}" --region "{{ region }}" >/dev/null; then
   aws lambda delete-function \
     --function-name "{{ name }}" \
     --region "{{ region }}" \
     --color off
 fi
 
-if aws sqs get-queue-url --queue-name "{{ name }}" --region "{{ region }}"; then
+if aws sqs get-queue-url --queue-name "{{ name }}" --region "{{ region }}" >/dev/null; then
   aws sqs delete-queue \
     --queue-url "https://sqs.{{ region }}.amazonaws.com/{{ account }}/{{ name }}" \
     --region "{{ region }}" \
@@ -47,7 +47,7 @@ if aws sqs get-queue-url --queue-name "{{ name }}" --region "{{ region }}"; then
   sleep 60
 fi
 
-if aws iam get-role --role-name "{{ name }}"; then
+if aws iam get-role --role-name "{{ name }}" >/dev/null; then
   while IFS= read -r policy; do
     aws iam delete-role-policy \
       --role-name "{{ name }}" \

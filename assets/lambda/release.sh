@@ -47,7 +47,7 @@ cp -R "clone/{{ directory }}" swarm
 
 aws ecr get-login-password --region "{{ region }}" | docker login --username AWS --password-stdin "{{ repository }}"
 
-if ! aws ecr describe-repositories --repository-names "{{ name }}" --region "{{ region }}"; then
+if ! aws ecr describe-repositories --repository-names "{{ name }}" --region "{{ region }}" >/dev/null; then
   aws ecr create-repository \
     --color off \
     --repository-name "{{ name }}" \
@@ -61,7 +61,7 @@ docker build . -t "${image}" --platform "linux/${arch}"
 docker push "${image}" --quiet --platform "linux/${arch}"
 
 # Create new IAM role, which will be assumed by Lambda function executions:
-if ! aws iam get-role --role-name "{{ name }}"; then
+if ! aws iam get-role --role-name "{{ name }}" >/dev/null; then
   aws iam create-role \
     --color off \
     --role-name "{{ name }}" \
@@ -80,7 +80,7 @@ if ! aws iam get-role --role-name "{{ name }}"; then
 fi
 
 # Allow this role to do everything it needs:
-if ! aws iam get-role-policy --role-name "{{ name }}" --policy-name 'access'; then
+if ! aws iam get-role-policy --role-name "{{ name }}" --policy-name 'access' >/dev/null; then
   aws iam put-role-policy \
     --color off \
     --role-name "{{ name }}" \
@@ -160,7 +160,7 @@ fi
 # Give this swarm special rights:
 # shellcheck disable=SC2050
 if [ "{{ human }}" == 'yegor256' ] && [ -e swarm/aws-policy.json ]; then
-  if ! aws iam get-role-policy --role-name "{{ name }}" --policy-name 'admin-access'; then
+  if ! aws iam get-role-policy --role-name "{{ name }}" --policy-name 'admin-access' >/dev/null; then
     aws iam put-role-policy \
       --color off \
       --role-name "{{ name }}" \
@@ -170,7 +170,7 @@ if [ "{{ human }}" == 'yegor256' ] && [ -e swarm/aws-policy.json ]; then
 fi
 
 # Create or update Lambda function:
-if aws lambda get-function --function-name "{{ name }}" --region "{{ region }}"; then
+if aws lambda get-function --function-name "{{ name }}" --region "{{ region }}" >/dev/null; then
   aws lambda update-function-code \
     --color off \
     --function-name "{{ name }}" \
@@ -192,7 +192,7 @@ else
 fi
 
 # Create new SQS queue for this new Lambda function:
-if ! aws sqs get-queue-url --queue-name "{{ name }}" --region "{{ region }}"; then
+if ! aws sqs get-queue-url --queue-name "{{ name }}" --region "{{ region }}" >/dev/null; then
   aws sqs create-queue \
     --color off \
     --queue-name "{{ name }}" \
@@ -202,7 +202,7 @@ fi
 # Make sure all new SQS events trigger Lambda function execution:
 arn="arn:aws:sqs:{{ region }}:{{ account }}:{{ name }}"
 fn="arn:aws:lambda:{{ region }}:{{ account }}:function:{{ name }}"
-if ! ( aws lambda list-event-source-mappings --event-source-arn "${arn}" --function-name "${fn}" --region "{{ region }}" | grep "\"${fn}\"" ); then
+if ! ( aws lambda list-event-source-mappings --event-source-arn "${arn}" --function-name "${fn}" --region "{{ region }}" | grep "\"${fn}\"" >/dev/null ); then
   aws lambda create-event-source-mapping \
     --color off \
     --event-source-arn "${arn}" \
