@@ -72,7 +72,7 @@ class Baza::Release
     )
     human.notify(
       code.zero? ? '🫐' : '⚠️',
-      "The release ##{@id} of the swarm ##{s.id} (`#{s.name}`)",
+      "The release ##{@id} of the swarm ##{s.id} (\"`#{s.name}`\")",
       code.zero? ?
         "successfully published [#{head[0..8].downcase}](https://github.com/#{s.repository}/commit/#{head.downcase})" :
         'failed',
