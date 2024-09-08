@@ -66,7 +66,7 @@ get(%r{/flag-of/([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})}) do
   ip = params['captures'].first
   content_type 'image/png'
   src =
-    settings.zache.get("country-of-#{ip}") do
+    settings.zache.get("flag-of-#{ip}") do
       settings.ipgeolocation.ipgeo(ip:)['country_flag']
     end
   URI.parse(src).open.read if src

@@ -95,6 +95,6 @@ class Baza::FrontPushTest < Minitest::Test
     assert_empty(app.settings.zache)
     get("flag-of/#{ip}")
     assert_status(200)
-    assert_equal(img, app.settings.zache.get("country-of-#{ip}"))
+    assert_equal(img, app.settings.zache.get("flag-of-#{ip}"))
   end
 end
