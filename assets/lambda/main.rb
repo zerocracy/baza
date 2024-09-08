@@ -49,7 +49,7 @@ end
 def register(stdout, job)
   home = Iri.new('https://www.zerocracy.com')
     .append('swarms')
-    .append('{{ swarm }}'.to_i)
+    .append('{{ swarm }}')
     .append('invocation')
     .add(secret: '{{ secret }}')
   Typhoeus::Request.put(
