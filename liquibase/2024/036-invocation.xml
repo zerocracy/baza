@@ -28,7 +28,7 @@ SOFTWARE.
       CREATE TABLE invocation (
         id SERIAL PRIMARY KEY,
         swarm INT NOT NULL REFERENCES swarm(id),
-        job INT NOT NULL REFERENCES job(id),
+        job INT REFERENCES job(id),
         stdout TEXT NOT NULL,
         created TIMESTAMPTZ DEFAULT now() NOT NULL
       );

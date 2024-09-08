@@ -20,33 +20,26 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-FROM public.ecr.aws/lambda/ruby:3.2
+FROM ruby:3.3
 
-# hadolint ignore=DL3033
-RUN yum update -y \
-  && yum install -q -y \
-    make-* automake gcc gcc-c++ kernel-devel \
-    gcc readline-devel libicu-devel zlib-devel \
-    openssl-devel openssl \
-    wget tar gzip \
-    libyaml libyaml-devel \
-    git \
-  && yum clean all
+ENV LAMBDA=/var/task
+RUN mkdir -p ${LAMBDA}
+WORKDIR ${LAMBDA}
 
-COPY install-pgsql.sh /tmp
-RUN /bin/bash /tmp/install-pgsql.sh > /dev/null
+RUN curl -Lso /usr/local/bin/aws-lambda-rie \
+  https://github.com/aws/aws-lambda-runtime-interface-emulator/releases/latest/download/aws-lambda-rie \
+  && chmod +x /usr/local/bin/aws-lambda-rie
 
-COPY Gemfile ${LAMBDA_TASK_ROOT}/
+COPY Gemfile ${LAMBDA}/
+ENV BUNDLE_SILENCE_ROOT_WARNING=1
 RUN gem install --quiet bundler -v 2.5.18 \
-  && bundle install --quiet "--gemfile=${LAMBDA_TASK_ROOT}/Gemfile"
+  && bundle config set --local path 'vendor/bundle' \
+  && bundle install --retry=5 --quiet "--gemfile=${LAMBDA}/Gemfile"
 
 COPY swarm/ /swarm
 
-COPY install.sh /tmp
-RUN /bin/bash /tmp/install.sh
+COPY install.sh .
+RUN /bin/bash ${LAMBDA}/install.sh
 
-COPY entry.rb ${LAMBDA_TASK_ROOT}/
-
-RUN rm -rf /tmp/*
-
-CMD ["entry.go"]
+COPY entry.sh main.rb .
+ENTRYPOINT ["/bin/bash", "entry.sh"]

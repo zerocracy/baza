@@ -158,10 +158,11 @@ put(%r{/swarms/([0-9]+)/invocation}) do
   swarm = settings.humans.swarm_by_id(id)
   secret = params[:secret]
   return [401, "Invalid secret for the swarm ##{swarm.id}"] if swarm.secret != secret
-  job = settings.humans.job_by_id(params[:job].to_i)
+  job_id = params[:job]&.to_i
+  job = job_id.nil? ? nil : settings.humans.job_by_id(job_id)
   request.body.rewind
-  id = swarm.invocations.register(job, request.body.read)
-  "Invocation ##{id} registered for swarm ##{swarm.id}, job ##{job.id}"
+  id = swarm.invocations.register(request.body.read, job)
+  "Invocation ##{id} registered for swarm ##{swarm.id}"
 end
 
 post('/swarms/add') do

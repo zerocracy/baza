@@ -50,9 +50,8 @@ class Baza::RecipeTest < Minitest::Test
     [
       "#!/bin/bash\n",
       "424242.dkr.ecr.us-east-1a.amazonaws.com/baza-#{n}",
-      'RUN yum update -y',
       'gem \'aws-sdk-core\'',
-      'cat > entry.rb <<EOT_',
+      'cat > main.rb <<EOT_',
       '"\${uri}"',
       'release.sh'
     ].each { |t| assert(bash.include?(t), "Can't find #{t.inspect} in:\n#{bash}") }
@@ -132,7 +131,7 @@ class Baza::RecipeTest < Minitest::Test
   def test_build_docker_image
     loog = Loog::NULL
     Dir.mktmpdir do |home|
-      ['Dockerfile', 'Gemfile', 'entry.rb', 'install-pgsql.sh', 'install.sh'].each do |f|
+      ['Dockerfile', 'Gemfile', 'entry.sh', 'main.rb', 'install.sh'].each do |f|
         FileUtils.copy(
           File.join(File.join(__dir__, '../../assets/lambda'), f),
           File.join(home, f)
@@ -146,43 +145,44 @@ class Baza::RecipeTest < Minitest::Test
   end
 
   def test_fake_docker_run
-    skip
     WebMock.enable_net_connect!
     loog = Loog::NULL
     Dir.mktmpdir do |home|
-      File.write(
-        File.join(home, 'Dockerfile'),
-        Liquid::Template.parse(
-          File.read(File.join(__dir__, '../../assets/lambda/Dockerfile'))
-        ).render('from' => 'public.ecr.aws/lambda/ruby:3.2')
-      )
-      ['install-pgsql.sh', 'install.sh', 'entry.rb', 'Gemfile'].each do |f|
+      ['Dockerfile', 'install.sh', 'entry.sh', 'main.rb', 'Gemfile'].each do |f|
         FileUtils.copy(File.join(File.join(__dir__, '../../assets/lambda'), f), File.join(home, f))
       end
       FileUtils.mkdir_p(File.join(home, 'swarm'))
-      File.write(File.join(home, 'swarm/Gemfile'), "source 'https://rubygems.org'\ngem 'tago'")
-      bash("docker build #{home} -t image-test", loog)
-      ret =
-        RandomPort::Pool::SINGLETON.acquire do |port|
-          stdout = bash("docker run -d -p #{port}:8080 image-test", loog)
-          container = stdout.split("\n")[-1]
-          loog.debug("Docker container started: #{container}")
-          begin
-            sleep 1
-            request = Typhoeus::Request.new(
-              "http://localhost:#{port}/2015-03-31/functions/function/invocations",
-              body: '{}',
-              method: :get
-            )
-            request.run
-            bash("docker logs #{container}", loog)
-            request.response
-          ensure
-            bash("docker rm -f #{container}", loog)
+      {
+        # 'swarm/Gemfile' => "source 'https://rubygems.org'\ngem 'tago'",
+        'swarm/entry.sh' => "#!/bin/bash\necho works fine!"
+      }.each { |f, txt| File.write(File.join(home, f), txt) }
+      image = 'image-test'
+      bash("docker build #{home} -t #{image}", loog)
+      begin
+        ret =
+          RandomPort::Pool::SINGLETON.acquire do |port|
+            stdout = bash("docker run -d -p #{port}:8080 #{image}", loog)
+            container = stdout.split("\n")[-1]
+            loog.debug("Docker container started: #{container}")
+            begin
+              sleep 1
+              request = Typhoeus::Request.new(
+                "http://localhost:#{port}/2015-03-31/functions/function/invocations",
+                body: '{}',
+                method: :get
+              )
+              request.run
+              bash("docker logs #{container}", loog)
+              request.response
+            ensure
+              bash("docker rm -f #{container}", loog)
+            end
           end
-        end
-      assert_equal(200, ret.response_code, ret.response_body)
-      assert_equal('"Done!"', ret.response_body, ret.response_body)
+        assert_equal(200, ret.response_code, ret.response_body)
+        assert_equal('"Done!"', ret.response_body, ret.response_body)
+      ensure
+        bash("docker rmi #{image}", loog)
+      end
     end
   end
 

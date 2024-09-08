@@ -125,4 +125,19 @@ class Baza::FrontSwarmsTest < Minitest::Test
     get("/swarms/#{s.id}/invocations")
     assert_status(200)
   end
+
+  def test_register_non_job_invocation
+    swarms = fake_human.swarms
+    s = swarms.add(fake_name, "#{fake_name}/#{fake_name}", fake_name, '/')
+    put(
+      "/swarms/#{s.id}/invocation?secret=#{s.secret}",
+      'this is a non-job stdout',
+      'CONTENT_TYPE' => 'text/plain'
+    )
+    assert_status(200)
+    assert(s.invocations.each.to_a.first[:stdout].include?('this is'))
+    fake_login(swarms.human.github)
+    get("/swarms/#{s.id}/invocations")
+    assert_status(200)
+  end
 end

@@ -62,15 +62,14 @@ class Baza::Invocations
 
   # Register new invocation.
   #
-  # @param [Baza::Job] job The ID of the job
   # @param [String] stdout The output
+  # @param [Baza::Job] job The ID of the job
   # @return [Integer] The ID of the added invocation
-  def register(job, stdout)
-    raise Baza::Urror, 'The "job" cannot be NIL' if job.nil?
+  def register(stdout, job)
     raise Baza::Urror, 'The "stdout" cannot be NIL' if stdout.nil?
     @swarm.pgsql.exec(
       'INSERT INTO invocation (swarm, job, stdout) VALUES ($1, $2, $3) RETURNING id',
-      [@swarm.id, job.id, stdout]
+      [@swarm.id, job.nil? ? nil : job.id, stdout]
     )[0]['id'].to_i
   end
 end

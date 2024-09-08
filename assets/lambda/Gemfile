@@ -23,10 +23,11 @@
 source 'https://rubygems.org'
 ruby '~>3.2'
 
+gem 'aws_lambda_ric', '2.0.0'
 gem 'aws-sdk-core', '~>3.202'
 gem 'aws-sdk-s3', '~>1.159'
 gem 'aws-sdk-sqs', '~>1.80'
 gem 'backtrace', '>0'
-gem 'fbe', '>0'
-gem 'judges', '>0'
+gem 'iri', '>0'
 gem 'loog', '>0'
+gem 'typhoeus', '~>1.3'

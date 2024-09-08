@@ -74,11 +74,11 @@ class Baza::Recipe
           'bucket' => 'swarms--use1-az4--x-s3'
         ),
         cat_of('Gemfile'),
+        cat_of('entry.sh'),
         cat_of(
-          'entry.rb',
+          'main.rb',
           'secret' => @swarm.secret
         ),
-        cat_of('install-pgsql.sh'),
         cat_of('install.sh'),
         cat_of('Dockerfile')
       ].join

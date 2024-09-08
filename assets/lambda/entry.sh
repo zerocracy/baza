@@ -1,4 +1,4 @@
-# frozen_string_literal: true
+#!/bin/bash
 
 # MIT License
 #
@@ -22,9 +22,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-secret = "{{ secret }}"
-
-def go(x)
-  puts 'hello!'
-  'Done!'
-end
+if [ -z "${AWS_LAMBDA_RUNTIME_API}" ]; then
+  exec /usr/local/bin/aws-lambda-rie bundle exec aws_lambda_ric main.go
+else
+  exec bundle exec aws_lambda_ric main.go
+fi

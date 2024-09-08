@@ -21,6 +21,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+set -ex
+
 home=/swarm
 if [ -e "${home}/Gemfile" ]; then
   bundle config set without development

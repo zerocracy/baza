@@ -281,7 +281,7 @@ GEM
     parser (3.3.5.0)
       ast (~> 2.4.1)
       racc
-    pg (1.5.7)
+    pg (1.5.8)
     pgtk (0.9.6)
       backtrace (~> 0.3)
       loog (~> 0.2)
@@ -337,7 +337,7 @@ GEM
     rexml (3.3.7)
     rspec-core (3.13.1)
       rspec-support (~> 3.13.0)
-    rspec-expectations (3.13.2)
+    rspec-expectations (3.13.3)
       diff-lcs (>= 1.2.0, < 2.0)
       rspec-support (~> 3.13.0)
     rspec-mocks (3.13.1)
@@ -410,7 +410,7 @@ GEM
     simplecov-cobertura (2.1.0)
       rexml
       simplecov (~> 0.19)
-    simplecov-html (0.12.3)
+    simplecov-html (0.13.0)
     simplecov_json_formatter (0.1.4)
     sinatra (4.0.0)
       mustermann (~> 3.0)
