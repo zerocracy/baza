@@ -135,7 +135,7 @@ class Baza::Swarm
     return "The release ##{last[:id]} is not yet finished, we're waiting for it." if last[:exit].nil?
     if last[:head] == head
       return \
-        "The SHA of the head of the release ##{last[:id]} (#{last[:head][0..8].downcase}) " \
+        "The SHA of the head of the release ##{last[:id]} (#{last[:head][0..6].downcase}) " \
         'equals to the SHA of the head of the swarm, no need to release.'
     end
     return nil if last[:head] == 'F' * 40
