@@ -87,7 +87,9 @@ def go(event:, context:)
         if job.nil?
           $loog.debug("The event #{rec['messageId']} is not related to any job")
         else
-          $loog.info(`/bin/bash /swarm/entry.sh #{job} 2>&1`)
+          cmd = "/bin/bash /swarm/entry.sh #{job} 2>&1"
+          $loog.info("+ #{cmd}")
+          $loog.info(`#{cmd}`)
           e = $CHILD_STATUS.exitstatus
           $loog.warn("FAILURE (#{e})") unless e.zero?
         end
