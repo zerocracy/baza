@@ -147,7 +147,8 @@ class Baza::RecipeTest < Minitest::Test
   def test_local_lambda_run
     WebMock.enable_net_connect!
     loog = Loog::NULL
-    s = fake_human.swarms.add('st', 'zerocracy/swarm-template', 'master', '/')
+    job = fake_job
+    s = job.jobs.human.swarms.add('st', 'zerocracy/swarm-template', 'master', '/')
     RandomPort::Pool::SINGLETON.acquire(2) do |lambda_port, backend_port|
       Dir.mktmpdir do |home|
         %w[curl shutdown aws].each { |f| stub_cli(home, f) }
@@ -180,8 +181,23 @@ class Baza::RecipeTest < Minitest::Test
                 sleep 1
                 request = Typhoeus::Request.new(
                   "http://localhost:#{lambda_port}/2015-03-31/functions/function/invocations",
-                  body: '{}',
-                  method: :get
+                  body: JSON.pretty_generate(
+                    {
+                      'Records' => [
+                        {
+                          'messageId' => 'defd997b-4675-42fc-9f33-9457011de8b3',
+                          'messageAttributes' => {
+                            'job' => { 'stringValue' => job.id.to_s }
+                          },
+                          'body' => 'something funny...'
+                        }
+                      ]
+                    }
+                  ),
+                  method: :get,
+                  headers: {
+                    'Content-Type' => 'application/json'
+                  }
                 )
                 request.run
                 bash("docker logs #{container}", loog)

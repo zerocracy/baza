@@ -26,6 +26,7 @@ source 'https://rubygems.org'
 ruby '~>3.2'
 
 gem 'always', '>0'
+gem 'archive-zip', '0.12.0'
 gem 'aws-sdk-core', '~>3.202'
 gem 'aws-sdk-ec2', '~>1.470'
 gem 'aws-sdk-s3', '~>1.159'

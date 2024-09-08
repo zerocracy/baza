@@ -22,14 +22,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require 'English'
 require 'backtrace'
-require 'iri'
-require 'typhoeus'
 require 'elapsed'
+require 'English'
+require 'iri'
+require 'json'
 require 'loog'
-
-$loog = Loog::Buffer.new
+require 'typhoeus'
 
 # This is needed because of this: https://github.com/aws/aws-lambda-ruby-runtime-interface-client/issues/14
 require 'aws_lambda_ric'
@@ -68,32 +67,31 @@ def report(stdout, job)
       'Content-Length' => stdout.length
     }
   )
-  $loog.debug("Report to #{home}: #{ret.code}")
-end
-
-at_exit do
-  report(Backtrace.new($!), 0)
+  puts "Reported to #{home}: #{ret.code}"
 end
 
 def go(event:, context:)
-  elapsed($loog, intro: 'Job processing finished') do
-    $loog.debug("Arrived event: #{event.to_s.inspect}")
-    if event.is_a?(Hash)
-      $loog.debug('The event is not a hash')
-      report($loog.to_s, nil)
-    else
-      event['Records'].each do |rec|
-        job = rec['messageAttributes']['job']&.to_i
-        if job.nil?
-          $loog.debug("The event #{rec['messageId']} is not related to any job")
-        else
-          cmd = "/bin/bash /swarm/entry.sh #{job} 2>&1"
-          $loog.info("+ #{cmd}")
-          $loog.info(`#{cmd}`)
-          e = $CHILD_STATUS.exitstatus
-          $loog.warn("FAILURE (#{e})") unless e.zero?
-        end
-        report($loog.to_s, job)
+  puts "Arrived event: #{event.to_s.inspect}"
+  elapsed(intro: 'Job processing finished') do
+    event['Records'].each do |rec|
+      loog = Loog::Buffer.new
+      begin
+        job = rec['messageAttributes']['job']['stringValue'].to_i
+        job = 0 if job.nil?
+        cmd =
+          if File.exist?('/swarm/entry.sh')
+            "/bin/bash /swarm/entry.sh #{job} 2>&1"
+          elsif File.exist?('/swarm/entry.rb')
+            "bundle exec ruby /swarm/entry.rb #{job} 2>&1"
+          else
+            "echo 'Cannot figure out how to start the swarm, try creating \"entry.sh\"'"
+          end
+        loog.info("+ #{cmd}")
+        loog.info(`SWARM_SECRET={{ secret }} #{cmd}`)
+        e = $CHILD_STATUS.exitstatus
+        loog.warn("FAILURE (#{e})") unless e.zero?
+      ensure
+        report(loog.to_s, job)
       end
     end
   end
