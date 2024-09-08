@@ -240,6 +240,8 @@ module Baza::Helpers
   end
 
   def snippet(text, preview: false, unrollable: true)
+    return 'NIL' if text.nil?
+    return '' if text.empty?
     lines = text.split("\n")
     [
       unrollable ? html_tag(
@@ -254,7 +256,13 @@ module Baza::Helpers
         style: 'cursor: pointer; margin-right: .5em;',
         title: 'Click here to see the full snippet'
       ) : '',
-      html_tag('span') { preview ? lines.first : "#{lines.count} lines" },
+      html_tag('span') do
+        if preview
+          lines.first
+        else
+          "#{lines.count} line#{lines.count == 1 ? '' : 's'}"
+        end
+      end,
       unrollable ? html_tag('pre', style: 'display: none;') { text } : ''
     ].join
   end
