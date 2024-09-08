@@ -22,6 +22,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+require 'English'
 require 'backtrace'
 require 'iri'
 require 'typhoeus'
@@ -79,7 +80,8 @@ def go(event:, context:)
     $loog.debug("Arrived event: #{event.to_s.inspect}")
     $loog.debug("Arrived context: #{context.to_s.inspect}")
     stdout = `/bin/bash /swarm/entry.sh 2>&1`
+    stdout += "\n#{$CHILD_STATUS.exitstatus.zero? ? 'SUCCESS' : 'FAILURE'}"
     report(stdout, nil)
-    $loog.info('Done!')
+    'Done!'
   end
 end
