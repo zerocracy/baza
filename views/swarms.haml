@@ -17,13 +17,11 @@
     -# Repository
     %col
     -# Head
-    %col{style: 'width: 7em;'}
+    %col{style: 'width: 8em;'}
     -# Secret
     %col{style: 'width: 15em;'}
     -# Invoked
-    %col{style: 'width: 7em;'}
-    -# Created
-    %col{style: 'width: 7em;'}
+    %col{style: 'width: 8em;'}
     -# Commands
     %col{style: 'width: 6em;'}
   %thead
@@ -40,8 +38,6 @@
         Secret
       %th
         Invoked
-      %th
-        Created
       %th
   %tbody
   - paging(swarms, offset:) do |s|
@@ -90,8 +86,6 @@
         - else
           %a.ff{href: iri.cut('/swarms').append(s.id).append('invocations'), title: "Invocations of the swarm ##{s.id}"}<
             != ago(s.invoked)
-      %td
-        != ago(s.created)
       %td
         - if s.enabled?
           %a.ico{href: iri.cut('/swarms').append(s.id).append('disable'), title: "Disable swarm ##{s.id}", onclick: "return confirm('Are you sure you want to disable the swarm ##{s.id}?')"}
