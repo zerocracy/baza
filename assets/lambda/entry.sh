@@ -23,7 +23,7 @@
 # SOFTWARE.
 
 if [ -z "${AWS_LAMBDA_RUNTIME_API}" ]; then
-  exec /usr/local/bin/aws-lambda-rie bundle exec aws_lambda_ric main.go
+  /usr/local/bin/aws-lambda-rie bundle exec aws_lambda_ric main.go
 else
-  exec bundle exec aws_lambda_ric main.go
+  bundle exec aws_lambda_ric main.go
 fi

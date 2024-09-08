@@ -70,7 +70,11 @@ printf '0' > exit.txt
 
 SECONDS=0
 
-/bin/bash "{{ script }}.sh" 2>&1 | tee stdout.log || echo $? > exit.txt
+if [ -e aws ]; then
+  echo 'Skipped {{ script }} because testing' > stdout.log
+else
+  /bin/bash "{{ script }}.sh" 2>&1 | tee stdout.log || echo $? > exit.txt
+fi
 
 tail -1000 stdout.log > tail.log
 

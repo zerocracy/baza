@@ -77,7 +77,8 @@ class Baza::Recipe
         cat_of('entry.sh'),
         cat_of(
           'main.rb',
-          'host' => 'https://www.zerocracy.com',
+          'host' => host,
+          'swarm' => @swarm.id.to_s,
           'secret' => @swarm.secret
         ),
         cat_of('install.sh'),
@@ -106,6 +107,6 @@ class Baza::Recipe
 
   def cat(file, txt)
     m = "EOT_#{SecureRandom.hex(8)}"
-    "\ncat > #{file} <<#{m}\n#{txt.gsub('$', '\\$')}#{txt.empty? ? '' : "\n"}#{m}\n"
+    "\ncat > #{file} <<#{m}\n#{txt.gsub('$', '\\$').gsub('`', '\\\\`')}#{txt.empty? ? '' : "\n"}#{m}\n"
   end
 end

@@ -25,6 +25,10 @@
 require 'backtrace'
 require 'iri'
 require 'typhoeus'
+require 'elapsed'
+require 'loog'
+
+$loog = Loog::VERBOSE
 
 # This is needed because of this: https://github.com/aws/aws-lambda-ruby-runtime-interface-client/issues/14
 require 'aws_lambda_ric'
@@ -46,14 +50,15 @@ module AwsLambdaRuntimeInterfaceClient
   end
 end
 
-def register(stdout, job)
+def report(stdout, job)
   home = Iri.new('{{ host }}')
     .append('swarms')
     .append('{{ swarm }}'.to_i)
     .append('invocation')
     .add(secret: '{{ secret }}')
-  Typhoeus::Request.put(
-    (job.nil? ? home : home.add(job: job)).to_s,
+  home = home.add(job: job) unless job.nil?
+  ret = Typhoeus::Request.put(
+    home.to_s,
     connecttimeout: 30,
     timeout: 300,
     body: stdout,
@@ -62,15 +67,17 @@ def register(stdout, job)
       'Content-Length' => stdout.length
     }
   )
+  $loog.debug("Report to #{home}: #{ret.code}")
 end
 
 at_exit do
-  register(Backtrace.new($!), 0)
+  report(Backtrace.new($!), 0)
 end
 
 def go(event:, context:)
-  stdout = `/bin/bash /swarm/entry.sh 2>&1`
-  register(stdout, nil)
-  'Done!'
+  elapsed(intro: 'Job processing finished') do
+    stdout = `/bin/bash /swarm/entry.sh 2>&1`
+    report(stdout, nil)
+    'Done!'
+  end
 end
-

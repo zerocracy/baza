@@ -144,44 +144,58 @@ class Baza::RecipeTest < Minitest::Test
     end
   end
 
-  def test_fake_docker_run
+  def test_local_lambda_run
     WebMock.enable_net_connect!
     loog = Loog::NULL
-    Dir.mktmpdir do |home|
-      ['Dockerfile', 'install.sh', 'entry.sh', 'main.rb', 'Gemfile'].each do |f|
-        FileUtils.copy(File.join(File.join(__dir__, '../../assets/lambda'), f), File.join(home, f))
-      end
-      FileUtils.mkdir_p(File.join(home, 'swarm'))
-      {
-        # 'swarm/Gemfile' => "source 'https://rubygems.org'\ngem 'tago'",
-        'swarm/entry.sh' => "#!/bin/bash\necho works fine!"
-      }.each { |f, txt| File.write(File.join(home, f), txt) }
-      image = 'image-test'
-      bash("docker build #{home} -t #{image}", loog)
-      begin
-        ret =
-          RandomPort::Pool::SINGLETON.acquire do |port|
-            stdout = bash("docker run -d -p #{port}:8080 #{image}", loog)
-            container = stdout.split("\n")[-1]
-            loog.debug("Docker container started: #{container}")
-            begin
-              sleep 1
-              request = Typhoeus::Request.new(
-                "http://localhost:#{port}/2015-03-31/functions/function/invocations",
-                body: '{}',
-                method: :get
+    s = fake_human.swarms.add('st', 'zerocracy/swarm-template', 'master', '/')
+    RandomPort::Pool::SINGLETON.acquire(2) do |lambda_port, backend_port|
+      Dir.mktmpdir do |home|
+        %w[curl shutdown aws].each { |f| stub_cli(home, f) }
+        sh = File.join(home, 'recipe.sh')
+        File.write(
+          sh,
+          Baza::Recipe.new(s, '').to_bash(
+            :release, '019644334823', 'us-east-1', 'fake',
+            host: "http://host.docker.internal:#{backend_port}"
+          )
+        )
+        bash("/bin/bash #{sh}", loog)
+        FileUtils.mkdir_p(File.join(home, 'swarm'))
+        {
+          'swarm/Gemfile' => "source 'https://rubygems.org'\ngem 'tago'",
+          'swarm/entry.sh' => "#!/bin/bash\necho works fine!"
+        }.each { |f, txt| File.write(File.join(home, f), txt) }
+        image = 'image-test'
+        bash("docker build #{home} -t #{image}", loog)
+        begin
+          ret =
+            with_front(backend_port, loog) do
+              stdout = bash(
+                "docker run --add-host host.docker.internal:host-gateway -d -p #{lambda_port}:8080 #{image}",
+                loog
               )
-              request.run
-              bash("docker logs #{container}", loog)
-              request.response
-            ensure
-              bash("docker rm -f #{container}", loog)
+              container = stdout.split("\n")[-1]
+              loog.debug("Docker container started: #{container}")
+              begin
+                sleep 1
+                request = Typhoeus::Request.new(
+                  "http://localhost:#{lambda_port}/2015-03-31/functions/function/invocations",
+                  body: '{}',
+                  method: :get
+                )
+                request.run
+                bash("docker logs #{container}", loog)
+                request.response
+              ensure
+                bash("docker rm -f #{container}", loog)
+              end
             end
-          end
-        assert_equal(200, ret.response_code, ret.response_body)
-        assert_equal('"Done!"', ret.response_body, ret.response_body)
-      ensure
-        bash("docker rmi #{image}", loog)
+          assert_equal(200, ret.response_code, ret.response_body)
+          assert_equal('"Done!"', ret.response_body, ret.response_body)
+          assert_equal(1, s.invocations.each.to_a.size)
+        ensure
+          bash("docker rmi #{image}", loog)
+        end
       end
     end
   end
