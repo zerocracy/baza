@@ -33,7 +33,7 @@ require_relative '../test__helper'
 class PopTest < Minitest::Test
   def test_runs_script
     loog = ENV['RACK_RUN'] ? Loog::NULL : Loog::VERBOSE
-    fake_job
+    job = fake_job
     s = fake_human.swarms.add(fake_name, "#{fake_name}/#{fake_name}", 'master', '/')
     Dir.mktmpdir do |home|
       %w[aws].each do |f|
@@ -41,7 +41,7 @@ class PopTest < Minitest::Test
         File.write(sh, "#!/bin/bash\necho $@")
         FileUtils.chmod('+x', sh)
       end
-      FileUtils.copy(File.join(__dir__, '../../swarms/pop/entry.sh'), home)
+      FileUtils.copy(File.join(__dir__, '../../swarms/shift/entry.sh'), home)
       File.write(
         File.join(home, 'Dockerfile'),
         '
@@ -56,21 +56,14 @@ class PopTest < Minitest::Test
       )
       img = 'test-pop'
       bash("docker build #{home} -t #{img}", loog)
-      RandomPort::Pool::SINGLETON.acquire do |port|
-        fake_front(port, loog) do
-          bash(
-            [
-              'docker run --add-host host.docker.internal:host-gateway ',
-              "-e BAZA_URL -e SWARM_ID -e SWARM_SECRET --rm #{img} 0 ."
-            ].join,
-            loog,
-            'BAZA_URL' => "http://host.docker.internal:#{port}",
-            'SWARM_ID' => s.id.to_s,
-            'SWARM_SECRET' => s.secret
-          )
-        ensure
-          bash("docker rmi #{img}", loog)
-        end
+      Dir.mktmpdir do |home|
+        File.write(
+          File.join(home, 'event.json'),
+          JSON.pretty_generate({ messageAttributes: { swarm: { stringValue: s.name } } })
+        )
+        bash("docker run -v #{home}:/temp --rm #{img} #{job.id} /temp", loog)
+      ensure
+        bash("docker rmi #{img}", loog)
       end
     end
   end

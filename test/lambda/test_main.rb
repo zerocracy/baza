@@ -22,8 +22,37 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require 'loog'
+require 'minitest/autorun'
+require 'webmock/minitest'
+require_relative '../test__helper'
 
-loog = Loog::VERBOSE
+# Test.
+# Author:: Yegor Bugayenko (yegor256@gmail.com)
+# Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
+# License:: MIT
+class MainTest < Minitest::Test
+  def test_no_records
+    require_relative '../../assets/lambda/main.rb'
+    go(event: { 'Records' => [] }, context: nil)
+  end
 
-loog.info('Nothing to do as of yet')
+  def test_one_record
+    WebMock.disable_net_connect!
+    job = fake_job
+    require_relative '../../assets/lambda/main.rb'
+    go(
+      event: {
+        'Records' => [
+          {
+            'messageId' => 'defd997b-4675-42fc-9f33-9457011de8b3',
+            'messageAttributes' => {
+              'job' => { 'stringValue' => job.id.to_s }
+            },
+            'body' => 'something funny...'
+          }
+        ]
+      },
+      context: nil
+    )
+  end
+end

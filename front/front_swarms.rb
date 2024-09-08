@@ -175,3 +175,42 @@ post('/swarms/add') do
   s = the_human.swarms.add(n, repo, branch, directory)
   flash(iri.cut('/swarms'), "The swarm ##{s.id} #{repo}@#{branch} just added")
 end
+
+# Take a job that needs processing (or return 204 if no job).
+get '/pop' do
+  id = params[:swarm]&.to_i
+  raise Baza::Urror, 'The "swarm" is a mandatory query param' if id.nil?
+  swarm = settings.humans.swarm_by_id(id)
+  secret = params[:secret]
+  return [401, "Invalid secret for the swarm ##{swarm.id}"] if swarm.secret != secret
+  pipe = settings.humans.pipe(settings.fbs)
+  job = pipe.pop(swarm.name)
+  if job.nil?
+    status 204
+    return
+  end
+  content_type('application/zip')
+  Tempfile.open do |f|
+    pipe.pack(job, f.path)
+    File.binread(f.path)
+  end
+end
+
+# Put back the result of its processing (the body is a ZIP file).
+put '/finish' do
+  id = params[:swarm]&.to_i
+  raise Baza::Urror, 'The "swarm" is a mandatory query param' if id.nil?
+  swarm = settings.humans.swarm_by_id(id)
+  secret = params[:secret]
+  return [401, "Invalid secret for the swarm ##{swarm.id}"] if swarm.secret != secret
+  job_id = params[:id]&.to_i
+  raise Baza::Urror, 'The "id" is a mandatory query param' if job_id.nil?
+  job = settings.humans.job_by_id(job_id)
+  pipe = settings.humans.pipe(settings.fbs)
+  Tempfile.open do |f|
+    request.body.rewind
+    File.binwrite(f.path, request.body.read)
+    pipe.unpack(job, f.path)
+  end
+  "Job ##{job.id} finished, thanks!"
+end

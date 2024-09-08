@@ -33,15 +33,16 @@ SimpleCov.formatter = SimpleCov::Formatter::CoberturaFormatter
 require 'minitest/reporters'
 Minitest::Reporters.use! [Minitest::Reporters::SpecReporter.new]
 
-require 'yaml'
-require 'minitest/autorun'
-require 'pgtk/pool'
-require 'loog'
-require 'securerandom'
-require 'rack/test'
-require 'glogin/cookie'
 require 'capybara'
 require 'capybara/dsl'
+require 'glogin/cookie'
+require 'loog'
+require 'minitest/autorun'
+require 'open3'
+require 'pgtk/pool'
+require 'rack/test'
+require 'securerandom'
+require 'yaml'
 require_relative '../baza'
 require_relative '../objects/baza/humans'
 require_relative '../objects/baza/pipeline'
@@ -160,5 +161,58 @@ class Minitest::Test
     hash.map do |k, v|
       "<#{k}>#{v.is_a?(Hash) ? to_xml(v) : v}</#{k}>"
     end.join
+  end
+
+  def bash(cmd, loog, env = {})
+    loog.debug("+ #{cmd}")
+    buf = ''
+    Open3.popen2e(env, "/bin/bash -c '#{cmd}'") do |stdin, stdout, thr|
+      stdin.close
+      until stdout.eof?
+        begin
+          ln = stdout.gets
+        rescue IOError => e
+          ln = Backtrace.new(e).to_s
+        end
+        loog.debug(ln)
+        buf += ln
+      end
+      assert(thr.value.to_i.zero?)
+    end
+    buf
+  end
+
+  def fake_front(port, loog)
+    started = false
+    pid = nil
+    server =
+      Thread.new do
+        Open3.popen2e({}, "ruby baza.rb -p #{port}") do |stdin, stdout, thr|
+          pid = thr.pid
+          stdin.close
+          until stdout.eof?
+            begin
+              ln = stdout.gets
+            rescue IOError => e
+              ln = Backtrace.new(e).to_s
+            end
+            loog.debug(ln)
+            started |= ln.include?("has taken the stage on #{port}")
+          end
+        end
+      rescue StandardError => e
+        loog.error(Backtrace.new(e))
+        raise e
+      end
+    loop do
+      sleep 0.1
+      break if started
+    end
+    begin
+      yield
+    ensure
+      Process.kill('QUIT', pid)
+      server.join
+    end
   end
 end

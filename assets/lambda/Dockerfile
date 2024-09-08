@@ -30,6 +30,14 @@ RUN curl -Lso /usr/local/bin/aws-lambda-rie \
   https://github.com/aws/aws-lambda-runtime-interface-emulator/releases/latest/download/aws-lambda-rie \
   && chmod +x /usr/local/bin/aws-lambda-rie
 
+RUN apt-get update \
+    && apt-get install -y unzip curl jq zip \
+    && curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip" \
+    && unzip awscliv2.zip \
+    && ./aws/install \
+    && rm -rf awscliv2.zip aws \
+    && apt-get clean
+
 COPY Gemfile ${LAMBDA}/
 ENV BUNDLE_SILENCE_ROOT_WARNING=1
 RUN gem install --quiet bundler -v 2.5.18 \

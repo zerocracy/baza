@@ -28,6 +28,7 @@ require 'rake/clean'
 require 'yaml'
 
 ENV['RACK_ENV'] = 'test'
+ENV['RACK_RUN'] = 'true'
 
 task default: %i[clean test rubocop scss_lint xcop config copyright]
 

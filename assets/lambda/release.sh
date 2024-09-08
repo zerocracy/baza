@@ -44,6 +44,7 @@ git --git-dir clone/.git rev-parse HEAD | tr '[:lower:]' '[:upper:]' > head.txt
 version=$(git --git-dir clone/.git rev-parse --short HEAD)
 rm -rf clone/.git
 cp -R "clone/{{ directory }}" swarm
+rm -rf "${HOME}/.ssh"
 
 aws ecr get-login-password --region "{{ region }}" | docker login --username AWS --password-stdin "{{ repository }}"
 
@@ -190,6 +191,11 @@ else
     --tags "VERSION=${version}" \
     --role "arn:aws:iam::{{ account }}:role/{{ name }}"
 fi
+
+# Increase its timeout:
+aws lambda update-function-configuration \
+  --function-name "{{ name }}" \
+  --timeout 300
 
 # Create new SQS queue for this new Lambda function:
 if ! aws sqs get-queue-url --queue-name "{{ name }}" --region "{{ region }}" >/dev/null; then

@@ -78,8 +78,10 @@ class Baza::Recipe
         cat_of(
           'main.rb',
           'host' => host,
+          'name' => safe("baza-#{@swarm.name}"),
           'swarm' => @swarm.id.to_s,
-          'secret' => @swarm.secret
+          'secret' => @swarm.secret,
+          'bucket' => 'swarms--use1-az4--x-s3'
         ),
         cat_of('install.sh'),
         cat_of('Dockerfile')

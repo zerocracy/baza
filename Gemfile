@@ -31,6 +31,7 @@ gem 'aws-sdk-core', '~>3.202'
 gem 'aws-sdk-ec2', '~>1.470'
 gem 'aws-sdk-s3', '~>1.159'
 gem 'aws-sdk-sqs', '~>1.80'
+gem 'aws_lambda_ric', '2.0.0', require: false
 gem 'backtrace', '>0'
 gem 'capybara'
 gem 'concurrent-ruby', '~>1.3'

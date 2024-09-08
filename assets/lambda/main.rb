@@ -22,6 +22,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+require 'aws-sdk-core'
+require 'aws-sdk-s3'
 require 'backtrace'
 require 'elapsed'
 require 'English'
@@ -70,6 +72,57 @@ def report(stdout, job)
   puts "Reported to #{home}: #{ret.code}"
 end
 
+def with_zip(id, rec, loog)
+  Dir.mktmpdir do |home|
+    zip = File.join(home, "#{id}.zip")
+    bucket = '{{ bucket }}'
+    key = "{{ name }}/#{id}.zip"
+    Aws::S3::Client.new.get_object(response_target: zip, bucket:, key:)
+    loog.info("Loaded S3 object #{key.inspect} from bucket #{bucket.inspect}")
+    pack = File.join(home, id.to_s)
+    Archive::Zip.extract(zip, pack)
+    loog.info("Unpacked ZIP (#{File.size(zip)} bytes)")
+    File.delete(zip)
+    rec_file = File.join(pack, 'event.json')
+    File.write(rec_file, JSON.pretty_generate(rec))
+    yield pack
+    FileUtils.rm_f(rec_file)
+    Archive::Zip.archive(zip, File.join(pack, '/.'))
+    File.open(zip, 'rb') do |f|
+      Aws::S3::Client.new.put_object(body: f, bucket:, key:)
+    end
+    Aws::SQS::Client.new.send_message(
+      queue_url: "https://sqs.us-east-1.amazonaws.com/019644334823/baza-shift",
+      message_body: "Job ##{id} was processed by {{ name }}",
+      message_attributes: {
+        'swarm' => {
+          string_value: '{{ swarm }}',
+          data_type: 'String'
+        },
+        'job' => {
+          string_value: id.to_s,
+          data_type: 'String'
+        }
+      }
+    )
+  end
+end
+
+def one(id, pack, loog)
+  cmd =
+    if File.exist?('/swarm/entry.sh')
+      "/bin/bash /swarm/entry.sh \"#{id}\" \"#{pack}\" 2>&1"
+    elsif File.exist?('/swarm/entry.rb')
+      "bundle exec ruby /swarm/entry.rb \"#{id}\" \"#{pack}\" 2>&1"
+    else
+      "echo 'Cannot figure out how to start the swarm, try creating \"entry.sh\" or \"entry.rb\"'"
+    end
+  loog.info("+ #{cmd}")
+  loog.info(`SWARM_SECRET={{ secret }} SWARM_ID={{ swarm }} #{cmd}`)
+  e = $CHILD_STATUS.exitstatus
+  loog.warn("FAILURE (#{e})") unless e.zero?
+end
+
 def go(event:, context:)
   puts "Arrived event: #{event.to_s.inspect}"
   elapsed(intro: 'Job processing finished') do
@@ -78,18 +131,16 @@ def go(event:, context:)
       begin
         job = rec['messageAttributes']['job']['stringValue'].to_i
         job = 0 if job.nil?
-        cmd =
-          if File.exist?('/swarm/entry.sh')
-            "/bin/bash /swarm/entry.sh #{job} 2>&1"
-          elsif File.exist?('/swarm/entry.rb')
-            "bundle exec ruby /swarm/entry.rb #{job} 2>&1"
-          else
-            "echo 'Cannot figure out how to start the swarm, try creating \"entry.sh\"'"
+        if %w[baza-pop baza-shift baza-finish].include?('{{ swarm }}')
+          Dir.mktmpdir do |pack|
+            File.write(File.join(pack, 'event.json'), JSON.pretty_generate(rec))
+            one(job, pack, loog)
           end
-        loog.info("+ #{cmd}")
-        loog.info(`SWARM_SECRET={{ secret }} #{cmd}`)
-        e = $CHILD_STATUS.exitstatus
-        loog.warn("FAILURE (#{e})") unless e.zero?
+        else
+          with_zip(job, rec, loog) do |pack|
+            one(job, pack, loog)
+          end
+        end
       ensure
         report(loog.to_s, job)
       end

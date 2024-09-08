@@ -1,4 +1,4 @@
-# frozen_string_literal: true
+#!/bin/bash
 
 # MIT License
 #
@@ -22,15 +22,42 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-source 'https://rubygems.org'
-ruby '~>3.2'
+set -ex
+set -o pipefail
 
-gem 'archive-zip', '0.12.0'
-gem 'aws-sdk-core', '~>3.202'
-gem 'aws-sdk-s3', '~>1.159'
-gem 'aws-sdk-sqs', '~>1.80'
-gem 'backtrace', '>0'
-gem 'baza.rb', '>0'
-gem 'elapsed', '>0'
-gem 'iri', '>0'
-gem 'loog', '>0'
+id=$1
+home=$2
+cd "${home}"
+
+if [ -z "${S3_BUCKET}" ]; then
+  S3_BUCKET=swarms--use1-az4--x-s3
+fi
+if [ -z "${BAZA_URL}" ]; then
+  BAZA_URL=https://www.zerocracy.com
+fi
+
+status=$(curl -s "${BAZA_URL}/pop?swarm=${SWARM_ID}&secret=${SWARM_SECRET}" -o pack.zip -w "%{http_code}")
+if [ "${status}" == '204' ]; then
+  echo 'No jobs to process'
+  exit
+fi
+if [ "${status}" != '200' ]; then
+  cat pack.zip
+  exit 1
+fi
+
+unzip pack.zip -d pack
+id=$(cat pack/job.json | jq .id)
+
+swarm=baza-j
+key="${swarm}/${id}.zip"
+
+rm pack.zip
+zip pack.zip pack/*
+
+aws s3 cp pack.zip "s3://${bucket}/${key}"
+
+aws sqs send-message \
+  --queue-url https://sqs.us-east-1.amazonaws.com/019644334823/baza-shift \
+  --message-body "Job ${id} needs processing" \
+  --message-attributes "job={DataType=String,StringValue='${id}'},swarm={DataType=String,StringValue='${swarm}'}"

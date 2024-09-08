@@ -26,7 +26,6 @@ require 'backtrace'
 require 'fileutils'
 require 'loog'
 require 'minitest/autorun'
-require 'open3'
 require 'random-port'
 require 'webmock/minitest'
 require 'yaml'
@@ -58,7 +57,7 @@ class Baza::RecipeTest < Minitest::Test
   end
 
   def test_runs_script
-    loog = Loog::NULL
+    loog = ENV['RACK_RUN'] ? Loog::NULL : Loog::VERBOSE
     swarm = fake_human.swarms.add('st', 'zerocracy/swarm-template', 'master', '/')
     secret = fake_name
     r = swarm.releases.start('just start', secret)
@@ -81,7 +80,7 @@ class Baza::RecipeTest < Minitest::Test
       bash("docker build #{File.join(home, '.docker')} -t #{img}", loog)
       begin
         RandomPort::Pool::SINGLETON.acquire do |port|
-          with_front(port, loog) do
+          fake_front(port, loog) do
             sh = File.join(home, 'recipe.sh')
             File.write(
               sh,
@@ -129,7 +128,7 @@ class Baza::RecipeTest < Minitest::Test
   end
 
   def test_build_docker_image
-    loog = Loog::NULL
+    loog = ENV['RACK_RUN'] ? Loog::NULL : Loog::VERBOSE
     Dir.mktmpdir do |home|
       ['Dockerfile', 'Gemfile', 'entry.sh', 'main.rb', 'install.sh'].each do |f|
         FileUtils.copy(
@@ -146,7 +145,7 @@ class Baza::RecipeTest < Minitest::Test
 
   def test_local_lambda_run
     WebMock.enable_net_connect!
-    loog = Loog::NULL
+    loog = ENV['RACK_RUN'] ? Loog::NULL : Loog::VERBOSE
     job = fake_job
     s = job.jobs.human.swarms.add('st', 'zerocracy/swarm-template', 'master', '/')
     RandomPort::Pool::SINGLETON.acquire(2) do |lambda_port, backend_port|
@@ -170,7 +169,7 @@ class Baza::RecipeTest < Minitest::Test
         bash("docker build #{home} -t #{image}", loog)
         begin
           ret =
-            with_front(backend_port, loog) do
+            fake_front(backend_port, loog) do
               stdout = bash(
                 "docker run --add-host host.docker.internal:host-gateway -d -p #{lambda_port}:8080 #{image}",
                 loog
@@ -217,59 +216,6 @@ class Baza::RecipeTest < Minitest::Test
   end
 
   private
-
-  def with_front(port, loog)
-    started = false
-    pid = nil
-    server =
-      Thread.new do
-        Open3.popen2e({}, "ruby baza.rb -p #{port}") do |stdin, stdout, thr|
-          pid = thr.pid
-          stdin.close
-          until stdout.eof?
-            begin
-              ln = stdout.gets
-            rescue IOError => e
-              ln = Backtrace.new(e).to_s
-            end
-            loog.debug(ln)
-            started |= ln.include?("has taken the stage on #{port}")
-          end
-        end
-      rescue StandardError => e
-        loog.error(Backtrace.new(e))
-        raise e
-      end
-    loop do
-      sleep 0.1
-      break if started
-    end
-    begin
-      yield
-    ensure
-      Process.kill('QUIT', pid)
-      server.join
-    end
-  end
-
-  def bash(cmd, loog, env = {})
-    loog.debug("+ #{cmd}")
-    buf = ''
-    Open3.popen2e(env, cmd) do |stdin, stdout, thr|
-      stdin.close
-      until stdout.eof?
-        begin
-          ln = stdout.gets
-        rescue IOError => e
-          ln = Backtrace.new(e).to_s
-        end
-        loog.debug(ln)
-        buf += ln
-      end
-      assert(thr.value.to_i.zero?)
-    end
-    buf
-  end
 
   def stub_cli(home, name)
     sh = File.join(home, name)

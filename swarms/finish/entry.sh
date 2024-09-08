@@ -1,4 +1,4 @@
-# frozen_string_literal: true
+#!/bin/bash
 
 # MIT License
 #
@@ -22,8 +22,31 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require 'loog'
+set -ex
+set -o pipefail
 
-loog = Loog::VERBOSE
+id=$1
+home=$2
+cd "${home}"
 
-loog.info('Nothing to do as of yet')
+if [ -z "${S3_BUCKET}" ]; then
+  S3_BUCKET=swarms--use1-az4--x-s3
+fi
+if [ -z "${BAZA_URL}" ]; then
+  BAZA_URL=https://www.zerocracy.com
+fi
+
+swarm=$(cat event.json | jq -r .messageAttributes.swarm.stringValue)
+key="${swarm}/${id}.zip"
+
+aws s3 cp "s3://${bucket}/${key}" pack.zip
+
+ls -al
+
+status=$(curl -X PUT -s "${BAZA_URL}/finish?id=${id}&swarm=${SWARM_ID}&secret=${SWARM_SECRET}" \
+  --data-binary '@pack.zip' -o /dev/null \
+  -H 'Content-Type: application/octet-stream' -w "%{http_code}")
+if [ "${status}" != '200' ]; then
+  echo "Failed to finish (code=${status})"
+  exit 1
+fi
