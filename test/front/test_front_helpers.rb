@@ -70,10 +70,8 @@ class Baza::FrontHelpersTest < Minitest::Test
   end
 
   def test_country_flag
-    assert(
-      country_flag('8.8.8.8', sts: app.settings).include?(
-        'https://ipgeolocation.io/static/flags/us_64.png'
-      )
+    assert_includes(
+      country_flag('8.8.8.8'), '/flag-of/8.8.8.8'
     )
   end
 end

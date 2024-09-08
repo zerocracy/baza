@@ -235,9 +235,8 @@ module Baza::Helpers
     settings.telegramers[id]
   end
 
-  def country_flag(ip, sts: settings)
-    src = sts.ipgeolocation.ipgeo(ip:)['country_flag']
-    html_tag('img', style: 'width: 1em', src:) { '' }
+  def country_flag(ip)
+    html_tag('img', style: 'width: 1em', src: "/flag-of/#{ip}")
   end
 end
 
