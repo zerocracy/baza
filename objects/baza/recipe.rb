@@ -52,7 +52,7 @@ class Baza::Recipe
   # @param [String] host Host to CURL results back to
   # @return [String] Bash script to use in EC2
   def to_bash(script, account, region, secret, host: 'https://www.zerocracy.com')
-    file_of(
+    sh = file_of(
       'recipe.sh',
       'script' => script.to_s,
       'host' => safe(host),
@@ -84,7 +84,8 @@ class Baza::Recipe
         cat_of('install.sh'),
         cat_of('Dockerfile')
       ].join
-    )
+    ).gsub(/^ *#.*\n/, '')
+    "#!/bin/bash\n\n#{sh}"
   end
 
   private
