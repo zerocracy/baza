@@ -50,4 +50,51 @@ class Baza::FrontPushTest < Minitest::Test
     assert_status(200)
     assert(last_response.body.include?('Terms'))
   end
+
+  def test_returns_image_as_binary_data
+    WebMock.disable_net_connect!
+    body = SecureRandom.bytes(100)
+    stub_request(:get, 'https://ipgeolocation.io/static/flags/us_64.png')
+      .to_return(
+        status: 200,
+        body:
+      )
+    get('flag-of/8.8.8.8')
+    assert_status(200)
+    assert_equal('image/png', last_response.headers['Content-type'])
+    assert_equal(body.bytes, last_response.body.bytes)
+  end
+
+  def test_404_when_ip_is_invalid
+    WebMock.disable_net_connect!
+    stub_request(:get, 'https://ipgeolocation.io/static/flags/us_64.png')
+      .to_return(
+        status: 200,
+        body: SecureRandom.bytes(100)
+      )
+    get('flag-of/8.8.8')
+    assert_status(404)
+    get('flag-of/123')
+    assert_status(404)
+    get('flag-of/123.12')
+    assert_status(404)
+    get('flag-of/not-ip')
+    assert_status(404)
+  end
+
+  def test_flag_is_cached
+    WebMock.disable_net_connect!
+    stub_request(:get, 'https://ipgeolocation.io/static/flags/us_64.png')
+      .to_return(
+        status: 200,
+        body: SecureRandom.bytes(100)
+      )
+    ip = '8.8.8.8'
+    img = 'https://ipgeolocation.io/static/flags/us_64.png'
+    app.settings.zache.remove_all
+    assert_empty(app.settings.zache)
+    get("flag-of/#{ip}")
+    assert_status(200)
+    assert_equal(img, app.settings.zache.get("country-of-#{ip}"))
+  end
 end

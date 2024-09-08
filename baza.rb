@@ -229,7 +229,6 @@ configure do
     token:,
     connection: ENV['RACK_ENV'] == 'test' && token.empty? ? Baza::IpGeolocation::FakeConnection : Faraday
   )
-  set :ipgeolocation_cache, Zache.new
 end
 
 # Garbage collection:
@@ -306,6 +305,5 @@ require_relative 'front/front_durables'
 require_relative 'front/front_alterations'
 require_relative 'front/front_swarms'
 require_relative 'front/front_push'
-require_relative 'front/front_flag_of'
 require_relative 'front/front_assets'
 require_relative 'front/front_helpers'

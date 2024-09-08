@@ -23,6 +23,7 @@
 # SOFTWARE.
 
 require 'redcarpet'
+require 'open-uri'
 
 get %r{/svg/([a-z0-9-]+.svg)} do
   n = params['captures'].first
@@ -59,4 +60,14 @@ get(%r{/(terms)}) do
     title: "/#{n}",
     html:
   )
+end
+
+get(%r{/flag-of/([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})}) do
+  ip = params['captures'].first
+  content_type 'image/png'
+  src =
+    settings.zache.get("country-of-#{ip}") do
+      settings.ipgeolocation.ipgeo(ip:)['country_flag']
+    end
+  URI.parse(src).open.read if src
 end
