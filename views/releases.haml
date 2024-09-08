@@ -77,16 +77,7 @@
         %td.ff.right
           = format('%d', r[:msec] / 1000)
       %td
-        %i.fa-regular.fa-eye{onclick: "$(this).hide(); $(this).parent().find('span').hide(); $(this).parent().find('pre').show();", title: 'Click here to see the full deployment log', style: 'cursor: pointer;'}
-        - lines = r[:tail].split("\n").count
-        - if r[:head].nil?
-          %span.orange
-            = "#{lines} lines"
-        - else
-          %span
-            = "#{lines} lines"
-        %pre{style: 'display: none;'}<>
-          = r[:tail]
+        != snippet(r[:tail])
       %td
         != secret(r[:secret])
       %td

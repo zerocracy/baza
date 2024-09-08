@@ -26,8 +26,6 @@
       %td.ff
         = "##{i[:id]}"
       %td
-        %i.fa-regular.fa-eye{onclick: "$(this).hide(); $(this).parent().find('span').hide(); $(this).parent().find('pre').show();", title: 'Click here to see the full invocation log', style: 'cursor: pointer;'}
-        %pre{style: 'display: none;'}<>
-          = i[:stdout]
+        != snippet(i[:stdout])
       %td
         != ago(i[:created])

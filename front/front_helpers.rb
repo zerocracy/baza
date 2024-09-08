@@ -238,6 +238,21 @@ module Baza::Helpers
   def country_flag(ip)
     html_tag('img', style: 'width: 1em', src: "/flag-of/#{ip}")
   end
+
+  def snippet(text, preview: false, unrollable: true)
+    lines = text.split("\n")
+    [
+      unrollable ? html_tag(
+        'i',
+        class: 'fa-regular fa-eye',
+        onclick: '$(this).hide(); $(this).parent().find("span").hide(); $(this).parent().find("pre").show();',
+        style: 'cursor: pointer',
+        title: 'Click here to see the full snippet'
+      ) : '',
+      preview ? lines.first : "#{lines.count} lines",
+      unrollable ? html_tag('pre', style: 'display: none;') { text } : ''
+    ].join
+  end
 end
 
 helpers do

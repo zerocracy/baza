@@ -40,7 +40,6 @@
         = t[:judge]
       %td.ff
         = t[:name]
-        %i.fa-regular.fa-eye{onclick: "$(this).parent().parent().find('pre').show();", title: 'Click here to see the full JSON', style: 'cursor: pointer;'}
       %td.json
         - if t[:judge] == 'greeting'
           %div.header
@@ -61,8 +60,7 @@
             != markdown t[:json]['answer']
         - else
           Unknown
-        %pre{style: 'display: none; overflow-x: scroll; width: 50em;'}
-          = JSON.pretty_generate(t[:json])
+        != snippet(JSON.pretty_generate(t[:json]), preview: false)
       %td
         != ago(t[:created])
 

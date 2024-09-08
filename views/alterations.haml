@@ -148,13 +148,7 @@
             %a{href: iri.cut('/jobs').over(name: s[:name])}<
               = s[:name]
         %td.ff
-          %span
-            = s[:script].split("\n")[0]
-            - if the_human.admin?
-              %i.fa-regular.fa-eye{onclick: "$(this).parent().parent().find('span').hide(); $(this).parent().parent().find('pre').show();", title: 'Click here to see the full Ruby script', style: 'cursor: pointer;'}
-          - if the_human.admin?
-            %pre{style: 'display: none;'}<>
-              = s[:script].strip
+          != snippet(s[:script], preview: true, unrollable: the_human.admin?)
         %td
           != ago(s[:created])
         %td

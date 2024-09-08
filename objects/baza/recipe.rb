@@ -77,6 +77,7 @@ class Baza::Recipe
         cat_of('entry.sh'),
         cat_of(
           'main.rb',
+          'host' => 'https://www.zerocracy.com',
           'secret' => @swarm.secret
         ),
         cat_of('install.sh'),
