@@ -23,6 +23,7 @@
 # SOFTWARE.
 
 require 'json'
+require_relative '../objects/baza/urror'
 
 get '/swarms' do
   admin_only
