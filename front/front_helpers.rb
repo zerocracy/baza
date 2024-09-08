@@ -251,7 +251,7 @@ module Baza::Helpers
           $(this).parent().find("span").hide();
           $(this).parent().find("pre").show();
           ',
-        style: 'cursor: pointer',
+        style: 'cursor: pointer; margin-right: .5em;',
         title: 'Click here to see the full snippet'
       ) : '',
       html_tag('span') { preview ? lines.first : "#{lines.count} lines" },
