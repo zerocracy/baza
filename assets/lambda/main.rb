@@ -80,6 +80,6 @@ def go(event:, context:)
     $loog.debug("Arrived context: #{context.to_s.inspect}")
     stdout = `/bin/bash /swarm/entry.sh 2>&1`
     report(stdout, nil)
-    'Done!'
+    $loog.info('Done!')
   end
 end

@@ -22,8 +22,4 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-if [ -z "${AWS_LAMBDA_RUNTIME_API}" ]; then
-  /usr/local/bin/aws-lambda-rie bundle exec aws_lambda_ric main.go
-else
-  bundle exec aws_lambda_ric main.go
-fi
+echo 'There is nothing to do in the "pop" swarm yet'
