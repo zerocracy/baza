@@ -49,14 +49,24 @@ class Baza::SQS
 
   # Create a new message with the given body.
   #
+  # @param [Baza::Job] job The job that originates this
   # @param [String] body The body of the SQS message
   # @return [Integer] The ID of the SQS message
-  def push(body)
+  def push(job, body)
     if @key.empty?
       42
     else
-      id = aws.send_message(queue_url: @url, message_body: body).message_id
-      @loog.debug("SQS message ##{id} posted: #{body.inspect}")
+      id = aws.send_message(
+        queue_url: @url,
+        message_body: body,
+        message_attributes: {
+          'job' => {
+            string_value: job.id.to_s,
+            data_type: 'String'
+          }
+        }
+      ).message_id
+      @loog.debug("SQS message ##{id} posted (job=#{job.id}): #{body.inspect}")
       id
     end
   end

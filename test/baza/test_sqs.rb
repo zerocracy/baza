@@ -36,13 +36,13 @@ require_relative '../../objects/baza/sqs'
 class Baza::SQSTest < Minitest::Test
   def test_fake_usage
     sqs = Baza::SQS.new('', '', '')
-    sqs.push('hello')
+    sqs.push(42, 'hello')
   end
 
   def test_live_aws_usage
     skip
     WebMock.enable_net_connect!
     sqs = Baza::SQS.new('AKIA...', 'KmX8e...', 'https://sqs.us-east-1.amazonaws.com/...', loog: Loog::NULL)
-    sqs.push('testing!')
+    sqs.push(42, 'testing!')
   end
 end

@@ -29,7 +29,7 @@ require 'typhoeus'
 require 'elapsed'
 require 'loog'
 
-$loog = Loog::VERBOSE
+$loog = Loog::Buffer.new
 
 # This is needed because of this: https://github.com/aws/aws-lambda-ruby-runtime-interface-client/issues/14
 require 'aws_lambda_ric'
@@ -76,12 +76,24 @@ at_exit do
 end
 
 def go(event:, context:)
-  elapsed(intro: 'Job processing finished') do
+  elapsed($loog, intro: 'Job processing finished') do
     $loog.debug("Arrived event: #{event.to_s.inspect}")
-    $loog.debug("Arrived context: #{context.to_s.inspect}")
-    stdout = `/bin/bash /swarm/entry.sh 2>&1`
-    stdout += "\n#{$CHILD_STATUS.exitstatus.zero? ? 'SUCCESS' : 'FAILURE'}"
-    report(stdout, nil)
-    'Done!'
+    if event.is_a?(Hash)
+      $loog.debug('The event is not a hash')
+      report($loog.to_s, nil)
+    else
+      event['Records'].each do |rec|
+        job = rec['messageAttributes']['job']&.to_i
+        if job.nil?
+          $loog.debug("The event #{rec['messageId']} is not related to any job")
+        else
+          $loog.info(`/bin/bash /swarm/entry.sh #{job} 2>&1`)
+          e = $CHILD_STATUS.exitstatus
+          $loog.warn("FAILURE (#{e})") unless e.zero?
+        end
+        report($loog.to_s, job)
+      end
+    end
   end
+  'Done!'
 end
