@@ -76,6 +76,8 @@ end
 
 def go(event:, context:)
   elapsed(intro: 'Job processing finished') do
+    $loog.debug("Arrived event: #{event.to_s.inspect}")
+    $loog.debug("Arrived context: #{context.to_s.inspect}")
     stdout = `/bin/bash /swarm/entry.sh 2>&1`
     report(stdout, nil)
     'Done!'
