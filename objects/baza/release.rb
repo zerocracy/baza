@@ -64,8 +64,9 @@ class Baza::Release
     )
     s = @releases.swarm
     human = s.swarms.human
+    cost = (human.price * msec * 16).to_i
     human.account.top_up(
-      -(human.price * msec * 16).to_i,
+      -cost,
       "Swarm release ##{@id} (#{s.repository})",
       message: ''
     )
@@ -81,7 +82,8 @@ class Baza::Release
         'Pay attention that the head of the swarm ',
         "[#{s.head[0..8].downcase}](https://github.com/#{s.repository}/commit/#{s.head.downcase}) is different ",
         'from what the release has published — this situation will trigger a new release soon.'
-      ].join
+      ].join,
+      "We [charged](//account) #{format('%0.2f', cost.to_f / (1000 * 100))} for this."
     )
   end
 
