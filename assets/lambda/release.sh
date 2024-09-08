@@ -45,7 +45,7 @@ version=$(git --git-dir clone/.git rev-parse --short HEAD)
 rm -rf clone/.git
 cp -R "clone/{{ directory }}" swarm
 if [ ! -e swarm/entry.sh ]; then
-  echo 'echo "There is no "entry.sh" in the root directory of the swarm"; exit 1' > swarm/entry.sh
+  echo 'echo "There is no "entry.sh" in the root directory of the swarm"' > swarm/entry.sh
 fi
 
 aws ecr get-login-password --region "{{ region }}" | docker login --username AWS --password-stdin "{{ repository }}"

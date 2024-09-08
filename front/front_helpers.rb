@@ -245,11 +245,16 @@ module Baza::Helpers
       unrollable ? html_tag(
         'i',
         class: 'fa-regular fa-eye',
-        onclick: '$(this).hide(); $(this).parent().find("span").hide(); $(this).parent().find("pre").show();',
+        onclick:
+          '
+          $(this).hide();
+          $(this).parent().find("span").hide();
+          $(this).parent().find("pre").show();
+          ',
         style: 'cursor: pointer',
         title: 'Click here to see the full snippet'
       ) : '',
-      preview ? lines.first : "#{lines.count} lines",
+      html_tag('span') { preview ? lines.first : "#{lines.count} lines" },
       unrollable ? html_tag('pre', style: 'display: none;') { text } : ''
     ].join
   end
