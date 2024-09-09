@@ -195,6 +195,7 @@ fi
 # Increase its timeout:
 aws lambda update-function-configuration \
   --function-name "{{ name }}" \
+  --region "{{ region }}" \
   --timeout 300
 
 # Create new SQS queue for this new Lambda function:
