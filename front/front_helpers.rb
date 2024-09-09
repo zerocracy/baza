@@ -204,7 +204,13 @@ module Baza::Helpers
   end
 
   def href(link, text, dot: false)
-    " <a href='#{link}'>#{text}</a>#{dot || ''} "
+    d =
+      if dot
+        dot.is_a?(String) ? dot : '.'
+      else
+        ''
+      end
+    " <a href='#{link}'>#{text}</a>#{d} "
   end
 
   def menu(cut, name)

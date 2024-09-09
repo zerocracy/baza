@@ -76,8 +76,12 @@
             %span.bad
               = format('%03d', r[:exit])
             %i.fa-solid.fa-triangle-exclamation.bad{title: 'The swarm release finished with an error (see the log!)'}
-        %td.ff.right
-          = format('%d', r[:msec] / 1000)
+        %td
+          - if r[:msec].nil?
+            = '?'
+          - else
+            %span.ff.right
+              = format('%d', r[:msec] / 1000)
       %td
         != snippet(r[:tail])
       %td
