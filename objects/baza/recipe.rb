@@ -80,7 +80,7 @@ class Baza::Recipe
     to_bash(
       script, account, region, secret,
       host:,
-      files: "curl -s #{host}/swarms/#{@swarm.id}/files?secret=#{secret} | /bin/bash"
+      files: "curl -s --fail-with-body #{host}/swarms/#{@swarm.id}/files?secret=#{@swarm.secret} | /bin/bash"
     )
   end
 
