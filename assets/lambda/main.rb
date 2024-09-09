@@ -157,17 +157,23 @@ def go(event:, context:)
       loog = Loog::Buffer.new
       begin
         job = rec['messageAttributes']['job']['stringValue'].to_i
+        loog.info("Event about job ##{job} arrived")
         job = 0 if job.nil?
-        if %w[baza-pop baza-shift baza-finish].include?('{{ swarm }}')
+        if ['baza-pop', 'baza-shift', 'baza-finish'].include?('{{ swarm }}')
+          loog.info("System swarm '{{ swarm }}' processing")
           Dir.mktmpdir do |pack|
             File.write(File.join(pack, 'event.json'), JSON.pretty_generate(rec))
             one(job, pack, loog)
           end
         else
+          loog.info("Normal swarm '{{ swarm }}' processing")
           with_zip(job, rec, loog) do |pack|
             one(job, pack, loog)
           end
         end
+      rescue StandardError => e
+        loog.error(Backtrace.new(e).to_s)
+        raise e
       ensure
         report(loog.to_s, job)
       end
