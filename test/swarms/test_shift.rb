@@ -56,12 +56,12 @@ class PopTest < Minitest::Test
       )
       img = 'test-pop'
       bash("docker build #{home} -t #{img}", loog)
-      Dir.mktmpdir do |home|
+      Dir.mktmpdir do |dir|
         File.write(
-          File.join(home, 'event.json'),
+          File.join(dir, 'event.json'),
           JSON.pretty_generate({ messageAttributes: { swarm: { stringValue: s.name } } })
         )
-        bash("docker run -v #{home}:/temp --rm #{img} #{job.id} /temp", loog)
+        bash("docker run -v #{dir}:/temp --rm #{img} #{job.id} /temp", loog)
       ensure
         bash("docker rmi #{img}", loog)
       end

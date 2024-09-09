@@ -70,16 +70,16 @@ class PopTest < Minitest::Test
       bash("docker build #{home} -t #{img}", loog)
       RandomPort::Pool::SINGLETON.acquire do |port|
         fake_front(port, loog) do
-          Dir.mktmpdir do |home|
+          Dir.mktmpdir do |dir|
             File.write(
-              File.join(home, 'event.json'),
+              File.join(dir, 'event.json'),
               JSON.pretty_generate({ messageAttributes: { swarm: { stringValue: s.name } } })
             )
             bash(
               [
                 'docker run --add-host host.docker.internal:host-gateway ',
                 '-e BAZA_URL -e SWARM_ID -e SWARM_SECRET ',
-                "-v #{home}:/temp --rm #{img} #{job.id} /temp"
+                "-v #{dir}:/temp --rm #{img} #{job.id} /temp"
               ].join,
               loog,
               'BAZA_URL' => "http://host.docker.internal:#{port}",
