@@ -206,11 +206,10 @@ put '/finish' do
   job_id = params[:id]&.to_i
   raise Baza::Urror, 'The "id" is a mandatory query param' if job_id.nil?
   job = settings.humans.job_by_id(job_id)
-  pipe = settings.humans.pipe(settings.fbs)
   Tempfile.open do |f|
     request.body.rewind
     File.binwrite(f.path, request.body.read)
-    pipe.unpack(job, f.path)
+    # settings.humans.pipe(settings.fbs).unpack(job, f.path) <--- we are still testing, that's why turned off
   end
   "Job ##{job.id} finished, thanks!"
 end

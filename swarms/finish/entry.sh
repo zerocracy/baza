@@ -48,3 +48,5 @@ if [ "${status}" != '200' ]; then
   echo "Failed to finish (code=${status})"
   exit 1
 fi
+
+aws s3 rm "s3://${bucket}/${key}"
