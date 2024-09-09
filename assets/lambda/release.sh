@@ -172,6 +172,11 @@ fi
 
 # Create or update Lambda function:
 if aws lambda get-function --function-name "{{ name }}" --region "{{ region }}" >/dev/null; then
+  aws lambda update-function-configuration \
+    --function-name "{{ name }}" \
+    --region "{{ region }}" \
+    --timeout 300
+  sleep 30
   aws lambda update-function-code \
     --color off \
     --function-name "{{ name }}" \
@@ -184,6 +189,7 @@ else
     --color off \
     --function-name "{{ name }}" \
     --region "{{ region }}" \
+    --timeout 300 \
     --architectures "${arch}" \
     --description "Process jobs of swarm #{{ swarm }} at {{ github }}" \
     --package-type Image \
@@ -191,13 +197,6 @@ else
     --tags "VERSION=${version}" \
     --role "arn:aws:iam::{{ account }}:role/{{ name }}"
 fi
-
-# Increase its timeout:
-sleep 60
-aws lambda update-function-configuration \
-  --function-name "{{ name }}" \
-  --region "{{ region }}" \
-  --timeout 300
 
 # Create new SQS queue for this new Lambda function:
 if ! aws sqs get-queue-url --queue-name "{{ name }}" --region "{{ region }}" >/dev/null; then
