@@ -62,7 +62,7 @@ class Baza::RecipeTest < Minitest::Test
     bash = Baza::Recipe.new(s, '').to_lite(:release, '424242', 'us-east-1a', 'sword-fish')
     [
       "#!/bin/bash\n",
-      "curl -s --fail-with-body https://www.zerocracy.com/swarms/#{s.id}/files?"
+      "curl -s --fail-with-body 'https://www.zerocracy.com/swarms/#{s.id}/files?"
     ].each { |t| assert(bash.include?(t), "Can't find #{t.inspect} in:\n#{bash}") }
   end
 

@@ -80,11 +80,13 @@ class Baza::Recipe
     to_bash(
       script, account, region, secret,
       host:,
-      files: "curl -s --fail-with-body #{host}/swarms/#{@swarm.id}/files?secret=#{@swarm.secret} | /bin/bash"
+      files: [
+        'curl -s --fail-with-body ',
+        "'#{host}/swarms/#{@swarm.id}/files?script=#{script}&secret=#{@swarm.secret}' ",
+        '| /bin/bash'
+      ].join
     )
   end
-
-  private
 
   # Make a bash script to generate files.
   #
@@ -126,6 +128,8 @@ class Baza::Recipe
       cat_of('Dockerfile')
     ].join
   end
+
+  private
 
   def safe(txt)
     raise "Unsafe value #{txt.inspect} for bash" if txt.match?(/[\n\r\t"']/)

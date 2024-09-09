@@ -109,6 +109,12 @@ class Baza::FrontSwarmsTest < Minitest::Test
     assert(s.releases.get(r.id).tail.include?('this is'))
   end
 
+  def test_get_files
+    s = fake_human.swarms.add(fake_name, "#{fake_name}/#{fake_name}", fake_name, '/')
+    get("/swarms/#{s.id}/files?script=release&secret=#{s.secret}")
+    assert_status(200)
+  end
+
   def test_register_invocation
     job = fake_job
     human = job.jobs.human
