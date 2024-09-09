@@ -77,6 +77,8 @@ class Baza::Recipe
         cat_of('entry.sh'),
         cat_of(
           'main.rb',
+          'account' => safe(account),
+          'region' => safe(region),
           'host' => host,
           'name' => safe("baza-#{@swarm.name}"),
           'swarm' => @swarm.id.to_s,

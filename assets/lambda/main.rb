@@ -31,6 +31,7 @@ require 'iri'
 require 'json'
 require 'loog'
 require 'typhoeus'
+require 'archive/zip'
 
 # This is needed because of this: https://github.com/aws/aws-lambda-ruby-runtime-interface-client/issues/14
 require 'aws_lambda_ric'
@@ -50,6 +51,47 @@ module AwsLambdaRuntimeInterfaceClient
       @runtime_loop_active = runtime_loop_active
     end
   end
+end
+
+# Download object from AWS S3.
+def get_object(key, file, loog)
+  Aws::S3::Client.new.get_object(
+    response_target: file,
+    bucket: '{{ bucket }}',
+    key:
+  )
+  loog.info("Loaded S3 object #{key.inspect} from bucket #{bucket.inspect}")
+end
+
+# Upload object to AWS S3.
+def put_object(key, file, loog)
+  File.open(file, 'rb') do |f|
+    Aws::S3::Client.new.put_object(
+      body: f,
+      bucket: '{{ bucket }}',
+      key:
+    )
+  end
+  loog.info("Saved S3 object #{key.inspect} to bucket #{bucket.inspect}")
+end
+
+# Send message to AWS SQS queue.
+def send_message(id, loog)
+  Aws::SQS::Client.new.send_message(
+    queue_url: "https://sqs.{{ region }}.amazonaws.com/{{ account }}/baza-shift",
+    message_body: "Job ##{id} was processed by {{ name }}",
+    message_attributes: {
+      'swarm' => {
+        string_value: '{{ swarm }}',
+        data_type: 'String'
+      },
+      'job' => {
+        string_value: id.to_s,
+        data_type: 'String'
+      }
+    }
+  )
+  loog.info("Sent message to SQS about job ##{id}")
 end
 
 def report(stdout, job)
@@ -75,10 +117,8 @@ end
 def with_zip(id, rec, loog)
   Dir.mktmpdir do |home|
     zip = File.join(home, "#{id}.zip")
-    bucket = '{{ bucket }}'
     key = "{{ name }}/#{id}.zip"
-    Aws::S3::Client.new.get_object(response_target: zip, bucket:, key:)
-    loog.info("Loaded S3 object #{key.inspect} from bucket #{bucket.inspect}")
+    get_object(key, zip, loog)
     pack = File.join(home, id.to_s)
     Archive::Zip.extract(zip, pack)
     loog.info("Unpacked ZIP (#{File.size(zip)} bytes)")
@@ -88,23 +128,8 @@ def with_zip(id, rec, loog)
     yield pack
     FileUtils.rm_f(rec_file)
     Archive::Zip.archive(zip, File.join(pack, '/.'))
-    File.open(zip, 'rb') do |f|
-      Aws::S3::Client.new.put_object(body: f, bucket:, key:)
-    end
-    Aws::SQS::Client.new.send_message(
-      queue_url: "https://sqs.us-east-1.amazonaws.com/019644334823/baza-shift",
-      message_body: "Job ##{id} was processed by {{ name }}",
-      message_attributes: {
-        'swarm' => {
-          string_value: '{{ swarm }}',
-          data_type: 'String'
-        },
-        'job' => {
-          string_value: id.to_s,
-          data_type: 'String'
-        }
-      }
-    )
+    put_object(key, zip, loog)
+    send_message(id, loog)
   end
 end
 

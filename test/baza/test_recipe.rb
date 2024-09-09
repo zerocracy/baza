@@ -161,6 +161,24 @@ class Baza::RecipeTest < Minitest::Test
           )
         )
         bash("/bin/bash #{sh}", loog)
+        File.write(
+          File.join(home, 'main.rb'),
+          [
+            File.read(File.join(home, 'main.rb')),
+            '
+            def get_object(key, file, loog)
+              Dir.mktmpdir do |home|
+                File.write(File.join(home, "job.json"), JSON.pretty_generate({"id" => 42}))
+                Archive::Zip.archive(file, File.join(home, "/."))
+              end
+            end
+            def put_object(key, file, loog)
+            end
+            def send_message(id, loog)
+            end
+            '
+          ].join("\n")
+        )
         FileUtils.mkdir_p(File.join(home, 'swarm'))
         {
           'swarm/Gemfile' => "source 'https://rubygems.org'\ngem 'tago'",
@@ -186,7 +204,7 @@ class Baza::RecipeTest < Minitest::Test
               container = stdout.split("\n")[-1]
               loog.debug("Docker container started: #{container}")
               begin
-                # wait_for { Typhoeus::Request.get("http://localhost:#{lambda_port}/").code == 200 }
+                wait_for { Typhoeus::Request.get("http://localhost:#{lambda_port}/test").code == 404 }
                 request = Typhoeus::Request.new(
                   "http://localhost:#{lambda_port}/2015-03-31/functions/function/invocations",
                   body: JSON.pretty_generate(
