@@ -37,9 +37,10 @@ class Baza::Recipe
   # @param [Baza::Swarm] swarm The swarm
   # @param [String] id_rsa RSA private key
   # @param [Loog] loog Logging facility
-  def initialize(swarm, id_rsa, loog: Loog::NULL)
+  def initialize(swarm, id_rsa, bucket, loog: Loog::NULL)
     @swarm = swarm
     @id_rsa = id_rsa
+    @bucket = bucket
     @loog = loog
   end
 
@@ -106,7 +107,7 @@ class Baza::Recipe
         'region' => safe(region),
         'account' => safe(account),
         'repository' => safe("#{account}.dkr.ecr.#{region}.amazonaws.com"),
-        'bucket' => 'swarms--use1-az4--x-s3'
+        'bucket' => @bucket
       ),
       cat_of('Gemfile'),
       cat_of('entry.sh'),
@@ -118,7 +119,7 @@ class Baza::Recipe
         'name' => safe("baza-#{@swarm.name}"),
         'swarm' => @swarm.id.to_s,
         'secret' => @swarm.secret,
-        'bucket' => 'swarms--use1-az4--x-s3'
+        'bucket' => @bucket
       ),
       cat_of(
         'install.sh',

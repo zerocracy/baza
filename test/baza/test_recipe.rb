@@ -45,7 +45,7 @@ class Baza::RecipeTest < Minitest::Test
   def test_generates_script
     n = fake_name
     s = fake_human.swarms.add(n, "#{fake_name}/#{fake_name}", 'master', '/')
-    bash = Baza::Recipe.new(s, '').to_bash(:release, '424242', 'us-east-1a', 'sword-fish')
+    bash = Baza::Recipe.new(s, '', '').to_bash(:release, '424242', 'us-east-1a', 'sword-fish')
     [
       "#!/bin/bash\n",
       "424242.dkr.ecr.us-east-1a.amazonaws.com/baza-#{n}",
@@ -59,7 +59,7 @@ class Baza::RecipeTest < Minitest::Test
   def test_generates_lite_script
     n = fake_name
     s = fake_human.swarms.add(n, "#{fake_name}/#{fake_name}", 'master', '/')
-    bash = Baza::Recipe.new(s, '').to_lite(:release, '424242', 'us-east-1a', 'sword-fish')
+    bash = Baza::Recipe.new(s, '', '').to_lite(:release, '424242', 'us-east-1a', 'sword-fish')
     [
       "#!/bin/bash\n",
       "curl -s --fail-with-body 'https://www.zerocracy.com/swarms/#{s.id}/files?"
@@ -94,7 +94,7 @@ class Baza::RecipeTest < Minitest::Test
             sh = File.join(home, 'recipe.sh')
             File.write(
               sh,
-              Baza::Recipe.new(swarm, id_rsa).to_bash(
+              Baza::Recipe.new(swarm, id_rsa, 'bucket').to_bash(
                 :release, 'accout', 'us-east-1', secret,
                 host: "http://host.docker.internal:#{port}"
               )
@@ -129,7 +129,7 @@ class Baza::RecipeTest < Minitest::Test
       %i[destroy release release].each do |step|
         File.write(
           sh,
-          Baza::Recipe.new(s, '').to_bash(step, '019644334823', 'us-east-1', 'fake')
+          Baza::Recipe.new(s, '', '').to_bash(step, '019644334823', 'us-east-1', 'fake')
         )
         stdout = bash("/bin/bash #{sh}", loog)
         assert(stdout.include?('exit=0&'))
@@ -165,7 +165,7 @@ class Baza::RecipeTest < Minitest::Test
         sh = File.join(home, 'recipe.sh')
         File.write(
           sh,
-          Baza::Recipe.new(s, '').to_bash(
+          Baza::Recipe.new(s, '', '').to_bash(
             :release, '019644334823', 'us-east-1', 'fake',
             host: "http://host.docker.internal:#{backend_port}"
           )

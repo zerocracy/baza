@@ -93,7 +93,8 @@ configure do
       'sgroup' => 'sg-42',
       'subnet' => 'sn-42',
       'image' => 'ami-42',
-      'id_rsa' => ''
+      'id_rsa' => '',
+      'bucket' => 'foo'
     },
     'github' => {
       'id' => '',
@@ -208,7 +209,7 @@ configure do
     loog: settings.loog
   )
   require_relative 'objects/baza/ops'
-  set :ops, Baza::Ops.new(ec2, cfg['account'], cfg['id_rsa'])
+  set :ops, Baza::Ops.new(ec2, cfg['account'], cfg['id_rsa'], cfg['bucket'])
 end
 
 # Pipeline:

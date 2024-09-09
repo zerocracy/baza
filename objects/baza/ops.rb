@@ -35,10 +35,11 @@ class Baza::Ops
   #
   # @param [Baza::Swarm] swarm The swarm
   # @param [Loog] loog Logging facility
-  def initialize(ec2, account, id_rsa, loog: Loog::NULL)
+  def initialize(ec2, account, id_rsa, bucket, loog: Loog::NULL)
     @ec2 = ec2
     @account = account
     @id_rsa = id_rsa
+    @bucket = bucket
     @loog = loog
   end
 
@@ -46,9 +47,7 @@ class Baza::Ops
   #
   # @param [Baza::Swarm] swarm The swarm
   def files(swarm, script)
-    Baza::Recipe.new(swarm, nil).to_files(
-      script, @account, @ec2.region
-    )
+    recipe(swarm).to_files(script, @account, @ec2.region)
   end
 
   # Release this swarm.
@@ -58,9 +57,7 @@ class Baza::Ops
     secret = SecureRandom.uuid
     instance = @ec2.run_instance(
       "#{swarm.id}-release-baza/#{swarm.name}",
-      Baza::Recipe.new(swarm, @id_rsa.gsub(/\n +/, "\n")).to_lite(
-        :release, @account, @ec2.region, secret
-      )
+      recipe(swarm).to_lite(:release, @account, @ec2.region, secret)
     )
     swarm.releases.start(greeting('releasing', instance), secret)
   end
@@ -72,14 +69,16 @@ class Baza::Ops
     secret = SecureRandom.uuid
     instance = @ec2.run_instance(
       "#{swarm.id}-destroy-baza/#{swarm.name}",
-      Baza::Recipe.new(swarm, @id_rsa.gsub(/\n +/, "\n")).to_lite(
-        :destroy, @account, @ec2.region, secret
-      )
+      recipe(swarm).to_lite(:destroy, @account, @ec2.region, secret)
     )
     swarm.releases.start(greeting('destroying', instance), secret)
   end
 
   private
+
+  def recipe(swarm)
+    Baza::Recipe.new(swarm, @id_rsa.gsub(/\n +/, "\n"), @bucket)
+  end
 
   def greeting(action, instance)
     [

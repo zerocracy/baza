@@ -30,7 +30,7 @@ home=$2
 cd "${home}"
 
 if [ -z "${S3_BUCKET}" ]; then
-  S3_BUCKET=swarms--use1-az4--x-s3
+  S3_BUCKET=swarms.zerocracy.com
 fi
 
 swarm=$(cat event.json | jq -r .messageAttributes.swarm.stringValue)
