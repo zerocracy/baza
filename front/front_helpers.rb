@@ -204,7 +204,7 @@ module Baza::Helpers
   end
 
   def href(link, text, dot: false)
-    " <a href='#{link}'>#{text}</a>#{dot ? '.' : ''} "
+    " <a href='#{link}'>#{text}</a>#{dot || ''} "
   end
 
   def menu(cut, name)

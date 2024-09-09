@@ -5,6 +5,14 @@
     %input{ type: 'text', name: 'branch', tabindex: 3, placeholder: 'Branch. e.g. master', size: 20, required: true }
     %input{ type: 'text', name: 'directory', tabindex: 4, placeholder: 'Directory. e.g. /', size: 18, required: true }
     %input{ type: 'submit', tabindex: 5, value: 'Add' }
+    %label.gray
+      Don't forget to add a
+      != href('https://docs.github.com/en/webhooks/using-webhooks/creating-webhooks', 'webhook', dot: ',')
+      pointing to
+      = ' '
+      %span.ff<
+        https://www.zerocracy.com/swarms/webhook
+      (JSON or form, doesn't matter).
 
 %p
   These are all your swarms:
