@@ -76,6 +76,11 @@
                 %li
                   %span
                     != footer_status(s)
-            %ul
-              - %w[Alterations Swarms Push SQL Bash Gift Trails Relogin Reset].each do |c|
-                != menu("/#{c.downcase}", c)
+          %ul
+            - %w[Alterations Swarms Push SQL Bash Gift Trails Relogin Reset].each do |c|
+              != menu("/#{c.downcase}", c)
+          %ul
+            %li
+              Spot a glitch or have a bright idea? Share it
+              != href('https://github.com/zerocracy/baza/issues', 'here', dot: '!')
+

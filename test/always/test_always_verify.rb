@@ -32,6 +32,8 @@ class Baza::AlwaysVerifyTest < Minitest::Test
   end
 
   def test_simple
+    WebMock.disable_net_connect!
+    stub_request(:get, %r{https://api.github.com/repos/.*/.*/actions/runs/.*}).to_return(status: 200)
     load(File.join(__dir__, '../../always/always_verify.rb'))
   end
 end
