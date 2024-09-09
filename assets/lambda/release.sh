@@ -176,7 +176,13 @@ if aws lambda get-function --function-name "{{ name }}" --region "{{ region }}" 
     --function-name "{{ name }}" \
     --region "{{ region }}" \
     --timeout 300
-  sleep 30
+  while true; do
+    sleep 1
+    state=$(aws lambda get-function --function-name baza-j | jq -r .Configuration.LastUpdateStatus)
+    if [ "${state}" == 'Successful' ]; then
+      break
+    fi
+  done
   aws lambda update-function-code \
     --color off \
     --function-name "{{ name }}" \
