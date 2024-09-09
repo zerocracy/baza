@@ -44,7 +44,7 @@ class Baza::Pipe
         'UPDATE job SET taken = $1 WHERE id = (',
         '  SELECT job.id FROM job',
         '  LEFT JOIN result ON result.job = job.id',
-        '  WHERE result.id IS NULL AND taken IS NULL',
+        '  WHERE result.id IS NULL AND (taken IS NULL OR taken = $1)',
         '  LIMIT 1)',
         'RETURNING id'
       ],
