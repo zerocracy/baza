@@ -177,7 +177,7 @@ class Baza::RecipeTest < Minitest::Test
             def send_message(id, loog)
             end
             '
-          ].join("\n")
+          ].join
         )
         FileUtils.mkdir_p(File.join(home, 'swarm'))
         {

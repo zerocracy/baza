@@ -151,10 +151,13 @@ class Minitest::Test
   end
 
   def fake_aws(cmd, hash)
-    xml = "<#{cmd}Response>#{to_xml(hash)}</#{cmd}Response>"
     stub_request(:post, 'https://ec2.us-east-1.amazonaws.com/')
       .with(body: /#{cmd}/)
-      .to_return(body: xml)
+      .to_return(body: to_aws_response(cmd, hash))
+  end
+
+  def to_aws_response(cmd, hash)
+    "<#{cmd}Response>#{to_xml(hash)}</#{cmd}Response>"
   end
 
   def to_xml(hash)

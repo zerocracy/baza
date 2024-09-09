@@ -24,6 +24,7 @@
 
 require 'minitest/autorun'
 require 'webmock/minitest'
+require 'archive/zip'
 require_relative '../test__helper'
 
 # Test.
@@ -31,28 +32,55 @@ require_relative '../test__helper'
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
 class MainTest < Minitest::Test
-  def test_no_records
-    require_relative '../../assets/lambda/main.rb'
-    go(event: { 'Records' => [] }, context: nil)
-  end
-
   def test_one_record
     WebMock.disable_net_connect!
-    job = fake_job
-    require_relative '../../assets/lambda/main.rb'
-    go(
-      event: {
-        'Records' => [
-          {
-            'messageId' => 'defd997b-4675-42fc-9f33-9457011de8b3',
-            'messageAttributes' => {
-              'job' => { 'stringValue' => job.id.to_s }
+    Dir.mktmpdir do |home|
+      FileUtils.mkdir_p(File.join(home, 'pack'))
+      File.write(File.join(home, 'pack/job.json'), JSON.pretty_generate({"id" => 7}))
+      zip = File.join(home, 'pack.zip')
+      Archive::Zip.archive(zip, File.join(home, 'pack/.'))
+      rb = File.join(home, 'main.rb')
+      File.write(
+        rb,
+        [
+          Liquid::Template.parse(File.read(File.join(__dir__, '../../assets/lambda/main.rb'))).render(
+            'swarm' => '42',
+            'name' => 'swarmik',
+            'secret' => 'sword-fish',
+            'bucket' => 'foo',
+            'region' => 'us-east-1',
+            'account' => '424242'
+          ),
+          "
+          go(
+            event: {
+              'Records' => [
+                {
+                  'messageId' => 'defd997b-4675-42fc-9f33-9457011de8b3',
+                  'messageAttributes' => {
+                    'job' => { 'stringValue' => '7' }
+                  },
+                  'body' => 'something funny...'
+                }
+              ]
             },
-            'body' => 'something funny...'
+            context: nil
+          )
+          "
+        ].join
+      )
+      stub_request(:put, "http://swarms/42/invocation?job=7&secret=sword-fish").to_return(status: 200)
+      stub_request(:get, "https://foo.s3.amazonaws.com/swarmik/7.zip").to_return(status: 200, body: File.binread(zip))
+      stub_request(:put, "https://foo.s3.amazonaws.com/swarmik/7.zip").to_return(status: 200)
+      stub_request(:post, 'https://sqs.us-east-1.amazonaws.com/424242/baza-shift').to_return(
+        body: JSON.pretty_generate(
+          {
+            'MD5OfMessageBody' => 'a951ef3c012387d2672814f5e050ad48',
+            'MD5OfMessageAttributes' => '42dc195a2fb2a294cba68f895a473e04'
           }
-        ]
-      },
-      context: nil
-    )
+        )
+      )
+      load(rb)
+    end
   end
 end

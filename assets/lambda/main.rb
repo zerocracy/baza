@@ -55,9 +55,10 @@ end
 
 # Download object from AWS S3.
 def get_object(key, file, loog)
+  bucket = '{{ bucket }}'
   Aws::S3::Client.new.get_object(
     response_target: file,
-    bucket: '{{ bucket }}',
+    bucket:,
     key:
   )
   loog.info("Loaded S3 object #{key.inspect} from bucket #{bucket.inspect}")
@@ -65,10 +66,11 @@ end
 
 # Upload object to AWS S3.
 def put_object(key, file, loog)
+  bucket = '{{ bucket }}'
   File.open(file, 'rb') do |f|
     Aws::S3::Client.new.put_object(
       body: f,
-      bucket: '{{ bucket }}',
+      bucket:,
       key:
     )
   end
