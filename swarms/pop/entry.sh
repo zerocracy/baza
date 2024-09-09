@@ -53,7 +53,7 @@ swarm=baza-j
 key="${swarm}/${id}.zip"
 
 rm pack.zip
-zip pack.zip pack/*
+zip -j pack.zip pack/*
 
 aws s3 cp pack.zip "s3://${S3_BUCKET}/${key}"
 
