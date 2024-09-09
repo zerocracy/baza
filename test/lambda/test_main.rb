@@ -36,7 +36,7 @@ class MainTest < Minitest::Test
     WebMock.disable_net_connect!
     Dir.mktmpdir do |home|
       FileUtils.mkdir_p(File.join(home, 'pack'))
-      File.write(File.join(home, 'pack/job.json'), JSON.pretty_generate({"id" => 7}))
+      File.write(File.join(home, 'pack/job.json'), JSON.pretty_generate({ 'id' => 7 }))
       zip = File.join(home, 'pack.zip')
       Archive::Zip.archive(zip, File.join(home, 'pack/.'))
       rb = File.join(home, 'main.rb')
@@ -69,9 +69,9 @@ class MainTest < Minitest::Test
           "
         ].join
       )
-      stub_request(:put, "http://swarms/42/invocation?job=7&secret=sword-fish").to_return(status: 200)
-      stub_request(:get, "https://foo.s3.amazonaws.com/swarmik/7.zip").to_return(status: 200, body: File.binread(zip))
-      stub_request(:put, "https://foo.s3.amazonaws.com/swarmik/7.zip").to_return(status: 200)
+      stub_request(:put, 'http://swarms/42/invocation?job=7&secret=sword-fish').to_return(status: 200)
+      stub_request(:get, 'https://foo.s3.amazonaws.com/swarmik/7.zip').to_return(status: 200, body: File.binread(zip))
+      stub_request(:put, 'https://foo.s3.amazonaws.com/swarmik/7.zip').to_return(status: 200)
       stub_request(:post, 'https://sqs.us-east-1.amazonaws.com/424242/baza-shift').to_return(
         body: JSON.pretty_generate(
           {
