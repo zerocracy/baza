@@ -22,6 +22,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+set -ex
+
 # If the "aws" file exists right here, it's a testing mode:
 if [ ! -e aws ]; then
   AWS_TOKEN=$(curl -X PUT 'http://169.254.169.254/latest/api/token' -H 'X-aws-ec2-metadata-token-ttl-seconds: 21600')
@@ -35,7 +37,9 @@ if [ ! -e aws ]; then
 fi
 
 if [ -z "${AWS_LAMBDA_RUNTIME_API}" ]; then
-  /usr/local/bin/aws-lambda-rie bundle exec aws_lambda_ric main.go
+  /usr/local/bin/aws-lambda-rie bundle exec aws_lambda_ric main.go &
 else
   bundle exec aws_lambda_ric main.go
 fi
+
+curl -v http://localhost:8080/

@@ -83,7 +83,10 @@ class Baza::Recipe
           'secret' => @swarm.secret,
           'bucket' => 'swarms--use1-az4--x-s3'
         ),
-        cat_of('install.sh'),
+        cat_of(
+          'install.sh',
+          'human' => @swarm.swarms.human.github.to_s
+        ),
         cat_of('Dockerfile')
       ].join
     ).gsub(/^ *#.*\n/, '')

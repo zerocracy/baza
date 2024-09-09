@@ -146,7 +146,8 @@ class Baza::RecipeTest < Minitest::Test
   def test_local_lambda_run
     WebMock.enable_net_connect!
     loog = ENV['RACK_RUN'] ? Loog::NULL : Loog::VERBOSE
-    job = fake_job
+    fake_pgsql.exec('TRUNCATE human CASCADE')
+    job = fake_job(fake_human('yegor256'))
     s = job.jobs.human.swarms.add('st', 'zerocracy/swarm-template', 'master', '/')
     RandomPort::Pool::SINGLETON.acquire(2) do |lambda_port, backend_port|
       Dir.mktmpdir do |home|
@@ -163,7 +164,15 @@ class Baza::RecipeTest < Minitest::Test
         FileUtils.mkdir_p(File.join(home, 'swarm'))
         {
           'swarm/Gemfile' => "source 'https://rubygems.org'\ngem 'tago'",
-          'swarm/entry.sh' => "#!/bin/bash\necho works fine!"
+          'swarm/entry.sh' => "#!/bin/bash\necho works fine!",
+          'swarm/install.sh' => "
+            #!/bin/bash
+            echo 'echo $@' > aws
+            cp aws curl
+            chmod a+x aws curl
+            mv aws /var/task
+            mv curl /var/task
+          "
         }.each { |f, txt| File.write(File.join(home, f), txt) }
         image = 'image-test'
         bash("docker build #{home} -t #{image}", loog)
@@ -177,7 +186,7 @@ class Baza::RecipeTest < Minitest::Test
               container = stdout.split("\n")[-1]
               loog.debug("Docker container started: #{container}")
               begin
-                sleep 1
+                wait_for { Typhoeus::Request.get("http://localhost:#{lambda_port}/").code == 200 }
                 request = Typhoeus::Request.new(
                   "http://localhost:#{lambda_port}/2015-03-31/functions/function/invocations",
                   body: JSON.pretty_generate(
@@ -199,9 +208,9 @@ class Baza::RecipeTest < Minitest::Test
                   }
                 )
                 request.run
-                bash("docker logs #{container}", loog)
                 request.response
               ensure
+                bash("docker logs #{container}", loog)
                 bash("docker rm -f #{container}", loog)
               end
             end

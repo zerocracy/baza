@@ -41,7 +41,6 @@ RUN apt-get update \
 COPY Gemfile ${LAMBDA}/
 ENV BUNDLE_SILENCE_ROOT_WARNING=1
 RUN gem install --quiet bundler -v 2.5.18 \
-  && bundle config set --local path 'vendor/bundle' \
   && bundle install --retry=5 --quiet "--gemfile=${LAMBDA}/Gemfile"
 
 COPY swarm/ /swarm

@@ -84,8 +84,8 @@ class Minitest::Test
     Baza::Humans.new(fake_pgsql)
   end
 
-  def fake_human
-    fake_humans.ensure(fake_name)
+  def fake_human(name = fake_name)
+    fake_humans.ensure(name)
   end
 
   def fake_token(human = fake_human)
@@ -213,6 +213,14 @@ class Minitest::Test
     ensure
       Process.kill('QUIT', pid)
       server.join
+    end
+  end
+
+  def wait_for(seconds = 5)
+    start = Time.now
+    loop do
+      raise 'Timed out' if Time.now - start > seconds
+      break if yield
     end
   end
 end

@@ -23,9 +23,15 @@
 
 set -ex
 
-home=/swarm
-if [ -e "${home}/Gemfile" ]; then
+cd /swarm
+
+if [ -e Gemfile ]; then
   bundle config set without development
-  bundle install --gemfile "${home}/Gemfile"
+  bundle install --gemfile Gemfile
 fi
 
+if [ '{{ human }}' == 'yegor256' ]; then
+  if [ -e install.sh ]; then
+    /bin/bash install.sh
+  fi
+fi
