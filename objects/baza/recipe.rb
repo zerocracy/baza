@@ -53,7 +53,7 @@ class Baza::Recipe
   # @return [String] Bash script to use in EC2
   def to_bash(script, account, region, secret, host: 'https://www.zerocracy.com',
     files: to_files(script, account, region, host:))
-    sh = file_of(
+    file_of(
       'recipe.sh',
       'script' => script.to_s,
       'host' => safe(host),
@@ -64,8 +64,7 @@ class Baza::Recipe
         "\n",
         files
       ].join
-    ).gsub(/^ *#.*\n/, '')
-    "#!/bin/bash\n\n#{sh}"
+    )
   end
 
   # Make it a bash script (without all files, but a link to them).
