@@ -193,6 +193,7 @@ else
 fi
 
 # Increase its timeout:
+sleep 60
 aws lambda update-function-configuration \
   --function-name "{{ name }}" \
   --region "{{ region }}" \
