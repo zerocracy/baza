@@ -34,12 +34,29 @@ if [ -z "${S3_BUCKET}" ]; then
 fi
 
 swarm=$(cat event.json | jq -r .messageAttributes.swarm.stringValue)
-key="${swarm}/${id}.zip"
 
-aws s3 cp "s3://${S3_BUCKET}/${key}" pack.zip
-aws s3 cp pack.zip "s3://${S3_BUCKET}/${key}"
+aws s3 cp "s3://${S3_BUCKET}/${swarm}/${id}.zip" pack.zip
 
-aws sqs send-message \
-  --queue-url https://sqs.us-east-1.amazonaws.com/019644334823/baza-finish \
-  --message-body "Job ${id} finished processing" \
-  --message-attributes "job={DataType=String,StringValue='${id}'},swarm={DataType=String,StringValue='${swarm}'}"
+more=()
+while IFS=' ' read -r s; do
+  if [ "${s}" != "${swarm}" ]; then
+    more+=("${s}")
+  fi
+done < <( cat event.json | jq -r .messageAttributes.more.stringValue )
+
+if [ "${#more[@]}" -eq 0 ]; then
+  aws sqs send-message \
+    --queue-url https://sqs.us-east-1.amazonaws.com/019644334823/baza-finish \
+    --message-body "Job ${id} finished processing" \
+    --message-attributes "job={DataType=String,StringValue='${id}'},swarm={DataType=String,StringValue='${swarm}'}"
+else
+  next=${more[0]}
+  aws s3 rm "s3://${S3_BUCKET}/${swarm}/${id}.zip"
+  aws s3 cp pack.zip "s3://${S3_BUCKET}/${next}/${id}.zip"
+  aws sqs send-message \
+    --queue-url "https://sqs.us-east-1.amazonaws.com/019644334823/${next}" \
+    --message-body "Job ${id} next futher processing by '${more[@]}'" \
+    --message-attributes "job={DataType=String,StringValue='${id}'},swarm={DataType=String,StringValue='${swarm}',more={DataType=String,StringValue='${more[@]}'}"
+fi
+
+

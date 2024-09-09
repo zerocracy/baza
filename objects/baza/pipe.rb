@@ -60,7 +60,7 @@ class Baza::Pipe
   # @param [String] file The path to .zip file to create
   def pack(job, file)
     Dir.mktmpdir do |dir|
-      @fbs.load(job.uri1, File.join(dir, 'input.fb'))
+      @fbs.load(job.uri1, File.join(dir, 'base.fb'))
       alts = job.jobs.human.alterations.each(pending: true).to_a.select { |a| a[:name] == job.name }
       File.write(
         File.join(dir, 'job.json'),
@@ -91,7 +91,7 @@ class Baza::Pipe
   def unpack(job, file)
     Dir.mktmpdir do |dir|
       Baza::Zip.new(file).unpack(dir)
-      ['job.json', 'output.fb', 'stdout.txt'].each do |n|
+      ['job.json', 'base.fb', 'stdout.txt'].each do |n|
         f = File.join(dir, n)
         raise Baza::Urror, "The #{File.basename(f)} file is missing" unless File.exist?(f)
       end
@@ -99,7 +99,7 @@ class Baza::Pipe
       %w[exit msec].each do |a|
         raise Baza::Urror, "The '#{a}' is missing in JSON" if meta[a].nil?
       end
-      fb = File.join(dir, 'output.fb')
+      fb = File.join(dir, 'base.fb')
       uri = @fbs.save(fb)
       job.finish!(
         uri,

@@ -54,7 +54,7 @@ class PopTest < Minitest::Test
         ENTRYPOINT ["/bin/bash", "entry.sh"]
         '
       )
-      img = 'test-pop'
+      img = 'test-shift'
       bash("docker build #{home} -t #{img}", loog)
       Dir.mktmpdir do |dir|
         File.write(

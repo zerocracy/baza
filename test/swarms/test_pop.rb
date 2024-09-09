@@ -33,7 +33,7 @@ require_relative '../test__helper'
 class PopTest < Minitest::Test
   def test_runs_script
     loog = ENV['RACK_RUN'] ? Loog::NULL : Loog::VERBOSE
-    fake_job
+    job = fake_job
     s = fake_human.swarms.add(fake_name, "#{fake_name}/#{fake_name}", 'master', '/')
     Dir.mktmpdir do |home|
       %w[aws].each do |f|
@@ -58,7 +58,7 @@ class PopTest < Minitest::Test
       bash("docker build #{home} -t #{img}", loog)
       RandomPort::Pool::SINGLETON.acquire do |port|
         fake_front(port, loog) do
-          bash(
+          stdout = bash(
             [
               'docker run --add-host host.docker.internal:host-gateway ',
               "-e BAZA_URL -e SWARM_ID -e SWARM_SECRET --rm #{img} 0 ."
@@ -68,6 +68,14 @@ class PopTest < Minitest::Test
             'SWARM_ID' => s.id.to_s,
             'SWARM_SECRET' => s.secret
           )
+          [
+            'inflating: pack/base.fb',
+            'inflating: pack/job.json',
+            'adding: base.fb (stored',
+            'adding: job.json',
+            "aws s3 cp pack.zip s3://swarms.zerocracy.com/baza-j/#{job.id}.zip",
+            'aws sqs send-message --queue-url https://sqs.us-east-1.amazonaws.com/019644334823/baza-j'
+          ].each { |t| assert(stdout.include?(t), t) }
         ensure
           bash("docker rmi #{img}", loog)
         end

@@ -48,16 +48,15 @@ fi
 
 unzip pack.zip -d pack
 id=$(cat pack/job.json | jq .id)
-
-swarm=baza-j
-key="${swarm}/${id}.zip"
-
 rm pack.zip
 zip -j pack.zip pack/*
+
+first=baza-j
+key="${first}/${id}.zip"
 
 aws s3 cp pack.zip "s3://${S3_BUCKET}/${key}"
 
 aws sqs send-message \
-  --queue-url https://sqs.us-east-1.amazonaws.com/019644334823/baza-shift \
+  --queue-url "https://sqs.us-east-1.amazonaws.com/019644334823/${first}" \
   --message-body "Job ${id} needs processing" \
-  --message-attributes "job={DataType=String,StringValue='${id}'},swarm={DataType=String,StringValue='${swarm}'}"
+  --message-attributes "job={DataType=String,StringValue='${id}'},swarm={DataType=String,StringValue='baza-pop',more={DataType=String,StringValue='baza-j'}"

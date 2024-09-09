@@ -97,7 +97,7 @@ class Baza::Pipeline
         level: job.jobs.human.extend(Baza::Human::Roles).admin? ? Logger::DEBUG : Logger::INFO
       )
       log = Loog::Tee.new(stdout, @loog)
-      input = File.join(dir, 'input.fb')
+      input = File.join(dir, 'base.fb')
       @fbs.load(job.uri1, input)
       log.debug("Factbase loaded from #{job.uri1} into #{input}")
       start = Time.now

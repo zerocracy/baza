@@ -24,9 +24,10 @@
 set -ex
 set -o pipefail
 
-if aws ecr describe-repositories --repository-names "{{ name }}" >/dev/null; then
+if aws ecr describe-repositories --repository-names "{{ name }}" --region "{{ region }}" >/dev/null; then
   aws ecr delete-repository \
     --repository-name "{{ name }}" \
+    --region "{{ region }}" \
     --force \
     --color off
 fi

@@ -45,7 +45,7 @@ class PopTest < Minitest::Test
           set -ex
           mkdir pack
           echo '{ \"id\": \"#{job.id}\", \"exit\": 0, \"msec\": 500 }' > pack/job.json
-          cp $(dirname $0)/empty.fb pack/output.fb
+          cp $(dirname $0)/empty.fb pack/base.fb
           echo '' > pack/stdout.txt
           zip -j $4 pack/*
           "
@@ -66,7 +66,7 @@ class PopTest < Minitest::Test
         ENTRYPOINT ["/bin/bash", "entry.sh"]
         '
       )
-      img = 'test-pop'
+      img = 'test-finish'
       bash("docker build #{home} -t #{img}", loog)
       RandomPort::Pool::SINGLETON.acquire do |port|
         fake_front(port, loog) do

@@ -166,7 +166,7 @@ class Baza::FrontSwarmsTest < Minitest::Test
       zip = File.join(dir, 'foo.zip')
       pipe.pack(job, zip)
       Baza::Zip.new(zip).unpack(dir)
-      ['job.json', 'input.fb', "alteration-#{alt}/alteration-#{alt}.rb"].each do |f|
+      ['job.json', 'base.fb', "alteration-#{alt}/alteration-#{alt}.rb"].each do |f|
         assert(File.exist?(File.join(dir, f)), f)
       end
       json = JSON.parse(File.read(File.join(dir, 'job.json')))
@@ -180,7 +180,7 @@ class Baza::FrontSwarmsTest < Minitest::Test
     fbs = Baza::Factbases.new('', '', loog: Loog::NULL)
     pipe = Baza::Humans.new(fake_pgsql).pipe(fbs)
     Dir.mktmpdir do |dir|
-      File.binwrite(File.join(dir, 'output.fb'), Factbase.new.export)
+      File.binwrite(File.join(dir, 'base.fb'), Factbase.new.export)
       File.write(File.join(dir, 'stdout.txt'), 'Nothing interesting')
       File.write(
         File.join(dir, 'job.json'),

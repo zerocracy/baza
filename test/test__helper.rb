@@ -180,7 +180,8 @@ class Minitest::Test
         loog.debug(ln)
         buf += ln
       end
-      assert(thr.value.to_i.zero?)
+      e = thr.value.to_i
+      assert(e.zero?, "The command '#{cmd}' failed with ##{e}\n#{buf}")
     end
     buf
   end
