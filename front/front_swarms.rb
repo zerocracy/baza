@@ -218,7 +218,7 @@ put '/finish' do
   Tempfile.open do |f|
     request.body.rewind
     File.binwrite(f.path, request.body.read)
-    # settings.humans.pipe(settings.fbs).unpack(job, f.path) <--- we are still testing, that's why turned off
+    settings.humans.pipe(settings.fbs).unpack(job, f.path)
   end
   "Job ##{job.id} finished, thanks!"
 end
