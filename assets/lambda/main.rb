@@ -154,7 +154,7 @@ end
 def go(event:, context:)
   puts "Arrived event: #{event.to_s.inspect}"
   elapsed(intro: 'Job processing finished') do
-    event['Records'].each do |rec|
+    event['Records']&.each do |rec|
       loog = Loog::Buffer.new
       begin
         job = rec['messageAttributes']['job']['stringValue'].to_i
