@@ -56,6 +56,16 @@ class Baza::RecipeTest < Minitest::Test
     ].each { |t| assert(bash.include?(t), "Can't find #{t.inspect} in:\n#{bash}") }
   end
 
+  def test_generates_lite_script
+    n = fake_name
+    s = fake_human.swarms.add(n, "#{fake_name}/#{fake_name}", 'master', '/')
+    bash = Baza::Recipe.new(s, '').to_lite(:release, '424242', 'us-east-1a', 'sword-fish')
+    [
+      "#!/bin/bash\n",
+      "curl -s https://www.zerocracy.com/swarms/#{s.id}/files?"
+    ].each { |t| assert(bash.include?(t), "Can't find #{t.inspect} in:\n#{bash}") }
+  end
+
   def test_runs_script
     loog = ENV['RACK_RUN'] ? Loog::NULL : Loog::VERBOSE
     swarm = fake_human.swarms.add('st', 'zerocracy/swarm-template', 'master', '/')

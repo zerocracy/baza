@@ -62,6 +62,16 @@ get(%r{/swarms/([0-9]+)/invocations}) do
   )
 end
 
+get(%r{/swarms/([0-9]+)/files}) do
+  id = params['captures'].first.to_i
+  swarm = settings.humans.swarm_by_id(id)
+  secret = params[:secret]
+  return [401, "Invalid secret for the swarm ##{swarm.id}"] if swarm.secret != secret
+  Baza::Recipe.new(swarm, @id_rsa.gsub(/\n +/, "\n")).to_bash(
+    params[:script].to_sym, @account, @ec2.region, secret
+  )
+end
+
 get(%r{/swarms/([0-9]+)/releases/([0-9]+)/stop}) do
   admin_only
   swarm = the_human.swarms.get(params['captures'].first.to_i)

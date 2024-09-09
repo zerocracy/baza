@@ -42,6 +42,15 @@ class Baza::Ops
     @loog = loog
   end
 
+  # Get BASH script to generate files.
+  #
+  # @param [Baza::Swarm] swarm The swarm
+  def files(swarm, script)
+    Baza::Recipe.new(swarm, nil).to_files(
+      script, @account, @ec2.region
+    )
+  end
+
   # Release this swarm.
   #
   # @param [Baza::Swarm] swarm The swarm
@@ -49,7 +58,7 @@ class Baza::Ops
     secret = SecureRandom.uuid
     instance = @ec2.run_instance(
       "#{swarm.id}-release-baza/#{swarm.name}",
-      Baza::Recipe.new(swarm, @id_rsa.gsub(/\n +/, "\n")).to_bash(
+      Baza::Recipe.new(swarm, @id_rsa.gsub(/\n +/, "\n")).to_lite(
         :release, @account, @ec2.region, secret
       )
     )
@@ -63,7 +72,7 @@ class Baza::Ops
     secret = SecureRandom.uuid
     instance = @ec2.run_instance(
       "#{swarm.id}-destroy-baza/#{swarm.name}",
-      Baza::Recipe.new(swarm, @id_rsa.gsub(/\n +/, "\n")).to_bash(
+      Baza::Recipe.new(swarm, @id_rsa.gsub(/\n +/, "\n")).to_lite(
         :destroy, @account, @ec2.region, secret
       )
     )

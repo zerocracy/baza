@@ -51,7 +51,8 @@ class Baza::Recipe
   # @param [String] secret Secret of the release
   # @param [String] host Host to CURL results back to
   # @return [String] Bash script to use in EC2
-  def to_bash(script, account, region, secret, host: 'https://www.zerocracy.com')
+  def to_bash(script, account, region, secret, host: 'https://www.zerocracy.com',
+    files: to_files(script, account, region, host:))
     sh = file_of(
       'recipe.sh',
       'script' => script.to_s,
@@ -60,42 +61,71 @@ class Baza::Recipe
       'save_files' => [
         "\n",
         cat('id_rsa', @id_rsa),
-        cat_of(
-          "#{script}.sh",
-          'human' => @swarm.swarms.human.github.to_s,
-          'swarm' => @swarm.id.to_s,
-          'name' => safe("baza-#{@swarm.name}"),
-          'github' => safe(@swarm.repository),
-          'branch' => safe(@swarm.branch),
-          'directory' => safe(@swarm.directory.delete_prefix('/')),
-          'region' => safe(region),
-          'account' => safe(account),
-          'repository' => safe("#{account}.dkr.ecr.#{region}.amazonaws.com"),
-          'bucket' => 'swarms--use1-az4--x-s3'
-        ),
-        cat_of('Gemfile'),
-        cat_of('entry.sh'),
-        cat_of(
-          'main.rb',
-          'account' => safe(account),
-          'region' => safe(region),
-          'host' => host,
-          'name' => safe("baza-#{@swarm.name}"),
-          'swarm' => @swarm.id.to_s,
-          'secret' => @swarm.secret,
-          'bucket' => 'swarms--use1-az4--x-s3'
-        ),
-        cat_of(
-          'install.sh',
-          'human' => @swarm.swarms.human.github.to_s
-        ),
-        cat_of('Dockerfile')
+        "\n",
+        files
       ].join
     ).gsub(/^ *#.*\n/, '')
     "#!/bin/bash\n\n#{sh}"
   end
 
+  # Make it a bash script (without all files, but a link to them).
+  #
+  # @param [Symbol] script The script to use (:release or :destroy)
+  # @param [String] account AWS account number
+  # @param [String] region AWS region
+  # @param [String] secret Secret of the release
+  # @param [String] host Host to CURL results back to
+  # @return [String] Bash script to use in EC2
+  def to_lite(script, account, region, secret, host: 'https://www.zerocracy.com')
+    to_bash(
+      script, account, region, secret,
+      host:,
+      files: "curl -s #{host}/swarms/#{@swarm.id}/files?secret=#{secret} | /bin/bash"
+    )
+  end
+
   private
+
+  # Make a bash script to generate files.
+  #
+  # @param [Symbol] script The script to use (:release or :destroy)
+  # @param [String] account AWS account number
+  # @param [String] region AWS region
+  # @return [String] Bash script to use in EC2
+  def to_files(script, account, region, host: 'https://www.zerocracy.com')
+    [
+      cat_of(
+        "#{script}.sh",
+        'human' => @swarm.swarms.human.github.to_s,
+        'swarm' => @swarm.id.to_s,
+        'name' => safe("baza-#{@swarm.name}"),
+        'github' => safe(@swarm.repository),
+        'branch' => safe(@swarm.branch),
+        'directory' => safe(@swarm.directory.delete_prefix('/')),
+        'region' => safe(region),
+        'account' => safe(account),
+        'repository' => safe("#{account}.dkr.ecr.#{region}.amazonaws.com"),
+        'bucket' => 'swarms--use1-az4--x-s3'
+      ),
+      cat_of('Gemfile'),
+      cat_of('entry.sh'),
+      cat_of(
+        'main.rb',
+        'account' => safe(account),
+        'region' => safe(region),
+        'host' => host,
+        'name' => safe("baza-#{@swarm.name}"),
+        'swarm' => @swarm.id.to_s,
+        'secret' => @swarm.secret,
+        'bucket' => 'swarms--use1-az4--x-s3'
+      ),
+      cat_of(
+        'install.sh',
+        'human' => @swarm.swarms.human.github.to_s
+      ),
+      cat_of('Dockerfile')
+    ].join
+  end
 
   def safe(txt)
     raise "Unsafe value #{txt.inspect} for bash" if txt.match?(/[\n\r\t"']/)
