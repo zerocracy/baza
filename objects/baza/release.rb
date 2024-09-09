@@ -35,13 +35,24 @@ class Baza::Release
     @id = id
   end
 
-  # Change head SHA of the relewase.
+  # Change head SHA of the release.
   #
   # @param [String] sha The hash of the Git head
   def head!(sha)
     @releases.pgsql.exec(
       'UPDATE release SET head = $1 WHERE id = $2',
       [sha, @id]
+    )
+    @to_json = nil
+  end
+
+  # Change exit code of the release.
+  #
+  # @param [Inteber] code The exit code
+  def exit!(code)
+    @releases.pgsql.exec(
+      'UPDATE release SET exit = $1 WHERE id = $2',
+      [code, @id]
     )
     @to_json = nil
   end
