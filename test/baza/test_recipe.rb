@@ -117,7 +117,7 @@ class Baza::RecipeTest < Minitest::Test
   # function if it exists and then creates it again.
   def test_live_local_run
     skip
-    loog = Loog::NULL
+    loog = ENV['RACK_RUN'] ? Loog::NULL : Loog::VERBOSE
     creds = File.join(Dir.home, '.aws/credentials')
     skip unless File.exist?(creds)
     s = fake_human.swarms.add('st', 'zerocracy/swarm-template', 'master', '/')
@@ -126,7 +126,7 @@ class Baza::RecipeTest < Minitest::Test
       FileUtils.mkdir_p(File.join(home, '.aws'))
       FileUtils.copy(creds, File.join(home, '.aws/credentials'))
       sh = File.join(home, 'recipe.sh')
-      %i[destroy release].each do |step|
+      %i[destroy release release].each do |step|
         File.write(
           sh,
           Baza::Recipe.new(s, '').to_bash(step, '019644334823', 'us-east-1', 'fake')

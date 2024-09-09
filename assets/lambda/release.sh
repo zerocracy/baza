@@ -44,7 +44,10 @@ git --git-dir clone/.git rev-parse HEAD | tr '[:lower:]' '[:upper:]' > head.txt
 version=$(git --git-dir clone/.git rev-parse --short HEAD)
 rm -rf clone/.git
 cp -R "clone/{{ directory }}" swarm
-rm -rf "${HOME}/.ssh"
+rm -rf clone
+if [ ! -e "${HOME}/.ssh/id_rsa.pub" ]; then
+  rm -f "${HOME}/.ssh/id_rsa"
+fi
 
 aws ecr get-login-password --region "{{ region }}" | docker login --username AWS --password-stdin "{{ repository }}"
 
@@ -170,19 +173,24 @@ if [ "{{ human }}" == 'yegor256' ] && [ -e swarm/aws-policy.json ]; then
   fi
 fi
 
-# Create or update Lambda function:
-if aws lambda get-function --function-name "{{ name }}" --region "{{ region }}" >/dev/null; then
-  aws lambda update-function-configuration \
-    --function-name "{{ name }}" \
-    --region "{{ region }}" \
-    --timeout 300
+function wait_for_function() {
   while true; do
     sleep 1
-    state=$(aws lambda get-function --function-name baza-j | jq -r .Configuration.LastUpdateStatus)
+    state=$(aws lambda get-function --function-name "{{ name }}" --region "{{ region }}" | jq -r .Configuration.LastUpdateStatus)
     if [ "${state}" == 'Successful' ]; then
       break
     fi
   done
+}
+
+# Create or update Lambda function:
+if aws lambda get-function --function-name "{{ name }}" --region "{{ region }}" >/dev/null; then
+  wait_for_function
+  aws lambda update-function-configuration \
+    --function-name "{{ name }}" \
+    --region "{{ region }}" \
+    --timeout 300
+  wait_for_function
   aws lambda update-function-code \
     --color off \
     --function-name "{{ name }}" \
@@ -205,16 +213,23 @@ else
 fi
 
 # Create new SQS queue for this new Lambda function:
-if ! aws sqs get-queue-url --queue-name "{{ name }}" --region "{{ region }}" >/dev/null; then
+if aws sqs get-queue-url --queue-name "{{ name }}" --region "{{ region }}" >/dev/null; then
+  aws sqs set-queue-attributes \
+    --color off \
+    --attributes 'VisibilityTimeout=300' \
+    --queue-url "https://sqs.{{ region }}.amazonaws.com/{{ account }}/{{ name }}" \
+    --region "{{ region }}"
+else
   aws sqs create-queue \
     --color off \
+    --attributes 'VisibilityTimeout=300' \
     --queue-name "{{ name }}" \
     --region "{{ region }}"
 fi
 
 # Make sure all new SQS events trigger Lambda function execution:
-arn="arn:aws:sqs:{{ region }}:{{ account }}:{{ name }}"
 fn="arn:aws:lambda:{{ region }}:{{ account }}:function:{{ name }}"
+arn="arn:aws:sqs:{{ region }}:{{ account }}:{{ name }}"
 if ! ( aws lambda list-event-source-mappings --event-source-arn "${arn}" --function-name "${fn}" --region "{{ region }}" | grep "\"${fn}\"" >/dev/null ); then
   aws lambda create-event-source-mapping \
     --color off \
