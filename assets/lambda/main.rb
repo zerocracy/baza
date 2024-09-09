@@ -161,13 +161,13 @@ def go(event:, context:)
         loog.info("Event about job ##{job} arrived")
         job = 0 if job.nil?
         if ['baza-pop', 'baza-shift', 'baza-finish'].include?('{{ name }}')
-          loog.info("System swarm '{{ swarm }}' processing")
+          loog.info("System swarm '{{ name }}' processing")
           Dir.mktmpdir do |pack|
             File.write(File.join(pack, 'event.json'), JSON.pretty_generate(rec))
             one(job, pack, loog)
           end
         else
-          loog.info("Normal swarm '{{ swarm }}' processing")
+          loog.info("Normal swarm '{{ name }}' processing")
           with_zip(job, rec, loog) do |pack|
             one(job, pack, loog)
           end
