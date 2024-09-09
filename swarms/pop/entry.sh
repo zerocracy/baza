@@ -55,7 +55,7 @@ key="${swarm}/${id}.zip"
 rm pack.zip
 zip pack.zip pack/*
 
-aws s3 cp pack.zip "s3://${bucket}/${key}"
+aws s3 cp pack.zip "s3://${S3_BUCKET}/${key}"
 
 aws sqs send-message \
   --queue-url https://sqs.us-east-1.amazonaws.com/019644334823/baza-shift \

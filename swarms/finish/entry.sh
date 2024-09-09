@@ -39,7 +39,7 @@ fi
 swarm=$(cat event.json | jq -r .messageAttributes.swarm.stringValue)
 key="${swarm}/${id}.zip"
 
-aws s3 cp "s3://${bucket}/${key}" pack.zip
+aws s3 cp "s3://${S3_BUCKET}/${key}" pack.zip
 
 status=$(curl -X PUT -s "${BAZA_URL}/finish?id=${id}&swarm=${SWARM_ID}&secret=${SWARM_SECRET}" \
   --data-binary '@pack.zip' -o /dev/null \
@@ -49,4 +49,4 @@ if [ "${status}" != '200' ]; then
   exit 1
 fi
 
-aws s3 rm "s3://${bucket}/${key}"
+aws s3 rm "s3://${S3_BUCKET}/${key}"

@@ -36,8 +36,8 @@ fi
 swarm=$(cat event.json | jq -r .messageAttributes.swarm.stringValue)
 key="${swarm}/${id}.zip"
 
-aws s3 cp "s3://${bucket}/${key}" pack.zip
-aws s3 cp pack.zip "s3://${bucket}/${key}"
+aws s3 cp "s3://${S3_BUCKET}/${key}" pack.zip
+aws s3 cp pack.zip "s3://${S3_BUCKET}/${key}"
 
 aws sqs send-message \
   --queue-url https://sqs.us-east-1.amazonaws.com/019644334823/baza-finish \
