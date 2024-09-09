@@ -145,8 +145,9 @@ def one(id, pack, loog)
       "echo 'Cannot figure out how to start the swarm, try creating \"entry.sh\" or \"entry.rb\"'"
     end
   loog.info("+ #{cmd}")
-  loog.info(`SWARM_SECRET={{ secret }} SWARM_ID={{ swarm }} #{cmd}`)
+  stdout = `SWARM_SECRET={{ secret }} SWARM_ID={{ swarm }} #{cmd}`
   e = $CHILD_STATUS.exitstatus
+  loog.info(stdout)
   loog.warn("FAILURE (#{e})") unless e.zero?
 end
 
@@ -159,7 +160,7 @@ def go(event:, context:)
         job = rec['messageAttributes']['job']['stringValue'].to_i
         loog.info("Event about job ##{job} arrived")
         job = 0 if job.nil?
-        if ['baza-pop', 'baza-shift', 'baza-finish'].include?('{{ swarm }}')
+        if ['baza-pop', 'baza-shift', 'baza-finish'].include?('{{ name }}')
           loog.info("System swarm '{{ swarm }}' processing")
           Dir.mktmpdir do |pack|
             File.write(File.join(pack, 'event.json'), JSON.pretty_generate(rec))
