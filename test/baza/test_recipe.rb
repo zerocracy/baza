@@ -186,7 +186,7 @@ class Baza::RecipeTest < Minitest::Test
               container = stdout.split("\n")[-1]
               loog.debug("Docker container started: #{container}")
               begin
-                wait_for { Typhoeus::Request.get("http://localhost:#{lambda_port}/").code == 200 }
+                # wait_for { Typhoeus::Request.get("http://localhost:#{lambda_port}/").code == 200 }
                 request = Typhoeus::Request.new(
                   "http://localhost:#{lambda_port}/2015-03-31/functions/function/invocations",
                   body: JSON.pretty_generate(

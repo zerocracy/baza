@@ -37,9 +37,7 @@ if [ ! -e aws ]; then
 fi
 
 if [ -z "${AWS_LAMBDA_RUNTIME_API}" ]; then
-  /usr/local/bin/aws-lambda-rie bundle exec aws_lambda_ric main.go &
+  /usr/local/bin/aws-lambda-rie bundle exec aws_lambda_ric main.go
 else
   bundle exec aws_lambda_ric main.go
 fi
-
-curl -v http://localhost:8080/
