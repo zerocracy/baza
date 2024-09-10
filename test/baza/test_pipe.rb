@@ -39,6 +39,14 @@ class Baza::PipeTest < Minitest::Test
     assert(!fake_pipe.pop('owner').nil?)
   end
 
+  def test_pop_the_same_if_not_processed
+    fake_pgsql.exec('TRUNCATE job CASCADE')
+    fake_job
+    owner = fake_name
+    job = fake_pipe.pop(owner)
+    assert_equal(job.id, fake_pipe.pop(owner).id)
+  end
+
   def test_simple_pack
     fake_job
     job = fake_pipe.pop('owner')
