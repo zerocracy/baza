@@ -63,13 +63,22 @@ class Baza::Invocations
   # Register new invocation.
   #
   # @param [String] stdout The output
+  # @param [Integer] code The code (zero means success)
   # @param [Baza::Job] job The ID of the job
   # @return [Integer] The ID of the added invocation
-  def register(stdout, job)
+  def register(stdout, code, job)
     raise Baza::Urror, 'The "stdout" cannot be NIL' if stdout.nil?
-    @swarm.pgsql.exec(
-      'INSERT INTO invocation (swarm, job, stdout) VALUES ($1, $2, $3) RETURNING id',
-      [@swarm.id, job.nil? ? nil : job.id, stdout]
+    id = @swarm.pgsql.exec(
+      'INSERT INTO invocation (swarm, code, job, stdout) VALUES ($1, $2, $3, $4) RETURNING id',
+      [@swarm.id, code, job.nil? ? nil : job.id, stdout]
     )[0]['id'].to_i
+    unless code.zero?
+      @swarm.swarms.human.notify(
+        "⚠️ The [swarm ##{@swarm.id}](//swarms/#{@swarm.id}/releases) (\"`#{@swarm.name}`\")",
+        "just failed, at the invocation ##{id}",
+        "(exit code is `#{code}`, #{stdout.split("\n").count} lines in the stdout)."
+      )
+    end
+    id
   end
 end
