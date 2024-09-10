@@ -81,15 +81,20 @@ class Baza::Release
       "Swarm release ##{@id} (#{s.repository})",
       message: ''
     )
+    destroyed = head == '0' * 40
     human.notify(
       code.zero? ? '🫐' : '⚠️',
       "The release ##{@id} of the swarm ##{s.id} (\"`#{s.name}`\")",
-      code.zero? ?
-        "successfully published [#{head[0..6].downcase}](https://github.com/#{s.repository}/commit/#{head.downcase})" :
-        'failed',
+      if destroyed
+        code.zero? ? 'destroyed the swarm' : 'failed to destroy the swarm'
+      elsif code.zero?
+        "successfully published [#{head[0..6].downcase}](https://github.com/#{s.repository}/commit/#{head.downcase})"
+      else
+        'failed'
+      end,
       "after #{format('%.2f', msec.to_f / (60 * 1000))} minutes of work,",
       "the log is [here](//swarms/#{s.id}/releases) (#{tail.split("\n").count} lines).",
-      head == s.head || !code.zero? ? '' : [
+      !destroyed && (head == s.head || !code.zero?) ? '' : [
         'Pay attention, the head of the swarm ',
         "[#{s.head[0..6].downcase}](https://github.com/#{s.repository}/commit/#{s.head.downcase}) is different ",
         'from what the release has published — this situation will trigger a new release soon.'

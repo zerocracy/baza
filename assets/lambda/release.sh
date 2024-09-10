@@ -84,92 +84,96 @@ if ! aws iam get-role --role-name "{{ name }}" >/dev/null; then
 fi
 
 # Allow this role to do everything it needs:
-if ! aws iam get-role-policy --role-name "{{ name }}" --policy-name 'access' >/dev/null; then
+policy='{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": [ "sqs:*" ],
+      "Effect": "Allow",
+      "Resource": "arn:aws:sqs:{{ region }}:{{ account }}:{{ name }}"
+    },
+    {
+      "Effect": "Allow",
+      "Action": ["s3:ListBucket"],
+      "Resource": "arn:aws:s3:::{{ bucket }}/*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:ListBucket",
+        "s3:GetObject",
+        "s3:PutObject"
+      ],
+      "Resource": "arn:aws:s3:::{{ bucket }}/{{ name }}/*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "cloudformation:DescribeStacks",
+        "cloudformation:ListStackResources",
+        "cloudwatch:ListMetrics",
+        "cloudwatch:GetMetricData",
+        "ec2:DescribeSecurityGroups",
+        "ec2:DescribeSubnets",
+        "ec2:DescribeVpcs",
+        "kms:ListAliases",
+        "iam:GetPolicy",
+        "iam:GetPolicyVersion",
+        "iam:GetRole",
+        "iam:GetRolePolicy",
+        "iam:ListAttachedRolePolicies",
+        "iam:ListRolePolicies",
+        "iam:ListRoles",
+        "lambda:*",
+        "states:DescribeStateMachine",
+        "states:ListStateMachines",
+        "tag:GetResources",
+        "xray:GetTraceSummaries",
+        "xray:BatchGetTraces"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": [
+        "logs:CreateLogGroup",
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+      ],
+      "Resource": "arn:aws:logs:{{ region }}:{{ account }}:log-group:/aws/lambda/*"
+    },
+    {
+      "Effect": "Allow",
+      "Action": "iam:PassRole",
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "iam:PassedToService": "lambda.amazonaws.com"
+        }
+      }
+    }
+  ]
+}'
+now=$( aws iam get-role-policy --role-name "{{ name }}" --policy-name 'access' 2>/dev/null || echo '')
+if [ "${now}" != "${policy}" ]; then
   aws iam put-role-policy \
     --color off \
     --role-name "{{ name }}" \
     --policy-name 'access' \
-    --policy-document '{
-        "Version": "2012-10-17",
-        "Statement": [
-          {
-            "Action": [ "sqs:*" ],
-            "Effect": "Allow",
-            "Resource": "arn:aws:sqs:{{ region }}:{{ account }}:{{ name }}"
-          },
-          {
-            "Effect": "Allow",
-            "Action": ["s3:ListBucket"],
-            "Resource": "arn:aws:s3:::{{ bucket }}/*"
-          },
-          {
-            "Effect": "Allow",
-            "Action": [
-              "s3:ListBucket",
-              "s3:GetObject",
-              "s3:PutObject"
-            ],
-            "Resource": "arn:aws:s3:::{{ bucket }}/{{ name }}/*"
-          },
-          {
-            "Effect": "Allow",
-            "Action": [
-              "cloudformation:DescribeStacks",
-              "cloudformation:ListStackResources",
-              "cloudwatch:ListMetrics",
-              "cloudwatch:GetMetricData",
-              "ec2:DescribeSecurityGroups",
-              "ec2:DescribeSubnets",
-              "ec2:DescribeVpcs",
-              "kms:ListAliases",
-              "iam:GetPolicy",
-              "iam:GetPolicyVersion",
-              "iam:GetRole",
-              "iam:GetRolePolicy",
-              "iam:ListAttachedRolePolicies",
-              "iam:ListRolePolicies",
-              "iam:ListRoles",
-              "lambda:*",
-              "states:DescribeStateMachine",
-              "states:ListStateMachines",
-              "tag:GetResources",
-              "xray:GetTraceSummaries",
-              "xray:BatchGetTraces"
-            ],
-            "Resource": "*"
-          },
-          {
-            "Effect": "Allow",
-            "Action": [
-              "logs:CreateLogGroup",
-              "logs:CreateLogStream",
-              "logs:PutLogEvents"
-            ],
-            "Resource": "arn:aws:logs:{{ region }}:{{ account }}:log-group:/aws/lambda/*"
-          },
-          {
-            "Effect": "Allow",
-            "Action": "iam:PassRole",
-            "Resource": "*",
-            "Condition": {
-              "StringEquals": {
-                "iam:PassedToService": "lambda.amazonaws.com"
-              }
-            }
-          }
-        ]
-      }'
+    --policy-document "${policy}"
 fi
 
 # Give this swarm special rights:
 # shellcheck disable=SC2050
 if [ "{{ human }}" == 'yegor256' ] && [ -e swarm/aws-policy.json ]; then
-  if ! aws iam get-role-policy --role-name "{{ name }}" --policy-name 'admin-access' >/dev/null; then
+  policy=$( cat swarm/aws-policy.json )
+  now=$( aws iam get-role-policy --role-name "{{ name }}" --policy-name 'admin-access' 2>/dev/null || echo '' )
+  if [ "${now}" != "${policy}" ]; then
     aws iam put-role-policy \
       --color off \
       --role-name "{{ name }}" \
       --policy-name 'admin-access' \
-      --policy-document "$(cat swarm/aws-policy.json)"
+      --policy-document "${policy}"
   fi
 fi
 
