@@ -43,11 +43,13 @@ class EnsembleTest < Minitest::Test
         mkdir temp
         ./pop.sh 0 temp
         rm -rf temp/*
-        echo '{\"messageAttributes\":{\"swarm\": {\"stringValue\": \"#{s.name}\"}},\"more\": {\"stringValue\": \"#{s.name}\"}}}' > temp/event.json
-        ./shift.sh 42 temp
+        echo '{\"messageAttributes\":{
+          \"swarm\": {\"stringValue\": \"#{s.name}\"}},
+          \"more\": {\"stringValue\": \"#{s.name}\"}}}' > temp/event.json
+        ./shift.sh #{job.id} temp
         rm -rf temp/*
         echo '{\"messageAttributes\":{\"swarm\": {\"stringValue\": \"#{s.name}\"}}}' > temp/event.json
-        ./finish.sh 42 temp
+        ./finish.sh #{job.id} temp
         "
       )
       save_script(
@@ -61,9 +63,9 @@ class EnsembleTest < Minitest::Test
               mkdir archive
               echo '{ \"id\": \"#{job.id}\", \"exit\": 0, \"msec\": 500 }' > archive/job.json
               cp $(dirname $0)/empty.fb archive/base.fb
-              echo '' > archive/stdout.txt
+              echo 'nothing special in the output' > archive/stdout.txt
               zip -j \"${4}\" archive/*
-              rm -rm archive
+              rm -rf archive
             fi
           fi
         fi
@@ -101,13 +103,19 @@ class EnsembleTest < Minitest::Test
             'SWARM_SECRET' => s.secret
           )
           [
-            'hello'
+            "PUT /finish?id=#{job.id}",
+            'adding: base.fb',
+            'adding: stdout.txt',
+            'HTTP/1.1 200 OK',
+            'aws s3 rm s3://swarms.zerocracy.com/'
           ].each { |t| assert(stdout.include?(t), t) }
         ensure
           bash("docker rmi #{img}", loog)
         end
       end
     end
+    assert_equal(0, job.result.exit)
+    assert(job.result.stdout.include?('nothing special'), job.result.stdout)
   end
 
   private
