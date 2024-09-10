@@ -54,6 +54,10 @@ module AwsLambdaRuntimeInterfaceClient
 end
 
 # Download object from AWS S3.
+#
+# @param [String] key The key in the bucket
+# @param [String] file The path of the file to upload
+# @param [Loog] loog The logging facility
 def get_object(key, file, loog)
   bucket = '{{ bucket }}'
   Aws::S3::Client.new.get_object(
@@ -65,6 +69,10 @@ def get_object(key, file, loog)
 end
 
 # Upload object to AWS S3.
+#
+# @param [String] key The key in the bucket
+# @param [String] file The path of the file to upload
+# @param [Loog] loog The logging facility
 def put_object(key, file, loog)
   bucket = '{{ bucket }}'
   File.open(file, 'rb') do |f|
@@ -78,6 +86,9 @@ def put_object(key, file, loog)
 end
 
 # Send message to AWS SQS queue.
+#
+# @param [Integer] id The ID of the job just processed
+# @param [Loog] loog The logging facility
 def send_message(id, loog)
   Aws::SQS::Client.new.send_message(
     queue_url: "https://sqs.{{ region }}.amazonaws.com/{{ account }}/baza-shift",
@@ -96,7 +107,12 @@ def send_message(id, loog)
   loog.info("Sent message to SQS about job ##{id}")
 end
 
-def report(stdout, job)
+# Send a report to baza about this particular invocation.
+#
+# @param [String] stdout Full log of the swarm
+# @param [Integer] code Exit code (zero if success, something else otherwise)
+# @param [Integer] job The ID of the job just processed (or NIL)
+def report(stdout, code, job)
   home = Iri.new('{{ host }}')
     .append('swarms')
     .append('{{ swarm }}'.to_i)
@@ -116,6 +132,11 @@ def report(stdout, job)
   puts "Reported to #{home}: #{ret.code}"
 end
 
+# Run one swarm for a particular job, where a ZIP archvie from S3 must be processed.
+#
+# @param [Integer] id The ID of the job to process
+# @param [Hash] rec JSON event from the SQS message
+# @param [Loog] loog The logging facility
 def with_zip(id, rec, loog)
   Dir.mktmpdir do |home|
     zip = File.join(home, "#{id}.zip")
@@ -135,6 +156,11 @@ def with_zip(id, rec, loog)
   end
 end
 
+# Run one swarm for a particular job.
+#
+# @param [Integer] id The ID of the job to process
+# @param [String] pack Directory name where the ZIP is unpacked
+# @param [Loog] loog The logging facility
 def one(id, pack, loog)
   cmd =
     if File.exist?('/swarm/entry.sh')
@@ -149,13 +175,19 @@ def one(id, pack, loog)
   e = $CHILD_STATUS.exitstatus
   loog.info(stdout)
   loog.warn("FAILURE (#{e})") unless e.zero?
+  e
 end
 
+# This is the entry point called by aws_lambda_ric when a new SQS message arrives.
+#
+# @param [Hash] event The JSON event
+# @param [LambdaContext] context I don't know what this is for
 def go(event:, context:)
   puts "Arrived event: #{event.to_s.inspect}"
   elapsed(intro: 'Job processing finished') do
     event['Records']&.each do |rec|
       loog = Loog::Buffer.new
+      code = 1
       begin
         job = rec['messageAttributes']['job']['stringValue'].to_i
         loog.info("Event about job ##{job} arrived")
@@ -164,19 +196,19 @@ def go(event:, context:)
           loog.info("System swarm '{{ name }}' processing")
           Dir.mktmpdir do |pack|
             File.write(File.join(pack, 'event.json'), JSON.pretty_generate(rec))
-            one(job, pack, loog)
+            code = one(job, pack, loog)
           end
         else
           loog.info("Normal swarm '{{ name }}' processing")
           with_zip(job, rec, loog) do |pack|
-            one(job, pack, loog)
+            code = one(job, pack, loog)
           end
         end
       rescue StandardError => e
         loog.error(Backtrace.new(e).to_s)
         raise e
       ensure
-        report(loog.to_s, job)
+        report(loog.to_s, code, job)
       end
     end
   end
