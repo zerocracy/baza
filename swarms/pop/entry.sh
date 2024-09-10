@@ -58,5 +58,5 @@ aws s3 cp pack.zip "s3://${S3_BUCKET}/${key}"
 
 aws sqs send-message \
   --queue-url "https://sqs.us-east-1.amazonaws.com/019644334823/${first}" \
-  --message-body "Job ${id} needs processing" \
+  --message-body "Job #${id} needs processing" \
   --message-attributes "job={DataType=String,StringValue='${id}'},swarm={DataType=String,StringValue='baza-pop',more={DataType=String,StringValue='baza-j'}"
