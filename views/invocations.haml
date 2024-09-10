@@ -8,6 +8,8 @@
   %colgroup
     -# ID
     %col{style: 'width: 4em;'}
+    -# Code
+    %col{style: 'width: 4em;'}
     -# Stdout
     %col
     -# Created
@@ -17,6 +19,8 @@
       %th
         = '#'
       %th
+        Code
+      %th
         Stdout
       %th
         Created
@@ -25,6 +29,12 @@
     %tr
       %td.ff
         = "##{i[:id]}"
+      %td.ff
+        - if i[:code].zero?
+          %i.fa-regular.fa-thumbs-up.good
+        - else
+          %span.bad
+            = i[:code]
       %td
         != snippet(i[:stdout])
       %td
