@@ -230,11 +230,21 @@ fi
 # Make sure all new SQS events trigger Lambda function execution:
 fn="arn:aws:lambda:{{ region }}:{{ account }}:function:{{ name }}"
 arn="arn:aws:sqs:{{ region }}:{{ account }}:{{ name }}"
-if ! ( aws lambda list-event-source-mappings --event-source-arn "${arn}" --function-name "${fn}" --region "{{ region }}" | grep "\"${fn}\"" >/dev/null ); then
+mapping=$( aws lambda list-event-source-mappings --event-source-arn "${arn}" --function-name "${fn}" --region "{{ region }}" )
+if [ "$(echo "${mapping}" | jq '.EventSourceMappings | length')" == 0 ]; then
   aws lambda create-event-source-mapping \
     --color off \
     --event-source-arn "${arn}" \
     --batch-size=1 \
     --function-name "${fn}" \
     --region "{{ region }}"
+else
+  if [ "$(echo "${mapping}" | jq -r '.EventSourceMappings[0].State')" == 'Disabled' ]; then
+    uuid=$(echo "${mapping}" | jq -r '.EventSourceMappings[0].UUID')
+    aws lambda update-event-source-mapping \
+      --color off \
+      --uuid "${uuid}" \
+      --enabled \
+      --region "{{ region }}"
+  fi
 fi
