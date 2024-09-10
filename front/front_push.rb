@@ -22,11 +22,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require 'fileutils'
+require 'backtrace'
 require 'factbase'
+require 'fileutils'
 require 'zlib'
-require_relative '../objects/baza/urror'
 require_relative '../objects/baza/errors'
+require_relative '../objects/baza/urror'
 
 def user_agent
   agent = request.env['HTTP_USER_AGENT']
@@ -62,7 +63,11 @@ def job_start(token, file, name, metas, ip)
     (request.env['HTTP_X_ZEROCRACY_META'] || '').split(/\s+/).map { |v| Base64.decode64(v) } + metas,
     ip
   )
-  settings.sqs.push(job, "Job ##{job.id} (#{job.name}) registered from #{ip}")
+  begin
+    settings.sqs.push(job, "Job ##{job.id} (#{job.name}) registered from #{ip}")
+  rescue StandardError => e
+    settings.loog.error(Backtrace.new(e).to_s)
+  end
   job
 end
 
