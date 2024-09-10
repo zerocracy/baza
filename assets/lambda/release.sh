@@ -188,7 +188,7 @@ function wait_for_function() {
 }
 
 # Create or update Lambda function:
-if aws lambda get-function --function-name "{{ name }}" --region "{{ region }}" >/dev/null; then
+if aws lambda get-function --function-name "{{ name }}" --region "{{ region }}" >/dev/null 2>&1; then
   wait_for_function
   aws lambda update-function-configuration \
     --function-name "{{ name }}" \
@@ -217,7 +217,7 @@ else
 fi
 
 # Create new SQS queue for this new Lambda function:
-if aws sqs get-queue-url --queue-name "{{ name }}" --region "{{ region }}" >/dev/null; then
+if aws sqs get-queue-url --queue-name "{{ name }}" --region "{{ region }}" >/dev/null 2>&1; then
   aws sqs set-queue-attributes \
     --color off \
     --attributes 'VisibilityTimeout=300' \

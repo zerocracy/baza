@@ -116,8 +116,8 @@ class Baza::RecipeTest < Minitest::Test
   # resources. The test should not make any hard. It just destroys the
   # function if it exists and then creates it again.
   def test_live_local_run
-    skip
-    loog = fake_loog
+    # skip
+    loog = Loog::VERBOSE
     creds = File.join(Dir.home, '.aws/credentials')
     skip unless File.exist?(creds)
     s = fake_human.swarms.add('st', 'zerocracy/swarm-template', 'master', '/')
@@ -126,7 +126,7 @@ class Baza::RecipeTest < Minitest::Test
       FileUtils.mkdir_p(File.join(home, '.aws'))
       FileUtils.copy(creds, File.join(home, '.aws/credentials'))
       sh = File.join(home, 'recipe.sh')
-      %i[destroy release release].each do |step|
+      %i[destroy release release destroy destroy].each do |step|
         File.write(
           sh,
           Baza::Recipe.new(s, '', '').to_bash(step, '019644334823', 'us-east-1', 'fake')
