@@ -56,7 +56,7 @@ else
   aws sqs send-message \
     --queue-url "https://sqs.us-east-1.amazonaws.com/019644334823/${next}" \
     --message-body "Job ${id} next futher processing by '${more[@]}'" \
-    --message-attributes "job={DataType=String,StringValue='${id}'},swarm={DataType=String,StringValue='${swarm}',more={DataType=String,StringValue='${more[@]}'}"
+    --message-attributes "job={DataType=String,StringValue='${id}'},swarm={DataType=String,StringValue='${swarm}'},more={DataType=String,StringValue='${more[@]}'}"
 fi
 
 

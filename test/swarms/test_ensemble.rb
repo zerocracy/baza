@@ -107,7 +107,8 @@ class EnsembleTest < Minitest::Test
             'adding: base.fb',
             'adding: stdout.txt',
             'HTTP/1.1 200 OK',
-            'aws s3 rm s3://swarms.zerocracy.com/'
+            'aws s3 rm s3://swarms.zerocracy.com/',
+            '--message-attributes'
           ].each { |t| assert(stdout.include?(t), t) }
         ensure
           bash("docker rmi #{img}", loog)
