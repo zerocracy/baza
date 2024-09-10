@@ -1,11 +1,15 @@
 - wn = releases.swarm.why_not
 - if wn.nil?
   %p
-    The swarm will soon be deployed.
+    %strong.good
+      The swarm will soon be deployed.
 - else
   %p
-    The swarm is not scheduled for release, because:
-    = wn.inspect
+    The swarm is
+    %strong.orange
+      not scheduled
+    for release, because:
+    = wn
 
 %p
   The swarm
