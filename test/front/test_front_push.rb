@@ -538,9 +538,9 @@ class Baza::FrontPushTest < Minitest::Test
   def process_pipeline
     Dir.mktmpdir do |home|
       humans = Baza::Humans.new(fake_pgsql)
-      fbs = Baza::Factbases.new('', '', loog: Loog::NULL)
+      fbs = Baza::Factbases.new('', '', loog: fake_loog)
       FileUtils.mkdir_p(File.join(home, 'judges'))
-      pp = Baza::Pipeline.new(home, humans, fbs, Loog::NULL, Baza::Trails.new(fake_pgsql))
+      pp = Baza::Pipeline.new(home, humans, fbs, fake_loog, Baza::Trails.new(fake_pgsql))
       loop do
         break unless pp.process_one
       end

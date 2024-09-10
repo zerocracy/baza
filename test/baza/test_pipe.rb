@@ -23,15 +23,60 @@
 # SOFTWARE.
 
 require 'minitest/autorun'
-require 'loog'
-require 'factbase'
 require_relative '../test__helper'
 require_relative '../../objects/baza'
+require_relative '../../objects/baza/factbases'
 require_relative '../../objects/baza/pipe'
+require_relative '../../objects/baza/zip'
 
 # Test for Pipe.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
 class Baza::PipeTest < Minitest::Test
+  def test_simple_pop
+    fake_job
+    assert(!fake_pipe.pop('owner').nil?)
+  end
+
+  def test_simple_pack
+    fake_job
+    job = fake_pipe.pop('owner')
+    Dir.mktmpdir do |home|
+      zip = File.join(home, 'foo.zip')
+      fake_pipe.pack(job, zip)
+      Baza::Zip.new(zip, loog: fake_loog).unpack(File.join(home, 'pack'))
+      assert(File.exist?(File.join(home, 'pack/base.fb')))
+    end
+  end
+
+  def test_simple_unpack
+    fake_job
+    job = fake_pipe.pop('owner')
+    Dir.mktmpdir do |home|
+      zip = File.join(home, 'foo.zip')
+      fake_pipe.pack(job, zip)
+      Baza::Zip.new(zip).unpack(File.join(home, 'pack'))
+      File.delete(zip)
+      File.write(File.join(home, 'pack/stdout.txt'), 'nothing...')
+      File.write(
+        File.join(home, 'pack/job.json'),
+        JSON.pretty_generate(
+          JSON.parse(File.read(File.join(home, 'pack/job.json'))).merge(
+            { 'exit' => 0, 'msec' => 500 }
+          )
+        )
+      )
+      Baza::Zip.new(zip, loog: fake_loog).pack(File.join(home, 'pack/.'))
+      fake_pipe.unpack(job, zip)
+    end
+  end
+
+  private
+
+  def fake_pipe
+    humans = fake_humans
+    fbs = Baza::Factbases.new('', '', loog: fake_loog)
+    Baza::Pipe.new(humans, fbs, loog: fake_loog)
+  end
 end

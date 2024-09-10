@@ -67,6 +67,10 @@ class Minitest::Test
     page.driver.header 'User-Agent', 'Capybara'
   end
 
+  def fake_loog
+    ENV['RACK_RUN'] ? Loog::NULL : Loog::VERBOSE
+  end
+
   def fake_pgsql
     # rubocop:disable Style/ClassVars
     @@fake_pgsql ||= Pgtk::Pool.new(

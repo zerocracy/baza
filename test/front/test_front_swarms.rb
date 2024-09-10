@@ -149,13 +149,13 @@ class Baza::FrontSwarmsTest < Minitest::Test
 
   def test_pop_one
     fake_job
-    fbs = Baza::Factbases.new('', '', loog: Loog::NULL)
+    fbs = Baza::Factbases.new('', '', loog: fake_loog)
     pipe = Baza::Humans.new(fake_pgsql).pipe(fbs)
     assert(!pipe.pop('owner').nil?)
   end
 
   def test_pack
-    fbs = Baza::Factbases.new('', '', loog: Loog::NULL)
+    fbs = Baza::Factbases.new('', '', loog: fake_loog)
     Dir.mktmpdir do |dir|
       input = File.join(dir, 'foo.fb')
       File.binwrite(input, Factbase.new.export)
@@ -177,7 +177,7 @@ class Baza::FrontSwarmsTest < Minitest::Test
 
   def test_unpack
     job = fake_job
-    fbs = Baza::Factbases.new('', '', loog: Loog::NULL)
+    fbs = Baza::Factbases.new('', '', loog: fake_loog)
     pipe = Baza::Humans.new(fake_pgsql).pipe(fbs)
     Dir.mktmpdir do |dir|
       File.binwrite(File.join(dir, 'base.fb'), Factbase.new.export)

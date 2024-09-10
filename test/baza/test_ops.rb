@@ -41,7 +41,7 @@ class Baza::OpsTest < Minitest::Test
       'sg-424242',
       'sn-42424242',
       't2.large',
-      loog: Loog::NULL
+      loog: fake_loog
     )
     ops = Baza::Ops.new(ec2, '', '', 'foo')
     swarm = fake_human.swarms.add(fake_name, "#{fake_name}/#{fake_name}", fake_name, '/')
@@ -56,7 +56,7 @@ class Baza::OpsTest < Minitest::Test
       'sg-424242',
       'sn-42424242',
       't2.large',
-      loog: Loog::NULL
+      loog: fake_loog
     )
     ops = Baza::Ops.new(ec2, '', '', 'foo')
     swarm = fake_human.swarms.add(fake_name, "#{fake_name}/#{fake_name}", fake_name, '/')

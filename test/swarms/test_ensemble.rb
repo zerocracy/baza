@@ -32,7 +32,7 @@ require_relative '../test__helper'
 # License:: MIT
 class EnsembleTest < Minitest::Test
   def test_runs_ensemble
-    loog = ENV['RACK_RUN'] ? Loog::NULL : Loog::VERBOSE
+    loog = fake_loog
     job = fake_job
     s = fake_human.swarms.add(fake_name, "#{fake_name}/#{fake_name}", 'master', '/')
     Dir.mktmpdir do |home|

@@ -140,7 +140,7 @@ class Baza::AlterationsTest < Minitest::Test
       # rubocop:disable Style/GlobalVars
       $global = {}
       $fb = Factbase.new
-      $loog = Loog::NULL
+      $loog = fake_loog
       $options = Judges::Options.new
       # rubocop:enable Style/GlobalVars
       Fbe.fb.query('(always)').delete!

@@ -33,9 +33,10 @@ require_relative 'zip'
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
 class Baza::Pipe
-  def initialize(humans, fbs)
+  def initialize(humans, fbs, loog: Loog::NULL)
     @humans = humans
     @fbs = fbs
+    @loog = loog
   end
 
   def pop(owner)
@@ -51,7 +52,9 @@ class Baza::Pipe
       [owner]
     )
     return nil if rows.empty?
-    @humans.job_by_id(rows.first['id'].to_i)
+    job = @humans.job_by_id(rows.first['id'].to_i)
+    @loog.debug("Job ##{job.id} popped out")
+    job
   end
 
   # Pack one job into a ZIP file.
@@ -80,8 +83,9 @@ class Baza::Pipe
         FileUtils.mkdir_p(File.dirname(rb))
         File.write(rb, a[:script])
       end
-      Baza::Zip.new(file).pack(dir)
+      Baza::Zip.new(file, loog: @loog).pack(dir)
     end
+    @loog.debug("Job ##{job.id} packed into ZIP (#{File.size(file)} bytes)")
   end
 
   # Unpack a ZIP file and finish the job with the information from it.
@@ -90,7 +94,7 @@ class Baza::Pipe
   # @param [String] file The path to .zip file to read
   def unpack(job, file)
     Dir.mktmpdir do |dir|
-      Baza::Zip.new(file).unpack(dir)
+      Baza::Zip.new(file, loog: @loog).unpack(dir)
       ['job.json', 'base.fb', 'stdout.txt'].each do |n|
         f = File.join(dir, n)
         raise Baza::Urror, "The #{File.basename(f)} file is missing" unless File.exist?(f)
@@ -110,5 +114,6 @@ class Baza::Pipe
         meta['exit'].zero? ? Baza::Errors.new(fb).count : nil
       )
     end
+    @loog.debug("Job ##{job.id} unpacked from ZIP (#{File.size(file)} bytes)")
   end
 end

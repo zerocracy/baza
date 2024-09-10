@@ -42,7 +42,7 @@ class Baza::SQSTest < Minitest::Test
   def test_live_aws_usage
     skip
     WebMock.enable_net_connect!
-    sqs = Baza::SQS.new('AKIA...', 'KmX8e...', 'https://sqs.us-east-1.amazonaws.com/...', loog: Loog::NULL)
+    sqs = Baza::SQS.new('AKIA...', 'KmX8e...', 'https://sqs.us-east-1.amazonaws.com/...', loog: fake_loog)
     sqs.push(42, 'testing!')
   end
 end

@@ -51,7 +51,7 @@ class Baza::FactbasesTest < Minitest::Test
     WebMock.disable_net_connect!
     stub_request(:put, %r{https://s3.amazonaws.com/baza.zerocracy.com/.*$})
       .to_return(status: 200)
-    fbs = Baza::Factbases.new('fake-key', 'fake-secret', loog: Loog::NULL)
+    fbs = Baza::Factbases.new('fake-key', 'fake-secret', loog: fake_loog)
     Dir.mktmpdir do |dir|
       input = File.join(dir, 'a.fb')
       File.write(input, 'hey')
@@ -64,7 +64,7 @@ class Baza::FactbasesTest < Minitest::Test
     WebMock.disable_net_connect!
     stub_request(:get, %r{https://s3.amazonaws.com/baza.zerocracy.com/.*$})
       .to_return(status: 200, body: 'hello, world!')
-    fbs = Baza::Factbases.new('fake-key', 'fake-secret', loog: Loog::NULL)
+    fbs = Baza::Factbases.new('fake-key', 'fake-secret', loog: fake_loog)
     Dir.mktmpdir do |dir|
       input = File.join(dir, 'a.fb')
       uuid = '2024-08-13-d7956cd6-9f2c-42db-a4e3-d9186f080bfa'
@@ -77,7 +77,7 @@ class Baza::FactbasesTest < Minitest::Test
     WebMock.disable_net_connect!
     stub_request(:get, %r{https://s3.amazonaws.com/baza.zerocracy.com/.*$})
       .to_return(status: 404)
-    fbs = Baza::Factbases.new('fake-key', 'fake-secret', loog: Loog::NULL)
+    fbs = Baza::Factbases.new('fake-key', 'fake-secret', loog: fake_loog)
     Dir.mktmpdir do |dir|
       input = File.join(dir, 'a.fb')
       uuid = '2024-08-13-d7956cd6-9f2c-42db-a4e3-d9186f080bfa'
@@ -89,7 +89,7 @@ class Baza::FactbasesTest < Minitest::Test
     WebMock.disable_net_connect!
     stub_request(:delete, %r{https://s3.amazonaws.com/baza.zerocracy.com/.*$})
       .to_return(status: 200)
-    fbs = Baza::Factbases.new('fake-key', 'fake-secret', loog: Loog::NULL)
+    fbs = Baza::Factbases.new('fake-key', 'fake-secret', loog: fake_loog)
     uuid = '2024-08-13-d7956cd6-9f2c-42db-a4e3-d9186f080bfa'
     fbs.delete(uuid)
   end
@@ -98,7 +98,7 @@ class Baza::FactbasesTest < Minitest::Test
     WebMock.disable_net_connect!
     stub_request(:delete, %r{https://s3.amazonaws.com/baza.zerocracy.com/.*$})
       .to_return(status: 404)
-    fbs = Baza::Factbases.new('fake-key', 'fake-secret', loog: Loog::NULL)
+    fbs = Baza::Factbases.new('fake-key', 'fake-secret', loog: fake_loog)
     uuid = '2024-08-13-d7956cd6-9f2c-42db-a4e3-d9186f080bfa'
     assert(assert_raises { fbs.delete(uuid) }.message.include?("Can't delete S3 object"))
   end
@@ -106,7 +106,7 @@ class Baza::FactbasesTest < Minitest::Test
   def test_live_aws_usage
     skip
     WebMock.enable_net_connect!
-    fbs = Baza::Factbases.new('AKIAQJE...', 'KmX8eM...', loog: Loog::NULL)
+    fbs = Baza::Factbases.new('AKIAQJE...', 'KmX8eM...', loog: fake_loog)
     Dir.mktmpdir do |dir|
       input = File.join(dir, 'a.fb')
       File.write(input, 'hey')

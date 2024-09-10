@@ -39,7 +39,7 @@ class Baza::PipelineTest < Minitest::Test
   def test_simple_processing
     finish_all_jobs
     loog = Loog::Buffer.new
-    humans = Baza::Humans.new(fake_pgsql)
+    humans = fake_humans
     fbs = Baza::Factbases.new('', '', loog:)
     Dir.mktmpdir do |home|
       %w[judges/foo lib].each { |d| FileUtils.mkdir_p(File.join(home, d)) }
@@ -86,7 +86,7 @@ class Baza::PipelineTest < Minitest::Test
 
   def test_picks_all_of_them
     finish_all_jobs
-    fbs = Baza::Factbases.new('', '', loog: Loog::NULL)
+    fbs = Baza::Factbases.new('', '', loog: fake_loog)
     Dir.mktmpdir do |home|
       token = fake_token
       first = token.start(fake_name, uri(fbs), 1, 0, 'n/a', [], '192.168.1.1')
@@ -100,8 +100,8 @@ class Baza::PipelineTest < Minitest::Test
 
   def test_with_two_alterations
     finish_all_jobs
-    humans = Baza::Humans.new(fake_pgsql)
-    fbs = Baza::Factbases.new('', '', loog: Loog::NULL)
+    humans = fake_humans
+    fbs = Baza::Factbases.new('', '', loog: fake_loog)
     Dir.mktmpdir do |home|
       FileUtils.mkdir_p(File.join(home, 'lib'))
       FileUtils.mkdir_p(File.join(home, 'judges/foo'))
@@ -130,9 +130,9 @@ class Baza::PipelineTest < Minitest::Test
 
   def test_with_trails
     finish_all_jobs
-    humans = Baza::Humans.new(fake_pgsql)
+    humans = fake_humans
     trails = Baza::Trails.new(fake_pgsql)
-    fbs = Baza::Factbases.new('', '', loog: Loog::NULL)
+    fbs = Baza::Factbases.new('', '', loog: fake_loog)
     Dir.mktmpdir do |home|
       FileUtils.mkdir_p(File.join(home, 'lib'))
       FileUtils.mkdir_p(File.join(home, 'judges/foo'))
@@ -171,7 +171,7 @@ class Baza::PipelineTest < Minitest::Test
 
   private
 
-  def process_all(home, humans, fbs, loog: Loog::NULL)
+  def process_all(home, humans, fbs, loog: fake_loog)
     FileUtils.mkdir_p(File.join(home, 'judges'))
     pp = Baza::Pipeline.new(home, humans, fbs, loog, Baza::Trails.new(fake_pgsql))
     loop do

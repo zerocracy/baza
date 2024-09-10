@@ -67,7 +67,7 @@ class Baza::RecipeTest < Minitest::Test
   end
 
   def test_runs_script
-    loog = ENV['RACK_RUN'] ? Loog::NULL : Loog::VERBOSE
+    loog = fake_loog
     swarm = fake_human.swarms.add('st', 'zerocracy/swarm-template', 'master', '/')
     secret = fake_name
     r = swarm.releases.start('just start', secret)
@@ -117,7 +117,7 @@ class Baza::RecipeTest < Minitest::Test
   # function if it exists and then creates it again.
   def test_live_local_run
     skip
-    loog = ENV['RACK_RUN'] ? Loog::NULL : Loog::VERBOSE
+    loog = fake_loog
     creds = File.join(Dir.home, '.aws/credentials')
     skip unless File.exist?(creds)
     s = fake_human.swarms.add('st', 'zerocracy/swarm-template', 'master', '/')
@@ -138,7 +138,7 @@ class Baza::RecipeTest < Minitest::Test
   end
 
   def test_build_docker_image
-    loog = ENV['RACK_RUN'] ? Loog::NULL : Loog::VERBOSE
+    loog = fake_loog
     Dir.mktmpdir do |home|
       ['Dockerfile', 'Gemfile', 'entry.sh', 'main.rb', 'install.sh'].each do |f|
         FileUtils.copy(
@@ -155,7 +155,7 @@ class Baza::RecipeTest < Minitest::Test
 
   def test_local_lambda_run
     WebMock.enable_net_connect!
-    loog = ENV['RACK_RUN'] ? Loog::NULL : Loog::VERBOSE
+    loog = fake_loog
     fake_pgsql.exec('TRUNCATE human CASCADE')
     job = fake_job(fake_human('yegor256'))
     s = job.jobs.human.swarms.add('st', 'zerocracy/swarm-template', 'master', '/')
