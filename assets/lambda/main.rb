@@ -85,7 +85,7 @@ def put_object(key, file, loog)
   loog.info("Saved S3 object #{key.inspect} to bucket #{bucket.inspect}")
 end
 
-# Send message to AWS SQS queue.
+# Send message to AWS SQS queue "shift", to enable further processing.
 #
 # @param [Integer] id The ID of the job just processed
 # @param [Loog] loog The logging facility
@@ -118,6 +118,7 @@ def report(stdout, code, job)
     .append('{{ swarm }}'.to_i)
     .append('invocation')
     .add(secret: '{{ secret }}')
+    .add(code: code)
   home = home.add(job: job) unless job.nil?
   ret = Typhoeus::Request.put(
     home.to_s,

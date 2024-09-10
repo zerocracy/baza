@@ -69,7 +69,7 @@ class MainTest < Minitest::Test
           "
         ].join
       )
-      stub_request(:put, 'http://swarms/42/invocation?job=7&secret=sword-fish').to_return(status: 200)
+      stub_request(:put, 'http://swarms/42/invocation?code=0&job=7&secret=sword-fish').to_return(status: 200)
       stub_request(:get, 'https://foo.s3.amazonaws.com/swarmik/7.zip').to_return(status: 200, body: File.binread(zip))
       stub_request(:put, 'https://foo.s3.amazonaws.com/swarmik/7.zip').to_return(status: 200)
       stub_request(:post, 'https://sqs.us-east-1.amazonaws.com/424242/baza-shift').to_return(
