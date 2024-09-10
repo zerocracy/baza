@@ -58,11 +58,13 @@ class Baza::Swarms
     return to_enum(__method__, offset:) unless block_given?
     rows = pgsql.exec(
       [
-        'SELECT s.*,',
+        'SELECT s.*, COUNT(release.id) AS releases_count,',
         '(SELECT exit FROM release WHERE swarm = s.id ORDER BY release.id DESC LIMIT 1) AS exit,',
         '(SELECT created FROM invocation WHERE swarm = s.id ORDER BY invocation.id DESC LIMIT 1) AS invoked',
         'FROM swarm AS s',
+        'LEFT JOIN release ON release.swarm = s.id',
         'WHERE human = $1',
+        'GROUP BY s.id',
         'ORDER BY s.name',
         "OFFSET #{offset.to_i}"
       ],
@@ -74,6 +76,7 @@ class Baza::Swarms
         id: row['id'].to_i,
         name: row['name'],
         exit: row['exit']&.to_i,
+        releases_count: row['releases_count'].to_i,
         enabled: row['enabled'] == 't',
         repository: row['repository'],
         directory: row['directory'],

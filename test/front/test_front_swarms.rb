@@ -98,7 +98,7 @@ class Baza::FrontSwarmsTest < Minitest::Test
     fake_login(human.github)
     swarms = human.swarms
     s = swarms.add(fake_name, "#{fake_name}/#{fake_name}", fake_name, '/')
-    secret = 'the-super-secret'
+    secret = fake_name
     r = s.releases.start('tail', secret)
     put(
       "/swarms/finish?head=4242424242424242424242424242424242424242&exit=0&sec=42&secret=#{secret}",
@@ -107,6 +107,19 @@ class Baza::FrontSwarmsTest < Minitest::Test
     )
     assert_status(200)
     assert(s.releases.get(r.id).tail.include?('this is'))
+  end
+
+  def test_reset_release
+    human = fake_job.jobs.human
+    fake_login(human.github)
+    swarms = human.swarms
+    s = swarms.add(fake_name, "#{fake_name}/#{fake_name}", fake_name, '/')
+    secret = fake_name
+    r = s.releases.start('tail', secret)
+    get("/swarms/#{s.id}/releases/#{r.id}/reset")
+    assert_status(302)
+    get("/swarms/#{s.id}/reset")
+    assert_status(302)
   end
 
   def test_get_files

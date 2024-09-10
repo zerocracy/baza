@@ -78,6 +78,13 @@ get(%r{/swarms/([0-9]+)/releases/([0-9]+)/stop}) do
   flash(iri.cut('/swarms').append(swarm.id).append('releases'), "The release ##{r.id} was stopped")
 end
 
+get(%r{/swarms/([0-9]+)/reset}) do
+  admin_only
+  swarm = the_human.swarms.get(params['captures'].first.to_i)
+  r = swarm.releases.each.to_a.first
+  redirect(iri.cut('/swarms').append(swarm.id).append('releases').append(r[:id]).append('reset'))
+end
+
 get(%r{/swarms/([0-9]+)/releases/([0-9]+)/reset}) do
   admin_only
   swarm = the_human.swarms.get(params['captures'].first.to_i)
