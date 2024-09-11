@@ -90,7 +90,7 @@ get(%r{/swarms/([0-9]+)/releases/([0-9]+)/reset}) do
   swarm = the_human.swarms.get(params['captures'].first.to_i)
   r = swarm.releases.get(params['captures'][1].to_i)
   r.head!('FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF')
-  r.exit!(1)
+  r.exit!(1) if r.exit.nil?
   flash(iri.cut('/swarms').append(swarm.id).append('releases'), "The SHA of the release ##{r.id} was reset")
 end
 
