@@ -65,9 +65,10 @@ error do
     bt = Backtrace.new(e).to_s
     settings.tbot.notify(
       settings.humans.ensure('yegor256'),
-      '🧨 I\'m sorry to tell you, but there is application crash on the server:',
+      '🧨 I\'m sorry to tell you, but there is a crash on the server:',
       "\n```\n#{bt.split("\n").take(6).map { |ln| ln.gsub('```', '...') }.join("\n")}\n```\n",
-      'You better pay attention to this as soon as possible.'
+      'You better pay attention to this as soon as possible',
+      'or [report](https://github.com/zerocracy/baza/issues) to the team.'
     )
     settings.loog.error("At #{request.url}:\n#{bt}")
     response.headers['X-Zerocracy-Failure'] = e.message.inspect.gsub(/^"(.*)"$/, '\1')
