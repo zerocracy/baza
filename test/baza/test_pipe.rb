@@ -35,8 +35,13 @@ require_relative '../../objects/baza/zip'
 # License:: MIT
 class Baza::PipeTest < Minitest::Test
   def test_simple_pop
+    fake_pgsql.exec('TRUNCATE job CASCADE')
     fake_job
-    assert(!fake_pipe.pop('owner').nil?)
+    owner = fake_name
+    assert(!fake_pipe.pop(owner).nil?)
+    assert(!fake_pipe.pop(owner).nil?)
+    assert(!fake_pipe.pop(owner).nil?)
+    assert(fake_pipe.pop('another owner').nil?)
   end
 
   def test_pop_the_same_if_not_processed

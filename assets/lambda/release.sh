@@ -90,9 +90,11 @@ function similar() {
   right=$( echo "$2" | tr '\n' ' ' | tr -d ' ')
   if [ "${left}" == "${right}" ]; then
     echo 'They are similar'
+    set -x
     return 0
   else
     echo 'There is a difference'
+    set -x
     return 1
   fi
 }
@@ -201,7 +203,7 @@ if [ '{{ human }}' == 'yegor256' ] && [ -e swarm/aws-policy.json ]; then
 fi
 
 # Create AWS CloudWatch LogGroup for Lambda function:
-if ! aws logs describe-log-groups --log-group-name-pattern '{{ name }}' --region '{{ region }}' --output text 2>&1 | grep ':{{ name }}:'; then
+if ! ( aws logs describe-log-groups --log-group-name-pattern '{{ name }}' --region '{{ region }}' --output text 2>&1 | grep ':{{ name }}:' ); then
   aws logs create-log-group \
     --color off \
     --region '{{ region }}' \
