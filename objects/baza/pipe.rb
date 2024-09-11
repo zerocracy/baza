@@ -58,7 +58,7 @@ class Baza::Pipe
     job = @humans.job_by_id(rows.first['id'].to_i)
     if job.name == 'test' && job.jobs.human.github == 'yegor256' && owner.start_with?('baza')
       job.untake!
-      @loog.debug("Job ##{job.id} can't be taken normally, it's for testing only")
+      @loog.debug("Job ##{job.id} can't be taken by #{owner.inspect}, it's for testing only")
       return nil
     end
     # Because we are still testing:
