@@ -51,15 +51,20 @@ class Baza::Pipe
       ],
       [owner]
     )
-    return nil if rows.empty?
+    if rows.empty?
+      @loog.debug('There are no not-yet-taken jobs in the pipeline now')
+      return nil
+    end
     job = @humans.job_by_id(rows.first['id'].to_i)
     if job.name == 'test' && job.jobs.human.github == 'yegor256' && owner.start_with?('baza')
       job.untake!
+      @loog.debug("Job ##{job.id} can't be taken normally, it's for testing only")
       return nil
     end
     # Because we are still testing:
     if owner.start_with?('swarm:') && ENV['RACK_ENV'] != 'test'
       job.untake!
+      @loog.debug("Job ##{job.id} can't be used by swarms, we are still testing")
       return nil
     end
     @loog.debug("Job ##{job.id} popped out")
