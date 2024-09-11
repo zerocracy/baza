@@ -73,9 +73,9 @@ class Baza::IpGeolocation
             'languages' => 'en-US,es-US,haw,fr',
             'country_flag' => 'https://ipgeolocation.io/static/flags/us_64.png',
             'geoname_id' => '6301403',
-            'isp' => ip == '8.8.8.8' ? 'Microsoft Corp' : 'Google LLC',
+            'isp' => ip == '8.8.8.8' ? 'Google LLC' : 'Microsoft Corp',
             'connection_type' => '',
-            'organization' => ip == '8.8.8.8' ? 'Microsoft Company' : 'Google LLC',
+            'organization' => ip == '8.8.8.8' ? 'Google LLC' : 'Microsoft Company',
             'country_emoji' => '🇺🇸',
             'currency' => { 'code' => 'USD', 'name' => 'US Dollar', 'symbol' => '$' },
             'time_zone' => {
