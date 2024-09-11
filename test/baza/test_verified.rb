@@ -35,6 +35,10 @@ require_relative '../../objects/baza/verified'
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
 class Baza::VerifiedTest < Minitest::Test
+  def app
+    Sinatra::Application
+  end
+
   def test_simple_check
     WebMock.disable_net_connect!
     human = fake_human
@@ -62,7 +66,7 @@ class Baza::VerifiedTest < Minitest::Test
       }.to_json,
       headers: { 'content-type': 'application/json' }
     )
-    v = Baza::Verified.new(job).verdict
+    v = Baza::Verified.new(job, app.settings).verdict
     assert(v.start_with?('OK: All good'))
   end
 
@@ -78,7 +82,7 @@ class Baza::VerifiedTest < Minitest::Test
     ).id
     job = human.jobs.get(id)
     stub_request(:get, 'https://api.github.com/repos/foo/foo/actions/runs/22').to_return(status: 404)
-    v = Baza::Verified.new(job).verdict
+    v = Baza::Verified.new(job, app.settings).verdict
     assert(v.include?('FAKE: Workflow URL https://github.com/foo/foo/actions/runs/22 not found'))
   end
 
@@ -88,7 +92,7 @@ class Baza::VerifiedTest < Minitest::Test
     ip = '192.168.1.1'
     id = token.start(fake_name, fake_name, 1, 0, 'n/a', [], ip).id
     job = human.jobs.get(id)
-    v = Baza::Verified.new(job).verdict
+    v = Baza::Verified.new(job, app.settings).verdict
     assert_equal('FAKE: There is no workflow_url meta', v)
   end
 
@@ -98,7 +102,7 @@ class Baza::VerifiedTest < Minitest::Test
     ip = '192.168.1.1'
     id = token.start(fake_name, fake_name, 1, 0, 'n/a', ['workflow_url:hey'], ip).id
     job = human.jobs.get(id)
-    v = Baza::Verified.new(job).verdict
+    v = Baza::Verified.new(job, app.settings).verdict
     assert_equal('FAKE: Wrong URL at workflow_url: "hey".', v)
   end
 end
