@@ -201,7 +201,7 @@ if [ '{{ human }}' == 'yegor256' ] && [ -e swarm/aws-policy.json ]; then
 fi
 
 # Create AWS CloudWatch LogGroup for Lambda function:
-if ! aws logs describe-log-groups --log-group-name-pattern '{{ name }}' --region '{{ region }}' --output text 2>&1 | grep '\t{{ name }}\t'; then
+if ! aws logs describe-log-groups --log-group-name-pattern '{{ name }}' --region '{{ region }}' --output text 2>&1 | grep ':{{ name }}:'; then
   aws logs create-log-group \
     --color off \
     --region '{{ region }}' \

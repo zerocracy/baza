@@ -206,19 +206,19 @@ module Baza::Helpers
   def href(link, text, dot: false)
     d =
       if dot
-        dot.is_a?(String) ? dot : '.'
+        dot.is_a?(String) ? CGI.escapeHTML(dot) : '.'
       else
         ''
       end
-    " <a href='#{link}'>#{text}</a>#{d} "
+    " <a href='#{link}'>#{CGI.escapeHTML(text)}</a>#{d} "
   end
 
   def menu(cut, name)
     href = iri.cut(cut)
     if iri.to_s == href.to_s
-      html_tag('li') { name }
+      html_tag('li') { CGI.escapeHTML(name) }
     else
-      html_tag('li') { html_tag('a', href: iri.cut(cut).to_s) { name } }
+      html_tag('li') { html_tag('a', href: iri.cut(cut).to_s) { CGI.escapeHTML(name) } }
     end
   end
 
@@ -264,12 +264,12 @@ module Baza::Helpers
       ) : '',
       html_tag('span') do
         if preview
-          lines.first
+          CGI.escapeHTML(lines.first)
         else
           "#{lines.count} line#{lines.count == 1 ? '' : 's'}"
         end
       end,
-      unrollable ? html_tag('pre') { text } : ''
+      unrollable ? html_tag('pre') { CGI.escapeHTML(text) } : ''
     ].join
   end
 end
