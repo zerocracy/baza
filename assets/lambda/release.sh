@@ -49,6 +49,12 @@ if [ ! -e "${HOME}/.ssh/id_rsa.pub" ]; then
   rm -f "${HOME}/.ssh/id_rsa"
 fi
 
+if ! ( aws --version | grep 'aws-cli/2.' ); then
+  aws --version
+  echo 'The installed version of "aws cli" is too old, please upgrade'
+  exit 1
+fi
+
 aws ecr get-login-password --region '{{ region }}' | docker login --username AWS --password-stdin '{{ repository }}'
 
 if ! aws ecr describe-repositories --repository-names '{{ name }}' --region '{{ region }}' >/dev/null; then
