@@ -178,7 +178,7 @@ module Baza::Helpers
       'span',
       class: num.positive? ? 'good' : 'bad',
       title: usd(num, digits: 6)
-    ) { usd }
+    ) { "Ƶ#{usd}" }
   end
 
   def msec(msec)

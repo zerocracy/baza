@@ -83,6 +83,20 @@ if ! aws iam get-role --role-name '{{ name }}' >/dev/null; then
   sleep 15
 fi
 
+# Compare two string and fail if they are not similar.
+function similar() {
+  set +x
+  left=$( echo "$1" | tr '\n' ' ' | tr -d ' ')
+  right=$( echo "$2" | tr '\n' ' ' | tr -d ' ')
+  if [ "${left}" == "${right}" ]; then
+    echo 'They are similar'
+    return 0
+  else
+    echo 'There is a difference'
+    return 1
+  fi
+}
+
 # Allow this role to do everything it needs:
 policy='{
   "Version": "2012-10-17",
@@ -163,8 +177,8 @@ policy='{
     }
   ]
 }'
-now=$( aws iam get-role-policy --role-name '{{ name }}' --policy-name 'access' 2>/dev/null || echo '')
-if [ "${now}" != "${policy}" ]; then
+now=$( aws iam get-role-policy --role-name '{{ name }}' --policy-name 'access' --query PolicyDocument 2>/dev/null || echo '')
+if ! similar "${now}" "${policy}"; then
   aws iam put-role-policy \
     --color off \
     --role-name '{{ name }}' \
@@ -176,8 +190,8 @@ fi
 # shellcheck disable=SC2050
 if [ '{{ human }}' == 'yegor256' ] && [ -e swarm/aws-policy.json ]; then
   policy=$( cat swarm/aws-policy.json )
-  now=$( aws iam get-role-policy --role-name '{{ name }}' --policy-name 'admin-access' 2>/dev/null || echo '' )
-  if [ "${now}" != "${policy}" ]; then
+  now=$( aws iam get-role-policy --role-name '{{ name }}' --policy-name 'admin-access' --query PolicyDocument 2>/dev/null || echo '' )
+  if ! similar "${now}" "${policy}"; then
     aws iam put-role-policy \
       --color off \
       --role-name '{{ name }}' \
