@@ -31,8 +31,9 @@ require_relative '../test__helper'
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
 class PopTest < Minitest::Test
-  def test_runs_script
+  def test_runs_pop_entry_script
     loog = fake_loog
+    fake_pgsql.exec('TRUNCATE job CASCADE')
     job = fake_job
     s = fake_human.swarms.add(fake_name, "#{fake_name}/#{fake_name}", 'master', '/')
     Dir.mktmpdir do |home|
@@ -75,7 +76,7 @@ class PopTest < Minitest::Test
             'adding: job.json',
             "aws s3 cp pack.zip s3://swarms.zerocracy.com/baza-j/#{job.id}.zip",
             'aws sqs send-message --queue-url https://sqs.us-east-1.amazonaws.com/019644334823/baza-j'
-          ].each { |t| assert(stdout.include?(t), t) }
+          ].each { |t| assert(stdout.include?(t), "Can't find #{t.inspect} in\n#{stdout}") }
         ensure
           bash("docker rmi #{img}", loog)
         end

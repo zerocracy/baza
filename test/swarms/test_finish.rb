@@ -30,8 +30,8 @@ require_relative '../test__helper'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class PopTest < Minitest::Test
-  def test_runs_script
+class FinishTest < Minitest::Test
+  def test_runs_finish_entry_script
     loog = fake_loog
     job = fake_job
     s = fake_human.swarms.add(fake_name, "#{fake_name}/#{fake_name}", 'master', '/')
@@ -43,11 +43,16 @@ class PopTest < Minitest::Test
           "
           #!/bin/bash
           set -ex
-          mkdir pack
-          echo '{ \"id\": \"#{job.id}\", \"exit\": 0, \"msec\": 500 }' > pack/job.json
-          cp $(dirname $0)/empty.fb pack/base.fb
-          echo '' > pack/stdout.txt
-          zip -j $4 pack/*
+          if [ \"${1}\" == 's3' ]; then
+            if [ \"${2}\" == 'cp' ]; then
+              rm -rf pack
+              mkdir pack
+              echo '{ \"id\": \"#{job.id}\", \"exit\": 0, \"msec\": 500 }' > pack/job.json
+              cp $(dirname $0)/empty.fb pack/base.fb
+              echo '' > pack/stdout.txt
+              zip -j $4 pack/*
+            fi
+          fi
           "
         )
         FileUtils.chmod('+x', sh)

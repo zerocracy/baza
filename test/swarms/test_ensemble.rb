@@ -44,11 +44,12 @@ class EnsembleTest < Minitest::Test
         ./pop.sh 0 temp
         rm -rf temp/*
         echo '{\"messageAttributes\":{
-          \"swarm\": {\"stringValue\": \"#{s.name}\"}},
+          \"swarm\": {\"stringValue\": \"#{s.name}\"},
           \"more\": {\"stringValue\": \"#{s.name}\"}}}' > temp/event.json
         ./shift.sh #{job.id} temp
         rm -rf temp/*
-        echo '{\"messageAttributes\":{\"swarm\": {\"stringValue\": \"#{s.name}\"}}}' > temp/event.json
+        echo '{\"messageAttributes\":{
+          \"swarm\": {\"stringValue\": \"#{s.name}\"}}}' > temp/event.json
         ./finish.sh #{job.id} temp
         "
       )
@@ -103,13 +104,11 @@ class EnsembleTest < Minitest::Test
             'SWARM_SECRET' => s.secret
           )
           [
-            "PUT /finish?id=#{job.id}",
             'adding: base.fb',
             'adding: stdout.txt',
-            'HTTP/1.1 200 OK',
             'aws s3 rm s3://swarms.zerocracy.com/',
             '--message-attributes'
-          ].each { |t| assert(stdout.include?(t), t) }
+          ].each { |t| assert(stdout.include?(t), "Can't find #{t.inspect} in\n#{stdout}") }
         ensure
           bash("docker rmi #{img}", loog)
         end

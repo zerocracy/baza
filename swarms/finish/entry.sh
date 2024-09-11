@@ -42,7 +42,7 @@ key="${swarm}/${id}.zip"
 
 aws s3 cp "s3://${S3_BUCKET}/${key}" pack.zip
 
-status=$(curl -v -X PUT -s "${BAZA_URL}/finish?id=${id}&swarm=${SWARM_ID}&secret=${SWARM_SECRET}" \
+status=$(curl -X PUT -s "${BAZA_URL}/finish?id=${id}&swarm=${SWARM_ID}&secret=${SWARM_SECRET}" \
   --data-binary '@pack.zip' -o /dev/null \
   -H 'User-Agent: baza-finish' \
   -H 'Content-Type: application/octet-stream' -w "%{http_code}")

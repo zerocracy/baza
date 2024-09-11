@@ -30,8 +30,8 @@ require_relative '../test__helper'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class PopTest < Minitest::Test
-  def test_runs_script
+class ShiftTest < Minitest::Test
+  def test_runs_shift_entry_script
     loog = fake_loog
     job = fake_job
     s = fake_human.swarms.add(fake_name, "#{fake_name}/#{fake_name}", 'master', '/')
@@ -56,10 +56,18 @@ class PopTest < Minitest::Test
       )
       img = 'test-shift'
       bash("docker build #{home} -t #{img}", loog)
+      name = "baza-#{s.name}"
       Dir.mktmpdir do |dir|
         File.write(
           File.join(dir, 'event.json'),
-          JSON.pretty_generate({ messageAttributes: { swarm: { stringValue: s.name } } })
+          JSON.pretty_generate(
+            {
+              messageAttributes: {
+                swarm: { stringValue: name },
+                more: { stringValue: name }
+              }
+            }
+          )
         )
         bash("docker run -v #{dir}:/temp --rm #{img} #{job.id} /temp", loog)
       ensure

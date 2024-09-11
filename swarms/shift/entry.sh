@@ -40,6 +40,12 @@ aws s3 cp "s3://${S3_BUCKET}/${swarm}/${id}.zip" pack.zip
 
 read -a more <<< "$( cat event.json | jq -r .messageAttributes.more.stringValue )"
 
+if [ "${more[0]}" == 'null' ]; then
+  cat event.json
+  echo "There is not 'more' found in the JSON, it's an error"
+  exit 1
+fi
+
 if [ "${#more[@]}" -eq 0 ]; then
   aws sqs send-message \
     --queue-url https://sqs.us-east-1.amazonaws.com/019644334823/baza-finish \
