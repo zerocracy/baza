@@ -57,6 +57,11 @@ class Baza::Pipe
       job.untake!
       return nil
     end
+    # Because we are still testing:
+    if owner.start_with?('swarm:') && ENV['RACK_ENV'] != 'test'
+      job.untake!
+      return nil
+    end
     @loog.debug("Job ##{job.id} popped out")
     job
   end
