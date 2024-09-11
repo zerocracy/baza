@@ -27,7 +27,7 @@ cd /swarm
 
 if [ -e Gemfile ]; then
   bundle config set without development
-  bundle install --gemfile Gemfile
+  bundle install --quiet --gemfile Gemfile
 fi
 
 if [ '{{ human }}' == 'yegor256' ]; then
