@@ -30,6 +30,7 @@ require_relative '../version'
 before '/*' do
   @locals = {
     http_start: Time.now,
+    heroku_release_version: ENV.fetch('HEROKU_RELEASE_VERSION', 'n/a'),
     github_login_link: settings.glogin.login_uri,
     request_ip: request.ip,
     db_size: settings.zache.get(:db_size, lifetime: 30 * 60) do
