@@ -269,7 +269,7 @@ module Baza::Helpers
           "#{lines.count} line#{lines.count == 1 ? '' : 's'}"
         end
       end,
-      unrollable ? html_tag('pre', style: 'display: none;') { text } : ''
+      unrollable ? html_tag('pre') { text } : ''
     ].join
   end
 end

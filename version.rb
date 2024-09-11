@@ -29,5 +29,5 @@ require_relative 'objects/baza'
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
 module Baza
-  VERSION = '0.0.0'
+  VERSION = '0.9010767'
 end
