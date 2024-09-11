@@ -110,7 +110,7 @@ policy='{
   "Version": "2012-10-17",
   "Statement": [
     {
-      "Sid": "SQSMessaging",
+      "Sid": "SQSReceiving",
       "Action": [
         "sqs:ChangeMessageVisibility",
         "sqs:DeleteMessage",
@@ -119,6 +119,14 @@ policy='{
       ],
       "Effect": "Allow",
       "Resource": "arn:aws:sqs:{{ region }}:{{ account }}:{{ name }}"
+    },
+    {
+      "Sid": "SQSSending",
+      "Action": [
+        "sqs:SendMessage"
+      ],
+      "Effect": "Allow",
+      "Resource": "arn:aws:sqs:{{ region }}:{{ account }}:baza-shift"
     },
     {
       "Sid": "S3Reading",
@@ -191,7 +199,7 @@ if ! similar "${now}" "${policy}"; then
     --color off \
     --role-name '{{ name }}' \
     --policy-name 'access' \
-    --policy-document "${policy}"
+    --policy-document "${policy}" >/dev/null
 fi
 
 # Give this swarm special rights:
@@ -204,7 +212,7 @@ if [ '{{ human }}' == 'yegor256' ] && [ -e swarm/aws-policy.json ]; then
       --color off \
       --role-name '{{ name }}' \
       --policy-name 'admin-access' \
-      --policy-document "${policy}"
+      --policy-document "${policy}" >/dev/null
   fi
 fi
 
@@ -214,13 +222,13 @@ if ! ( aws logs describe-log-groups --log-group-name-pattern '{{ name }}' --regi
     --color off \
     --region '{{ region }}' \
     --tags 'baza={{ version }}' \
-    --log-group-name '{{ name }}'
+    --log-group-name '{{ name }}' >/dev/null
 fi
 aws logs put-retention-policy \
   --color off \
   --region '{{ region }}' \
   --log-group-name '{{ name }}' \
-  --retention-in-days 14
+  --retention-in-days 14 >/dev/null
 
 function wait_for_function() {
   while true; do
@@ -240,11 +248,11 @@ if aws lambda get-function --function-name '{{ name }}' --region '{{ region }}' 
     --function-name '{{ name }}' \
     --region '{{ region }}' \
     --logging-config 'LogGroup={{ name }},LogFormat=Text' \
-    --timeout 300
+    --timeout 300 >/dev/null
   wait_for_function
   aws lambda tag-resource \
     --resource "${fn}" \
-    --tags 'baza={{ version }}'
+    --tags 'baza={{ version }}' >/dev/null
   wait_for_function
   aws lambda update-function-code \
     --color off \
@@ -252,7 +260,7 @@ if aws lambda get-function --function-name '{{ name }}' --region '{{ region }}' 
     --architectures "${arch}" \
     --region '{{ region }}' \
     --image-uri "${image}" \
-    --publish
+    --publish >/dev/null
 else
   aws lambda create-function \
     --color off \
@@ -266,7 +274,7 @@ else
     --package-type Image \
     --code "ImageUri=${image}" \
     --tags "VERSION=${version}" \
-    --role 'arn:aws:iam::{{ account }}:role/{{ name }}'
+    --role 'arn:aws:iam::{{ account }}:role/{{ name }}' >/dev/null
 fi
 
 # Create new SQS queue for this new Lambda function:
@@ -275,14 +283,14 @@ if aws sqs get-queue-url --queue-name '{{ name }}' --region '{{ region }}' >/dev
     --color off \
     --attributes 'VisibilityTimeout=300' \
     --queue-url 'https://sqs.{{ region }}.amazonaws.com/{{ account }}/{{ name }}' \
-    --region '{{ region }}'
+    --region '{{ region }}' >/dev/null
 else
   aws sqs create-queue \
     --color off \
     --attributes 'VisibilityTimeout=300' \
     --tags 'baza={{ version }}' \
     --queue-name '{{ name }}' \
-    --region '{{ region }}'
+    --region '{{ region }}' >/dev/null
 fi
 
 # Make sure all new SQS events trigger Lambda function execution:
@@ -294,7 +302,7 @@ if [ "$(echo "${mapping}" | jq '.EventSourceMappings | length')" == 0 ]; then
     --event-source-arn "${queue}" \
     --batch-size=1 \
     --function-name "${fn}" \
-    --region '{{ region }}'
+    --region '{{ region }}' >/dev/null
 else
   if [ "$(echo "${mapping}" | jq -r '.EventSourceMappings[0].State')" == 'Disabled' ]; then
     uuid=$(echo "${mapping}" | jq -r '.EventSourceMappings[0].UUID')
@@ -302,6 +310,6 @@ else
       --color off \
       --uuid "${uuid}" \
       --enabled \
-      --region '{{ region }}'
+      --region '{{ region }}' >/dev/null
   fi
 fi
