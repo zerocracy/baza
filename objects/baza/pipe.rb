@@ -53,6 +53,10 @@ class Baza::Pipe
     )
     return nil if rows.empty?
     job = @humans.job_by_id(rows.first['id'].to_i)
+    if job.name == 'test' && job.jobs.human.github == 'yegor256' && owner.start_with?('baza')
+      job.untake!
+      return nil
+    end
     @loog.debug("Job ##{job.id} popped out")
     job
   end

@@ -50,6 +50,8 @@ class Baza::PipeTest < Minitest::Test
     owner = fake_name
     job = fake_pipe.pop(owner)
     assert_equal(job.id, fake_pipe.pop(owner).id)
+    job.untake!
+    assert(!fake_pipe.pop('another owner').nil?)
   end
 
   def test_simple_pack

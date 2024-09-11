@@ -47,6 +47,10 @@ class Baza::Job
     @jobs.pgsql.exec('UPDATE job SET verified = $2 WHERE id = $1', [@id, text])
   end
 
+  def untake!
+    @jobs.pgsql.exec('UPDATE job SET taken = NULL WHERE id = $1', [@id])
+  end
+
   # Delete the data of the job, that take space.
   #
   # @param [Baza::Factbases] fbs The location of artifacts
