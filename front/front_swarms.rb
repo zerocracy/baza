@@ -202,10 +202,7 @@ get '/pop' do
   return [401, "Invalid secret for the swarm ##{swarm.id}"] if swarm.secret != secret
   pipe = settings.humans.pipe(settings.fbs)
   job = pipe.pop("swarm:##{swarm.id}/#{swarm.name}")
-  if job.nil?
-    status 204
-    return
-  end
+  return [204, 'No jobs at the moment in the pipeline'] if job.nil?
   content_type('application/zip')
   Tempfile.open do |f|
     pipe.pack(job, f.path)
