@@ -24,6 +24,7 @@
 
 require 'aws-sdk-core'
 require 'aws-sdk-s3'
+require 'aws-sdk-sqs'
 require 'backtrace'
 require 'elapsed'
 require 'English'
