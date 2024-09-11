@@ -185,11 +185,11 @@ end
 # @param [Hash] event The JSON event
 # @param [LambdaContext] context I don't know what this is for
 def go(event:, context:)
-  puts 'Baza version: {{ version }}'
   puts "Arrived event: #{event.to_s.inspect}"
   elapsed(intro: 'Job processing finished') do
     event['Records']&.each do |rec|
       loog = Loog::Buffer.new
+      loog.info('Version: {{ version }}')
       code = 1
       begin
         job = rec['messageAttributes']['job']['stringValue'].to_i
