@@ -37,12 +37,7 @@ swarm=$(cat event.json | jq -r .messageAttributes.swarm.stringValue)
 
 aws s3 cp "s3://${S3_BUCKET}/${swarm}/${id}.zip" pack.zip
 
-more=()
-while IFS=' ' read -r s; do
-  if [ "${s}" != "${swarm}" ]; then
-    more+=("${s}")
-  fi
-done < <( cat event.json | jq -r .messageAttributes.more.stringValue )
+read -a more <<< "$( cat event.json | jq -r .messageAttributes.more.stringValue )"
 
 if [ "${#more[@]}" -eq 0 ]; then
   aws sqs send-message \
@@ -58,5 +53,3 @@ else
     --message-body "Job ${id} next futher processing by '${more[@]}'" \
     --message-attributes "job={DataType=String,StringValue='${id}'},swarm={DataType=String,StringValue='${swarm}'},more={DataType=String,StringValue='${more[@]}'}"
 fi
-
-
