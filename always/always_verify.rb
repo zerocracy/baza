@@ -22,6 +22,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-settings.humans.verify_one_job do |j, verdict|
+settings.humans.verify_one_job(settings) do |j, verdict|
   settings.loog.debug("Job ##{j.id} was verified as #{verdict.inspect}")
 end

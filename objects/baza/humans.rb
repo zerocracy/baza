@@ -184,7 +184,7 @@ class Baza::Humans
   end
 
   # Verify one job.
-  def verify_one_job
+  def verify_one_job(settings)
     rows = @pgsql.exec(
       [
         "UPDATE job SET verified = 'START: #{Time.now.utc.iso8601}' WHERE id = ",
@@ -194,7 +194,7 @@ class Baza::Humans
     )
     return if rows.empty?
     job = job_by_id(rows.first['id'].to_i)
-    verdict = Baza::Verified.new(job).verdict
+    verdict = Baza::Verified.new(job, settings).verdict
     job.verify!(verdict)
     yield job, verdict
   end
