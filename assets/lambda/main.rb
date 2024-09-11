@@ -126,6 +126,7 @@ def report(stdout, code, job)
     timeout: 300,
     body: stdout,
     headers: {
+      'User-Agent' => '{{ name }} {{ version }}',
       'Content-Type' => 'text/plain',
       'Content-Length' => stdout.length
     }
@@ -184,6 +185,7 @@ end
 # @param [Hash] event The JSON event
 # @param [LambdaContext] context I don't know what this is for
 def go(event:, context:)
+  puts 'Baza version: {{ version }}'
   puts "Arrived event: #{event.to_s.inspect}"
   elapsed(intro: 'Job processing finished') do
     event['Records']&.each do |rec|

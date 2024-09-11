@@ -70,8 +70,7 @@
             %a.ico{href: iri.cut('/jobs').append(j.id).append('input.html'), title: "Click here to see the HTML of the incoming Factbase file (#{bytes(j.size)})"}
               %i.fa-solid.fa-box-archive
           - if j.errors.positive?
-            %span{title: "#{j.errors} error(s) in the 'judges-summary' fact, before processing"}
-              %i.fa-solid.fa-triangle-exclamation.bad
+            %i.fa-solid.fa-triangle-exclamation.bad{title: "#{j.errors} error(s) in the 'judges-summary' fact, before processing"}
         %td.ff
           %a{href: iri.over(name: j.name)}<
             = j.name

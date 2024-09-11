@@ -88,6 +88,7 @@ policy='{
   "Version": "2012-10-17",
   "Statement": [
     {
+      "Sid": "SQSMessaging",
       "Action": [
         "sqs:ChangeMessageVisibility",
         "sqs:DeleteMessage",
@@ -98,11 +99,13 @@ policy='{
       "Resource": "arn:aws:sqs:{{ region }}:{{ account }}:{{ name }}"
     },
     {
+      "Sid": "S3Reading",
       "Effect": "Allow",
       "Action": ["s3:ListBucket"],
       "Resource": "arn:aws:s3:::{{ bucket }}/*"
     },
     {
+      "Sid": "S3ReadingAndWriting",
       "Effect": "Allow",
       "Action": [
         "s3:GetObject",
@@ -111,6 +114,7 @@ policy='{
       "Resource": "arn:aws:s3:::{{ bucket }}/{{ name }}/*"
     },
     {
+      "Sid": "LambdaExecuting",
       "Effect": "Allow",
       "Action": [
         "cloudformation:DescribeStacks",
@@ -138,6 +142,7 @@ policy='{
       "Resource": "*"
     },
     {
+      "Sid": "SavingLogs",
       "Effect": "Allow",
       "Action": [
         "logs:CreateLogStream",
@@ -146,6 +151,7 @@ policy='{
       "Resource": "arn:aws:logs:{{ region }}:{{ account }}:log-group:{{ name }}"
     },
     {
+      "Sid": "RoleAssuming",
       "Effect": "Allow",
       "Action": "iam:PassRole",
       "Resource": "*",
@@ -183,6 +189,7 @@ fi
 # Create AWS CloudWatch LogGroup for Lambda function:
 if ! aws logs describe-log-groups --log-group-name-pattern '{{ name }}' --region '{{ region }}' --output text 2>&1 | grep '\t{{ name }}\t'; then
   aws logs create-log-group \
+    --tags 'baza={{ version }}' \
     --log-group-name '{{ name }}' \
     --region '{{ region }}'
 fi
@@ -201,6 +208,7 @@ function wait_for_function() {
 }
 
 # Create or update Lambda function:
+fn='arn:aws:lambda:{{ region }}:{{ account }}:function:{{ name }}'
 if aws lambda get-function --function-name '{{ name }}' --region '{{ region }}' >/dev/null 2>&1; then
   wait_for_function
   aws lambda update-function-configuration \
@@ -208,6 +216,10 @@ if aws lambda get-function --function-name '{{ name }}' --region '{{ region }}' 
     --region '{{ region }}' \
     --logging-config 'LogGroup={{ name }},LogFormat=Text' \
     --timeout 300
+  wait_for_function
+  aws lambda tag-resource \
+    --resource "${fn}" \
+    --tags 'baza={{ version }}'
   wait_for_function
   aws lambda update-function-code \
     --color off \
@@ -221,6 +233,7 @@ else
     --color off \
     --function-name '{{ name }}' \
     --region '{{ region }}' \
+    --tags 'baza={{ version }}' \
     --timeout 300 \
     --logging-config 'LogGroup={{ name }},LogFormat=Text' \
     --architectures "${arch}" \
@@ -242,18 +255,18 @@ else
   aws sqs create-queue \
     --color off \
     --attributes 'VisibilityTimeout=300' \
+    --tags 'baza={{ version }}' \
     --queue-name '{{ name }}' \
     --region '{{ region }}'
 fi
 
 # Make sure all new SQS events trigger Lambda function execution:
-fn='arn:aws:lambda:{{ region }}:{{ account }}:function:{{ name }}'
-arn='arn:aws:sqs:{{ region }}:{{ account }}:{{ name }}'
-mapping=$( aws lambda list-event-source-mappings --event-source-arn "${arn}" --function-name "${fn}" --region '{{ region }}' )
+queue='arn:aws:sqs:{{ region }}:{{ account }}:{{ name }}'
+mapping=$( aws lambda list-event-source-mappings --event-source-arn "${queue}" --function-name "${fn}" --region '{{ region }}' )
 if [ "$(echo "${mapping}" | jq '.EventSourceMappings | length')" == 0 ]; then
   aws lambda create-event-source-mapping \
     --color off \
-    --event-source-arn "${arn}" \
+    --event-source-arn "${queue}" \
     --batch-size=1 \
     --function-name "${fn}" \
     --region '{{ region }}'

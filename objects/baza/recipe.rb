@@ -98,6 +98,7 @@ class Baza::Recipe
     [
       cat_of(
         "#{script}.sh",
+        'version' => Baza::VERSION,
         'human' => @swarm.swarms.human.github.to_s,
         'swarm' => @swarm.id.to_s,
         'name' => safe("baza-#{@swarm.name}"),
@@ -113,6 +114,7 @@ class Baza::Recipe
       cat_of('entry.sh'),
       cat_of(
         'main.rb',
+        'version' => Baza::VERSION,
         'account' => safe(account),
         'region' => safe(region),
         'host' => host,
