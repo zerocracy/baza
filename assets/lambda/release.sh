@@ -232,7 +232,7 @@ aws logs put-retention-policy \
 
 function wait_for_function() {
   while true; do
-    sleep 1
+    sleep 5
     state=$(aws lambda get-function --function-name '{{ name }}' --region '{{ region }}' | jq -r .Configuration.LastUpdateStatus)
     if [ "${state}" == 'Successful' ]; then
       break

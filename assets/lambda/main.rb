@@ -96,7 +96,7 @@ def send_message(id, loog)
     message_body: "Job ##{id} was processed by {{ name }}",
     message_attributes: {
       'swarm' => {
-        string_value: '{{ swarm }}',
+        string_value: '{{ name }}',
         data_type: 'String'
       },
       'job' => {
