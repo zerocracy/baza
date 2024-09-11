@@ -105,4 +105,14 @@ class Baza::VerifiedTest < Minitest::Test
     v = Baza::Verified.new(job, app.settings).verdict
     assert_equal('FAKE: Wrong URL at workflow_url: "hey".', v)
   end
+
+  def test_wrong_ip
+    human = fake_human
+    token = human.tokens.add(fake_name)
+    ip = '8.8.8.8'
+    id = token.start(fake_name, fake_name, 1, 0, 'n/a', ['workflow_url:hey'], ip).id
+    job = human.jobs.get(id)
+    v = Baza::Verified.new(job, app.settings).verdict
+    assert_equal("FAKE: IP #{ip} is not from Microsoft.", v)
+  end
 end
