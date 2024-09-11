@@ -94,7 +94,7 @@ class Baza::Release
       end,
       "after #{format('%.2f', msec.to_f / (60 * 1000))} minutes of work,",
       "the log is [here](//swarms/#{s.id}/releases) (#{tail.split("\n").count} lines).",
-      if code.zero? && !destroyed && head == s.head
+      if code.zero? && !destroyed && head != s.head
         [
           'Pay attention, the head of the swarm ',
           "[#{s.head[0..6].downcase}](https://github.com/#{s.repository}/commit/#{s.head.downcase}) is different ",
