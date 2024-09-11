@@ -94,12 +94,21 @@ class Baza::Release
       end,
       "after #{format('%.2f', msec.to_f / (60 * 1000))} minutes of work,",
       "the log is [here](//swarms/#{s.id}/releases) (#{tail.split("\n").count} lines).",
-      !destroyed && (head == s.head || !code.zero?) ? '' : [
-        'Pay attention, the head of the swarm ',
-        "[#{s.head[0..6].downcase}](https://github.com/#{s.repository}/commit/#{s.head.downcase}) is different ",
-        'from what the release has published — this situation will trigger a new release soon.'
-      ].join,
-      "We [charged](//account) #{format('%0.2f', cost.to_f / (1000 * 100))} for this."
+      if !destroyed && (head == s.head || !code.zero?)
+        [
+          'Pay attention, the head of the swarm ',
+          "[#{s.head[0..6].downcase}](https://github.com/#{s.repository}/commit/#{s.head.downcase}) is different ",
+          'from what the release has published — this situation will trigger a new release soon.'
+        ].join
+      end,
+      unless code.zero?
+        [
+          'This failure is _most probably_ caused by an internal error in our server software. ',
+          'We kindly ask you to report it, by submitting an issue to the ',
+          '[zerocracy/baza](https://github.com/zerocracy/baza/issues) repository.'
+        ].join
+      end,
+      "We [charged](//account) Ƶ#{format('%0.2f', cost.to_f / (1000 * 100))} for this."
     )
   end
 

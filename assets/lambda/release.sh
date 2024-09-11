@@ -189,11 +189,14 @@ fi
 # Create AWS CloudWatch LogGroup for Lambda function:
 if ! aws logs describe-log-groups --log-group-name-pattern '{{ name }}' --region '{{ region }}' --output text 2>&1 | grep '\t{{ name }}\t'; then
   aws logs create-log-group \
+    --color off \
+    --region '{{ region }}' \
     --tags 'baza={{ version }}' \
-    --log-group-name '{{ name }}' \
-    --region '{{ region }}'
+    --log-group-name '{{ name }}'
 fi
 aws logs put-retention-policy \
+  --color off \
+  --region '{{ region }}' \
   --log-group-name '{{ name }}' \
   --retention-in-days 14
 

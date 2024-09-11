@@ -145,6 +145,8 @@ class Baza::Tbot
     @tp.post(
       row['id'].to_i,
       lines
+        .compact
+        .reject(&:empty?)
         .join(' ')
         .gsub(%r{\(//([^)]+)\)}, '(https://www.zerocracy.com/\1)')
         .strip
