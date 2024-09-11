@@ -127,36 +127,9 @@ class Baza::IpGeolocation
           'country_flag' => 'https://ipgeolocation.io/static/flags/us_64.png',
           'geoname_id' => '6301403',
           'isp' => 'Microsoft Corp',
-          'connection_type' => '',
           'organization' => 'Microsoft Company',
           'country_emoji' => '🇺🇸',
           'currency' => { 'code' => 'USD', 'name' => 'US Dollar', 'symbol' => '$' },
-          'time_zone' => {
-            'name' => 'America/Los_Angeles',
-            'offset' => -8,
-            'offset_with_dst' => -7,
-            'current_time' => '2024-09-03 07:42:32.209-0700',
-            'current_time_unix' => 1_725_374_552.209,
-            'is_dst' => true,
-            'dst_savings' => 1,
-            'dst_exists' => true,
-            'dst_start' => {
-              'utc_time' => '2024-03-10 TIME 10',
-              'duration' => '+1H',
-              'gap' => true,
-              'dateTimeAfter' => '2024-03-10 TIME 03',
-              'dateTimeBefore' => '2024-03-10 TIME 02',
-              'overlap' => false
-            },
-            'dst_end' => {
-              'utc_time' => '2024-11-03 TIME 09',
-              'duration' => '-1H',
-              'gap' => false,
-              'dateTimeAfter' => '2024-11-03 TIME 01',
-              'dateTimeBefore' => '2024-11-03 TIME 02',
-              'overlap' => true
-            }
-          }
         },
         '127.0.0.1' => {
           'ip' => '127.0.0.1',
@@ -181,36 +154,8 @@ class Baza::IpGeolocation
           'country_flag' => 'https://ipgeolocation.io/static/flags/us_64.png',
           'geoname_id' => '6301403',
           'isp' => 'Microsoft Corp',
-          'connection_type' => '',
           'organization' => 'Microsoft Company',
           'country_emoji' => '🇺🇸',
-          'currency' => { 'code' => 'USD', 'name' => 'US Dollar', 'symbol' => '$' },
-          'time_zone' => {
-            'name' => 'America/Los_Angeles',
-            'offset' => -8,
-            'offset_with_dst' => -7,
-            'current_time' => '2024-09-03 07:42:32.209-0700',
-            'current_time_unix' => 1_725_374_552.209,
-            'is_dst' => true,
-            'dst_savings' => 1,
-            'dst_exists' => true,
-            'dst_start' => {
-              'utc_time' => '2024-03-10 TIME 10',
-              'duration' => '+1H',
-              'gap' => true,
-              'dateTimeAfter' => '2024-03-10 TIME 03',
-              'dateTimeBefore' => '2024-03-10 TIME 02',
-              'overlap' => false
-            },
-            'dst_end' => {
-              'utc_time' => '2024-11-03 TIME 09',
-              'duration' => '-1H',
-              'gap' => false,
-              'dateTimeAfter' => '2024-11-03 TIME 01',
-              'dateTimeBefore' => '2024-11-03 TIME 02',
-              'overlap' => true
-            }
-          }
         }
       }
       GetResponse.new(body: JSON.dump(data[ip]))
