@@ -41,7 +41,7 @@ class Baza::EC2
   # @param [String] region AWS region
   #
   # @param [Loog] loog Logging facility
-  def initialize(key, secret, region, sgroup, subnet, image,
+  def initialize(key, secret, region, sgroup, subnet,
     loog: Loog::NULL, type: 't2.xlarge')
     raise Baza::Urror, 'AWS key is nil' if key.nil?
     raise Baza::Urror, "AWS key is wrong: #{key.inspect}" unless key.match?(/^(AKIA|FAKE|STUB)[A-Z0-9]{16}$/)
@@ -55,11 +55,20 @@ class Baza::EC2
     @sgroup = sgroup
     raise Baza::Urror, 'AWS subnet is nil' if subnet.nil?
     @subnet = subnet
-    raise Baza::Urror, 'AWS image is nil' if image.nil?
-    @image = image
     raise Baza::Urror, 'AWS image type is nil' if type.nil?
     @type = type
     @loog = loog
+  end
+
+  def find_ami
+    aws.describe_images(
+      filters: [
+        {
+          name: 'name',
+          values: ['baza-release']
+        }
+      ]
+    ).images[0].image_id
   end
 
   def run_instance(tag, data)
@@ -68,7 +77,7 @@ class Baza::EC2
     return 'i-42424242' if @key.start_with?('FAKE')
     elapsed(@loog, intro: "Started new #{@type.inspect} EC2 instance") do
       aws.run_instances(
-        image_id: @image,
+        image_id: find_ami,
         instance_type: @type,
         max_count: 1,
         min_count: 1,

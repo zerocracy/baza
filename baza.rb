@@ -204,7 +204,6 @@ configure do
     cfg['region'],
     cfg['sgroup'],
     cfg['subnet'],
-    cfg['image'],
     type: 't2.xlarge',
     loog: settings.loog
   )

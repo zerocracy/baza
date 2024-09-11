@@ -40,9 +40,9 @@ class Baza::EC2Test < Minitest::Test
       'us-east-1',
       'sg-424242',
       'sn-42424242',
-      't2.large',
       loog: fake_loog
     )
+    fake_aws('DescribeImages', { imagesSet: { item: { imageId: 'ami-42424242' } } })
     fake_aws('RunInstances', { instancesSet: { item: { instanceId: 'i-42424242' } } })
     i = ec2.run_instance('some-fake-name', "#!/bin/bash\necho test\n")
     assert_equal('i-42424242', i)

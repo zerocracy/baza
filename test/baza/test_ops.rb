@@ -40,7 +40,6 @@ class Baza::OpsTest < Minitest::Test
       'us-east-1',
       'sg-424242',
       'sn-42424242',
-      't2.large',
       loog: fake_loog
     )
     ops = Baza::Ops.new(ec2, '', '', 'foo')
@@ -55,7 +54,6 @@ class Baza::OpsTest < Minitest::Test
       'us-east-1',
       'sg-424242',
       'sn-42424242',
-      't2.large',
       loog: fake_loog
     )
     ops = Baza::Ops.new(ec2, '', '', 'foo')
