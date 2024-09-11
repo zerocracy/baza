@@ -26,6 +26,7 @@ set -ex
 set -o pipefail
 
 id=$1
+[[ "${id}" =~ ^[0-9]+$ ]]
 home=$2
 cd "${home}"
 

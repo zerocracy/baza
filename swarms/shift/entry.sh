@@ -26,6 +26,7 @@ set -ex
 set -o pipefail
 
 id=$1
+[[ "${id}" =~ ^[0-9]+$ ]]
 home=$2
 cd "${home}"
 
@@ -45,11 +46,16 @@ if [ "${#more[@]}" -eq 0 ]; then
     --message-body "Job ${id} finished processing" \
     --message-attributes "job={DataType=String,StringValue='${id}'},swarm={DataType=String,StringValue='${swarm}'}"
 else
-  next=${more[0]}
+  next="${more[0]}"
+  if [[ ! "${next}" =~ ^baza- ]]; then
+    cat event.json
+    echo "Wrong swarm name '${next}' found in '${more[@]}'"
+    exit 1
+  fi
   aws s3 rm "s3://${S3_BUCKET}/${swarm}/${id}.zip"
   aws s3 cp pack.zip "s3://${S3_BUCKET}/${next}/${id}.zip"
   aws sqs send-message \
     --queue-url "https://sqs.us-east-1.amazonaws.com/019644334823/${next}" \
-    --message-body "Job ${id} next futher processing by '${more[@]}'" \
+    --message-body "Job #${id} needs futher processing by '${more[@]}'" \
     --message-attributes "job={DataType=String,StringValue='${id}'},swarm={DataType=String,StringValue='${swarm}'},more={DataType=String,StringValue='${more[@]}'}"
 fi

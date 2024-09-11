@@ -102,6 +102,10 @@ def send_message(id, loog)
       'job' => {
         string_value: id.to_s,
         data_type: 'String'
+      },
+      'more' => {
+        string_value: 'baza-j',
+        data_type: 'String'
       }
     }
   )
@@ -186,11 +190,12 @@ end
 # @param [Hash] event The JSON event
 # @param [LambdaContext] context I don't know what this is for
 def go(event:, context:)
-  puts "Arrived event: #{event.to_s.inspect}"
+  puts "Arrived package: #{event.to_s.inspect}"
   elapsed(intro: 'Job processing finished') do
     event['Records']&.each do |rec|
       loog = Loog::Buffer.new
       loog.info('Version: {{ version }}')
+      loog.info("Event: #{rec}")
       code = 1
       begin
         job = rec['messageAttributes']['job']['stringValue'].to_i

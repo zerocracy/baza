@@ -35,3 +35,5 @@ if [ '{{ human }}' == 'yegor256' ]; then
     /bin/bash install.sh
   fi
 fi
+
+gem install judges
