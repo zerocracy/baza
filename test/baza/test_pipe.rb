@@ -85,6 +85,51 @@ class Baza::PipeTest < Minitest::Test
     end
   end
 
+  def test_pack_with_alterations
+    fbs = Baza::Factbases.new('', '', loog: fake_loog)
+    Dir.mktmpdir do |dir|
+      input = File.join(dir, 'foo.fb')
+      File.binwrite(input, Factbase.new.export)
+      uri = fbs.save(input)
+      job = fake_token.start(fake_name, uri, 1, 0, 'n/a', [], '1.1.1.1')
+      alt = job.jobs.human.alterations.add(job.name, 'ruby', { script: '42 + 1"' })
+      pipe = Baza::Humans.new(fake_pgsql).pipe(fbs)
+      zip = File.join(dir, 'foo.zip')
+      pipe.pack(job, zip)
+      Baza::Zip.new(zip).unpack(dir)
+      ['job.json', 'base.fb', "alteration-#{alt}/alteration-#{alt}.rb"].each do |f|
+        assert(File.exist?(File.join(dir, f)), f)
+      end
+      json = JSON.parse(File.read(File.join(dir, 'job.json')))
+      assert_equal(job.id, json['id'], json)
+      assert_equal(job.name, json['name'], json)
+    end
+  end
+
+  def test_unpack_from_scratch
+    job = fake_job
+    fbs = Baza::Factbases.new('', '', loog: fake_loog)
+    pipe = Baza::Humans.new(fake_pgsql).pipe(fbs)
+    Dir.mktmpdir do |dir|
+      File.binwrite(File.join(dir, 'base.fb'), Factbase.new.export)
+      File.write(File.join(dir, 'stdout.txt'), 'Nothing interesting')
+      File.write(
+        File.join(dir, 'job.json'),
+        JSON.pretty_generate(
+          {
+            id: job.id,
+            exit: 0,
+            msec: 500
+          }
+        )
+      )
+      zip = File.join(dir, 'foo.zip')
+      Baza::Zip.new(zip).pack(dir)
+      pipe.unpack(job, zip)
+      assert(job.jobs.get(job.id).finished?)
+    end
+  end
+
   private
 
   def fake_pipe
