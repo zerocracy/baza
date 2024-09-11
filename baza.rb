@@ -161,7 +161,7 @@ end
 # Humans:
 configure do
   require_relative 'objects/baza/humans'
-  set :humans, Baza::Humans.new(settings.pgsql, tbot: settings.tbot)
+  set :humans, Baza::Humans.new(settings.pgsql, tbot: settings.tbot, loog: settings.loog)
 end
 
 # Trails:

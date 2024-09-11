@@ -39,14 +39,15 @@ class Baza::Humans
 
   class TokenNotFound < Baza::Urror; end
 
-  def initialize(pgsql, tbot: Baza::Tbot::Fake.new)
+  def initialize(pgsql, tbot: Baza::Tbot::Fake.new, loog: Loog::NULL)
     @pgsql = pgsql
     @tbot = tbot
+    @loog = loog
   end
 
   def pipe(fbs)
     require_relative 'pipe'
-    Baza::Pipe.new(self, fbs)
+    Baza::Pipe.new(self, fbs, loog: @loog)
   end
 
   def gc
