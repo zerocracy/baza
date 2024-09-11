@@ -30,6 +30,17 @@ require 'yaml'
 ENV['RACK_ENV'] = 'test'
 ENV['RACK_RUN'] = 'true'
 
+# In order to use any of the following options, you must run rake like this:
+#   rake -- --live=my.yml
+# Pay attention to the double dash that splits "rake" and the list of options.
+ARGV.each do |a|
+  opt, value = a.split('=', 2)
+  if opt == '--live'
+    # It is used in test__helper.rb, in the "fake_live_cfg" function:
+    ENV['RACK_LIVE_YAML_FILE'] = value
+  end
+end
+
 task default: %i[clean test rubocop scss_lint xcop config copyright]
 
 require 'rake/testtask'

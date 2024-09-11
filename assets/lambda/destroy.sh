@@ -24,38 +24,44 @@
 set -ex
 set -o pipefail
 
-if aws ecr describe-repositories --repository-names "{{ name }}" --region "{{ region }}" >/dev/null 2>&1; then
+if aws ecr describe-repositories --repository-names '{{ name }}' --region '{{ region }}' >/dev/null 2>&1; then
   aws ecr delete-repository \
-    --repository-name "{{ name }}" \
-    --region "{{ region }}" \
+    --repository-name '{{ name }}' \
+    --region '{{ region }}' \
     --force \
     --color off
 fi
 
-if aws lambda get-function --function-name "{{ name }}" --region "{{ region }}" >/dev/null 2>&1; then
+if aws lambda get-function --function-name '{{ name }}' --region '{{ region }}' >/dev/null 2>&1; then
   aws lambda delete-function \
-    --function-name "{{ name }}" \
-    --region "{{ region }}" \
+    --function-name '{{ name }}' \
+    --region '{{ region }}' \
     --color off
 fi
 
-if aws sqs get-queue-url --queue-name "{{ name }}" --region "{{ region }}" >/dev/null 2>&1; then
+if aws sqs get-queue-url --queue-name '{{ name }}' --region '{{ region }}' >/dev/null 2>&1; then
   aws sqs delete-queue \
-    --queue-url "https://sqs.{{ region }}.amazonaws.com/{{ account }}/{{ name }}" \
-    --region "{{ region }}" \
+    --queue-url 'https://sqs.{{ region }}.amazonaws.com/{{ account }}/{{ name }}' \
+    --region '{{ region }}' \
     --color off
   echo "Now, we have to wait a bit, to make sure SQS queue deleted entirely..."
   sleep 60
 fi
 
-if aws iam get-role --role-name "{{ name }}" >/dev/null 2>&1; then
+if aws iam get-role --role-name '{{ name }}' >/dev/null 2>&1; then
   while IFS= read -r policy; do
     aws iam delete-role-policy \
-      --role-name "{{ name }}" \
+      --role-name '{{ name }}' \
       --policy-name "${policy}" \
       --color off
-  done < <( aws iam list-role-policies --role-name "{{ name }}" --output json | jq -r '.PolicyNames[]' )
+  done < <( aws iam list-role-policies --role-name '{{ name }}' --output json | jq -r '.PolicyNames[]' )
   aws iam delete-role \
-    --role-name "{{ name }}" \
+    --role-name '{{ name }}' \
     --color off
+fi
+
+if [ "$(aws logs describe-log-groups --log-group-name-pattern '{{ name }}' --region '{{ region }}' 2>&1)" == '{{ name }}' ]; then
+  aws logs delete-log-group \
+    --log-group-name '{{ name }}' \
+    --region '{{ region }}'
 fi

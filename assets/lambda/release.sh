@@ -28,14 +28,14 @@ set -o pipefail
 # make sure the EC2 image that you are using is of the same architecture.
 arch=x86_64
 
-uri="git@github.com:{{ github }}.git"
+uri='git@github.com:{{ github }}.git'
 if [ ! -s "${HOME}/.ssh/id_rsa" ]; then
-  uri="https://github.com/{{ github }}"
+  uri='https://github.com/{{ github }}'
 fi
 
 attempt=0
 while true; do
-  git clone -b "{{ branch }}" --depth=1 --single-branch "${uri}" clone && break
+  git clone -b '{{ branch }}' --depth=1 --single-branch "${uri}" clone && break
   ((++attempt))
   if [ "${attempt}" -gt 8 ]; then exit 1; fi
   sleep "${attempt}"
@@ -43,19 +43,19 @@ done
 git --git-dir clone/.git rev-parse HEAD | tr '[:lower:]' '[:upper:]' > head.txt
 version=$(git --git-dir clone/.git rev-parse --short HEAD)
 rm -rf clone/.git
-cp -R "clone/{{ directory }}" swarm
+cp -R 'clone/{{ directory }}' swarm
 rm -rf clone
 if [ ! -e "${HOME}/.ssh/id_rsa.pub" ]; then
   rm -f "${HOME}/.ssh/id_rsa"
 fi
 
-aws ecr get-login-password --region "{{ region }}" | docker login --username AWS --password-stdin "{{ repository }}"
+aws ecr get-login-password --region '{{ region }}' | docker login --username AWS --password-stdin '{{ repository }}'
 
-if ! aws ecr describe-repositories --repository-names "{{ name }}" --region "{{ region }}" >/dev/null; then
+if ! aws ecr describe-repositories --repository-names '{{ name }}' --region '{{ region }}' >/dev/null; then
   aws ecr create-repository \
     --color off \
-    --repository-name "{{ name }}" \
-    --region "{{ region }}" \
+    --repository-name '{{ name }}' \
+    --region '{{ region }}' \
     --image-tag-mutability MUTABLE
 fi
 
@@ -65,10 +65,10 @@ docker build . -t "${image}" --platform "linux/${arch}"
 docker push "${image}" --quiet --platform "linux/${arch}"
 
 # Create new IAM role, which will be assumed by Lambda function executions:
-if ! aws iam get-role --role-name "{{ name }}" >/dev/null; then
+if ! aws iam get-role --role-name '{{ name }}' >/dev/null; then
   aws iam create-role \
     --color off \
-    --role-name "{{ name }}" \
+    --role-name '{{ name }}' \
     --assume-role-policy-document '{
         "Version": "2012-10-17",
         "Statement": [
@@ -88,7 +88,12 @@ policy='{
   "Version": "2012-10-17",
   "Statement": [
     {
-      "Action": [ "sqs:*" ],
+      "Action": [
+        "sqs:ChangeMessageVisibility",
+        "sqs:DeleteMessage",
+        "sqs:GetQueueAttributes",
+        "sqs:ReceiveMessage"
+      ],
       "Effect": "Allow",
       "Resource": "arn:aws:sqs:{{ region }}:{{ account }}:{{ name }}"
     },
@@ -100,7 +105,6 @@ policy='{
     {
       "Effect": "Allow",
       "Action": [
-        "s3:ListBucket",
         "s3:GetObject",
         "s3:PutObject"
       ],
@@ -136,11 +140,10 @@ policy='{
     {
       "Effect": "Allow",
       "Action": [
-        "logs:CreateLogGroup",
         "logs:CreateLogStream",
         "logs:PutLogEvents"
       ],
-      "Resource": "arn:aws:logs:{{ region }}:{{ account }}:log-group:/aws/lambda/*"
+      "Resource": "arn:aws:logs:{{ region }}:{{ account }}:log-group:{{ name }}"
     },
     {
       "Effect": "Allow",
@@ -154,33 +157,43 @@ policy='{
     }
   ]
 }'
-now=$( aws iam get-role-policy --role-name "{{ name }}" --policy-name 'access' 2>/dev/null || echo '')
+now=$( aws iam get-role-policy --role-name '{{ name }}' --policy-name 'access' 2>/dev/null || echo '')
 if [ "${now}" != "${policy}" ]; then
   aws iam put-role-policy \
     --color off \
-    --role-name "{{ name }}" \
+    --role-name '{{ name }}' \
     --policy-name 'access' \
     --policy-document "${policy}"
 fi
 
 # Give this swarm special rights:
 # shellcheck disable=SC2050
-if [ "{{ human }}" == 'yegor256' ] && [ -e swarm/aws-policy.json ]; then
+if [ '{{ human }}' == 'yegor256' ] && [ -e swarm/aws-policy.json ]; then
   policy=$( cat swarm/aws-policy.json )
-  now=$( aws iam get-role-policy --role-name "{{ name }}" --policy-name 'admin-access' 2>/dev/null || echo '' )
+  now=$( aws iam get-role-policy --role-name '{{ name }}' --policy-name 'admin-access' 2>/dev/null || echo '' )
   if [ "${now}" != "${policy}" ]; then
     aws iam put-role-policy \
       --color off \
-      --role-name "{{ name }}" \
+      --role-name '{{ name }}' \
       --policy-name 'admin-access' \
       --policy-document "${policy}"
   fi
 fi
 
+# Create AWS CloudWatch LogGroup for Lambda function:
+if ! aws logs describe-log-groups --log-group-name-pattern '{{ name }}' --region '{{ region }}' --output text 2>&1 | grep '\t{{ name }}\t'; then
+  aws logs create-log-group \
+    --log-group-name '{{ name }}' \
+    --region '{{ region }}'
+fi
+aws logs put-retention-policy \
+  --log-group-name '{{ name }}' \
+  --retention-in-days 14
+
 function wait_for_function() {
   while true; do
     sleep 1
-    state=$(aws lambda get-function --function-name "{{ name }}" --region "{{ region }}" | jq -r .Configuration.LastUpdateStatus)
+    state=$(aws lambda get-function --function-name '{{ name }}' --region '{{ region }}' | jq -r .Configuration.LastUpdateStatus)
     if [ "${state}" == 'Successful' ]; then
       break
     fi
@@ -188,60 +201,62 @@ function wait_for_function() {
 }
 
 # Create or update Lambda function:
-if aws lambda get-function --function-name "{{ name }}" --region "{{ region }}" >/dev/null 2>&1; then
+if aws lambda get-function --function-name '{{ name }}' --region '{{ region }}' >/dev/null 2>&1; then
   wait_for_function
   aws lambda update-function-configuration \
-    --function-name "{{ name }}" \
-    --region "{{ region }}" \
+    --function-name '{{ name }}' \
+    --region '{{ region }}' \
+    --logging-config 'LogGroup={{ name }},LogFormat=Text' \
     --timeout 300
   wait_for_function
   aws lambda update-function-code \
     --color off \
-    --function-name "{{ name }}" \
+    --function-name '{{ name }}' \
     --architectures "${arch}" \
-    --region "{{ region }}" \
+    --region '{{ region }}' \
     --image-uri "${image}" \
     --publish
 else
   aws lambda create-function \
     --color off \
-    --function-name "{{ name }}" \
-    --region "{{ region }}" \
+    --function-name '{{ name }}' \
+    --region '{{ region }}' \
     --timeout 300 \
+    --logging-config 'LogGroup={{ name }},LogFormat=Text' \
     --architectures "${arch}" \
-    --description "Process jobs of swarm #{{ swarm }} at {{ github }}" \
+    --description 'Process jobs of swarm #{{ swarm }} at {{ github }}' \
     --package-type Image \
     --code "ImageUri=${image}" \
     --tags "VERSION=${version}" \
-    --role "arn:aws:iam::{{ account }}:role/{{ name }}"
+    --role 'arn:aws:iam::{{ account }}:role/{{ name }}'
 fi
 
 # Create new SQS queue for this new Lambda function:
-if aws sqs get-queue-url --queue-name "{{ name }}" --region "{{ region }}" >/dev/null 2>&1; then
+if aws sqs get-queue-url --queue-name '{{ name }}' --region '{{ region }}' >/dev/null 2>&1; then
   aws sqs set-queue-attributes \
     --color off \
     --attributes 'VisibilityTimeout=300' \
-    --queue-url "https://sqs.{{ region }}.amazonaws.com/{{ account }}/{{ name }}" \
-    --region "{{ region }}"
+    --queue-url 'https://sqs.{{ region }}.amazonaws.com/{{ account }}/{{ name }}' \
+    --region '{{ region }}'
 else
   aws sqs create-queue \
     --color off \
     --attributes 'VisibilityTimeout=300' \
-    --queue-name "{{ name }}" \
-    --region "{{ region }}"
+    --queue-name '{{ name }}' \
+    --region '{{ region }}'
 fi
 
 # Make sure all new SQS events trigger Lambda function execution:
-fn="arn:aws:lambda:{{ region }}:{{ account }}:function:{{ name }}"
-arn="arn:aws:sqs:{{ region }}:{{ account }}:{{ name }}"
-mapping=$( aws lambda list-event-source-mappings --event-source-arn "${arn}" --function-name "${fn}" --region "{{ region }}" )
+fn='arn:aws:lambda:{{ region }}:{{ account }}:function:{{ name }}'
+arn='arn:aws:sqs:{{ region }}:{{ account }}:{{ name }}'
+mapping=$( aws lambda list-event-source-mappings --event-source-arn "${arn}" --function-name "${fn}" --region '{{ region }}' )
 if [ "$(echo "${mapping}" | jq '.EventSourceMappings | length')" == 0 ]; then
   aws lambda create-event-source-mapping \
     --color off \
     --event-source-arn "${arn}" \
     --batch-size=1 \
     --function-name "${fn}" \
-    --region "{{ region }}"
+    --region '{{ region }}'
 else
   if [ "$(echo "${mapping}" | jq -r '.EventSourceMappings[0].State')" == 'Disabled' ]; then
     uuid=$(echo "${mapping}" | jq -r '.EventSourceMappings[0].UUID')
@@ -249,6 +264,6 @@ else
       --color off \
       --uuid "${uuid}" \
       --enabled \
-      --region "{{ region }}"
+      --region '{{ region }}'
   fi
 fi

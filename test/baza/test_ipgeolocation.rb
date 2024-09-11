@@ -48,23 +48,14 @@ class Baza::IpGeolocationTest < Minitest::Test
   end
 
   def test_call_ipgeo
-    skip # it's a "live" test, run it manually if you need it
     WebMock.allow_net_connect!
     client = Baza::IpGeolocation.new(
-      token: ENV.fetch('IPGEOLOCATION_TOKEN', nil),
+      token: fake_live_cfg['ipgeolocation'],
       connection: Faraday
     )
     result = client.ipgeo(ip: '8.8.8.8')
     assert_equal('8.8.8.8', result['ip'])
     assert_equal('United States', result['country_name'])
     assert_equal('https://ipgeolocation.io/static/flags/us_64.png', result['country_flag'])
-  end
-
-  def test_call_ipgeo_with_invalid_token
-    skip # it's a "live" test, run it manually if you need it
-    WebMock.allow_net_connect!
-    client = Baza::IpGeolocation.new(token: nil, connection: Faraday)
-    result = client.ipgeo(ip: '8.8.8.8')
-    assert_match(/Please provide an API key/, result['message'])
   end
 end

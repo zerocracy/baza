@@ -116,7 +116,6 @@ class Baza::RecipeTest < Minitest::Test
   # resources. The test should not make any hard. It just destroys the
   # function if it exists and then creates it again.
   def test_live_local_run
-    # skip
     loog = Loog::VERBOSE
     creds = File.join(Dir.home, '.aws/credentials')
     skip unless File.exist?(creds)
@@ -129,7 +128,9 @@ class Baza::RecipeTest < Minitest::Test
       %i[destroy release release destroy destroy].each do |step|
         File.write(
           sh,
-          Baza::Recipe.new(s, '', '').to_bash(step, '019644334823', 'us-east-1', 'fake')
+          Baza::Recipe.new(s, '', fake_live_cfg['lambda']['bucket']).to_bash(
+            step, fake_live_cfg['lambda']['account'], fake_live_cfg['lambda']['region'], 'fake'
+          )
         )
         stdout = bash("/bin/bash #{sh}", loog)
         assert(stdout.include?('exit=0&'))

@@ -67,6 +67,14 @@ class Minitest::Test
     page.driver.header 'User-Agent', 'Capybara'
   end
 
+  def fake_live_cfg
+    # It is configured in Rackfile:
+    file = ENV.fetch('RACK_LIVE_YAML_FILE', nil)
+    skip if file.nil?
+    skip unless File.exist?(file)
+    YAML.safe_load(File.open(file))
+  end
+
   def fake_loog
     ENV['RACK_RUN'] ? Loog::NULL : Loog::VERBOSE
   end
