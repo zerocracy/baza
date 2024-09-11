@@ -37,7 +37,7 @@ class Baza::GcTest < Minitest::Test
   def test_finds_too_old
     humans = Baza::Humans.new(fake_pgsql)
     humans.gc.ready_to_expire(0) do |j|
-      j.expire!(Baza::Factbases.new('', ''))
+      j.expire!(Baza::Factbases.new('', ''), 'no reason')
     end
     assert_equal(0, humans.gc.ready_to_expire(0).to_a.size)
     human = humans.ensure(fake_name)
@@ -54,7 +54,7 @@ class Baza::GcTest < Minitest::Test
   def test_finds_stuck
     humans = Baza::Humans.new(fake_pgsql)
     humans.gc.stuck(0) do |j|
-      j.expire!(Baza::Factbases.new('', ''))
+      j.expire!(Baza::Factbases.new('', ''), 'no reason')
     end
     humans.pgsql.exec("UPDATE job SET taken = 'yes' WHERE id = $1", [fake_job.id])
     assert_equal(1, humans.gc.stuck(0).to_a.size)
@@ -67,7 +67,7 @@ class Baza::GcTest < Minitest::Test
     humans.pgsql.exec('INSERT INTO token (human, name, text) VALUES ($1, $2, $3)', [human.id, fake_name, key])
     fake_job(human)
     humans.gc.tests(0) do |j|
-      j.expire!(Baza::Factbases.new('', ''))
+      j.expire!(Baza::Factbases.new('', ''), 'no reason')
     end
     assert(humans.gc.tests(0).to_a.empty?)
   end

@@ -130,7 +130,7 @@ class Baza::JobsTest < Minitest::Test
     token = human.tokens.add(fake_name)
     name = fake_name
     job = token.start(name, fake_name, 1, 0, 'n/a', [], '192.168.1.1')
-    job.expire!(Baza::Factbases.new('', ''))
+    job.expire!(Baza::Factbases.new('', ''), 'no reason')
     token.start(name, fake_name, 1, 0, 'n/a', [], '192.168.1.1')
   end
 

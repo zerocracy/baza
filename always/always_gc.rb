@@ -23,15 +23,15 @@
 # SOFTWARE.
 
 settings.humans.gc.ready_to_expire(settings.expiration_days) do |j|
-  j.expire!(settings.fbs)
+  j.expire!(settings.fbs, 'It is garbage')
   settings.loog.debug("Job ##{j.id} is garbage, expired")
 end
 settings.humans.gc.stuck(60) do |j|
-  j.expire!(settings.fbs)
+  j.expire!(settings.fbs, 'The job was stuck, that is why expired')
   settings.loog.debug("Job ##{j.id} was stuck, expired")
 end
 settings.humans.gc.tests(4 * 60) do |j|
-  j.expire!(settings.fbs)
+  j.expire!(settings.fbs, 'It was a test job, that is why expired')
   settings.loog.debug("Job ##{j.id} was a test, expired")
 end
 begin

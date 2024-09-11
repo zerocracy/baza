@@ -48,7 +48,10 @@ class Baza::Job
   end
 
   # Delete the data of the job, that take space.
-  def expire!(fbs)
+  #
+  # @param [Baza::Factbases] fbs The location of artifacts
+  # @param [String] reason The reason for expiration
+  def expire!(fbs, reason)
     raise Baza::Urror, 'The job is already expired' if expired?
     @jobs.pgsql.transaction do |t|
       t.exec('UPDATE job SET expired = now() WHERE id = $1', [@id])
@@ -61,7 +64,7 @@ class Baza::Job
         [id, nil, 'Internal error', 1, 1, 0, 0]
       )
       t.exec('UPDATE result SET expired = now() WHERE job = $1', [@id])
-      t.exec('UPDATE result SET stdout = \'The stdout has been removed\' WHERE job = $1', [@id])
+      t.exec('UPDATE result SET stdout = $2 WHERE job = $1', [@id, reason])
     end
     fbs.delete(uri1)
     fbs.delete(result.uri2) if finished? && !result.uri2.nil?
