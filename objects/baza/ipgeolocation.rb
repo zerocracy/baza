@@ -48,7 +48,7 @@ class Baza::IpGeolocation
     end
 
     def get(url)
-      ip = URI.parse(url).query.split("&")&.last&.split("=")&.last
+      ip = URI.parse(url).query.split('&')&.last&.split('=')&.last
       data = {
         '8.8.8.8' => {
           'ip' => '8.8.8.8',

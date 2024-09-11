@@ -77,9 +77,10 @@ class Baza::Verified
   private
 
   def ip_from_microsoft?(ip)
-    organization = @settings.zache.get("owner-of-#{ip}") do
-    @settings.ipgeolocation.ipgeo(ip:)['organization']
-    end
+    organization =
+      @settings.zache.get("owner-of-#{ip}") do
+        @settings.ipgeolocation.ipgeo(ip:)['organization']
+      end
     organization.include?('Microsoft')
   end
 end
