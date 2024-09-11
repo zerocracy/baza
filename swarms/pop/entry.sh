@@ -36,7 +36,7 @@ if [ -z "${BAZA_URL}" ]; then
   BAZA_URL=https://www.zerocracy.com
 fi
 
-status=$(curl -s "${BAZA_URL}/pop?swarm=${SWARM_ID}&secret=${SWARM_SECRET}" -o pack.zip -w "%{http_code}")
+status=$(curl -s "${BAZA_URL}/pop?swarm=${SWARM_ID}&secret=${SWARM_SECRET}" -H 'User-Agent: baza-pop' -o pack.zip -w "%{http_code}")
 if [ "${status}" == '204' ]; then
   echo 'No jobs to process'
   exit

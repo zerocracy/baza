@@ -82,5 +82,7 @@ if [ ! -e head.txt ] || [ ! -s head.txt ]; then
   printf '0000000000000000000000000000000000000000' > head.txt
 fi
 
-curl -s -X PUT --data-binary '@tail.log' -H 'Content-Type: text/plain' \
+curl -s -X PUT --data-binary '@tail.log' \
+  -H 'Content-Type: text/plain' \
+  -H 'User-Agent: recipe.sh' \
   "{{ host }}/swarms/finish?secret={{ secret }}&head=$(cat head.txt)&exit=$(cat exit.txt)&sec=${SECONDS}"
