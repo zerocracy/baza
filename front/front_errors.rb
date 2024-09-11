@@ -62,7 +62,13 @@ error do
     flash(@locals[:human] ? iri.cut('/dash') : iri.cut('/'), e.message, alert: true, code: 303)
   else
     Sentry.capture_exception(e)
-    bt = Backtrace.new(e)
+    bt = Backtrace.new(e).to_s
+    settings.tbot.notify(
+      settings.humans.ensure('yegor256'),
+      '🧨 I\'m sorry to tell you, but there is application crash on the server:',
+      "\n```\n#{bt.split("\n").take(6).map { |ln| ln.gsub('```', '...') }.join("\n")}\n```\n",
+      'You better pay attention to this as soon as possible.'
+    )
     settings.loog.error("At #{request.url}:\n#{bt}")
     response.headers['X-Zerocracy-Failure'] = e.message.inspect.gsub(/^"(.*)"$/, '\1')
     haml(:error, layout: :empty, locals: { backtrace: bt.to_s })
