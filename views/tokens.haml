@@ -49,7 +49,7 @@
         %td.ff
           = t.name
         %td.ff
-          = t.text
+          != secret(t.text)
         %td
           != ago(t.created)
         %td.right.ff
