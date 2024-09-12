@@ -48,7 +48,7 @@ class Baza::IpGeolocation
     end
 
     def get(url)
-      ip = URI.parse(url).query.split('&')&.last&.split('=')&.last
+      ip = URI.decode_www_form(URI.parse(url).query).to_h.fetch('ip', nil)
       GetResponse.new(
         body: JSON.dump(
           {
