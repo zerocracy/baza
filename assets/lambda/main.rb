@@ -217,6 +217,7 @@ def go(event:, context:)
         loog.error(Backtrace.new(e).to_s)
         raise e
       ensure
+        puts loog.to_s
         report(loog.to_s, code, job)
       end
     end

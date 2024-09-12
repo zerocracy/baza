@@ -138,8 +138,12 @@ class Baza::RecipeTest < Minitest::Test
     end
   end
 
+  # This test simply tries to build a Docker image using the Dockerfile
+  # that we use inside AWS Lambda function. If something is wrong in the
+  # Dockerfile, this test must highlight such a problem.
   def test_build_docker_image
     loog = fake_loog
+    img = 'test-recipe-build'
     Dir.mktmpdir do |home|
       ['Dockerfile', 'Gemfile', 'entry.sh', 'main.rb', 'install.sh'].each do |f|
         FileUtils.copy(
@@ -148,18 +152,24 @@ class Baza::RecipeTest < Minitest::Test
         )
       end
       FileUtils.mkdir_p(File.join(home, 'swarm'))
-      bash("docker build #{home} -t test_recipe", loog)
+      bash("docker build #{home} -t #{img}", loog)
     ensure
-      bash('docker rmi -f test_recipe', loog)
+      bash("docker rmi -f #{img}", loog)
     end
   end
 
+  # This test emulates execution of a single AWS Lambda run. First, we
+  # prepare all files as if we would do with the help of "release.sh". Then,
+  # we build a Docker image as if it would have been built for AWS Lambda.
+  # Finally, we run a container, expecting it to finish without errors,
+  # processing a single job with the help of a simple judge.
   def test_local_lambda_run
     WebMock.enable_net_connect!
     loog = fake_loog
     fake_pgsql.exec('TRUNCATE human CASCADE')
     job = fake_job(fake_human('yegor256'))
     s = job.jobs.human.swarms.add('st', 'zerocracy/swarm-template', 'master', '/')
+    stdout = nil
     RandomPort::Pool::SINGLETON.acquire(2) do |lambda_port, backend_port|
       Dir.mktmpdir do |home|
         %w[curl shutdown aws].each { |f| stub_cli(home, f) }
@@ -208,11 +218,10 @@ class Baza::RecipeTest < Minitest::Test
         begin
           ret =
             fake_front(backend_port, loog) do
-              stdout = bash(
+              container = bash(
                 "docker run --add-host host.docker.internal:host-gateway -d -p #{lambda_port}:8080 #{image}",
                 loog
-              )
-              container = stdout.split("\n")[-1]
+              ).split("\n")[-1]
               loog.debug("Docker container started: #{container}")
               begin
                 wait_for { Typhoeus::Request.get("http://localhost:#{lambda_port}/test").code == 404 }
@@ -239,7 +248,7 @@ class Baza::RecipeTest < Minitest::Test
                 request.run
                 request.response
               ensure
-                bash("docker logs #{container}", loog)
+                stdout = bash("docker logs #{container}", loog)
                 bash("docker rm -f #{container}", loog)
               end
             end
@@ -251,6 +260,12 @@ class Baza::RecipeTest < Minitest::Test
         end
       end
     end
+    [
+      "Event about job ##{job.id} arrived",
+      "Normal swarm 'baza-#{s.name}' processing",
+      'Unpacked ZIP',
+      "/bin/bash /swarm/entry.sh \"#{job.id}\""
+    ].each { |t| assert(stdout.include?(t), "Can't find #{t.inspect} in\n#{stdout}") }
   end
 
   private
