@@ -25,6 +25,7 @@
 require 'aws-sdk-ec2'
 require 'aws-sdk-core'
 require 'base64'
+require_relative '../../version'
 
 # AWS EC2.
 #
@@ -60,6 +61,31 @@ class Baza::EC2
     @loog = loog
   end
 
+  # Collect the garbage, deleting instances that are too old and still
+  # running in AWS EC2 (due to some internal error, for example).
+  def gc!(minutes: 10)
+    aws.describe_instances(
+      filters: [
+        {
+          name: 'instance-state-name',
+          values: ['running']
+        },
+        {
+          name: 'tag-key',
+          values: ['Baza']
+        }
+      ]
+    ).reservations.each do |resv|
+      t = resv.launch_time
+      next if t > Time.now - (minutes * 60)
+      id = resv.instance_id
+      ec2.terminate_instances(instance_ids: [id])
+      @loog.warn("The instance #{id} has been launched #{t.ago}, seems to be stuch, we terminated it")
+    end
+  end
+
+  # Using the name of the AMI ('baza-release') this method find the
+  # ID of the AMI, which is later used by the +run_instance()+ method.
   def find_ami
     aws.describe_images(
       filters: [
@@ -75,6 +101,7 @@ class Baza::EC2
     raise Baza::Urror, 'AWS image tag is nil' if tag.nil?
     raise Baza::Urror, 'AWS image user_data is nil' if data.nil?
     return 'i-42424242' if @key.start_with?('FAKE')
+    gc!
     elapsed(@loog, intro: "Started new #{@type.inspect} EC2 instance") do
       aws.run_instances(
         image_id: find_ami,
@@ -95,6 +122,10 @@ class Baza::EC2
               {
                 key: 'Name',
                 value: tag
+              },
+              {
+                key: 'Baza',
+                value: Baza::VERSION
               }
             ]
           }

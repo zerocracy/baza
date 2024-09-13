@@ -42,6 +42,8 @@ class Baza::EC2Test < Minitest::Test
       'sn-42424242',
       loog: fake_loog
     )
+    fake_aws('DescribeInstances', { instancesSet: { item: { instanceId: 'i-42424242' } } })
+    fake_aws('TerminateInstances', {})
     fake_aws('DescribeImages', { imagesSet: { item: { imageId: 'ami-42424242' } } })
     fake_aws('RunInstances', { instancesSet: { item: { instanceId: 'i-42424242' } } })
     i = ec2.run_instance('some-fake-name', "#!/bin/bash\necho test\n")
