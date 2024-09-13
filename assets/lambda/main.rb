@@ -92,7 +92,7 @@ end
 # @param [Integer] id The ID of the job just processed
 # @param [Loog] loog The logging facility
 def send_message(id, loog)
-  Aws::SQS::Client.new.send_message(
+  Aws::SQS::Client.new(region: '{{ region }}').send_message(
     queue_url: "https://sqs.{{ region }}.amazonaws.com/{{ account }}/baza-shift",
     message_body: "Job ##{id} was processed by {{ name }}",
     message_attributes: {

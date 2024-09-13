@@ -47,9 +47,13 @@ if [ "${more[0]}" == 'null' ]; then
 fi
 
 # Remove current swarm, so it won't be processed again:
-more=${more[@]/$swarm}
+for s in "${!more[@]}"; do
+  if [[ "${more[s]}" = "${swarm}" ]]; then
+    unset 'more[s]'
+  fi
+done
 
-if [ -z "${more[@]}" ]; then
+if [ "${#more[@]}" -eq 0 ]; then
   aws sqs send-message \
     --queue-url https://sqs.us-east-1.amazonaws.com/019644334823/baza-finish \
     --message-body "Job ${id} finished processing" \
