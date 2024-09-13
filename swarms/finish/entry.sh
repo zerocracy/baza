@@ -37,7 +37,7 @@ if [ -z "${BAZA_URL}" ]; then
   BAZA_URL=https://www.zerocracy.com
 fi
 
-swarm=$(cat event.json | jq -r .messageAttributes.swarm.stringValue)
+swarm=$( jq -r .messageAttributes.swarm.stringValue < event.json )
 key="${swarm}/${id}.zip"
 
 aws s3 cp "s3://${S3_BUCKET}/${key}" pack.zip

@@ -48,7 +48,7 @@ if [ "${status}" != '200' ]; then
 fi
 
 unzip pack.zip -d pack
-id=$(cat pack/job.json | jq .id)
+id=$( jq .id < pack/job.json )
 rm pack.zip
 zip -j pack.zip pack/*
 

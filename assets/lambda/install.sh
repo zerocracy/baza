@@ -31,7 +31,8 @@ if [ -e Gemfile ]; then
   bundle list
 fi
 
-if [ '{{ human }}' == 'yegor256' ]; then
+human='{{ human }}'
+if [ "${human}" == 'yegor256' ]; then
   if [ -e install.sh ]; then
     /bin/bash install.sh
   fi

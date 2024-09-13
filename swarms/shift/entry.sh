@@ -34,11 +34,11 @@ if [ -z "${S3_BUCKET}" ]; then
   S3_BUCKET=swarms.zerocracy.com
 fi
 
-swarm=$(cat event.json | jq -r .messageAttributes.swarm.stringValue)
+swarm=$(jq -r .messageAttributes.swarm.stringValue < event.json)
 
 aws s3 cp "s3://${S3_BUCKET}/${swarm}/${id}.zip" pack.zip
 
-read -a more <<< "$( cat event.json | jq -r .messageAttributes.more.stringValue )"
+read -r -a more <<< "$( jq -r .messageAttributes.more.stringValue < event.json )"
 
 if [ "${more[0]}" == 'null' ]; then
   cat event.json
@@ -55,13 +55,13 @@ else
   next="${more[0]}"
   if [[ ! "${next}" =~ ^baza- ]]; then
     cat event.json
-    echo "Wrong swarm name '${next}' found in '${more[@]}'"
+    printf "Wrong swarm name '%s' found in '%s'" "${next}" "${more[@]}"
     exit 1
   fi
   aws s3 rm "s3://${S3_BUCKET}/${swarm}/${id}.zip"
   aws s3 cp pack.zip "s3://${S3_BUCKET}/${next}/${id}.zip"
   aws sqs send-message \
     --queue-url "https://sqs.us-east-1.amazonaws.com/019644334823/${next}" \
-    --message-body "Job #${id} needs futher processing by '${more[@]}'" \
-    --message-attributes "job={DataType=String,StringValue='${id}'},swarm={DataType=String,StringValue='${swarm}'},more={DataType=String,StringValue='${more[@]}'}"
+    --message-body "$( printf "Job #${id} needs futher processing by '%s'" "${more[@]}" )" \
+    --message-attributes "$( printf "job={DataType=String,StringValue='%d'},swarm={DataType=String,StringValue='%s'},more={DataType=String,StringValue='%s'}" "${id}" "${swarm}" "${more[@]}" )"
 fi
