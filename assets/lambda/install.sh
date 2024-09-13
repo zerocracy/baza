@@ -30,7 +30,8 @@ if [ -e Gemfile ]; then
   bundle install --quiet --gemfile Gemfile
 fi
 
-if [ '{{ human }}' == 'yegor256' ]; then
+human='{{ human }}'
+if [ "${human}" == 'yegor256' ]; then
   if [ -e install.sh ]; then
     /bin/bash install.sh
   fi
