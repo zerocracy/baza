@@ -95,7 +95,7 @@ class Baza::RecipeTest < Minitest::Test
         ENTRYPOINT ["/bin/bash", "recipe.sh"]
         '
       )
-      img = 'test_recipe'
+      img = 'test-recipe-script'
       bash("docker build #{File.join(home, '.docker')} -t #{img}", loog)
       begin
         RandomPort::Pool::SINGLETON.acquire do |port|
@@ -110,7 +110,7 @@ class Baza::RecipeTest < Minitest::Test
             )
             bash(
               [
-                'docker run --rm ',
+                'docker run --rm --add-host host.docker.internal:host-gateway ',
                 "--user #{Process.uid}:#{Process.gid} ",
                 "-v #{home}:/r #{img}"
               ].join,

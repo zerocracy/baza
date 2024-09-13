@@ -79,6 +79,15 @@ class MainTest < Minitest::Test
           }
         )
       )
+      stub_request(:get, 'http://169.254.169.254/latest/meta-data/iam/security-credentials/%7B').to_return(
+        body: JSON.pretty_generate(
+          {
+            'AccessKeyId' => 'FAKEFAKEFAKEFAKEFAKE',
+            'SecretAccessKey' => 'fakefakefakefakefakefakefakefakefakefake',
+            'Token' => 'fake-fake-fake-fake-fake-fake-fake-fake'
+          }
+        )
+      )
       stub_request(:put, 'http://swarms/42/invocation?code=0&job=7&secret=sword-fish')
       stub_request(:get, 'https://foo.s3.amazonaws.com/swarmik/7.zip').to_return(body: File.binread(zip))
       stub_request(:put, 'https://foo.s3.amazonaws.com/swarmik/7.zip')

@@ -115,18 +115,19 @@ module Baza::Helpers
           href: '',
           title: 'Show the secret',
           class: 'eye',
-          onclick: js_eye
+          onclick: js_eye,
+          style: 'margin-left: .5em'
         ) { html_tag('i', class: 'fa-regular fa-eye') },
         html_tag(
           'a',
           href: '',
           title: 'Copy the secret',
           class: 'copy',
-          style: 'display: none',
+          style: 'display: none; margin-left: .5em',
           onclick: js_copy
         ) { html_tag('i', class: 'fa-regular fa-copy') },
         html_tag('span', class: 'gray', style: 'display: none;') { 'Copied to clipboard!' }
-      ].join('&nbsp;')
+      ]
     end
   end
 
