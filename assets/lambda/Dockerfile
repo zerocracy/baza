@@ -48,7 +48,6 @@ COPY swarm/ /swarm
 
 COPY install.sh .
 RUN /bin/bash ${LAMBDA}/install.sh
-RUN cd /swarm; bundle list
 
 COPY entry.sh main.rb ./
 ENTRYPOINT ["/bin/bash", "entry.sh"]

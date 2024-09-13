@@ -210,14 +210,12 @@ class Baza::RecipeTest < Minitest::Test
             #!/bin/bash
             set -ex
             cd \"$(dirname \"$0\")\"
-            whoami
-            bundle list
+            export BUNDLE_GEMFILE=\"$(dirname \"$0\")/Gemfile\"
             bundle exec judges --version
           ",
           'swarm/install.sh' => "
             #!/bin/bash
             set -ex
-            apt-get -q -y update && apt-get -y install tree
             echo 'echo $@' > aws
             cp aws curl
             chmod a+x aws curl
@@ -273,8 +271,8 @@ class Baza::RecipeTest < Minitest::Test
       end
     end
     [
-      "Event about job ##{job.id} arrived",
-      "Normal swarm 'baza-#{s.name}' processing",
+      "A new event arived, about job ##{job.id}",
+      "Starting to process 'baza-#{s.name}' (normal swarm)",
       'Unpacked ZIP',
       "/bin/bash /swarm/entry.sh \"#{job.id}\""
     ].each { |t| assert(stdout.include?(t), "Can't find #{t.inspect} in\n#{stdout}") }
