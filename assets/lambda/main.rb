@@ -62,7 +62,7 @@ end
 # @param [Loog] loog The logging facility
 def get_object(key, file, loog)
   bucket = '{{ bucket }}'
-  Aws::S3::Client.new.get_object(
+  Aws::S3::Client.new(region: '{{ region }}').get_object(
     response_target: file,
     bucket:,
     key:
@@ -78,7 +78,7 @@ end
 def put_object(key, file, loog)
   bucket = '{{ bucket }}'
   File.open(file, 'rb') do |f|
-    Aws::S3::Client.new.put_object(
+    Aws::S3::Client.new(region: '{{ region }}').put_object(
       body: f,
       bucket:,
       key:
