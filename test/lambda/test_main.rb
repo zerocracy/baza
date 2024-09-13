@@ -69,10 +69,19 @@ class MainTest < Minitest::Test
           "
         ].join
       )
-      stub_request(:put, 'http://169.254.169.254/latest/api/token').to_return(status: 200, body: 'a-token')
-      stub_request(:put, 'http://swarms/42/invocation?code=0&job=7&secret=sword-fish').to_return(status: 200)
-      stub_request(:get, 'https://foo.s3.amazonaws.com/swarmik/7.zip').to_return(status: 200, body: File.binread(zip))
-      stub_request(:put, 'https://foo.s3.amazonaws.com/swarmik/7.zip').to_return(status: 200)
+      stub_request(:put, 'http://169.254.169.254/latest/api/token').to_return(body: 'a-token')
+      stub_request(:get, 'http://169.254.169.254/latest/meta-data/iam/security-credentials/').to_return(
+        body: JSON.pretty_generate(
+          {
+            'AccessKeyId' => 'FAKEFAKEFAKEFAKEFAKE',
+            'SecretAccessKey' => 'fakefakefakefakefakefakefakefakefakefake',
+            'Token' => 'fake-fake-fake-fake-fake-fake-fake-fake'
+          }
+        )
+      )
+      stub_request(:put, 'http://swarms/42/invocation?code=0&job=7&secret=sword-fish')
+      stub_request(:get, 'https://foo.s3.amazonaws.com/swarmik/7.zip').to_return(body: File.binread(zip))
+      stub_request(:put, 'https://foo.s3.amazonaws.com/swarmik/7.zip')
       stub_request(:post, 'https://sqs.us-east-1.amazonaws.com/424242/baza-shift').to_return(
         body: JSON.pretty_generate(
           {
