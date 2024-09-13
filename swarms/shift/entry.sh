@@ -46,7 +46,10 @@ if [ "${more[0]}" == 'null' ]; then
   exit 1
 fi
 
-if [ "${#more[@]}" -eq 0 ]; then
+# Remove current swarm, so it won't be processed again:
+more=${more[@]/$swarm}
+
+if [ -z "${more[@]}" ]; then
   aws sqs send-message \
     --queue-url https://sqs.us-east-1.amazonaws.com/019644334823/baza-finish \
     --message-body "Job ${id} finished processing" \
@@ -62,6 +65,6 @@ else
   aws s3 cp pack.zip "s3://${S3_BUCKET}/${next}/${id}.zip"
   aws sqs send-message \
     --queue-url "https://sqs.us-east-1.amazonaws.com/019644334823/${next}" \
-    --message-body "$( printf "Job #${id} needs futher processing by '%s'" "${more[@]}" )" \
+    --message-body "$( printf "Job #${id} needs further processing by '%s'" "${more[@]}" )" \
     --message-attributes "$( printf "job={DataType=String,StringValue='%d'},swarm={DataType=String,StringValue='%s'},more={DataType=String,StringValue='%s'}" "${id}" "${swarm}" "${more[@]}" )"
 fi
