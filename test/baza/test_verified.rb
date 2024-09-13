@@ -66,7 +66,7 @@ class Baza::VerifiedTest < Minitest::Test
       }.to_json,
       headers: { 'content-type': 'application/json' }
     )
-    v = Baza::Verified.new(job, app.settings).verdict
+    v = Baza::Verified.new(job, app.settings.ipgeolocation, app.settings.zache).verdict
     assert(v.start_with?('OK: All good'))
   end
 
@@ -82,7 +82,7 @@ class Baza::VerifiedTest < Minitest::Test
     ).id
     job = human.jobs.get(id)
     stub_request(:get, 'https://api.github.com/repos/foo/foo/actions/runs/22').to_return(status: 404)
-    v = Baza::Verified.new(job, app.settings).verdict
+    v = Baza::Verified.new(job, app.settings.ipgeolocation, app.settings.zache).verdict
     assert(v.include?('FAKE: Workflow URL https://github.com/foo/foo/actions/runs/22 not found'))
   end
 
@@ -92,7 +92,7 @@ class Baza::VerifiedTest < Minitest::Test
     ip = '192.168.1.1'
     id = token.start(fake_name, fake_name, 1, 0, 'n/a', [], ip).id
     job = human.jobs.get(id)
-    v = Baza::Verified.new(job, app.settings).verdict
+    v = Baza::Verified.new(job, app.settings.ipgeolocation, app.settings.zache).verdict
     assert_equal('FAKE: There is no workflow_url meta', v)
   end
 
@@ -102,7 +102,7 @@ class Baza::VerifiedTest < Minitest::Test
     ip = '192.168.1.1'
     id = token.start(fake_name, fake_name, 1, 0, 'n/a', ['workflow_url:hey'], ip).id
     job = human.jobs.get(id)
-    v = Baza::Verified.new(job, app.settings).verdict
+    v = Baza::Verified.new(job, app.settings.ipgeolocation, app.settings.zache).verdict
     assert_equal('FAKE: Wrong URL at workflow_url: "hey".', v)
   end
 
@@ -113,7 +113,7 @@ class Baza::VerifiedTest < Minitest::Test
       human.jobs.get(
         human.tokens.add(fake_name).start(fake_name, fake_name, 1, 0, 'n/a', ['workflow_url:hey'], ip).id
       ),
-      app.settings
+      app.settings.ipgeolocation, app.settings.zache
     ).verdict
     assert_equal("FAKE: IP #{ip} is not from Microsoft.", v)
   end

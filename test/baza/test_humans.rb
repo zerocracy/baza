@@ -94,7 +94,7 @@ class Baza::HumansTest < Minitest::Test
     WebMock.disable_net_connect!
     job = fake_job
     stub_request(:get, %r{^https://api.github.com/repos/[^/]+/[^/]+/actions/runs/.*$}).to_return(status: 404)
-    job.jobs.human.humans.verify_one_job(app.settings) do |_job, verdict|
+    job.jobs.human.humans.verify_one_job(app.settings.ipgeolocation, app.settings.zache) do |_job, verdict|
       assert(verdict.start_with?('FAKE: '))
     end
   end

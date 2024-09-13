@@ -31,9 +31,10 @@ require 'base64'
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
 class Baza::Verified
-  def initialize(job, settings)
+  def initialize(job, ipgeolocation, zache)
     @job = job
-    @settings = settings
+    @ipgeolocation = ipgeolocation
+    @zache = zache
   end
 
   # Get the verdict.
@@ -78,8 +79,8 @@ class Baza::Verified
 
   def ip_from_microsoft?(ip)
     organization =
-      @settings.zache.get("owner-of-#{ip}") do
-        @settings.ipgeolocation.ipgeo(ip:)['organization']
+      @zache.get("owner-of-#{ip}") do
+        @ipgeolocation.ipgeo(ip:)['organization']
       end
     organization.match?(/Microsoft/i)
   end
