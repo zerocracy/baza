@@ -230,7 +230,7 @@ def go(event:, context:)
         end
         lg.info("Finished processing '{{ name }}' (code=#{code})")
       rescue Exception => e
-        loog.error(Backtrace.new(e).to_s)
+        lg.error(Backtrace.new(e).to_s)
         code = 255
         raise e
       ensure
