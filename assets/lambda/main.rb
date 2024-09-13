@@ -184,6 +184,7 @@ def one(id, pack, loog)
   e = $CHILD_STATUS.exitstatus
   File.binwrite(File.join(pack, 'stdout.txt'), stdout, mode: 'a+')
   jfile = File.join(pack, 'job.json')
+  File.write(jfile, '{}') unless File.exist?(jfile)
   File.write(
     jfile,
     JSON.pretty_generate(

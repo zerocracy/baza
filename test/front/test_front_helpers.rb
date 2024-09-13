@@ -51,9 +51,17 @@ class Baza::FrontHelpersTest < Minitest::Test
   end
 
   def test_zents
-    assert(zents(42_000).include?('+0.4200'))
-    assert(zents(123_000).start_with?('<span class="good"'))
-    assert(zents(-10_000).start_with?('<span class="bad"'))
+    {
+      42_000 => '+Ƶ0.4200',
+      -42_543 => '-Ƶ0.4254',
+      -100_000_000 => '-Ƶ1000.0000',
+      123_456_789 => '+Ƶ1234.5679',
+      123_000 => '<span class="good"',
+      -10_000 => '<span class="bad"'
+    }.each do |k, v|
+      t = zents(k)
+      assert(t.include?(v), "#{k} renders to #{t} instead of #{v}")
+    end
   end
 
   def test_ago

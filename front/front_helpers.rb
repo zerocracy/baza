@@ -179,7 +179,7 @@ module Baza::Helpers
       'span',
       class: num.positive? ? 'good' : 'bad',
       title: usd(num, digits: 6)
-    ) { "Ƶ#{usd}" }
+    ) { usd.gsub(/^(\+|-)/, '\1Ƶ') }
   end
 
   def msec(msec)
