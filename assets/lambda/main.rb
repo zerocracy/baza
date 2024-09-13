@@ -31,6 +31,7 @@ require 'English'
 require 'iri'
 require 'json'
 require 'loog'
+require 'loog/tee'
 require 'typhoeus'
 require 'archive/zip'
 
@@ -190,38 +191,38 @@ end
 # @param [Hash] event The JSON event
 # @param [LambdaContext] context I don't know what this is for
 def go(event:, context:)
-  puts "Arrived package: #{event}"
+  loog = Loog::VERBOSE
+  loog.info("Arrived package: #{event}")
   elapsed(intro: 'Job processing finished') do
     event['Records']&.each do |rec|
-      loog = Loog::Buffer.new
-      loog.info('Version: {{ version }}')
-      loog.info("Event: #{rec}")
+      buf = Loog::Buffer.new
+      lg = Loog::Tee.new(loog, buf)
+      lg.info('Version: {{ version }}')
+      lg.info("Event: #{rec}")
       code = 1
       begin
         job = rec['messageAttributes']['job']['stringValue'].to_i
-        loog.info("A new event arived, about job ##{job}")
+        lg.info("A new event arived, about job ##{job}")
         job = 0 if job.nil?
         if ['baza-pop', 'baza-shift', 'baza-finish'].include?('{{ name }}')
-          loog.info("Starting to process '{{ name }}' (system swarm)")
+          lg.info("Starting to process '{{ name }}' (system swarm)")
           Dir.mktmpdir do |pack|
             File.write(File.join(pack, 'event.json'), JSON.pretty_generate(rec))
-            code = one(job, pack, loog)
+            code = one(job, pack, lg)
           end
         else
-          loog.info("Starting to process '{{ name }}' (normal swarm)")
-          with_zip(job, rec, loog) do |pack|
-            code = one(job, pack, loog)
+          lg.info("Starting to process '{{ name }}' (normal swarm)")
+          with_zip(job, rec, lg) do |pack|
+            code = one(job, pack, lg)
           end
         end
-      rescue StandardError => e
-        bt = Backtrace.new(e).to_s
-        puts bt
-        loog.error(bt)
+        lg.info("Finished processing '{{ name }}' (code=#{code})")
+      rescue Exception => e
+        loog.error(Backtrace.new(e).to_s)
         code = 255
         raise e
       ensure
-        puts loog.to_s
-        report(loog.to_s, code, job)
+        report(buf.to_s, code, job)
       end
     end
   end
