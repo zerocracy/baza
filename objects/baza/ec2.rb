@@ -63,7 +63,7 @@ class Baza::EC2
 
   # Collect the garbage, deleting instances that are too old and still
   # running in AWS EC2 (due to some internal error, for example).
-  def gc!(minutes: 10)
+  def gc!(minutes: 15)
     aws.describe_instances(
       filters: [
         {

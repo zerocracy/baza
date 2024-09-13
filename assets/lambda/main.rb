@@ -145,6 +145,7 @@ end
 # @param [Integer] id The ID of the job to process
 # @param [Hash] rec JSON event from the SQS message
 # @param [Loog] loog The logging facility
+# @return [Integer] Exit code (zero means success)
 def with_zip(id, rec, loog)
   Dir.mktmpdir do |home|
     zip = File.join(home, "#{id}.zip")
@@ -156,11 +157,23 @@ def with_zip(id, rec, loog)
     File.delete(zip)
     rec_file = File.join(pack, 'event.json')
     File.write(rec_file, JSON.pretty_generate(rec))
-    yield pack
+    start = Time.now
+    r = yield pack
     FileUtils.rm_f(rec_file)
+    jfile = File.join(pack, 'job.json')
+    File.write(
+      jfile,
+      JSON.pretty_generate(
+        JSON.parse(File.read(jfile)).merge(
+          { 'exit' => r, 'msec' => ((Time.now - start) * 1000).to_i }
+        )
+      )
+    )
+    loog.info("JSON updated at #{jfile} (#{File.size(jfile)} bytes)")
     Archive::Zip.archive(zip, File.join(pack, '/.'))
     put_object(key, zip, loog)
     send_message(id, loog)
+    r
   end
 end
 
@@ -169,8 +182,8 @@ end
 # @param [Integer] id The ID of the job to process
 # @param [String] pack Directory name where the ZIP is unpacked
 # @param [Loog] loog The logging facility
+# @return [Integer] Exit code (zero means success)
 def one(id, pack, loog)
-  start = Time.now
   cmd =
     if File.exist?('/swarm/entry.sh')
       "/bin/bash /swarm/entry.sh \"#{id}\" \"#{pack}\" 2>&1"
@@ -183,17 +196,6 @@ def one(id, pack, loog)
   stdout = `SWARM_SECRET={{ secret }} SWARM_ID={{ swarm }} #{cmd}`
   e = $CHILD_STATUS.exitstatus
   File.binwrite(File.join(pack, 'stdout.txt'), stdout, mode: 'a+')
-  jfile = File.join(pack, 'job.json')
-  File.write(jfile, '{}') unless File.exist?(jfile)
-  File.write(
-    jfile,
-    JSON.pretty_generate(
-      JSON.parse(File.read(jfile)).merge(
-        { 'exit' => e, 'msec' => ((Time.now - start) * 1000).to_i }
-      )
-    )
-  )
-  loog.info("JSON updated at #{jfile} (#{File.size(jfile)} bytes)")
   loog.info(stdout)
   loog.warn("FAILURE (#{e})") unless e.zero?
   e
@@ -225,9 +227,10 @@ def go(event:, context:)
           end
         else
           lg.info("Starting to process '{{ name }}' (normal swarm)")
-          with_zip(job, rec, lg) do |pack|
-            code = one(job, pack, lg)
-          end
+          code =
+            with_zip(job, rec, lg) do |pack|
+              one(job, pack, lg)
+            end
         end
         lg.info("Finished processing '{{ name }}' (code=#{code})")
       rescue Exception => e
