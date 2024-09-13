@@ -48,11 +48,11 @@ fi
 # {{ save_files }}
 
 if [ -z "${HOME}" ]; then
-  echo 'For some reason the $HOME variable is not set! I will try to set it now:'
+  echo 'For some reason the HOME variable is not set! I will try to set it now:'
   # shellcheck disable=SC2116
   HOME=$(echo ~)
   if [ -z "${HOME}" ]; then
-    echo 'I failed to set the $HOME variable'
+    echo 'I failed to set the HOME variable'
     exit 1
   fi
   if [ ! -e "${HOME}" ]; then
