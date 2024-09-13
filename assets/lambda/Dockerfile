@@ -22,6 +22,8 @@
 
 FROM ruby:3.3
 
+ENV DEBIAN_FRONTEND=noninteractive
+
 ENV LAMBDA=/var/task
 RUN mkdir -p ${LAMBDA}
 WORKDIR ${LAMBDA}
@@ -40,13 +42,13 @@ RUN apt-get -qq update \
 
 COPY Gemfile ${LAMBDA}/
 ENV BUNDLE_SILENCE_ROOT_WARNING=1
-RUN gem install --quiet bundler -v 2.5.18 \
-  && bundle install --retry=5 --quiet "--gemfile=${LAMBDA}/Gemfile"
+RUN bundle install --retry=5 --quiet "--gemfile=${LAMBDA}/Gemfile"
 
 COPY swarm/ /swarm
 
 COPY install.sh .
 RUN /bin/bash ${LAMBDA}/install.sh
+RUN cd /swarm; bundle list
 
 COPY entry.sh main.rb .
 ENTRYPOINT ["/bin/bash", "entry.sh"]

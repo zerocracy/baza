@@ -202,10 +202,22 @@ class Baza::RecipeTest < Minitest::Test
         )
         FileUtils.mkdir_p(File.join(home, 'swarm'))
         {
-          'swarm/Gemfile' => "source 'https://rubygems.org'\ngem 'tago'",
-          'swarm/entry.sh' => "#!/bin/bash\necho works fine!",
+          'swarm/Gemfile' => "
+            source 'https://rubygems.org'
+            gem 'judges'
+          ",
+          'swarm/entry.sh' => "
+            #!/bin/bash
+            set -ex
+            cd \"$(dirname \"$0\")\"
+            whoami
+            bundle list
+            bundle exec judges --version
+          ",
           'swarm/install.sh' => "
             #!/bin/bash
+            set -ex
+            apt-get -q -y update && apt-get -y install tree
             echo 'echo $@' > aws
             cp aws curl
             chmod a+x aws curl
@@ -213,7 +225,7 @@ class Baza::RecipeTest < Minitest::Test
             mv curl /var/task
           "
         }.each { |f, txt| File.write(File.join(home, f), txt) }
-        image = 'image-test'
+        image = 'local-lambda-test'
         bash("docker build #{home} -t #{image}", loog)
         begin
           ret =

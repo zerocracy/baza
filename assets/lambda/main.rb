@@ -190,7 +190,7 @@ end
 # @param [Hash] event The JSON event
 # @param [LambdaContext] context I don't know what this is for
 def go(event:, context:)
-  puts "Arrived package: #{event.to_s.inspect}"
+  puts "Arrived package: #{event}"
   elapsed(intro: 'Job processing finished') do
     event['Records']&.each do |rec|
       loog = Loog::Buffer.new
@@ -199,16 +199,16 @@ def go(event:, context:)
       code = 1
       begin
         job = rec['messageAttributes']['job']['stringValue'].to_i
-        loog.info("Event about job ##{job} arrived")
+        loog.info("A new event arived, about job ##{job}")
         job = 0 if job.nil?
         if ['baza-pop', 'baza-shift', 'baza-finish'].include?('{{ name }}')
-          loog.info("System swarm '{{ name }}' processing")
+          loog.info("Starting to process '{{ name }}' (system swarm)")
           Dir.mktmpdir do |pack|
             File.write(File.join(pack, 'event.json'), JSON.pretty_generate(rec))
             code = one(job, pack, loog)
           end
         else
-          loog.info("Normal swarm '{{ name }}' processing")
+          loog.info("Starting to process '{{ name }}' (normal swarm)")
           with_zip(job, rec, loog) do |pack|
             code = one(job, pack, loog)
           end

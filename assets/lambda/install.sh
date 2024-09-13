@@ -23,11 +23,12 @@
 
 set -ex
 
-cd /swarm
+cd /swarm || exit 1
 
 if [ -e Gemfile ]; then
   bundle config set without development
-  bundle install --quiet --gemfile Gemfile
+  bundle install --gemfile Gemfile
+  bundle list
 fi
 
 if [ '{{ human }}' == 'yegor256' ]; then
@@ -35,5 +36,3 @@ if [ '{{ human }}' == 'yegor256' ]; then
     /bin/bash install.sh
   fi
 fi
-
-gem install judges
