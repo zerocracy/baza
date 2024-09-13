@@ -214,7 +214,10 @@ def go(event:, context:)
           end
         end
       rescue StandardError => e
-        loog.error(Backtrace.new(e).to_s)
+        bt = Backtrace.new(e).to_s
+        puts bt
+        loog.error(bt)
+        code = 255
         raise e
       ensure
         puts loog.to_s
