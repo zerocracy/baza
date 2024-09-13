@@ -170,6 +170,7 @@ end
 # @param [String] pack Directory name where the ZIP is unpacked
 # @param [Loog] loog The logging facility
 def one(id, pack, loog)
+  start = Time.now
   cmd =
     if File.exist?('/swarm/entry.sh')
       "/bin/bash /swarm/entry.sh \"#{id}\" \"#{pack}\" 2>&1"
@@ -181,6 +182,17 @@ def one(id, pack, loog)
   loog.info("+ #{cmd}")
   stdout = `SWARM_SECRET={{ secret }} SWARM_ID={{ swarm }} #{cmd}`
   e = $CHILD_STATUS.exitstatus
+  File.binwrite(File.join(pack, 'stdout.txt'), stdout, mode: 'a+')
+  jfile = File.join(pack, 'job.json')
+  File.write(
+    jfile,
+    JSON.pretty_generate(
+      JSON.parse(File.read(jfile)).merge(
+        { 'exit' => e, 'msec' => ((Time.now - start) * 1000).to_i }
+      )
+    )
+  )
+  loog.info("JSON updated at #{jfile} (#{File.size(jfile)} bytes)")
   loog.info(stdout)
   loog.warn("FAILURE (#{e})") unless e.zero?
   e

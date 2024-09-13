@@ -88,9 +88,24 @@ class MainTest < Minitest::Test
           }
         )
       )
-      stub_request(:put, 'http://swarms/42/invocation?code=0&job=7&secret=sword-fish')
+      stub_request(:put, 'http://swarms/42/invocation?code=0&job=7&secret=sword-fish').with do |req|
+        [
+          'A new event arived, about job #7',
+          'Loaded S3 object "swarmik/7.zip" from bucket "foo"',
+          'Cannot figure out how to start the swarm'
+        ].each { |t| assert(req.body.include?(t), req.body) }
+        ''
+      end
       stub_request(:get, 'https://foo.s3.amazonaws.com/swarmik/7.zip').to_return(body: File.binread(zip))
-      stub_request(:put, 'https://foo.s3.amazonaws.com/swarmik/7.zip')
+      stub_request(:put, 'https://foo.s3.amazonaws.com/swarmik/7.zip').with do |req|
+        zip = File.join(home, 'result.zip')
+        File.binwrite(zip, req.body)
+        Baza::Zip.new(zip, loog: fake_loog).unpack(File.join(home, 'result'))
+        ['stdout.txt', 'job.json'].each { |f| assert(File.exist?(File.join(File.join(home, 'result'), f))) }
+        json = JSON.parse(File.read(File.join(home, 'result/job.json')))
+        assert_equal(0, json['exit'])
+        ''
+      end
       stub_request(:post, 'https://sqs.us-east-1.amazonaws.com/424242/baza-shift').to_return(
         body: JSON.pretty_generate(
           {
