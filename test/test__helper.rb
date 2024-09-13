@@ -193,7 +193,7 @@ class Minitest::Test
         buf += ln
       end
       e = thr.value.to_i
-      assert(e.zero?, "The command '#{cmd}' failed with ##{e}\n#{buf}")
+      assert(e.zero?, "The command '#{cmd}' failed with exit code ##{e}\n#{buf}")
     end
     buf
   end

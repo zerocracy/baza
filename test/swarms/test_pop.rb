@@ -57,30 +57,32 @@ class PopTest < Minitest::Test
       )
       img = 'test-pop'
       bash("docker build #{home} -t #{img}", loog)
-      RandomPort::Pool::SINGLETON.acquire do |port|
-        fake_front(port, loog) do
-          stdout = bash(
-            [
-              'docker run --add-host host.docker.internal:host-gateway ',
-              "-e BAZA_URL -e SWARM_ID -e SWARM_SECRET --rm #{img} 0 ."
-            ].join,
-            loog,
-            'BAZA_URL' => "http://host.docker.internal:#{port}",
-            'SWARM_ID' => s.id.to_s,
-            'SWARM_SECRET' => s.secret
-          )
-          [
-            'inflating: pack/base.fb',
-            'inflating: pack/job.json',
-            'adding: base.fb (stored',
-            'adding: job.json',
-            "aws s3 cp pack.zip s3://swarms.zerocracy.com/baza-j/#{job.id}.zip",
-            'aws sqs send-message --queue-url https://sqs.us-east-1.amazonaws.com/019644334823/baza-j'
-          ].each { |t| assert(stdout.include?(t), "Can't find #{t.inspect} in\n#{stdout}") }
-        ensure
-          bash("docker rmi #{img}", loog)
+      stdout =
+        RandomPort::Pool::SINGLETON.acquire do |port|
+          fake_front(port, loog) do
+            bash(
+              [
+                'docker run --add-host host.docker.internal:host-gateway ',
+                "--user #{Process.uid}:#{Process.gid} ",
+                "-e BAZA_URL -e SWARM_ID -e SWARM_SECRET --rm #{img} 0 /tmp"
+              ].join,
+              loog,
+              'BAZA_URL' => "http://host.docker.internal:#{port}",
+              'SWARM_ID' => s.id.to_s,
+              'SWARM_SECRET' => s.secret
+            )
+          ensure
+            bash("docker rmi #{img}", loog)
+          end
         end
-      end
+      [
+        'inflating: pack/base.fb',
+        'inflating: pack/job.json',
+        'adding: base.fb (stored',
+        'adding: job.json',
+        "aws s3 cp pack.zip s3://swarms.zerocracy.com/baza-j/#{job.id}.zip",
+        'aws sqs send-message --queue-url https://sqs.us-east-1.amazonaws.com/019644334823/baza-j'
+      ].each { |t| assert(stdout.include?(t), "Can't find #{t.inspect} in\n#{stdout}") }
     end
   end
 end

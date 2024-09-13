@@ -26,7 +26,7 @@ set -o pipefail
 
 trap 'shutdown' EXIT
 
-cd "$(dirname "$0")"
+cd "$(dirname "$0")" || exit 1
 
 PATH=$(pwd):$PATH
 
@@ -48,8 +48,13 @@ fi
 # {{ save_files }}
 
 if [ -z "${HOME}" ]; then
+  echo 'For some reason the $HOME variable is not set! I will try to set it now:'
   # shellcheck disable=SC2116
   HOME=$(echo ~)
+  if [ -z "${HOME}" ]; then
+    echo 'I failed to set the $HOME variable'
+    exit 1
+  fi
   if [ ! -e "${HOME}" ]; then
     echo "For some reason, there is no HOME directory in the system: '${HOME}'"
     exit 1

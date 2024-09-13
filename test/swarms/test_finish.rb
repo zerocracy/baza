@@ -83,6 +83,7 @@ class FinishTest < Minitest::Test
             bash(
               [
                 'docker run --add-host host.docker.internal:host-gateway ',
+                "--user #{Process.uid}:#{Process.gid} ",
                 '-e BAZA_URL -e SWARM_ID -e SWARM_SECRET ',
                 "-v #{dir}:/temp --rm #{img} #{job.id} /temp"
               ].join,

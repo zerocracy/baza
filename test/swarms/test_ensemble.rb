@@ -40,17 +40,18 @@ class EnsembleTest < Minitest::Test
         home, 'entry.sh',
         "
         #!/bin/bash
-        mkdir temp
-        ./pop.sh 0 temp
-        rm -rf temp/*
+        set -ex
+        mkdir /tmp/e
+        ./pop.sh 0 /tmp/e
+        rm -rf /tmp/e/*
         echo '{\"messageAttributes\":{
           \"swarm\": {\"stringValue\": \"#{s.name}\"},
-          \"more\": {\"stringValue\": \"#{s.name}\"}}}' > temp/event.json
-        ./shift.sh #{job.id} temp
-        rm -rf temp/*
+          \"more\": {\"stringValue\": \"baza-#{s.name}\"}}}' > /tmp/e/event.json
+        ./shift.sh #{job.id} /tmp/e
+        rm -rf /tmp/e/*
         echo '{\"messageAttributes\":{
-          \"swarm\": {\"stringValue\": \"#{s.name}\"}}}' > temp/event.json
-        ./finish.sh #{job.id} temp
+          \"swarm\": {\"stringValue\": \"baza-#{s.name}\"}}}' > /tmp/e/event.json
+        ./finish.sh #{job.id} /tmp/e
         "
       )
       save_script(
@@ -96,6 +97,7 @@ class EnsembleTest < Minitest::Test
           stdout = bash(
             [
               'docker run --add-host host.docker.internal:host-gateway ',
+              "--user #{Process.uid}:#{Process.gid} ",
               "-e BAZA_URL -e SWARM_ID -e SWARM_SECRET --rm #{img}"
             ].join,
             loog,

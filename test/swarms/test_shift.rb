@@ -69,7 +69,14 @@ class ShiftTest < Minitest::Test
             }
           )
         )
-        bash("docker run -v #{dir}:/temp --rm #{img} #{job.id} /temp", loog)
+        bash(
+          [
+            "docker run -v #{dir}:/temp ",
+            "--user #{Process.uid}:#{Process.gid} ",
+            "--rm #{img} #{job.id} /temp"
+          ].join,
+          loog
+        )
       ensure
         bash("docker rmi #{img}", loog)
       end
