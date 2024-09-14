@@ -64,7 +64,7 @@ class Baza::EC2
   # Collect the garbage, deleting instances that are too old and still
   # running in AWS EC2 (due to some internal error, for example).
   def gc!(minutes: 15)
-    aws.describe_instances(
+    reservations = aws.describe_instances(
       filters: [
         {
           name: 'instance-state-name',
@@ -75,12 +75,14 @@ class Baza::EC2
           values: ['Baza']
         }
       ]
-    ).reservations.each do |resv|
-      t = resv.launch_time
+    ).reservations
+    return if reservations.empty?
+    reservations[0].instances.each do |instance|
+      t = instance.launch_time
       next if t > Time.now - (minutes * 60)
-      id = resv.instance_id
-      ec2.terminate_instances(instance_ids: [id])
-      @loog.warn("The instance #{id} has been launched #{t.ago}, seems to be stuch, we terminated it")
+      id = instance.instance_id
+      aws.terminate_instances(instance_ids: [id])
+      @loog.warn("The instance #{id} has been launched #{t.ago} ago, seems to be stuck, we terminated it")
     end
   end
 

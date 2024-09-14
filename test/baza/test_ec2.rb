@@ -34,6 +34,7 @@ require_relative '../test__helper'
 # License:: MIT
 class Baza::EC2Test < Minitest::Test
   def test_run_instance
+    WebMock.disable_net_connect!
     ec2 = Baza::EC2.new(
       'STUBSTUBSTUBSTUBSTUB',
       'fakefakefakefakefakefakefakefakefakefake',
@@ -42,11 +43,42 @@ class Baza::EC2Test < Minitest::Test
       'sn-42424242',
       loog: fake_loog
     )
-    fake_aws('DescribeInstances', { instancesSet: { item: { instanceId: 'i-42424242' } } })
+    fake_aws(
+      'DescribeInstances',
+      { reservationSet: { item: { instancesSet: { item: { instanceId: 'i-42424242', launchTime: '2024-01-01' } } } } }
+    )
     fake_aws('TerminateInstances', {})
     fake_aws('DescribeImages', { imagesSet: { item: { imageId: 'ami-42424242' } } })
     fake_aws('RunInstances', { instancesSet: { item: { instanceId: 'i-42424242' } } })
     i = ec2.run_instance('some-fake-name', "#!/bin/bash\necho test\n")
     assert_equal('i-42424242', i)
+  end
+
+  def test_gc_nothing
+    WebMock.disable_net_connect!
+    ec2 = Baza::EC2.new(
+      'STUBSTUBSTUBSTUBSTUB',
+      'fakefakefakefakefakefakefakefakefakefake',
+      'us-east-1',
+      'sg-424242',
+      'sn-42424242',
+      loog: fake_loog
+    )
+    fake_aws('DescribeInstances', { reservationSet: {} })
+    ec2.gc!
+  end
+
+  def test_live_gc
+    WebMock.enable_net_connect!
+    cfg = fake_live_cfg
+    ec2 = Baza::EC2.new(
+      cfg['lambda']['key'],
+      cfg['lambda']['secret'],
+      cfg['lambda']['region'],
+      cfg['lambda']['sgroup'],
+      cfg['lambda']['subnet'],
+      loog: fake_loog
+    )
+    ec2.gc!
   end
 end

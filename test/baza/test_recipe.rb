@@ -132,7 +132,6 @@ class Baza::RecipeTest < Minitest::Test
   # resources. The test should not make any hard. It just destroys the
   # function if it exists and then creates it again.
   def test_live_local_run
-    loog = Loog::VERBOSE
     creds = File.join(Dir.home, '.aws/credentials')
     skip unless File.exist?(creds)
     s = fake_human.swarms.add('st', 'zerocracy/swarm-template', 'master', '/')
@@ -148,7 +147,7 @@ class Baza::RecipeTest < Minitest::Test
             step, fake_live_cfg['lambda']['account'], fake_live_cfg['lambda']['region'], 'fake'
           )
         )
-        stdout = bash("/bin/bash #{sh}", loog)
+        stdout = bash("/bin/bash #{sh}", fake_loog)
         assert(stdout.include?('exit=0&'))
       end
     end
