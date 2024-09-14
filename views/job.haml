@@ -8,13 +8,13 @@
 
 %div.columns
   %p
-    ID:
+    Job ID:
     %br
     %span.ff
       = "##{job.id}"
 
   %p
-    Name:
+    Job name:
     %br
     %a.ff{href: iri.over(name: job.name)}
       = job.name
@@ -27,19 +27,19 @@
         = job.token.name
 
   %p
-    IP:
+    Arrived from:
     %br
     %a{href: Iri.new('https://iplocation.io/ip').append(job.ip)}<
       %span.ff<
         = job.ip
     != country_flag(job.ip)
   %p
-    Created:
+    Created on:
     %br
     != ago(job.created)
 
   %p
-    Verified:
+    Verification result:
     %br
     - if job.verified.nil?
       %span.orange

@@ -207,7 +207,7 @@ end
 # @param [LambdaContext] context I don't know what this is for
 def go(event:, context:)
   loog = Loog::VERBOSE
-  loog.info("Arrived package: #{event}")
+  loog.debug("Arrived package: #{event}")
   elapsed(intro: 'Job processing finished') do
     event['Records']&.each do |rec|
       buf = Loog::Buffer.new
