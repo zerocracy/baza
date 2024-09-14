@@ -47,11 +47,12 @@ class Baza::IpGeolocation
       @url = url
     end
 
-    def get(_url)
+    def get(url)
+      ip = URI.decode_www_form(URI.parse(url).query).to_h.fetch('ip', nil)
       GetResponse.new(
         body: JSON.dump(
           {
-            'ip' => '8.8.8.8',
+            'ip' => ip,
             'continent_code' => 'NA',
             'continent_name' => 'North America',
             'country_code2' => 'US',
@@ -72,9 +73,9 @@ class Baza::IpGeolocation
             'languages' => 'en-US,es-US,haw,fr',
             'country_flag' => 'https://ipgeolocation.io/static/flags/us_64.png',
             'geoname_id' => '6301403',
-            'isp' => 'Google LLC',
+            'isp' => ip == '8.8.8.8' ? 'Google LLC' : 'Microsoft Corp',
             'connection_type' => '',
-            'organization' => 'Google LLC',
+            'organization' => ip == '8.8.8.8' ? 'Google LLC' : 'Microsoft Company',
             'country_emoji' => '🇺🇸',
             'currency' => { 'code' => 'USD', 'name' => 'US Dollar', 'symbol' => '$' },
             'time_zone' => {

@@ -31,12 +31,15 @@ require 'base64'
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
 class Baza::Verified
-  def initialize(job)
+  def initialize(job, ipgeolocation, zache)
     @job = job
+    @ipgeolocation = ipgeolocation
+    @zache = zache
   end
 
   # Get the verdict.
   def verdict
+    return "FAKE: IP #{@job.ip} is not from Microsoft." unless ip_from_microsoft?(@job.ip)
     meta = @job.metas.find { |m| m.start_with?('workflow_url:') }
     return 'FAKE: There is no workflow_url meta' if meta.nil?
     url = meta.split(':', 2)[1]
@@ -70,5 +73,15 @@ class Baza::Verified
     "OK: All good in https://github.com/#{repo}/blob/#{branch}/#{path}"
   rescue StandardError => e
     "FAKE: #{e.message}"
+  end
+
+  private
+
+  def ip_from_microsoft?(ip)
+    organization =
+      @zache.get("owner-of-#{ip}") do
+        @ipgeolocation.ipgeo(ip:)['organization']
+      end
+    organization.match?(/Microsoft/i)
   end
 end
