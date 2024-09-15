@@ -248,7 +248,7 @@ if aws lambda get-function --function-name '{{ name }}' --region '{{ region }}' 
     --function-name '{{ name }}' \
     --region '{{ region }}' \
     --logging-config 'LogGroup={{ name }},LogFormat=Text' \
-    --timeout 300 >/dev/null
+    --timeout 600 >/dev/null
   wait_for_function
   aws lambda tag-resource \
     --resource "${fn}" \
@@ -267,7 +267,7 @@ else
     --function-name '{{ name }}' \
     --region '{{ region }}' \
     --tags 'baza={{ version }}' \
-    --timeout 300 \
+    --timeout 600 \
     --logging-config 'LogGroup={{ name }},LogFormat=Text' \
     --architectures "${arch}" \
     --description 'Process jobs of swarm #{{ swarm }} at {{ github }}' \
