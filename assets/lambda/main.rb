@@ -193,7 +193,7 @@ def one(id, pack, loog)
       "echo 'Cannot figure out how to start the swarm, try creating \"entry.sh\" or \"entry.rb\"'"
     end
   loog.info("+ #{cmd}")
-  stdout = `SWARM_SECRET={{ secret }} SWARM_ID={{ swarm }} #{cmd}`
+  stdout = `SWARM_SECRET={{ secret }} SWARM_ID={{ swarm }} SWARM_NAME={{ name }} #{cmd}`
   e = $CHILD_STATUS.exitstatus
   File.binwrite(File.join(pack, 'stdout.txt'), stdout, mode: 'a+')
   loog.info(stdout)
