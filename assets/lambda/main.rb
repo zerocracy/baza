@@ -94,7 +94,7 @@ end
 def send_message(id, loog)
   Aws::SQS::Client.new(region: '{{ region }}').send_message(
     queue_url: "https://sqs.{{ region }}.amazonaws.com/{{ account }}/baza-shift",
-    message_body: "Job ##{id} was processed by {{ name }}",
+    message_body: "Job ##{id} was processed by {{ name }} (swarm no.{{ swarm }})",
     message_attributes: {
       'swarm' => {
         string_value: '{{ name }}',
@@ -110,7 +110,7 @@ def send_message(id, loog)
       }
     }
   )
-  loog.info("Sent message to SQS about job ##{id}")
+  loog.info("Swarm {{ name }} sent SQS message about job ##{id}")
 end
 
 # Send a report to baza about this particular invocation.

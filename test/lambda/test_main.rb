@@ -109,7 +109,7 @@ class MainTest < Minitest::Test
       stub_request(:post, 'https://sqs.us-east-1.amazonaws.com/424242/baza-shift').to_return(
         body: JSON.pretty_generate(
           {
-            'MD5OfMessageBody' => 'a951ef3c012387d2672814f5e050ad48',
+            'MD5OfMessageBody' => '8c2abe2dedea4b54103ab99e6ef3691d',
             'MD5OfMessageAttributes' => '3a8a27b5b690247210a5e2297556f9b4'
           }
         )
