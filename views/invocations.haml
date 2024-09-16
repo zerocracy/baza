@@ -34,7 +34,7 @@
       %td.ff
         = "##{i[:id]}"
       %td
-        - if [:job].nil?
+        - unless [:job].nil?
           %a{href: iri.cut('/jobs').append(i[:job])}
             = "##{i[:job]}"
       %td.ff
