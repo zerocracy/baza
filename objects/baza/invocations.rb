@@ -53,7 +53,7 @@ class Baza::Invocations
       r = {
         id: row['id'].to_i,
         code: row['code'].to_i,
-        job: row['job'].to_i,
+        job: row['job']&.to_i,
         stdout: row['stdout'],
         created: Time.parse(row['created'])
       }

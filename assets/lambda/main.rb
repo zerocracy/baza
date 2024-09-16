@@ -221,7 +221,8 @@ def go(event:, context:)
       buf = Loog::Buffer.new
       lg = Loog::Tee.new(loog, buf)
       lg.info('Version: {{ version }}')
-      lg.info("Event: #{rec}")
+      lg.info("Time: #{Time.now.utc.iso8601}")
+      lg.info("Event: #{JSON.pretty_generate(rec)}")
       code = 1
       begin
         job = rec['messageAttributes']['job']['stringValue'].to_i

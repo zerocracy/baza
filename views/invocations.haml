@@ -8,6 +8,8 @@
   %colgroup
     -# ID
     %col{style: 'width: 5em;'}
+    -# Job ID
+    %col{style: 'width: 5em;'}
     -# Code
     %col{style: 'width: 4em;'}
     -# Stdout
@@ -19,6 +21,8 @@
       %th
         = '#'
       %th
+        Job
+      %th
         Code
       %th
         Stdout
@@ -29,6 +33,10 @@
     %tr
       %td.ff
         = "##{i[:id]}"
+      %td
+        - if [:job].nil?
+          %a{href: iri.cut('/jobs').append(i[:job])}
+            = "##{i[:job]}"
       %td.ff
         - if i[:code].zero?
           %i.fa-regular.fa-thumbs-up.good

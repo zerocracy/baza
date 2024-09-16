@@ -66,7 +66,7 @@ error do
     settings.tbot.notify(
       settings.humans.ensure('yegor256'),
       '🧨 I\'m sorry to tell you, but there is a crash on the server:',
-      "\n```\n#{bt.split("\n").take(6).map { |ln| ln.gsub('```', '...') }.join("\n")}\n```\n",
+      "\n```\n#{bt.split("\n").take(8).map { |ln| ln.gsub('```', '...') }.join("\n")}\n```\n",
       'You better pay attention to this as soon as possible',
       'or [report](https://github.com/zerocracy/baza/issues) to the team.'
     )
