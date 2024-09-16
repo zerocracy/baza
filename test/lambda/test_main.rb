@@ -58,7 +58,8 @@ class MainTest < Minitest::Test
                 {
                   'messageId' => 'defd997b-4675-42fc-9f33-9457011de8b3',
                   'messageAttributes' => {
-                    'job' => { 'stringValue' => '7' }
+                    'job' => { 'stringValue' => '7' },
+                    'more' => { 'stringValue' => '' }
                   },
                   'body' => 'something funny...'
                 }
@@ -110,7 +111,7 @@ class MainTest < Minitest::Test
         body: JSON.pretty_generate(
           {
             'MD5OfMessageBody' => '8c2abe2dedea4b54103ab99e6ef3691d',
-            'MD5OfMessageAttributes' => '3a8a27b5b690247210a5e2297556f9b4'
+            'MD5OfMessageAttributes' => '9d149553d86bdf2586f2456fc84b6227'
           }
         )
       )

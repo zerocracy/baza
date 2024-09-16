@@ -91,8 +91,9 @@ end
 # Send message to AWS SQS queue "shift", to enable further processing.
 #
 # @param [Integer] id The ID of the job just processed
+# @param [Array<String>] more List of swarm names to be processed later
 # @param [Loog] loog The logging facility
-def send_message(id, loog)
+def send_message(id, more, loog)
   Aws::SQS::Client.new(region: '{{ region }}').send_message(
     queue_url: "https://sqs.{{ region }}.amazonaws.com/{{ account }}/baza-shift",
     message_body: "Job ##{id} was processed by {{ name }} (swarm no.{{ swarm }})",
@@ -106,7 +107,7 @@ def send_message(id, loog)
         data_type: 'String'
       },
       'more' => {
-        string_value: 'baza-j',
+        string_value: more.join(' '),
         data_type: 'String'
       }
     }
@@ -135,7 +136,7 @@ def report(stdout, code, job)
     headers: {
       'User-Agent' => '{{ name }} {{ version }}',
       'Content-Type' => 'text/plain',
-      'Content-Length' => stdout.length
+      'Content-Length' => stdout.bytesize
     }
   )
   puts "Reported to #{home}: #{ret.code}"
@@ -173,7 +174,8 @@ def with_zip(id, rec, loog)
     loog.info("JSON updated at #{jfile} (#{File.size(jfile)} bytes)")
     Archive::Zip.archive(zip, File.join(pack, '/.'))
     put_object(key, zip, loog)
-    send_message(id, loog)
+    more = rec['messageAttributes']['more']['stringValue'].split(' ') - ['{{ name }}']
+    send_message(id, more, loog)
     r
   end
 end
@@ -227,7 +229,6 @@ def go(event:, context:)
       begin
         job = rec['messageAttributes']['job']['stringValue'].to_i
         lg.info("A new event arived, about job ##{job}")
-        job = 0 if job.nil?
         if ['baza-pop', 'baza-shift', 'baza-finish'].include?('{{ name }}')
           lg.info("Starting to process '{{ name }}' (system swarm)")
           Dir.mktmpdir do |pack|
