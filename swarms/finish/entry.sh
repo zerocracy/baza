@@ -42,10 +42,17 @@ key="${swarm}/${id}.zip"
 
 aws s3 cp "s3://${S3_BUCKET}/${key}" pack.zip
 
-status=$(curl -X PUT -s "${BAZA_URL}/finish?id=${id}&swarm=${SWARM_ID}&secret=${SWARM_SECRET}" \
-  --data-binary '@pack.zip' -o /dev/null \
-  -H "User-Agent: ${SWARM_NAME}" \
-  -H 'Content-Type: application/octet-stream' -w "%{http_code}")
+attempt=0
+while true; do
+  ((++attempt))
+  status=$(curl -X PUT -s "${BAZA_URL}/finish?id=${id}&swarm=${SWARM_ID}&secret=${SWARM_SECRET}" \
+    --data-binary '@pack.zip' -o /dev/null \
+    -H "User-Agent: ${SWARM_NAME}" \
+    -H 'Content-Type: application/octet-stream' -w "%{http_code}")
+  if [ "${status}" -lt 500 ]; then break; fi
+  if [ "${attempt}" -gt 8 ]; then exit 1; fi
+  sleep "${attempt}"
+done
 if [ "${status}" != '200' ]; then
   echo "Failed to finish (code=${status})"
   exit 1
