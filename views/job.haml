@@ -47,9 +47,10 @@
     - elsif job.verified.start_with?('FAKE: ')
       %span.bad
         != large_text(job.verified)
-        We expect you to use exactly
-        != href('https://github.com/zerocracy/judges-action/blob/master/README.md', 'this YAML')
-        in your GitHub workflow.
+      %br
+      We expect you to use exactly
+      != href('https://github.com/zerocracy/judges-action/blob/master/README.md', 'this YAML')
+      in your GitHub workflow.
     - elsif job.verified.start_with?('OK: ')
       %i.fa-solid.fa-certificate.good
       %span.good

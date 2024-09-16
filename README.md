@@ -41,15 +41,13 @@ In order to run "live" tests, which will connect, for exampe, to AWS resources,
 you must have a YAML config file, similar to the one provided during the
 deployment. Then, when the file is ready, run it like this:
 
-```
-bash
+```bash
 bundle exec rake -- --live=/path/to/yaml/file.yml
 ```
 
 If you need to run just one "live" test, try this, for example:
 
-```
-bash
+```bash
 RACK_LIVE_YAML_FILE=/path/to/yaml/file.yml bundle exec ruby test/base/test_ec2.rb -n test_live_gc
 ```
 

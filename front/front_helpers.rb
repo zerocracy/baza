@@ -46,7 +46,7 @@ module Baza::Helpers
           html_tag('ul', style: 'margin-bottom: 0; text-align: left;') do
             [
               params[:offset].zero? ? '' : html_tag('li') do
-                html_tag('a', href: iri.del(:offset)) do
+                html_tag('a', href: iri.over(offset: params[:offset] - max)) do
                   [
                     html_tag('i', class: 'fa-solid fa-backward'),
                     html_tag('span', style: 'margin-left: .5em') { 'Back' }
@@ -126,7 +126,7 @@ module Baza::Helpers
           style: 'display: none; margin-left: .5em',
           onclick: js_copy
         ) { html_tag('i', class: 'fa-regular fa-copy') },
-        html_tag('span', class: 'gray', style: 'display: none;') { 'Copied to clipboard!' }
+        html_tag('span', class: 'gold', style: 'display: none;') { 'Copied to clipboard!' }
       ].join
     end
   end

@@ -22,6 +22,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+require 'archive/zip'
 require 'aws-sdk-core'
 require 'aws-sdk-s3'
 require 'aws-sdk-sqs'
@@ -32,8 +33,8 @@ require 'iri'
 require 'json'
 require 'loog'
 require 'loog/tee'
+require 'qbash'
 require 'typhoeus'
-require 'archive/zip'
 
 # This is needed because of this: https://github.com/aws/aws-lambda-ruby-runtime-interface-client/issues/14
 require 'aws_lambda_ric'
@@ -192,13 +193,20 @@ def one(id, pack, loog)
     else
       "echo 'Cannot figure out how to start the swarm, try creating \"entry.sh\" or \"entry.rb\"'"
     end
-  loog.info("+ #{cmd}")
-  stdout = `SWARM_SECRET={{ secret }} SWARM_ID={{ swarm }} SWARM_NAME={{ name }} #{cmd}`
-  e = $CHILD_STATUS.exitstatus
+  stdout, code = qbash(
+    cmd,
+    both: true,
+    loog:,
+    env: {
+      'SWARM_SECRET' => '{{ secret }}',
+      'SWARM_ID' => '{{ swarm }}',
+      'SWARM_NAME' => '{{ name }}'
+    },
+    accept: []
+  )
   File.binwrite(File.join(pack, 'stdout.txt'), stdout, mode: 'a+')
-  loog.info(stdout)
-  loog.warn("FAILURE (#{e})") unless e.zero?
-  e
+  loog.warn("FAILURE (#{code})") unless code.zero?
+  code
 end
 
 # This is the entry point called by aws_lambda_ric when a new SQS message arrives.

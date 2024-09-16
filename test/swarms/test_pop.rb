@@ -24,6 +24,7 @@
 
 require 'minitest/autorun'
 require 'random-port'
+require 'qbash'
 require_relative '../test__helper'
 
 # Test.
@@ -32,14 +33,26 @@ require_relative '../test__helper'
 # License:: MIT
 class PopTest < Minitest::Test
   def test_runs_pop_entry_script
-    loog = fake_loog
     fake_pgsql.exec('TRUNCATE job CASCADE')
     job = fake_job
     s = fake_human.swarms.add(fake_name, "#{fake_name}/#{fake_name}", 'master', '/')
     Dir.mktmpdir do |home|
       %w[aws].each do |f|
         sh = File.join(home, f)
-        File.write(sh, "#!/bin/bash\necho $@")
+        File.write(
+          sh,
+          "
+          #!/bin/bash
+          set -ex
+          if [ \"${1}\" == 'sqs' ]; then
+            if [ \"${2}\" == 'send-message' ]; then
+              for a in \"$@\"; do
+                echo SQS-MESSAGE: [\"${a}\"]
+              done
+            fi
+          fi
+          "
+        )
         FileUtils.chmod('+x', sh)
       end
       FileUtils.copy(File.join(__dir__, '../../swarms/pop/entry.sh'), home)
@@ -56,23 +69,26 @@ class PopTest < Minitest::Test
         '
       )
       img = 'test-pop'
-      bash("docker build #{home} -t #{img}", loog)
+      qbash("docker build #{home} -t #{img}", loog: fake_loog)
       stdout =
         RandomPort::Pool::SINGLETON.acquire do |port|
-          fake_front(port, loog) do
-            bash(
+          fake_front(port, loog: fake_loog) do
+            qbash(
               [
-                'docker run --add-host host.docker.internal:host-gateway ',
-                "--user #{Process.uid}:#{Process.gid} ",
-                "-e BAZA_URL -e SWARM_ID -e SWARM_SECRET --rm #{img} 0 /tmp"
-              ].join,
-              loog,
-              'BAZA_URL' => "http://host.docker.internal:#{port}",
-              'SWARM_ID' => s.id.to_s,
-              'SWARM_SECRET' => s.secret
+                'docker run --add-host host.docker.internal:host-gateway',
+                "--user #{Process.uid}:#{Process.gid}",
+                "-e BAZA_URL -e SWARM_ID -e SWARM_SECRET -e SWARM_NAME --rm #{img} 0 /tmp"
+              ],
+              loog: fake_loog,
+              env: {
+                'BAZA_URL' => "http://host.docker.internal:#{port}",
+                'SWARM_ID' => s.id.to_s,
+                'SWARM_SECRET' => s.secret,
+                'SWARM_NAME' => s.name
+              }
             )
           ensure
-            bash("docker rmi #{img}", loog)
+            qbash("docker rmi #{img}", loog: fake_loog)
           end
         end
       [
@@ -81,7 +97,10 @@ class PopTest < Minitest::Test
         'adding: base.fb (stored',
         'adding: job.json',
         "aws s3 cp pack.zip s3://swarms.zerocracy.com/baza-j/#{job.id}.zip",
-        'aws sqs send-message --queue-url https://sqs.us-east-1.amazonaws.com/019644334823/baza-j'
+        'aws sqs send-message --queue-url https://sqs.us-east-1.amazonaws.com/019644334823/baza-j',
+        "StringValue='#{job.id}'",
+        "StringValue='#{s.name}'",
+        "StringValue='baza-j baza-eva'"
       ].each { |t| assert(stdout.include?(t), "Can't find #{t.inspect} in\n#{stdout}") }
     end
   end

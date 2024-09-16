@@ -24,6 +24,7 @@
 
 require 'minitest/autorun'
 require 'random-port'
+require 'qbash'
 require_relative '../test__helper'
 
 # Test.
@@ -32,7 +33,6 @@ require_relative '../test__helper'
 # License:: MIT
 class ShiftTest < Minitest::Test
   def test_runs_shift_entry_script
-    loog = fake_loog
     job = fake_job
     s = fake_human.swarms.add(fake_name, "#{fake_name}/#{fake_name}", 'master', '/')
     Dir.mktmpdir do |home|
@@ -55,7 +55,7 @@ class ShiftTest < Minitest::Test
         '
       )
       img = 'test-shift'
-      bash("docker build #{home} -t #{img}", loog)
+      qbash("docker build #{home} -t #{img}", loog: fake_loog)
       name = "baza-#{s.name}"
       Dir.mktmpdir do |dir|
         File.write(
@@ -69,16 +69,16 @@ class ShiftTest < Minitest::Test
             }
           )
         )
-        bash(
+        qbash(
           [
-            "docker run -v #{dir}:/temp ",
-            "--user #{Process.uid}:#{Process.gid} ",
+            "docker run -v #{dir}:/temp",
+            "--user #{Process.uid}:#{Process.gid}",
             "--rm #{img} #{job.id} /temp"
-          ].join,
-          loog
+          ],
+          loog: fake_loog
         )
       ensure
-        bash("docker rmi #{img}", loog)
+        qbash("docker rmi #{img}", loog: fake_loog)
       end
     end
   end

@@ -86,7 +86,8 @@ class Baza::Pipe
           {
             id: job.id,
             name: job.name,
-            human: job.jobs.human.id,
+            packed: Time.now.utc.iso8601,
+            human: job.jobs.human.github,
             alterations: alts.map { |a| a[:id] },
             options: job.options
           }

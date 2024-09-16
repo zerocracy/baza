@@ -40,6 +40,7 @@ require 'loog'
 require 'minitest/autorun'
 require 'open3'
 require 'pgtk/pool'
+require 'qbash'
 require 'rack/test'
 require 'securerandom'
 require 'yaml'
@@ -178,27 +179,7 @@ class Minitest::Test
     end.join
   end
 
-  def bash(cmd, loog, env = {})
-    loog.debug("+ #{cmd}")
-    buf = ''
-    Open3.popen2e(env, "/bin/bash -c '#{cmd}'") do |stdin, stdout, thr|
-      stdin.close
-      until stdout.eof?
-        begin
-          ln = stdout.gets
-        rescue IOError => e
-          ln = Backtrace.new(e).to_s
-        end
-        loog.debug(ln)
-        buf += ln
-      end
-      e = thr.value.to_i
-      assert(e.zero?, "The command '#{cmd}' failed with exit code ##{e}\n#{buf}")
-    end
-    buf
-  end
-
-  def fake_front(port, loog)
+  def fake_front(port, loog: Loog::NULL)
     started = false
     pid = nil
     server =

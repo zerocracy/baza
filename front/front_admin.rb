@@ -22,6 +22,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+require 'qbash'
 require_relative '../objects/baza/urror'
 
 def admin_only
@@ -74,7 +75,7 @@ get '/bash' do
     :default,
     title: '/bash',
     command:,
-    stdout: `set -ex; (#{command}) 2>&1`
+    stdout: qbash("set -ex; (#{command}) 2>&1")
   )
 end
 

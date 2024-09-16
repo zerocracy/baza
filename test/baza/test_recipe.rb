@@ -26,6 +26,7 @@ require 'backtrace'
 require 'fileutils'
 require 'loog'
 require 'minitest/autorun'
+require 'qbash'
 require 'random-port'
 require 'webmock/minitest'
 require 'yaml'
@@ -75,7 +76,6 @@ class Baza::RecipeTest < Minitest::Test
   # without errors, ensuring that the script functions correctly in a clean
   # environment akin to a production setup.
   def test_runs_script
-    loog = fake_loog
     swarm = fake_human.swarms.add('st', 'zerocracy/swarm-template', 'master', '/')
     secret = fake_name
     r = swarm.releases.start('just start', secret)
@@ -96,10 +96,10 @@ class Baza::RecipeTest < Minitest::Test
         '
       )
       img = 'test-recipe-script'
-      bash("docker build #{File.join(home, '.docker')} -t #{img}", loog)
+      qbash("docker build #{File.join(home, '.docker')} -t #{img}", loog: fake_loog)
       begin
         RandomPort::Pool::SINGLETON.acquire do |port|
-          fake_front(port, loog) do
+          fake_front(port, loog: fake_loog) do
             sh = File.join(home, 'recipe.sh')
             File.write(
               sh,
@@ -108,18 +108,18 @@ class Baza::RecipeTest < Minitest::Test
                 host: "http://host.docker.internal:#{port}"
               )
             )
-            bash(
+            qbash(
               [
-                'docker run --rm --add-host host.docker.internal:host-gateway ',
-                "--user #{Process.uid}:#{Process.gid} ",
+                'docker run --rm --add-host host.docker.internal:host-gateway',
+                "--user #{Process.uid}:#{Process.gid}",
                 "-v #{home}:/r #{img}"
-              ].join,
-              loog
+              ],
+              loog: fake_loog
             )
           end
         end
       ensure
-        bash("docker rmi #{img}", loog)
+        qbash("docker rmi #{img}", loog: fake_loog)
       end
     end
     assert(swarm.releases.get(r.id).exit.zero?)
@@ -147,7 +147,7 @@ class Baza::RecipeTest < Minitest::Test
             step, fake_live_cfg['lambda']['account'], fake_live_cfg['lambda']['region'], 'fake'
           )
         )
-        stdout = bash("/bin/bash #{sh}", fake_loog)
+        stdout = qbash("/bin/bash #{sh}", loog: fake_loog)
         assert(stdout.include?('exit=0&'))
       end
     end
@@ -157,7 +157,6 @@ class Baza::RecipeTest < Minitest::Test
   # that we use inside AWS Lambda function. If something is wrong in the
   # Dockerfile, this test must highlight such a problem.
   def test_build_docker_image
-    loog = fake_loog
     img = 'test-recipe-build'
     Dir.mktmpdir do |home|
       ['Dockerfile', 'Gemfile', 'entry.sh', 'main.rb', 'install.sh'].each do |f|
@@ -167,9 +166,9 @@ class Baza::RecipeTest < Minitest::Test
         )
       end
       FileUtils.mkdir_p(File.join(home, 'swarm'))
-      bash("docker build #{home} -t #{img}", loog)
+      qbash("docker build #{home} -t #{img}", loog: fake_loog)
     ensure
-      bash("docker rmi -f #{img}", loog)
+      qbash("docker rmi -f #{img}", loog: fake_loog)
     end
   end
 
@@ -180,7 +179,6 @@ class Baza::RecipeTest < Minitest::Test
   # processing a single job with the help of a simple judge.
   def test_local_lambda_run
     WebMock.enable_net_connect!
-    loog = fake_loog
     fake_pgsql.exec('TRUNCATE human CASCADE')
     job = fake_job(fake_human('yegor256'))
     s = job.jobs.human.swarms.add('st', 'zerocracy/swarm-template', 'master', '/')
@@ -196,7 +194,7 @@ class Baza::RecipeTest < Minitest::Test
             host: "http://host.docker.internal:#{backend_port}"
           )
         )
-        bash("/bin/bash #{sh}", loog)
+        qbash("/bin/bash #{sh}", loog: fake_loog)
         File.write(
           File.join(home, 'main.rb'),
           [
@@ -239,19 +237,18 @@ class Baza::RecipeTest < Minitest::Test
           "
         }.each { |f, txt| File.write(File.join(home, f), txt) }
         image = 'local-lambda-test'
-        bash("docker build #{home} -t #{image}", loog)
+        qbash("docker build #{home} -t #{image}", loog: fake_loog)
         begin
           ret =
-            fake_front(backend_port, loog) do
-              container = bash(
+            fake_front(backend_port, loog: fake_loog) do
+              container = qbash(
                 [
-                  'docker run --add-host host.docker.internal:host-gateway ',
-                  "--user #{Process.uid}:#{Process.gid} ",
+                  'docker run --add-host host.docker.internal:host-gateway',
+                  "--user #{Process.uid}:#{Process.gid}",
                   "-d -p #{lambda_port}:8080 #{image}"
-                ].join,
-                loog
+                ],
+                loog: fake_loog
               ).split("\n")[-1]
-              loog.debug("Docker container started: #{container}")
               begin
                 wait_for { Typhoeus::Request.get("http://localhost:#{lambda_port}/test").code == 404 }
                 request = Typhoeus::Request.new(
@@ -277,15 +274,15 @@ class Baza::RecipeTest < Minitest::Test
                 request.run
                 request.response
               ensure
-                stdout = bash("docker logs #{container}", loog)
-                bash("docker rm -f #{container}", loog)
+                stdout = qbash("docker logs #{container}", loog: fake_loog)
+                qbash("docker rm -f #{container}", loog: fake_loog)
               end
             end
           assert_equal(200, ret.response_code, ret.response_body)
           assert_equal('"Done!"', ret.response_body, ret.response_body)
           assert_equal(1, s.invocations.each.to_a.size)
         ensure
-          bash("docker rmi #{image}", loog)
+          qbash("docker rmi #{image}", loog: fake_loog)
         end
       end
     end

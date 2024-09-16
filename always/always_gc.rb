@@ -26,14 +26,24 @@ settings.humans.gc.ready_to_expire(settings.expiration_days) do |j|
   j.expire!(settings.fbs, 'It is garbage')
   settings.loog.debug("Job ##{j.id} is garbage, expired")
 end
-settings.humans.gc.stuck(60) do |j|
-  j.expire!(settings.fbs, 'The job was stuck, that is why expired')
+
+minutes = 60
+settings.humans.gc.stuck(minutes) do |j|
+  j.expire!(
+    settings.fbs,
+    'The job was stuck, that is why expired. ' \
+    'Technically, this means that the jobs was taken by some pipeline, but has not been returned for a long time. ' \
+    'The "taken" attribute of the job may explain better by who exactly it has been taken. ' \
+    "It is expected that a job is processed faster than #{minutes} minutes."
+  )
   settings.loog.debug("Job ##{j.id} was stuck, expired")
 end
+
 settings.humans.gc.tests(4 * 60) do |j|
   j.expire!(settings.fbs, 'It was a test job, that is why expired')
   settings.loog.debug("Job ##{j.id} was a test, expired")
 end
+
 begin
   tester = settings.humans.his_token(Baza::Tokens::TESTER).human
   tester.durables(settings.fbs).each do |d|

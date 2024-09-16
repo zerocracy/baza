@@ -24,6 +24,7 @@
 
 require 'minitest/autorun'
 require 'random-port'
+require 'qbash'
 require_relative '../test__helper'
 
 # Test.
@@ -32,7 +33,6 @@ require_relative '../test__helper'
 # License:: MIT
 class FinishTest < Minitest::Test
   def test_runs_finish_entry_script
-    loog = fake_loog
     job = fake_job
     s = fake_human.swarms.add(fake_name, "#{fake_name}/#{fake_name}", 'master', '/')
     Dir.mktmpdir do |home|
@@ -72,30 +72,32 @@ class FinishTest < Minitest::Test
         '
       )
       img = 'test-finish'
-      bash("docker build #{home} -t #{img}", loog)
+      qbash("docker build #{home} -t #{img}", loog: fake_loog)
       RandomPort::Pool::SINGLETON.acquire do |port|
-        fake_front(port, loog) do
+        fake_front(port, loog: fake_loog) do
           Dir.mktmpdir do |dir|
             File.write(
               File.join(dir, 'event.json'),
               JSON.pretty_generate({ messageAttributes: { swarm: { stringValue: s.name } } })
             )
-            bash(
+            qbash(
               [
-                'docker run --add-host host.docker.internal:host-gateway ',
-                "--user #{Process.uid}:#{Process.gid} ",
-                '-e BAZA_URL -e SWARM_ID -e SWARM_SECRET ',
+                'docker run --add-host host.docker.internal:host-gateway',
+                "--user #{Process.uid}:#{Process.gid}",
+                '-e BAZA_URL -e SWARM_ID -e SWARM_SECRET',
                 "-v #{dir}:/temp --rm #{img} #{job.id} /temp"
-              ].join,
-              loog,
-              'BAZA_URL' => "http://host.docker.internal:#{port}",
-              'SWARM_ID' => s.id.to_s,
-              'SWARM_SECRET' => s.secret
+              ],
+              loog: fake_loog,
+              env: {
+                'BAZA_URL' => "http://host.docker.internal:#{port}",
+                'SWARM_ID' => s.id.to_s,
+                'SWARM_SECRET' => s.secret
+              }
             )
           end
         end
       ensure
-        bash("docker rmi #{img}", loog)
+        qbash("docker rmi #{img}", loog: fake_loog)
       end
     end
   end
