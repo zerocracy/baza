@@ -108,6 +108,35 @@ class Baza::PipeTest < Minitest::Test
     end
   end
 
+  def test_unpack_with_alterations
+    fbs = Baza::Factbases.new('', '', loog: fake_loog)
+    Dir.mktmpdir do |home|
+      input = File.join(home, 'foo.fb')
+      File.binwrite(input, Factbase.new.export)
+      uri = fbs.save(input)
+      job = fake_token.start(fake_name, uri, 1, 0, 'n/a', [], '1.1.1.1')
+      alt = job.jobs.human.alterations.add(job.name, 'ruby', { script: '42 + 1"' })
+      pipe = Baza::Humans.new(fake_pgsql).pipe(fbs, nil)
+      zip = File.join(home, 'foo.zip')
+      pipe.pack(job, zip)
+      Baza::Zip.new(zip).unpack(home)
+      File.delete(zip)
+      File.write(
+        File.join(home, 'job.json'),
+        JSON.pretty_generate(
+          JSON.parse(File.read(File.join(home, 'job.json'))).merge(
+            { 'exit' => 0, 'msec' => 500 }
+          )
+        )
+      )
+      File.write(File.join(home, 'stdout.txt'), 'finished')
+      File.write(File.join(home, "alteration-#{alt}/stdout.txt"), 'done...')
+      Baza::Zip.new(zip, loog: fake_loog).pack(home)
+      fake_pipe.unpack(job, zip)
+      assert(!job.jobs.human.alterations.get(alt)[:applied].nil?)
+    end
+  end
+
   def test_unpack_with_trails
     job = fake_job
     job = fake_pipe.pop('owner')

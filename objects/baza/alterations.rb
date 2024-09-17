@@ -80,7 +80,15 @@ class Baza::Alterations
 
   def get(id)
     row = pgsql.exec(
-      'SELECT * FROM alteration WHERE id = $1 AND human = $2',
+      [
+        'SELECT alteration.id, alteration.name, alteration.script, alteration.created,',
+        'b.id AS applied, COUNT(a.id) AS jobs',
+        'FROM alteration',
+        'LEFT JOIN job AS a ON a.name = alteration.name',
+        'LEFT JOIN job AS b ON b.id = alteration.job',
+        'WHERE alteration.id = $1 AND alteration.human = $2',
+        'GROUP BY alteration.id, b.id'
+      ],
       [id, @human.id]
     ).first
     {
@@ -88,6 +96,7 @@ class Baza::Alterations
       name: row['name'],
       script: row['script'],
       created: Time.parse(row['created']),
+      jobs: row['jobs'].to_i,
       applied: row['applied']&.to_i
     }
   end

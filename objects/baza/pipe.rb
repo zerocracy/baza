@@ -130,14 +130,24 @@ class Baza::Pipe
         meta['exit'].zero? ? File.size(fb) : nil,
         meta['exit'].zero? ? Baza::Errors.new(fb).count : nil
       )
+      Dir[File.join(dir, 'alteration-*/stdout.txt')].each do |f|
+        alt = File.basename(File.dirname(f)).split('-', 2)[1].to_i
+        job.jobs.human.notify(
+          "🍊 We have successfully applied the alteration ##{alt}",
+          "to the job `#{job.name}` (##{job.id}),",
+          "you can see the log [here](//jobs/#{job.id})."
+        )
+        job.jobs.human.alterations.complete(alt, job.id)
+        @loog.debug("The job ##{job.id} applied the alteration ##{alt}")
+      end
       Dir[File.join(dir, 'trails/*/*')].each do |f|
         data = File.read(f)
         judge = File.basename(File.dirname(f))
         n = File.basename(f)
-        @loog.debug("The trail '#{n}' (#{data.size} bytes) was left by the '#{judge}' judge")
         @trails.add(job, judge, n, JSON.parse(data))
+        @loog.debug("The trail '#{n}' (#{data.size} bytes) was left by the '#{judge}' judge")
       end
     end
-    @loog.debug("Job ##{job.id} unpacked from ZIP (#{File.size(file)} bytes)")
+    @loog.debug("The job ##{job.id} unpacked from ZIP (#{File.size(file)} bytes)")
   end
 end

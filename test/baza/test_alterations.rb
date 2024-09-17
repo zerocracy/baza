@@ -50,6 +50,18 @@ class Baza::AlterationsTest < Minitest::Test
     assert(alterations.each.to_a.empty?)
   end
 
+  def test_get_one
+    human = fake_human
+    alterations = human.alterations
+    n = fake_name
+    script = 'puts "Hello, world!"'
+    id = alterations.add(n, 'ruby', script:)
+    a = alterations.get(id)
+    assert_equal(n, a[:name])
+    assert_equal(script, a[:script])
+    assert_equal(0, a[:jobs])
+  end
+
   def test_with_template
     human = fake_human
     alterations = human.alterations
