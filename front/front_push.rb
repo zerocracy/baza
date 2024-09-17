@@ -64,7 +64,10 @@ def job_start(token, file, name, metas, ip)
     ip
   )
   begin
-    settings.sqs.push(job, "Job ##{job.id} (#{job.name}) registered from #{ip}")
+    settings.sqs.push(
+      job,
+      "Job ##{job.id} (\"#{job.name}\") of #{File.size(file.path)} bytes registered from #{ip}"
+    )
   rescue StandardError => e
     settings.loog.error(Backtrace.new(e).to_s)
   end

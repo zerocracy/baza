@@ -94,25 +94,28 @@ end
 # @param [Array<String>] more List of swarm names to be processed later
 # @param [Loog] loog The logging facility
 def send_message(id, more, loog)
+  attrs = {
+    'swarm' => {
+      string_value: '{{ name }}',
+      data_type: 'String'
+    },
+    'job' => {
+      string_value: id.to_s,
+      data_type: 'String'
+    }
+  }
+  unless more.empty?
+    attrs['more'] = {
+      string_value: more.join(' '),
+      data_type: 'String'
+    }
+  end
   Aws::SQS::Client.new(region: '{{ region }}').send_message(
     queue_url: "https://sqs.{{ region }}.amazonaws.com/{{ account }}/baza-shift",
     message_body: "Job ##{id} was processed by {{ name }} (swarm no.{{ swarm }})",
-    message_attributes: {
-      'swarm' => {
-        string_value: '{{ name }}',
-        data_type: 'String'
-      },
-      'job' => {
-        string_value: id.to_s,
-        data_type: 'String'
-      },
-      'more' => {
-        string_value: more.join(' '),
-        data_type: 'String'
-      }
-    }
+    message_attributes: attrs
   )
-  loog.info("Swarm {{ name }} sent SQS message about job ##{id}")
+  loog.info("Swarm {{ name }} sent SQS message about job ##{id} (more=#{more})")
 end
 
 # Send a report to baza about this particular invocation.

@@ -111,7 +111,7 @@ class MainTest < Minitest::Test
         body: JSON.pretty_generate(
           {
             'MD5OfMessageBody' => '8c2abe2dedea4b54103ab99e6ef3691d',
-            'MD5OfMessageAttributes' => '9d149553d86bdf2586f2456fc84b6227'
+            'MD5OfMessageAttributes' => '4cbfcbc94438be62036bdcc80ab63fb4'
           }
         )
       )
