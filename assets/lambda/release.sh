@@ -248,6 +248,7 @@ if aws lambda get-function --function-name '{{ name }}' --region '{{ region }}' 
     --function-name '{{ name }}' \
     --region '{{ region }}' \
     --logging-config 'LogGroup={{ name }},LogFormat=Text' \
+    --memory-size 4096 \
     --timeout 600 >/dev/null
   wait_for_function
   aws lambda tag-resource \
@@ -267,6 +268,7 @@ else
     --function-name '{{ name }}' \
     --region '{{ region }}' \
     --tags 'baza={{ version }}' \
+    --memory-size 4096 \
     --timeout 600 \
     --logging-config 'LogGroup={{ name }},LogFormat=Text' \
     --architectures "${arch}" \
