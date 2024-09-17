@@ -29,6 +29,7 @@ require 'aws-sdk-sqs'
 require 'backtrace'
 require 'elapsed'
 require 'English'
+require 'fileutils'
 require 'iri'
 require 'json'
 require 'loog'
@@ -146,13 +147,33 @@ def report(stdout, code, job)
   puts "Reported to #{home.to_uri.host}:#{home.to_uri.port}, received HTTP ##{ret.code}"
 end
 
+# Execute one swarm, collecting trails.
+#
+# @param [String] pack The directory with the unpacked ZIP
+# @param [Loog] loog The logging facility
+def with_trails(pack, loog)
+  jfile = File.join(pack, 'job.json')
+  before = JSON.parse(File.read(jfile))
+  json = before.dup
+  r = 0
+  Dir.mktmpdir do |dir|
+    json['options'] = {} if json['options'].nil?
+    json['options']['TRAILS_DIR'] = dir
+    File.write(jfile, JSON.pretty_generate(json))
+    r = yield pack
+    FileUtils.cp_r(dir, File.join(pack, 'trails/'))
+  end
+  File.write(jfile, JSON.pretty_generate(before))
+  r
+end
+
 # Run one swarm for a particular job, where a ZIP archvie from S3 must be processed.
 #
 # @param [Integer] id The ID of the job to process
 # @param [Hash] rec JSON event from the SQS message
 # @param [Loog] loog The logging facility
 # @return [Integer] Exit code (zero means success)
-def with_zip(id, rec, loog)
+def with_zip(id, rec, loog, &)
   Dir.mktmpdir do |home|
     zip = File.join(home, "#{id}.zip")
     key = "{{ name }}/#{id}.zip"
@@ -167,8 +188,11 @@ def with_zip(id, rec, loog)
     rec_file = File.join(pack, 'event.json')
     File.write(rec_file, JSON.pretty_generate(rec))
     start = Time.now
-    r = yield pack
-    loog.warn(File.binread(File.join(pack, 'stdout.txt'))) unless r.zero?
+    r = with_trails(pack, loog, &)
+    unless r.zero?
+      loog.warn('This is what was printed by the swarm:')
+      loog.warn(File.binread(File.join(pack, 'stdout.txt')))
+    end
     FileUtils.rm_f(rec_file)
     json['exit'] = r
     json['msec'] = ((Time.now - start) * 1000).to_i
@@ -177,7 +201,12 @@ def with_zip(id, rec, loog)
     Archive::Zip.archive(zip, File.join(pack, '/.'))
     loog.info("Packed ZIP (#{File.size(zip)} bytes)")
     put_object(key, zip, loog)
-    more = rec['messageAttributes']['more']['stringValue'].split(' ') - ['{{ name }}']
+    more = rec['messageAttributes']['more']
+    if more.nil?
+      more = []
+    else
+      more = more['stringValue'].split(' ') - ['{{ name }}']
+    end
     send_message(id, more, loog)
     r
   end
@@ -214,7 +243,7 @@ def one(id, pack, loog)
     [
       "Started swarm no.{{ swarm }} ({{ name }}):",
       stdout,
-      "Finished  swarm no.{{ swarm }} ({{ name }}).",
+      "Finished swarm no.{{ swarm }} ({{ name }}).",
       "\n"
     ].join("\n"),
     mode: 'a+'
@@ -224,6 +253,8 @@ def one(id, pack, loog)
 end
 
 # This is the entry point called by aws_lambda_ric when a new SQS message arrives.
+#
+# More about the context: https://docs.aws.amazon.com/lambda/latest/dg/ruby-context.html
 #
 # @param [Hash] event The JSON event
 # @param [LambdaContext] context I don't know what this is for

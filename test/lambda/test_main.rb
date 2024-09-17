@@ -25,6 +25,8 @@
 require 'minitest/autorun'
 require 'webmock/minitest'
 require 'archive/zip'
+require 'random-port'
+require 'shellwords'
 require_relative '../test__helper'
 
 # Test.
@@ -116,6 +118,97 @@ class MainTest < Minitest::Test
         )
       )
       load(rb)
+    end
+  end
+
+  def test_picks_up_trails
+    fake_pgsql.exec('TRUNCATE job CASCADE')
+    Dir.mktmpdir do |home|
+      FileUtils.mkdir_p(File.join(home, 'swarm'))
+      FileUtils.copy(File.join(__dir__, '../../assets/lambda/Gemfile'), home)
+      File.write(
+        File.join(home, 'main.rb'),
+        [
+          File.read(File.join(__dir__, '../../assets/lambda/main.rb')),
+          "
+          def get_object(key, file, loog)
+            Dir.mktmpdir do |home|
+              File.write(
+                File.join(home, 'job.json'),
+                JSON.pretty_generate({'id' => 42})
+              )
+              Archive::Zip.archive(file, File.join(home, '/.'))
+            end
+          end
+          def put_object(key, file, loog)
+            FileUtils.copy(file, '/tmp/result.zip')
+          end
+          def send_message(id, more, loog); end
+          def report(stdout, code, job); end
+          go(
+            event: {
+              'Records' => [
+                {
+                  'messageId' => 'defd997b-4675-42fc-9f33-9457011de8b3',
+                  'messageAttributes' => {
+                    'job' => { 'stringValue' => '7' }
+                  },
+                  'body' => 'something funny...'
+                }
+              ]
+            },
+            context: nil
+          )
+          "
+        ].join
+      )
+      File.write(
+        File.join(home, 'swarm/entry.sh'),
+        "
+        #!/bin/bash
+        set -ex
+        job=$1
+        home=$2
+        TRAILS_DIR=$( jq -r .options.TRAILS_DIR \"${home}/job.json\" )
+        mkdir -p \"${TRAILS_DIR}/first\"
+        echo 'first' > \"${TRAILS_DIR}/first/foo.txt\"
+        echo 'first' > \"${TRAILS_DIR}/first/bar.txt\"
+        mkdir -p \"${TRAILS_DIR}/second\"
+        echo 'second' > \"${TRAILS_DIR}/second/hello.txt\"
+        "
+      )
+      File.write(
+        File.join(home, 'Dockerfile'),
+        '
+        FROM ruby:3.3
+        WORKDIR /r
+        RUN apt-get update -y && apt-get install -y jq unzip
+        COPY Gemfile .
+        RUN bundle install
+        COPY swarm/ /swarm
+        COPY main.rb Gemfile .
+        '
+      )
+      img = 'test-main-in-docker'
+      qbash("docker build #{home} -t #{img}", loog: fake_loog)
+      stdout =
+        begin
+          qbash(
+            [
+              "docker run --user #{Process.uid}:#{Process.gid} --rm #{img}",
+              '/bin/bash -c',
+              Shellwords.escape('ruby main.rb; unzip /tmp/result.zip -d /tmp/result')
+            ],
+            loog: fake_loog
+          )
+        ensure
+          qbash("docker rmi #{img}", loog: fake_loog)
+        end
+      [
+        'inflating: /tmp/result/trails/first/bar.txt',
+        'inflating: /tmp/result/trails/second/hello.txt',
+        'Job processing finished'
+      ].each { |t| assert(stdout.include?(t), "Can't find #{t.inspect} in\n#{stdout}") }
     end
   end
 end
