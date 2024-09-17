@@ -91,8 +91,8 @@ class MainTest < Minitest::Test
       )
       stub_request(:put, 'http://swarms/42/invocation?code=0&job=7&secret=sword-fish').with do |req|
         [
-          'A new event arived, about job #7',
-          'Loaded S3 object "swarmik/7.zip" from bucket "foo"',
+          'A new event arrived, about job #7',
+          'Loaded S3 object "swarmik/7.zip" (129 bytes) from bucket "foo"',
           'Cannot figure out how to start the swarm'
         ].each { |t| assert(req.body.include?(t), req.body) }
         ''

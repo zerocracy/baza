@@ -288,7 +288,7 @@ class Baza::RecipeTest < Minitest::Test
       end
     end
     [
-      "A new event arived, about job ##{job.id}",
+      "A new event arrived, about job ##{job.id}",
       "Starting to process 'baza-#{s.name}' (normal swarm)",
       'Unpacked ZIP',
       "/bin/bash /swarm/entry.sh \"#{job.id}\""

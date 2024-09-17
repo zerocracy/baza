@@ -68,7 +68,7 @@ def get_object(key, file, loog)
     bucket:,
     key:
   )
-  loog.info("Loaded S3 object #{key.inspect} from bucket #{bucket.inspect}")
+  loog.info("Loaded S3 object #{key.inspect} (#{File.size(file)} bytes) from bucket #{bucket.inspect}")
 end
 
 # Upload object to AWS S3.
@@ -85,7 +85,7 @@ def put_object(key, file, loog)
       key:
     )
   end
-  loog.info("Saved S3 object #{key.inspect} to bucket #{bucket.inspect}")
+  loog.info("Saved S3 object #{key.inspect} (#{File.size(file)} bytes) to bucket #{bucket.inspect}")
 end
 
 # Send message to AWS SQS queue "shift", to enable further processing.
@@ -110,12 +110,13 @@ def send_message(id, more, loog)
       data_type: 'String'
     }
   end
+  queue = 'baza-shift'
   Aws::SQS::Client.new(region: '{{ region }}').send_message(
-    queue_url: "https://sqs.{{ region }}.amazonaws.com/{{ account }}/baza-shift",
+    queue_url: "https://sqs.{{ region }}.amazonaws.com/{{ account }}/#{queue}",
     message_body: "Job ##{id} was processed by {{ name }} (swarm no.{{ swarm }})",
     message_attributes: attrs
   )
-  loog.info("Swarm {{ name }} sent SQS message about job ##{id} (more=#{more})")
+  loog.info("Swarm {{ name }} sent SQS message about job ##{id} to #{queue} (more=#{more})")
 end
 
 # Send a report to baza about this particular invocation.
@@ -227,11 +228,11 @@ def go(event:, context:)
       lg = Loog::Tee.new(loog, buf)
       lg.info('Version: {{ version }}')
       lg.info("Time: #{Time.now.utc.iso8601}")
-      lg.info("Event: #{JSON.pretty_generate(rec)}")
+      lg.info("Incoming SQS event: #{JSON.pretty_generate(rec)}")
       code = 1
       begin
         job = rec['messageAttributes']['job']['stringValue'].to_i
-        lg.info("A new event arived, about job ##{job}")
+        lg.info("A new event arrived, about job ##{job}")
         if ['baza-pop', 'baza-shift', 'baza-finish'].include?('{{ name }}')
           lg.info("Starting to process '{{ name }}' (system swarm)")
           Dir.mktmpdir do |pack|
