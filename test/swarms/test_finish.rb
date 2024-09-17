@@ -50,7 +50,7 @@ class FinishTest < Minitest::Test
               echo '{ \"id\": \"#{job.id}\", \"exit\": 0, \"msec\": 500 }' > pack/job.json
               cp $(dirname $0)/empty.fb pack/base.fb
               echo '' > pack/stdout.txt
-              zip -j $4 pack/*
+              cd pack && zip -r ../$4 . && cd ..
             fi
           fi
           "

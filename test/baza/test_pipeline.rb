@@ -62,15 +62,15 @@ class Baza::PipelineTest < Minitest::Test
       human.secrets.add(job.name, 'ppp', 'swordfish')
       process_all(home, humans, fbs, loog:)
       assert(human.jobs.get(job.id).finished?)
-      stdout = loog.to_s
-      [
+      assert_include(
+        loog.to_s,
         'Running foo (#0)',
         'The following options provided',
         'PPP → "swor*fish"',
         'VITALS_URL → "abc"',
         'ZEROCRAT_TOKEN → "noth***********ting"',
         'Update finished in 2 cycle(s), modified 1/0 fact(s)'
-      ].each { |t| assert(stdout.include?(t), "Can't find '#{t}' in #{stdout}") }
+      )
       Tempfile.open do |f|
         job = human.jobs.get(job.id)
         assert(!job.result.empty?)

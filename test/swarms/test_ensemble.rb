@@ -66,7 +66,7 @@ class EnsembleTest < Minitest::Test
               echo '{ \"id\": \"#{job.id}\", \"exit\": 0, \"msec\": 500 }' > archive/job.json
               cp $(dirname $0)/empty.fb archive/base.fb
               echo 'nothing special in the output' > archive/stdout.txt
-              zip -j \"${4}\" archive/*
+              cd archive && zip -r \"../${4}\" . && cd ..
               rm -rf archive
             fi
           fi
@@ -107,12 +107,13 @@ class EnsembleTest < Minitest::Test
               'SWARM_SECRET' => s.secret
             }
           )
-          [
+          assert_include(
+            stdout,
             'adding: base.fb',
             'adding: stdout.txt',
             'aws s3 rm s3://swarms.zerocracy.com/',
             '--message-attributes'
-          ].each { |t| assert(stdout.include?(t), "Can't find #{t.inspect} in\n#{stdout}") }
+          )
         ensure
           qbash("docker rmi #{img}", loog: fake_loog)
         end

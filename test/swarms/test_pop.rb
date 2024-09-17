@@ -97,8 +97,9 @@ class PopTest < Minitest::Test
         'inflating: pack/job.json',
         'adding: base.fb (stored',
         'adding: job.json',
-        "aws s3 cp pack.zip s3://swarms.zerocracy.com/baza-j/#{job.id}.zip",
-        'aws sqs send-message --queue-url https://sqs.us-east-1.amazonaws.com/019644334823/baza-j',
+        'aws s3 cp pack.zip s3://swarms.zerocracy.com/baza-',
+        "/#{job.id}.zip",
+        'aws sqs send-message --queue-url https://sqs.us-east-1.amazonaws.com/019644334823/baza-',
         "StringValue='#{job.id}'",
         "StringValue='#{s.name}'",
         "StringValue='baza-alterations baza-j baza-eva'"

@@ -57,15 +57,15 @@ fi
 unzip pack.zip -d pack
 id=$( jq .id < pack/job.json )
 rm pack.zip
-zip -j pack.zip pack/*
-
-first=baza-j
-key="${first}/${id}.zip"
-
-aws s3 cp pack.zip "s3://${S3_BUCKET}/${key}"
+cd pack && zip -r ../pack.zip . && cd ..
 
 # This list is here only temporary! It should be configurable from the web front.
 swarms=(baza-alterations baza-j baza-eva)
+
+first=${swarms[0]}
+key="${first}/${id}.zip"
+
+aws s3 cp pack.zip "s3://${S3_BUCKET}/${key}"
 
 aws sqs send-message \
   --queue-url "https://sqs.us-east-1.amazonaws.com/019644334823/${first}" \

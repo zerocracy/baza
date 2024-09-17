@@ -92,11 +92,12 @@ class MainTest < Minitest::Test
         )
       )
       stub_request(:put, 'http://swarms/42/invocation?code=0&job=7&secret=sword-fish').with do |req|
-        [
+        assert_include(
+          req.body,
           'A new event arrived, about job #7',
           'Loaded S3 object "swarmik/7.zip" (129 bytes) from bucket "foo"',
           'Cannot figure out how to start the swarm'
-        ].each { |t| assert(req.body.include?(t), req.body) }
+        )
         ''
       end
       stub_request(:get, 'https://foo.s3.amazonaws.com/swarmik/7.zip').to_return(body: File.binread(zip))
@@ -204,11 +205,12 @@ class MainTest < Minitest::Test
         ensure
           qbash("docker rmi #{img}", loog: fake_loog)
         end
-      [
+      assert_include(
+        stdout,
         'inflating: /tmp/result/trails/first/bar.txt',
         'inflating: /tmp/result/trails/second/hello.txt',
         'Job processing finished'
-      ].each { |t| assert(stdout.include?(t), "Can't find #{t.inspect} in\n#{stdout}") }
+      )
     end
   end
 end
