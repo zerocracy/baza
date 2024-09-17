@@ -45,9 +45,9 @@ class Baza::Humans
     @loog = loog
   end
 
-  def pipe(fbs)
+  def pipe(fbs, trails)
     require_relative 'pipe'
-    Baza::Pipe.new(self, fbs, loog: @loog)
+    Baza::Pipe.new(self, fbs, trails, loog: @loog)
   end
 
   def gc

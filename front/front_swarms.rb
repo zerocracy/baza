@@ -200,7 +200,7 @@ get '/pop' do
   swarm = settings.humans.swarm_by_id(id)
   secret = params[:secret]
   return [401, "Invalid secret for the swarm ##{swarm.id}"] if swarm.secret != secret
-  pipe = settings.humans.pipe(settings.fbs)
+  pipe = settings.humans.pipe(settings.fbs, settings.trails)
   job = pipe.pop("swarm:##{swarm.id}/#{swarm.name}")
   return [204, 'No jobs at the moment in the pipeline'] if job.nil?
   content_type('application/zip')
@@ -223,7 +223,7 @@ put '/finish' do
   Tempfile.open do |f|
     request.body.rewind
     File.binwrite(f.path, request.body.read)
-    settings.humans.pipe(settings.fbs).unpack(job, f.path)
+    settings.humans.pipe(settings.fbs, settings.trails).unpack(job, f.path)
   end
   "Job ##{job.id} finished, thanks!"
 end

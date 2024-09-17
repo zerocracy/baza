@@ -95,7 +95,7 @@ class Baza::PipeTest < Minitest::Test
       uri = fbs.save(input)
       job = fake_token.start(fake_name, uri, 1, 0, 'n/a', [], '1.1.1.1')
       alt = job.jobs.human.alterations.add(job.name, 'ruby', { script: '42 + 1"' })
-      pipe = Baza::Humans.new(fake_pgsql).pipe(fbs)
+      pipe = Baza::Humans.new(fake_pgsql).pipe(fbs, nil)
       zip = File.join(dir, 'foo.zip')
       pipe.pack(job, zip)
       Baza::Zip.new(zip).unpack(dir)
@@ -108,10 +108,37 @@ class Baza::PipeTest < Minitest::Test
     end
   end
 
+  def test_unpack_with_trails
+    job = fake_job
+    job = fake_pipe.pop('owner')
+    Dir.mktmpdir do |home|
+      zip = File.join(home, 'foo.zip')
+      fake_pipe.pack(job, zip)
+      Baza::Zip.new(zip).unpack(File.join(home, 'pack'))
+      File.delete(zip)
+      File.write(File.join(home, 'pack/stdout.txt'), 'nothing...')
+      File.write(
+        File.join(home, 'pack/job.json'),
+        JSON.pretty_generate(
+          JSON.parse(File.read(File.join(home, 'pack/job.json'))).merge(
+            { 'exit' => 0, 'msec' => 500 }
+          )
+        )
+      )
+      FileUtils.mkdir_p(File.join(home, 'pack/trails/foo'))
+      File.write(File.join(home, 'pack/trails/foo/bar.json'), '{ "something": 42}')
+      Baza::Zip.new(zip, loog: fake_loog).pack(File.join(home, 'pack/.'))
+      fake_pipe.unpack(job, zip)
+      trails = Baza::Trails.new(fake_pgsql)
+      trails.each.to_a.any? do |t|
+        t[:job] == job.id && t[:judge] == 'foo' && t[:name] == 'bar.json' && t[:json]['something'] == 42
+      end
+    end
+  end
+
   def test_unpack_from_scratch
     job = fake_job
-    fbs = Baza::Factbases.new('', '', loog: fake_loog)
-    pipe = Baza::Humans.new(fake_pgsql).pipe(fbs)
+    pipe = fake_pipe
     Dir.mktmpdir do |dir|
       File.binwrite(File.join(dir, 'base.fb'), Factbase.new.export)
       File.write(File.join(dir, 'stdout.txt'), 'Nothing interesting')
@@ -137,6 +164,6 @@ class Baza::PipeTest < Minitest::Test
   def fake_pipe
     humans = fake_humans
     fbs = Baza::Factbases.new('', '', loog: fake_loog)
-    Baza::Pipe.new(humans, fbs, loog: fake_loog)
+    Baza::Pipe.new(humans, fbs, Baza::Trails.new(fake_pgsql), loog: fake_loog)
   end
 end

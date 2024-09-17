@@ -33,9 +33,10 @@ require_relative 'zip'
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
 class Baza::Pipe
-  def initialize(humans, fbs, loog: Loog::NULL)
+  def initialize(humans, fbs, trails, loog: Loog::NULL)
     @humans = humans
     @fbs = fbs
+    @trails = trails
     @loog = loog
   end
 
@@ -129,6 +130,13 @@ class Baza::Pipe
         meta['exit'].zero? ? File.size(fb) : nil,
         meta['exit'].zero? ? Baza::Errors.new(fb).count : nil
       )
+      Dir[File.join(dir, 'trails/*/*')].each do |f|
+        data = File.read(f)
+        judge = File.basename(File.dirname(f))
+        n = File.basename(f)
+        @loog.debug("The trail '#{n}' (#{data.size} bytes) was left by the '#{judge}' judge")
+        @trails.add(job, judge, n, JSON.parse(data))
+      end
     end
     @loog.debug("Job ##{job.id} unpacked from ZIP (#{File.size(file)} bytes)")
   end

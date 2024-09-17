@@ -61,7 +61,7 @@ class Baza::FrontSwarmsTest < Minitest::Test
     assert_status(204)
     humans = fake_humans
     fbs = Baza::Factbases.new('', '', loog: fake_loog)
-    pipe = Baza::Pipe.new(humans, fbs, loog: fake_loog)
+    pipe = Baza::Pipe.new(humans, fbs, nil, loog: fake_loog)
     assert_nil(pipe.pop('some other owner'))
   end
 
