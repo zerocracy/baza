@@ -98,7 +98,7 @@ class Baza::Pipe
         t = "alteration-#{a[:id]}"
         rb = File.join(dir, "#{t}/#{t}.rb")
         FileUtils.mkdir_p(File.dirname(rb))
-        File.write(rb, a[:script])
+        File.write(rb, "'require \"fbe/fb\"'\n#{a[:script]}")
       end
       Baza::Zip.new(file, loog: @loog).pack(dir)
     end
