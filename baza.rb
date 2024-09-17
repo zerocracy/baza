@@ -168,7 +168,7 @@ configure do
     'and started running at [zerocracy.com](//dash).',
     "Ruby version is `#{RUBY_VERSION}`.",
     "PostgreSQL version is `#{settings.pgsql.version}`.",
-    "Total memory on the server: #{Total::Mem.new.bytes / (1024 * 1024)}Mb."
+    "Total memory on the server: #{Total::Mem.new.bytes / (1000 * 1000 * 1000)}Gb."
   )
 end
 

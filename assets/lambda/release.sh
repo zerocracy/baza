@@ -283,13 +283,13 @@ fi
 if aws sqs get-queue-url --queue-name '{{ name }}' --region '{{ region }}' >/dev/null 2>&1; then
   aws sqs set-queue-attributes \
     --color off \
-    --attributes 'VisibilityTimeout=300' \
+    --attributes 'VisibilityTimeout=600' \
     --queue-url 'https://sqs.{{ region }}.amazonaws.com/{{ account }}/{{ name }}' \
     --region '{{ region }}' >/dev/null
 else
   aws sqs create-queue \
     --color off \
-    --attributes 'VisibilityTimeout=300' \
+    --attributes 'VisibilityTimeout=600' \
     --tags 'baza={{ version }}' \
     --queue-name '{{ name }}' \
     --region '{{ region }}' >/dev/null
