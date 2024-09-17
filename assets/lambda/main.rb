@@ -143,7 +143,7 @@ def report(stdout, code, job)
       'Content-Length' => stdout.bytesize
     }
   )
-  puts "Reported to #{home}: #{ret.code}"
+  puts "Reported to #{home.to_uri.host}:#{home.to_uri.port}, received HTTP ##{ret.code}"
 end
 
 # Run one swarm for a particular job, where a ZIP archvie from S3 must be processed.
@@ -161,22 +161,21 @@ def with_zip(id, rec, loog)
     Archive::Zip.extract(zip, pack)
     loog.info("Unpacked ZIP (#{File.size(zip)} bytes)")
     File.delete(zip)
+    jfile = File.join(pack, 'job.json')
+    json = JSON.parse(File.read(jfile))
+    loog.info("Job ##{json['id']} is coming from @#{json['human']}")
     rec_file = File.join(pack, 'event.json')
     File.write(rec_file, JSON.pretty_generate(rec))
     start = Time.now
     r = yield pack
+    loog.warn(File.binread(File.join(pack, 'stdout.txt'))) unless r.zero?
     FileUtils.rm_f(rec_file)
-    jfile = File.join(pack, 'job.json')
-    File.write(
-      jfile,
-      JSON.pretty_generate(
-        JSON.parse(File.read(jfile)).merge(
-          { 'exit' => r, 'msec' => ((Time.now - start) * 1000).to_i }
-        )
-      )
-    )
-    loog.info("JSON updated at #{jfile} (#{File.size(jfile)} bytes)")
+    json['exit'] = r
+    json['msec'] = ((Time.now - start) * 1000).to_i
+    File.write(jfile, JSON.pretty_generate(json))
+    loog.info("JSON updated at #{jfile} (#{File.size(jfile)} bytes), exit=#{json['exit']}, msec=#{json['msec']}")
     Archive::Zip.archive(zip, File.join(pack, '/.'))
+    loog.info("Packed ZIP (#{File.size(zip)} bytes)")
     put_object(key, zip, loog)
     more = rec['messageAttributes']['more']['stringValue'].split(' ') - ['{{ name }}']
     send_message(id, more, loog)
@@ -229,7 +228,7 @@ end
 # @param [Hash] event The JSON event
 # @param [LambdaContext] context I don't know what this is for
 def go(event:, context:)
-  loog = Loog::VERBOSE
+  loog = ENV['RACK_ENV'] == 'test' ? Loog::VERBOSE : Loog::REGULAR
   loog.debug("Arrived package: #{event}")
   elapsed(intro: 'Job processing finished') do
     event['Records']&.each do |rec|
@@ -237,25 +236,25 @@ def go(event:, context:)
       lg = Loog::Tee.new(loog, buf)
       lg.info('Version: {{ version }}')
       lg.info("Time: #{Time.now.utc.iso8601}")
-      lg.info("Incoming SQS event: #{JSON.pretty_generate(rec)}")
+      lg.debug("Incoming SQS event: #{JSON.pretty_generate(rec)}")
       code = 1
       begin
         job = rec['messageAttributes']['job']['stringValue'].to_i
-        lg.info("A new event arrived, about job ##{job}")
+        lg.debug("A new event arrived, about job ##{job}")
         if ['baza-pop', 'baza-shift', 'baza-finish'].include?('{{ name }}')
-          lg.info("Starting to process '{{ name }}' (system swarm)")
+          lg.debug("Starting to process '{{ name }}' (system swarm)")
           Dir.mktmpdir do |pack|
             File.write(File.join(pack, 'event.json'), JSON.pretty_generate(rec))
             code = one(job, pack, lg)
           end
         else
-          lg.info("Starting to process '{{ name }}' (normal swarm)")
+          lg.debug("Starting to process '{{ name }}' (normal swarm)")
           code =
             with_zip(job, rec, lg) do |pack|
               one(job, pack, lg)
             end
         end
-        lg.info("Finished processing '{{ name }}' (code=#{code})")
+        lg.debug("Finished processing '{{ name }}' (code=#{code})")
       rescue Exception => e
         lg.error(Backtrace.new(e).to_s)
         code = 255

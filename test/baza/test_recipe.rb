@@ -182,8 +182,8 @@ class Baza::RecipeTest < Minitest::Test
     fake_pgsql.exec('TRUNCATE human CASCADE')
     job = fake_job(fake_human('yegor256'))
     s = job.jobs.human.swarms.add('st', 'zerocracy/swarm-template', 'master', '/')
-    stdout = nil
     RandomPort::Pool::SINGLETON.acquire(2) do |lambda_port, backend_port|
+      stdout = nil
       Dir.mktmpdir do |home|
         %w[curl shutdown aws].each { |f| stub_cli(home, f) }
         sh = File.join(home, 'recipe.sh')
@@ -202,7 +202,7 @@ class Baza::RecipeTest < Minitest::Test
             '
             def get_object(key, file, loog)
               Dir.mktmpdir do |home|
-                File.write(File.join(home, "job.json"), JSON.pretty_generate({"id" => 42}))
+                File.write(File.join(home, "job.json"), JSON.pretty_generate({"id" => 42, "human" => "yegor256"}))
                 Archive::Zip.archive(file, File.join(home, "/."))
               end
             end
@@ -286,13 +286,14 @@ class Baza::RecipeTest < Minitest::Test
           qbash("docker rmi #{image}", loog: fake_loog)
         end
       end
+      [
+        'Unpacked ZIP',
+        'Job #42 is coming from @yegor256',
+        'JSON updated at',
+        "Reported to host.docker.internal:#{backend_port}, received HTTP #200",
+        'Job processing finished'
+      ].each { |t| assert(stdout.include?(t), "Can't find #{t.inspect} in\n#{stdout}") }
     end
-    [
-      "A new event arrived, about job ##{job.id}",
-      "Starting to process 'baza-#{s.name}' (normal swarm)",
-      'Unpacked ZIP',
-      "/bin/bash /swarm/entry.sh \"#{job.id}\""
-    ].each { |t| assert(stdout.include?(t), "Can't find #{t.inspect} in\n#{stdout}") }
   end
 
   private

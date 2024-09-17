@@ -27,7 +27,6 @@ require 'rake'
 require 'rake/clean'
 require 'yaml'
 
-ENV['RACK_ENV'] = 'test'
 ENV['RACK_RUN'] = 'true'
 
 # In order to use any of the following options, you must run rake like this:
