@@ -39,6 +39,7 @@ require 'securerandom'
 require 'sinatra'
 require 'sinatra/cookies'
 require 'time'
+require 'total'
 require 'truncate'
 require 'yaml'
 require 'zache'
@@ -162,6 +163,13 @@ end
 configure do
   require_relative 'objects/baza/humans'
   set :humans, Baza::Humans.new(settings.pgsql, tbot: settings.tbot, loog: settings.loog)
+  settings.humans.ensure('yegor256').notify(
+    "🍓 New version `#{ENV.fetch('HEROKU_RELEASE_VERSION', 'n/a')}:#{Baza::VERSION}` released",
+    'and started running at [zerocracy.com](//dash).',
+    "Ruby version is `#{RUBY_VERSION}`.",
+    "PostgreSQL version is `#{settings.pgsql.version}`.",
+    "Total memory on the server: #{Total::Mem.new.bytes / (1024 * 1024)}Mb."
+  )
 end
 
 # Trails:

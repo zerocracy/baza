@@ -132,6 +132,7 @@ class Baza::Swarm
   # @return [String] Explanation of why we don't release now (or NIL if we can release)
   def why_not(hours: 24, minutes: 60)
     return "The swarm ##{@id} is disabled." unless enabled?
+    return 'The account is out of funds.' unless swarms.human.account.balance.positive? || ENV['RACK_ENV'] == 'test'
     if head == '0' * 40
       return 'The swarm has just been created, we are waiting for the first webhook to arrive (did you configure it?).'
     end
