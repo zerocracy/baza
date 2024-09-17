@@ -38,6 +38,7 @@ require 'pgtk/pool'
 require 'securerandom'
 require 'sinatra'
 require 'sinatra/cookies'
+require 'socket'
 require 'time'
 require 'total'
 require 'truncate'
@@ -165,10 +166,10 @@ configure do
   set :humans, Baza::Humans.new(settings.pgsql, tbot: settings.tbot, loog: settings.loog)
   settings.humans.ensure('yegor256').notify(
     "🍓 New version `#{ENV.fetch('HEROKU_RELEASE_VERSION', 'n/a')}:#{Baza::VERSION}` released",
-    'and started running at [zerocracy.com](//dash).',
+    "and started running at [#{Socket.ip_address_list.detect(&:ipv4_private?).ip_address}](//dash).",
     "Ruby version is `#{RUBY_VERSION}`.",
     "PostgreSQL version is `#{settings.pgsql.version}`.",
-    "Total memory on the server: #{Total::Mem.new.bytes / (1000 * 1000 * 1000)}Gb."
+    "Total memory on the server: #{Total::Mem.new.bytes / (1024 * 1024 * 1024)}Gb."
   )
 end
 
