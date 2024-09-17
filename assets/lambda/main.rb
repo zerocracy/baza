@@ -95,7 +95,7 @@ end
 # @param [Loog] loog The logging facility
 def send_message(id, more, loog)
   attrs = {
-    'swarm' => {
+    'previous' => {
       string_value: '{{ name }}',
       data_type: 'String'
     },

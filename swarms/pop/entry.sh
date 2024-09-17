@@ -65,8 +65,9 @@ key="${first}/${id}.zip"
 aws s3 cp pack.zip "s3://${S3_BUCKET}/${key}"
 
 swarms=(baza-j baza-eva)
-list=${swarms[@]}
 aws sqs send-message \
   --queue-url "https://sqs.us-east-1.amazonaws.com/019644334823/${first}" \
-  --message-body "Job #${id} needs processing" \
-  --message-attributes "job={DataType=String,StringValue='${id}'},swarm={DataType=String,StringValue='${SWARM_NAME}'},more={DataType=String,StringValue='${list}'}"
+  --message-body "Job #${id} needs processing by ${first}" \
+  --message-attributes "job={DataType=String,StringValue='${id}'},previous={DataType=String,StringValue='${SWARM_NAME}'},more={DataType=String,StringValue='${swarms[*]}'}"
+
+printf "The job #${id} must be processed by a few swarms: %s" "${swarms[*]}"

@@ -45,12 +45,12 @@ class EnsembleTest < Minitest::Test
         ./pop.sh 0 /tmp/e
         rm -rf /tmp/e/*
         echo '{\"messageAttributes\":{
-          \"swarm\": {\"stringValue\": \"#{s.name}\"},
+          \"previous\": {\"stringValue\": \"#{s.name}\"},
           \"more\": {\"stringValue\": \"baza-#{s.name}\"}}}' > /tmp/e/event.json
         ./shift.sh #{job.id} /tmp/e
         rm -rf /tmp/e/*
         echo '{\"messageAttributes\":{
-          \"swarm\": {\"stringValue\": \"baza-#{s.name}\"}}}' > /tmp/e/event.json
+          \"previous\": {\"stringValue\": \"baza-#{s.name}\"}}}' > /tmp/e/event.json
         ./finish.sh #{job.id} /tmp/e
         "
       )

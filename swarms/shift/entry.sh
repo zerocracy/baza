@@ -34,21 +34,20 @@ if [ -z "${S3_BUCKET}" ]; then
   S3_BUCKET=swarms.zerocracy.com
 fi
 
-swarm=$(jq -r .messageAttributes.swarm.stringValue < event.json)
+previous=$(jq -r .messageAttributes.previous.stringValue < event.json)
 
-aws s3 cp "s3://${S3_BUCKET}/${swarm}/${id}.zip" pack.zip
+aws s3 cp "s3://${S3_BUCKET}/${previous}/${id}.zip" pack.zip
 
 read -r -a more <<< "$( jq -r .messageAttributes.more.stringValue < event.json )"
 
+# If nothing left to be processed
 if [ "${more[0]}" == 'null' ]; then
-  cat event.json
-  echo "There is not 'more' found in the JSON, it's an error"
-  exit 1
+  more=()
 fi
 
 # Remove current swarm, so it won't be processed again:
 for s in "${!more[@]}"; do
-  if [[ "${more[s]}" = "${swarm}" ]]; then
+  if [[ "${more[s]}" = "${previous}" ]]; then
     unset 'more[s]'
   fi
 done
@@ -57,18 +56,20 @@ if [ "${#more[@]}" -eq 0 ]; then
   aws sqs send-message \
     --queue-url https://sqs.us-east-1.amazonaws.com/019644334823/baza-finish \
     --message-body "Job ${id} finished processing" \
-    --message-attributes "job={DataType=String,StringValue='${id}'},swarm={DataType=String,StringValue='${swarm}'}"
+    --message-attributes "job={DataType=String,StringValue='${id}'},previous={DataType=String,StringValue='${previous}'}"
+  echo "No more swarms to process, it's time to finish"
 else
   next="${more[0]}"
   if [[ ! "${next}" =~ ^baza- ]]; then
     cat event.json
-    printf "Wrong swarm name '%s' found in '%s'" "${next}" "${more[@]}"
+    printf "Wrong swarm name '%s' found in '%s'" "${next}" "${more[*]}"
     exit 1
   fi
-  aws s3 rm "s3://${S3_BUCKET}/${swarm}/${id}.zip"
+  aws s3 rm "s3://${S3_BUCKET}/${previous}/${id}.zip"
   aws s3 cp pack.zip "s3://${S3_BUCKET}/${next}/${id}.zip"
   aws sqs send-message \
     --queue-url "https://sqs.us-east-1.amazonaws.com/019644334823/${next}" \
-    --message-body "$( printf "Job #${id} needs further processing by '%s'" "${more[@]}" )" \
-    --message-attributes "$( printf "job={DataType=String,StringValue='%d'},swarm={DataType=String,StringValue='%s'},more={DataType=String,StringValue='%s'}" "${id}" "${swarm}" "${more[@]}" )"
+    --message-body "Job #${id} needs further processing by '${more[*]}'" \
+    --message-attributes "job={DataType=String,StringValue='${id}'},previous={DataType=String,StringValue='${previous}'},more={DataType=String,StringValue='${more[*]}'}"
+  printf "The job #${id} now goes to ${next}, later will go to '${more[*]}'"
 fi

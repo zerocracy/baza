@@ -37,8 +37,8 @@ if [ -z "${BAZA_URL}" ]; then
   BAZA_URL=https://www.zerocracy.com
 fi
 
-swarm=$( jq -r .messageAttributes.swarm.stringValue < event.json )
-key="${swarm}/${id}.zip"
+previous=$( jq -r .messageAttributes.previous.stringValue < event.json )
+key="${previous}/${id}.zip"
 
 aws s3 cp "s3://${S3_BUCKET}/${key}" pack.zip
 
@@ -59,3 +59,5 @@ if [ "${status}" != '200' ]; then
 fi
 
 aws s3 rm "s3://${S3_BUCKET}/${key}"
+
+echo "Job #${id} processing finished"

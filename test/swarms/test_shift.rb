@@ -35,51 +35,57 @@ class ShiftTest < Minitest::Test
   def test_runs_shift_entry_script
     job = fake_job
     s = fake_human.swarms.add(fake_name, "#{fake_name}/#{fake_name}", 'master', '/')
-    Dir.mktmpdir do |home|
-      %w[aws].each do |f|
-        sh = File.join(home, f)
-        File.write(sh, "#!/bin/bash\necho $@")
-        FileUtils.chmod('+x', sh)
-      end
-      FileUtils.copy(File.join(__dir__, '../../swarms/shift/entry.sh'), home)
-      File.write(
-        File.join(home, 'Dockerfile'),
-        '
-        FROM ruby:3.3
-        WORKDIR /r
-        RUN apt-get update -y && apt-get install -y jq zip unzip curl
-        COPY entry.sh aws .
-        RUN chmod a+x aws
-        ENV PATH=/r:${PATH}
-        ENTRYPOINT ["/bin/bash", "entry.sh"]
-        '
-      )
-      img = 'test-shift'
-      qbash("docker build #{home} -t #{img}", loog: fake_loog)
-      name = "baza-#{s.name}"
-      Dir.mktmpdir do |dir|
+    stdout =
+      Dir.mktmpdir do |home|
+        %w[aws].each do |f|
+          sh = File.join(home, f)
+          File.write(sh, "#!/bin/bash\necho AWS: $@")
+          FileUtils.chmod('+x', sh)
+        end
+        FileUtils.copy(File.join(__dir__, '../../swarms/shift/entry.sh'), home)
         File.write(
-          File.join(dir, 'event.json'),
-          JSON.pretty_generate(
-            {
-              messageAttributes: {
-                swarm: { stringValue: name },
-                more: { stringValue: name }
+          File.join(home, 'Dockerfile'),
+          '
+          FROM ruby:3.3
+          WORKDIR /r
+          RUN apt-get update -y && apt-get install -y jq zip unzip curl
+          COPY entry.sh aws .
+          RUN chmod a+x aws
+          ENV PATH=/r:${PATH}
+          ENTRYPOINT ["/bin/bash", "entry.sh"]
+          '
+        )
+        img = 'test-shift'
+        qbash("docker build #{home} -t #{img}", loog: fake_loog)
+        name = "baza-#{s.name}"
+        Dir.mktmpdir do |dir|
+          File.write(
+            File.join(dir, 'event.json'),
+            JSON.pretty_generate(
+              {
+                messageAttributes: {
+                  previous: { stringValue: name },
+                  more: { stringValue: 'baza-foo baza-bar baza-xyz' }
+                }
               }
-            }
+            )
           )
-        )
-        qbash(
-          [
-            "docker run -v #{dir}:/temp",
-            "--user #{Process.uid}:#{Process.gid}",
-            "--rm #{img} #{job.id} /temp"
-          ],
-          loog: fake_loog
-        )
-      ensure
-        qbash("docker rmi #{img}", loog: fake_loog)
+          qbash(
+            [
+              "docker run -v #{dir}:/temp",
+              "--user #{Process.uid}:#{Process.gid}",
+              "--rm #{img} #{job.id} /temp"
+            ],
+            loog: fake_loog
+          )
+        ensure
+          qbash("docker rmi #{img}", loog: fake_loog)
+        end
       end
-    end
+    [
+      "StringValue='#{job.id}'",
+      "StringValue='baza-#{s.name}'",
+      "StringValue='baza-foo baza-bar baza-xyz'"
+    ].each { |t| assert(stdout.include?(t), "Can't find #{t.inspect} in\n#{stdout}") }
   end
 end
