@@ -220,4 +220,10 @@ class Minitest::Test
       break if yield
     end
   end
+
+  def assert_include(text, *subs)
+    subs.each do |s|
+      assert(text.include?(s), "Can't find #{s.inspect} in\n#{text}")
+    end
+  end
 end

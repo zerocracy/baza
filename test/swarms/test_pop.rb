@@ -91,7 +91,8 @@ class PopTest < Minitest::Test
             qbash("docker rmi #{img}", loog: fake_loog)
           end
         end
-      [
+      assert_include(
+        stdout,
         'inflating: pack/base.fb',
         'inflating: pack/job.json',
         'adding: base.fb (stored',
@@ -100,8 +101,8 @@ class PopTest < Minitest::Test
         'aws sqs send-message --queue-url https://sqs.us-east-1.amazonaws.com/019644334823/baza-j',
         "StringValue='#{job.id}'",
         "StringValue='#{s.name}'",
-        "StringValue='baza-j baza-eva'"
-      ].each { |t| assert(stdout.include?(t), "Can't find #{t.inspect} in\n#{stdout}") }
+        "StringValue='baza-alterations baza-j baza-eva'"
+      )
     end
   end
 end
