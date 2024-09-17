@@ -210,7 +210,16 @@ def one(id, pack, loog)
     },
     accept: []
   )
-  File.binwrite(File.join(pack, 'stdout.txt'), stdout, mode: 'a+')
+  File.binwrite(
+    File.join(pack, 'stdout.txt'),
+    [
+      "Started swarm no.{{ swarm }} ({{ name }}):",
+      stdout,
+      "Finished  swarm no.{{ swarm }} ({{ name }}).",
+      "\n"
+    ].join("\n"),
+    mode: 'a+'
+  )
   loog.warn("FAILURE (#{code})") unless code.zero?
   code
 end
