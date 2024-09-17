@@ -178,7 +178,7 @@ policy='{
         "logs:CreateLogStream",
         "logs:PutLogEvents"
       ],
-      "Resource": "arn:aws:logs:{{ region }}:{{ account }}:log-group:{{ name }}"
+      "Resource": "arn:aws:logs:{{ region }}:{{ account }}:log-group:{{ name }}:*"
     },
     {
       "Sid": "RoleAssuming",
