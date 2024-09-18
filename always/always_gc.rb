@@ -56,7 +56,7 @@ rescue Baza::Humans::TokenNotFound
 end
 
 settings.humans.gc.stuck_locks(4 * 60) do |human, id|
-  human.nofications.post(
+  human.notifications.post(
     "lock-#{id}-is-stuck",
     "⚠️ The lock ##{id} exists for too long. Most probably it is stuck " \
     'and must be removed manually, [here](//locks).'
