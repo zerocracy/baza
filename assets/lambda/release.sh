@@ -49,6 +49,12 @@ if [ ! -e "${HOME}/.ssh/id_rsa.pub" ]; then
   rm -f "${HOME}/.ssh/id_rsa"
 fi
 
+if [ ! -e swarm/entry.sh ] && [ ! -e swarm/entry.rb ] && [ -e swarm/Gemfile ] && [ -e swarm/judges ]; then
+  cp default-entry.sh swarm/entry.sh
+  chmod a+x swarm/entry.sh
+  echo "We are using the default version of entry.sh"
+fi
+
 if ! ( aws --version | grep 'aws-cli/2.' ); then
   aws --version
   echo 'The installed version of "aws cli" is too old, please upgrade'

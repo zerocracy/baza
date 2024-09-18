@@ -76,7 +76,7 @@ printf '0' > exit.txt
 SECONDS=0
 
 if [ -e aws ]; then
-  echo 'Skipped {{ script }} because testing' > stdout.log
+  echo 'Skipped {{ script }} because we are testing' > stdout.log
 else
   /bin/bash "{{ script }}.sh" 2>&1 | tee stdout.log || echo $? > exit.txt
 fi

@@ -112,6 +112,7 @@ class Baza::Recipe
       ),
       cat_of('Gemfile'),
       cat_of('entry.sh'),
+      cat_of('default-entry.sh'),
       cat_of(
         'main.rb',
         'version' => Baza::VERSION,
