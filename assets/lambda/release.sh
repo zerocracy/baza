@@ -35,6 +35,7 @@ fi
 
 attempt=0
 while true; do
+  echo "Clnoing ${uri}..."
   git clone -b '{{ branch }}' --depth=1 --single-branch "${uri}" clone && break
   ((++attempt))
   if [ "${attempt}" -gt 8 ]; then exit 1; fi

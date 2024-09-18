@@ -118,7 +118,9 @@ class Baza::Pipe
       e = Dir[File.join(dir, 'swarm-*/exit.txt')].map { |f| File.read(f).to_i }.inject(&:+) || 0
       job.finish!(
         uri,
-        Dir[File.join(dir, 'swarm-*/stdout.txt')].map { |f| File.binread(f) }.join("\n\n") || 'No output',
+        Dir[File.join(dir, 'swarm-*/stdout.txt')].map do |f|
+          "#{'=' * 80}\n#{f}:\n#{File.binread(f)}\n\n\n"
+        end.join("\n\n") || 'No output',
         e,
         Dir[File.join(dir, 'swarm-*/msec.txt')].map { |f| File.read(f).to_i }.inject(&:+) || 0,
         e.zero? ? File.size(fb) : nil,
