@@ -82,14 +82,12 @@ class Baza::Jobs
       'result.id AS rid, result.uri2, result.stdout, result.exit, result.msec, ' \
       'result.size AS rsize, result.errors AS rerrors, ' \
       'ROW_NUMBER() OVER (PARTITION BY job.name ORDER BY job.created DESC) AS row, ' \
-      'STRING_AGG(meta.text, $2) AS metas, ' \
-      'STRING_AGG(invocation.id::TEXT, $2) AS invocations ' \
+      '(SELECT STRING_AGG(meta.text, $2) FROM meta WHERE meta.job = job.id) AS metas, ' \
+      '(SELECT STRING_AGG(invocation.id::TEXT, $2) FROM invocation WHERE invocation.job = job.id) AS invocations ' \
       'FROM job ' \
       'JOIN token ON token.id = job.token ' \
       'LEFT JOIN lock ON lock.human = token.human AND lock.name = job.name ' \
       'LEFT JOIN result ON result.job = job.id ' \
-      'LEFT JOIN meta ON meta.job = job.id ' \
-      'LEFT JOIN invocation ON invocation.job = job.id ' \
       'WHERE token.human = $1 ' \
       "#{name.nil? ? '' : 'AND job.name = $3'} " \
       'GROUP BY job.id, result.id, lock.id, token.id ' \

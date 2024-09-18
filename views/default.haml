@@ -72,7 +72,11 @@
               = request.ip
           - if the_human.admin?
             %ul{ style: 'font-family: monospace;' }
-              - %w[pipeline gc donations tbot verify release].each do |s|
+              - if ENV['FEATURE_PIPELINE']
+                %li
+                  %span
+                    != footer_status('pipeline')
+              - %w[gc donations tbot verify release].each do |s|
                 %li
                   %span
                     != footer_status(s)
