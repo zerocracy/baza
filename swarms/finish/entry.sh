@@ -49,6 +49,7 @@ while true; do
     --data-binary '@pack.zip' -o /dev/null \
     -H "User-Agent: ${SWARM_NAME}" \
     -H 'Content-Type: application/octet-stream' -w "%{http_code}")
+  echo "/finish returned HTTP #${status}"
   if [ "${status}" -lt 500 ]; then break; fi
   if [ "${attempt}" -gt 8 ]; then exit 1; fi
   sleep "${attempt}"
