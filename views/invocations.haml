@@ -10,6 +10,8 @@
     %col{ style: 'width: 5em;' }
     -# Job ID
     %col{ style: 'width: 5em;' }
+    -# Job Name
+    %col{ style: 'width: 14em;' }
     -# Code
     %col{ style: 'width: 4em;' }
     -# Stdout
@@ -23,6 +25,8 @@
       %th
         Job
       %th
+        Name
+      %th
         Code
       %th
         Stdout
@@ -34,9 +38,13 @@
       %td.ff
         = "##{i[:id]}"
       %td
-        - unless [:job].nil?
+        - unless i[:job].nil?
           %a{ href: iri.cut('/jobs').append(i[:job]) }
             = "##{i[:job]}"
+      %td
+        - unless i[:name].nil?
+          %a{ href: iri.over(name: i[:name]) }<
+            = i[:name]
       %td.ff
         - if i[:code].zero?
           %i.fa-regular.fa-thumbs-up.good
