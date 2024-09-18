@@ -78,6 +78,7 @@
         Here
       %a.ico{href: url, title: "Click here to open the published vitals report"}
         %i.fa-solid.fa-list
+
   %p
     Meta:
     %br
@@ -99,6 +100,14 @@
               != secret(v)
             - else
               != large_text(v)
+
+  %p
+    Invocations:
+    - if job.invocations.empty?
+      %span.orange
+        None
+    - else
+      = job.invocations.map { |i| "##{i}" }.join(', ')
 
   %p
     Taken:

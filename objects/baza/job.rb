@@ -245,6 +245,10 @@ class Baza::Job
     to_json[:metas]
   end
 
+  def invocations
+    to_json[:invocations]
+  end
+
   def errors
     to_json[:errors]
   end
@@ -265,13 +269,15 @@ class Baza::Job
           [
             'SELECT job.*, result.id AS rid, receipt.id AS tid, ',
             'lock.created AS when_locked, lock.owner AS lock_owner,',
-            'STRING_AGG(meta.text, $2) AS metas',
+            'STRING_AGG(meta.text, $2) AS metas,',
+            'STRING_AGG(invocation.id::TEXT, $2) AS invocations',
             'FROM job',
             'JOIN token ON token.id = job.token',
             'LEFT JOIN meta ON meta.job = job.id',
             'LEFT JOIN result ON result.job = job.id',
             'LEFT JOIN receipt ON receipt.job = job.id',
             'LEFT JOIN lock ON lock.name = job.name AND lock.human = token.human',
+            'LEFT JOIN invocation ON invocation.job = job.id',
             'WHERE job.id = $1 AND token.human = $3',
             'GROUP BY job.id, result.id, receipt.id, lock.id'
           ],
@@ -290,6 +296,7 @@ class Baza::Job
           size: row['size'].to_i,
           metas: (row['metas'] || '').split(sep),
           errors: row['errors'].to_i,
+          invocations: (row['invocations'] || '').split(sep),
           verified: row['verified'],
           agent: row['agent'],
           finished: !row['rid'].nil?,

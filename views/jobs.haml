@@ -23,6 +23,8 @@
       %col{style: 'width: 4em;'}
       -# Name
       %col
+      -# Invocations
+      %col{style: 'width: 3em;'}
       -# Lock
       %col{style: 'width: 5em;'}
       -# Token
@@ -45,6 +47,8 @@
           In
         %th
           Name
+        %th
+          Inv
         %th
           Lock
         %th
@@ -85,6 +89,8 @@
           - if_meta(j, 'duration') do |sec|
             %span.gray{title: 'How long it took to update the factbase'}
               = "#{sec}s"
+        %td.ff.right
+          = j.invocations.size
         %td.ff
           - unless j.when_locked.nil?
             %a.ico{href: iri.cut('/locks'), title: "The job was locked #{j.when_locked.ago} ago, click to unlock"}
