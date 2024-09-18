@@ -152,6 +152,12 @@ class Baza::Valves
     raise Baza::Urror, "The valve ##{id} cannot be reset" if rows.empty?
   end
 
+  def get(id)
+    raise 'Valve ID must be an integer' unless id.is_a?(Integer)
+    require_relative 'valve'
+    Baza::Valve.new(self, id)
+  end
+
   private
 
   # Make it suitable for Telegram (where they expect Markdown).
