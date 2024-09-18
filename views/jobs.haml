@@ -89,7 +89,7 @@
           - if_meta(j, 'duration') do |sec|
             %span.gray{ title: 'How long it took to update the factbase' }
               = "#{sec}s"
-        %td.ff.right
+        %td
           = j.invocations.size
         %td.ff
           - unless j.when_locked.nil?
