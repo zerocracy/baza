@@ -35,7 +35,7 @@ fi
 
 attempt=0
 while true; do
-  echo "Clnoing ${uri}..."
+  echo "Cloning Git repository from ${uri}..."
   git clone -b '{{ branch }}' --depth=1 --single-branch "${uri}" clone && break
   ((++attempt))
   if [ "${attempt}" -gt 8 ]; then exit 1; fi
@@ -98,16 +98,11 @@ fi
 
 # Compare two string and fail if they are not similar.
 function similar() {
-  set +x
   left=$( echo "$1" | tr '\n' ' ' | tr -d ' ')
   right=$( echo "$2" | tr '\n' ' ' | tr -d ' ')
   if [ "${left}" == "${right}" ]; then
-    echo 'They are similar'
-    set -x
     return 0
   else
-    echo 'There is a difference'
-    set -x
     return 1
   fi
 }
