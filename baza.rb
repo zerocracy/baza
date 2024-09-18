@@ -223,7 +223,7 @@ end
 # Pipeline:
 configure do
   set(:pipeline, Always.new(1).on_error { |e, _| settings.loog.error(Backtrace.new(e)) })
-  unless ENV['RACK_ENV'] == 'test'
+  unless ENV['RACK_ENV'] == 'test' || ENV['FEATURE_PIPELINE'].nil?
     settings.pipeline.start(5) do
       load('always/always_pipeline.rb', true)
     end

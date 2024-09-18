@@ -57,17 +57,19 @@ class Baza::Pipe
       return nil
     end
     job = @humans.job_by_id(rows.first['id'].to_i)
-    if job.name == 'test' && job.jobs.human.github == 'yegor256'
-      if owner.start_with?('baza')
+    if ENV['FEATURE_PIPELINE']
+      if job.name == 'test' && job.jobs.human.github == 'yegor256'
+        if owner.start_with?('baza')
+          job.untake!
+          @loog.debug("Job ##{job.id} can't be taken by #{owner.inspect}, it's for testing only")
+          return nil
+        end
+      # Because we are still testing:
+      elsif owner.start_with?('swarm:') && ENV['RACK_ENV'] != 'test'
         job.untake!
-        @loog.debug("Job ##{job.id} can't be taken by #{owner.inspect}, it's for testing only")
+        @loog.debug("Job ##{job.id} can't be used by swarms, we are still testing")
         return nil
       end
-    # Because we are still testing:
-    elsif owner.start_with?('swarm:') && ENV['RACK_ENV'] != 'test'
-      job.untake!
-      @loog.debug("Job ##{job.id} can't be used by swarms, we are still testing")
-      return nil
     end
     @loog.debug("Job ##{job.id} popped out")
     job
