@@ -58,7 +58,8 @@ class EnsembleTest < Minitest::Test
         home, 'aws',
         "
         #!/bin/bash
-        set -ex
+        set -e
+        echo AWS $@
         if [ \"${1}\" == 's3' ]; then
           if [ \"${2}\" == 'cp' ]; then
             if [ \"${4}\" == 'pack.zip' ]; then
@@ -111,7 +112,7 @@ class EnsembleTest < Minitest::Test
             stdout,
             'adding: base.fb',
             'adding: stdout.txt',
-            'aws s3 rm s3://swarms.zerocracy.com/',
+            'AWS s3 rm s3://swarms.zerocracy.com/',
             '--message-attributes'
           )
         ensure

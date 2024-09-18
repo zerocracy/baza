@@ -21,7 +21,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-set -ex
+set -e
 set -o pipefail
 
 if aws ecr describe-repositories --repository-names '{{ name }}' --region '{{ region }}' >/dev/null 2>&1; then

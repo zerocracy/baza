@@ -43,7 +43,8 @@ class PopTest < Minitest::Test
           sh,
           "
           #!/bin/bash
-          set -ex
+          set -e
+          echo AWS $@
           if [ \"${1}\" == 'sqs' ]; then
             if [ \"${2}\" == 'send-message' ]; then
               for a in \"$@\"; do
@@ -97,9 +98,9 @@ class PopTest < Minitest::Test
         'inflating: pack/job.json',
         'adding: base.fb (stored',
         'adding: job.json',
-        'aws s3 cp pack.zip s3://swarms.zerocracy.com/baza-',
+        'AWS s3 cp pack.zip s3://swarms.zerocracy.com/baza-',
         "/#{job.id}.zip",
-        'aws sqs send-message --queue-url https://sqs.us-east-1.amazonaws.com/019644334823/baza-',
+        'AWS sqs send-message --queue-url https://sqs.us-east-1.amazonaws.com/019644334823/baza-',
         "StringValue='#{job.id}'",
         "StringValue='#{s.name}'",
         "StringValue='baza-alterations baza-j baza-eva'"

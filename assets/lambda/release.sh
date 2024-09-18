@@ -21,7 +21,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-set -ex
+set -e
 set -o pipefail
 
 # This should either be "arm64" or "x86_64". If you change this value,

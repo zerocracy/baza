@@ -22,7 +22,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-set -ex
+set -e
 set -o pipefail
 
 id=$1
@@ -40,6 +40,7 @@ fi
 attempt=0
 while true; do
   status=$(curl -s "${BAZA_URL}/pop?swarm=${SWARM_ID}&secret=${SWARM_SECRET}" -H 'User-Agent: baza-pop' -o pack.zip -w "%{http_code}")
+  echo "/pop returned HTTP #${status}"
   ((++attempt))
   if [ "${status}" -lt 500 ]; then break; fi
   if [ "${attempt}" -gt 8 ]; then exit 1; fi
