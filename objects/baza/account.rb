@@ -80,10 +80,18 @@ class Baza::Account
 
   # Get total current balance of the human.
   def balance
-    pgsql.exec(
+    zents = pgsql.exec(
       'SELECT SUM(zents) FROM receipt WHERE human = $1',
       [@human.id]
     )[0]['sum'].to_i
+    unless zents.positive?
+      @human.notifications.post(
+        "no-funds-#{Time.now.utc.iso8601[0..9]}",
+        '🍋 We are very sorry to inform you that [your account](//account) just ran out of funds. ' \
+        'Jobs won\'t be processed until you top up the balance.'
+      )
+    end
+    zents
   end
 
   # Add a new receipt for a human, not attached to a job.

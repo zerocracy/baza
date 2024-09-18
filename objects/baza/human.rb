@@ -59,6 +59,11 @@ class Baza::Human
     Baza::Jobs.new(self)
   end
 
+  def notifications
+    require_relative 'notifications'
+    Baza::Notifications.new(self)
+  end
+
   def locks
     require_relative 'locks'
     Baza::Locks.new(self)

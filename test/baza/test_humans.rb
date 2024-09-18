@@ -83,11 +83,12 @@ class Baza::HumansTest < Minitest::Test
     tbot = others { |*args| passed << args }
     humans = Baza::Humans.new(fake_pgsql, tbot:)
     human = humans.ensure(fake_name)
+    human.account.top_up(42_000, 'need it')
     token = human.tokens.add(fake_name)
     id = token.start(fake_name, fake_name, 1, 0, 'n/a', [], '192.168.1.1').id
     job = human.jobs.get(id)
     job.valve.enter('badge', 'why') { 42 }
-    assert_equal(2, passed.size)
+    assert_equal(3, passed.size, passed)
   end
 
   def test_verify_one_job

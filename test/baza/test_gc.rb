@@ -60,6 +60,11 @@ class Baza::GcTest < Minitest::Test
     assert_equal(1, humans.gc.stuck(0).to_a.size)
   end
 
+  def test_finds_stuck_locks
+    humans = Baza::Humans.new(fake_pgsql)
+    humans.gc.stuck_locks(0)
+  end
+
   def test_finds_tests
     humans = Baza::Humans.new(fake_pgsql)
     human = humans.ensure(fake_name)

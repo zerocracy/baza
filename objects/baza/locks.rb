@@ -86,8 +86,8 @@ class Baza::Locks
     begin
       pgsql.exec(
         [
-          'INSERT INTO lock (human, name, owner, ip) ',
-          'VALUES ($1, $2, $3, $4) ',
+          'INSERT INTO lock (human, name, owner, ip)',
+          'VALUES ($1, $2, $3, $4)',
           'ON CONFLICT (human, name, owner) DO UPDATE SET owner = lock.owner'
         ],
         [@human.id, name.downcase, owner, ip]
