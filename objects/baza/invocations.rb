@@ -42,8 +42,9 @@ class Baza::Invocations
     return to_enum(__method__, offset:) unless block_given?
     rows = @swarm.pgsql.exec(
       [
-        'SELECT invocation.*, job.name FROM invocation',
+        'SELECT invocation.*, job.name, swarm.name AS swarm FROM invocation',
         'LEFT JOIN job ON job.id = invocation.job',
+        'JOIN swarm ON swarm.id = invocation.swarm',
         'WHERE swarm = $1',
         'ORDER BY invocation.created DESC',
         "OFFSET #{offset.to_i}"
@@ -56,6 +57,7 @@ class Baza::Invocations
         code: row['code'].to_i,
         job: row['job']&.to_i,
         name: row['name'],
+        swarm: row['swarm'],
         stdout: row['stdout'],
         created: Time.parse(row['created'])
       }

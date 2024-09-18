@@ -1,17 +1,16 @@
 %p
-  The swarm
-  %span.ff<
-    = "\"#{invocations.swarm.name}\""
-  = "(##{invocations.swarm.id})"
-  has the following invocations:
+  Invocations:
+
 %table
   %colgroup
     -# ID
     %col{ style: 'width: 5em;' }
+    -# Swarm
+    %col{ style: 'width: 10em;' }
     -# Job ID
     %col{ style: 'width: 5em;' }
     -# Job Name
-    %col{ style: 'width: 14em;' }
+    %col{ style: 'width: 12em;' }
     -# Code
     %col{ style: 'width: 4em;' }
     -# Stdout
@@ -22,6 +21,8 @@
     %tr
       %th
         = '#'
+      %th
+        Swarm
       %th
         Job
       %th
@@ -37,6 +38,9 @@
     %tr
       %td.ff
         = "##{i[:id]}"
+      %td
+        %a{ href: iri.cut('/swarms') }<
+          = i[:swarm]
       %td
         - unless i[:job].nil?
           %a{ href: iri.cut('/jobs').append(i[:job]) }
