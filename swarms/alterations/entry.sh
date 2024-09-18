@@ -38,11 +38,6 @@ if [ -z "${home}" ]; then
   exit 1
 fi
 
-if [ ! -e "${home}/job.json" ]; then
-  echo "There is no JSON description of the job, something is going wrong"
-  exit 1
-fi
-
 if [ ! -e "${home}/base.fb" ]; then
   echo "There is no Factbase, something is going wrong"
   exit 1
@@ -53,9 +48,9 @@ self=$(dirname "$0")
 export BUNDLE_GEMFILE="${self}/Gemfile"
 
 set -x
-for alt in $( find "${home}" -type d -name 'alteration-*' -exec basename {} \; ); do
+for alt in $( find "${home}" -type f -name 'alteration-*.rb' -exec basename {} .rb \; ); do
   tmp=$( mktemp -d )
-  mkdir ${tmp}/alteration
-  cp "${home}/${alt}/${alt}.rb" "${tmp}/alteration/alteration.rb"
-  bundle exec judges --verbose update --quiet --no-summary --max-cycles=1 --no-log "${tmp}" "${home}/base.fb" > "${home}/${alt}/stdout.txt" 2>&1
+  mkdir ${tmp}/${alt}
+  cp "${home}/${alt}.rb" "${tmp}/${alt}/${alt}.rb"
+  bundle exec judges --verbose update --quiet --no-summary --max-cycles=1 --no-log "${tmp}" "${home}/base.fb" > "${home}/${alt}.txt" 2>&1
 done

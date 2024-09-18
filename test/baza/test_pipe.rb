@@ -73,15 +73,10 @@ class Baza::PipeTest < Minitest::Test
       fake_pipe.pack(job, zip)
       Baza::Zip.new(zip).unpack(File.join(home, 'pack'))
       File.delete(zip)
-      File.write(File.join(home, 'pack/stdout.txt'), 'nothing...')
-      File.write(
-        File.join(home, 'pack/job.json'),
-        JSON.pretty_generate(
-          JSON.parse(File.read(File.join(home, 'pack/job.json'))).merge(
-            { 'exit' => 0, 'msec' => 500 }
-          )
-        )
-      )
+      FileUtils.mkdir_p(File.join(home, 'pack/42'))
+      File.write(File.join(home, 'pack/42/stdout.txt'), 'nothing...')
+      File.write(File.join(home, 'pack/42/exit.txt'), '0')
+      File.write(File.join(home, 'pack/42/msec.txt'), '500')
       Baza::Zip.new(zip, loog: fake_loog).pack(File.join(home, 'pack/.'))
       fake_pipe.unpack(job, zip)
     end
@@ -99,7 +94,7 @@ class Baza::PipeTest < Minitest::Test
       zip = File.join(dir, 'foo.zip')
       pipe.pack(job, zip)
       Baza::Zip.new(zip).unpack(dir)
-      ['job.json', 'base.fb', "alteration-#{alt}/alteration-#{alt}.rb"].each do |f|
+      ['job.json', 'base.fb', "alteration-#{alt}.rb"].each do |f|
         assert(File.exist?(File.join(dir, f)), f)
       end
       json = JSON.parse(File.read(File.join(dir, 'job.json')))
@@ -121,16 +116,7 @@ class Baza::PipeTest < Minitest::Test
       pipe.pack(job, zip)
       Baza::Zip.new(zip).unpack(home)
       File.delete(zip)
-      File.write(
-        File.join(home, 'job.json'),
-        JSON.pretty_generate(
-          JSON.parse(File.read(File.join(home, 'job.json'))).merge(
-            { 'exit' => 0, 'msec' => 500 }
-          )
-        )
-      )
-      File.write(File.join(home, 'stdout.txt'), 'finished')
-      File.write(File.join(home, "alteration-#{alt}/stdout.txt"), 'done...')
+      File.write(File.join(home, "alteration-#{alt}.txt"), 'done...')
       Baza::Zip.new(zip, loog: fake_loog).pack(home)
       fake_pipe.unpack(job, zip)
       assert(!job.jobs.human.alterations.get(alt)[:applied].nil?)
@@ -145,17 +131,9 @@ class Baza::PipeTest < Minitest::Test
       fake_pipe.pack(job, zip)
       Baza::Zip.new(zip).unpack(File.join(home, 'pack'))
       File.delete(zip)
-      File.write(File.join(home, 'pack/stdout.txt'), 'nothing...')
-      File.write(
-        File.join(home, 'pack/job.json'),
-        JSON.pretty_generate(
-          JSON.parse(File.read(File.join(home, 'pack/job.json'))).merge(
-            { 'exit' => 0, 'msec' => 500 }
-          )
-        )
-      )
-      FileUtils.mkdir_p(File.join(home, 'pack/trails/foo'))
-      File.write(File.join(home, 'pack/trails/foo/bar.json'), '{ "something": 42}')
+      FileUtils.mkdir_p(File.join(home, 'pack/42/trails/foo'))
+      File.write(File.join(home, 'pack/42/stdout.txt'), 'nothing...')
+      File.write(File.join(home, 'pack/42/trails/foo/bar.json'), '{ "something": 42}')
       Baza::Zip.new(zip, loog: fake_loog).pack(File.join(home, 'pack/.'))
       fake_pipe.unpack(job, zip)
       trails = Baza::Trails.new(fake_pgsql)
@@ -170,17 +148,6 @@ class Baza::PipeTest < Minitest::Test
     pipe = fake_pipe
     Dir.mktmpdir do |dir|
       File.binwrite(File.join(dir, 'base.fb'), Factbase.new.export)
-      File.write(File.join(dir, 'stdout.txt'), 'Nothing interesting')
-      File.write(
-        File.join(dir, 'job.json'),
-        JSON.pretty_generate(
-          {
-            id: job.id,
-            exit: 0,
-            msec: 500
-          }
-        )
-      )
       zip = File.join(dir, 'foo.zip')
       Baza::Zip.new(zip).pack(dir)
       pipe.unpack(job, zip)

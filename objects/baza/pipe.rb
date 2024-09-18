@@ -91,15 +91,13 @@ class Baza::Pipe
             name: job.name,
             packed: Time.now.utc.iso8601,
             human: job.jobs.human.github,
-            alterations: alts.map { |a| a[:id] },
             options: job.options
           }
         )
       )
       alts.each do |a|
         t = "alteration-#{a[:id]}"
-        rb = File.join(dir, "#{t}/#{t}.rb")
-        FileUtils.mkdir_p(File.dirname(rb))
+        rb = File.join(dir, "#{t}.rb")
         File.write(rb, "'require \"fbe/fb\"'\n#{a[:script]}")
       end
       Baza::Zip.new(file, loog: @loog).pack(dir)
@@ -114,26 +112,20 @@ class Baza::Pipe
   def unpack(job, file)
     Dir.mktmpdir do |dir|
       Baza::Zip.new(file, loog: @loog).unpack(dir)
-      ['job.json', 'base.fb', 'stdout.txt'].each do |n|
-        f = File.join(dir, n)
-        raise Baza::Urror, "The #{File.basename(f)} file is missing" unless File.exist?(f)
-      end
-      meta = JSON.parse(File.read(File.join(dir, 'job.json')))
-      %w[exit msec].each do |a|
-        raise Baza::Urror, "The '#{a}' is missing in JSON" if meta[a].nil?
-      end
       fb = File.join(dir, 'base.fb')
+      raise Baza::Urror, "The 'base.fb' file is missing" unless File.exist?(fb)
       uri = @fbs.save(fb)
+      e = Dir[File.join(dir, 'swarm-*/exit.txt')].map { |f| File.read(f).to_i }.inject(&:+) || 0
       job.finish!(
         uri,
-        File.binread(File.join(dir, 'stdout.txt')),
-        meta['exit'],
-        meta['msec'],
-        meta['exit'].zero? ? File.size(fb) : nil,
-        meta['exit'].zero? ? Baza::Errors.new(fb).count : nil
+        Dir[File.join(dir, 'swarm-*/stdout.txt')].map { |f| File.binread(f) }.join("\n\n") || 'No output',
+        e,
+        Dir[File.join(dir, 'swarm-*/msec.txt')].map { |f| File.read(f).to_i }.inject(&:+) || 0,
+        e.zero? ? File.size(fb) : nil,
+        e.zero? ? Baza::Errors.new(fb).count : nil
       )
-      Dir[File.join(dir, 'alteration-*/stdout.txt')].each do |f|
-        alt = File.basename(File.dirname(f)).split('-', 2)[1].to_i
+      Dir[File.join(dir, 'alteration-*.txt')].each do |f|
+        alt = File.basename(f).split('-', 2)[1].to_i
         job.jobs.human.notify(
           "🍊 We have successfully applied the alteration ##{alt}",
           "to the job `#{job.name}` (##{job.id}),",
@@ -142,12 +134,14 @@ class Baza::Pipe
         job.jobs.human.alterations.complete(alt, job.id)
         @loog.debug("The job ##{job.id} applied the alteration ##{alt}")
       end
-      Dir[File.join(dir, 'trails/*/*')].each do |f|
-        data = File.read(f)
-        judge = File.basename(File.dirname(f))
-        n = File.basename(f)
-        @trails.add(job, judge, n, JSON.parse(data))
-        @loog.debug("The trail '#{n}' (#{data.size} bytes) was left by the '#{judge}' judge")
+      Dir[File.join(dir, 'swarm-*')].each do |d|
+        Dir[File.join(d, 'trails/*/*')].each do |f|
+          data = File.read(f)
+          judge = File.basename(File.dirname(f))
+          n = File.basename(f)
+          @trails.add(job, judge, n, JSON.parse(data))
+          @loog.debug("The trail '#{n}' (#{data.size} bytes) was left by the '#{judge}' judge")
+        end
       end
     end
     @loog.debug("The job ##{job.id} unpacked from ZIP (#{File.size(file)} bytes)")

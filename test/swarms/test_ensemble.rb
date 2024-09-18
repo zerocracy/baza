@@ -64,9 +64,10 @@ class EnsembleTest < Minitest::Test
           if [ \"${2}\" == 'cp' ]; then
             if [ \"${4}\" == 'pack.zip' ]; then
               mkdir archive
-              echo '{ \"id\": \"#{job.id}\", \"exit\": 0, \"msec\": 500 }' > archive/job.json
+              echo '{ \"id\": \"#{job.id}\" }' > archive/job.json
               cp $(dirname $0)/empty.fb archive/base.fb
-              echo 'nothing special in the output' > archive/stdout.txt
+              mkdir -p archive/swarm-001-42-baza-foo
+              echo 'nothing special in the output' > archive/swarm-001-42-baza-foo/stdout.txt
               cd archive && zip -r \"../${4}\" . && cd ..
               rm -rf archive
             fi
@@ -111,7 +112,7 @@ class EnsembleTest < Minitest::Test
           assert_include(
             stdout,
             'adding: base.fb',
-            'adding: stdout.txt',
+            'adding: swarm-001-42-baza-foo/stdout.txt',
             'AWS s3 rm s3://swarms.zerocracy.com/',
             '--message-attributes'
           )

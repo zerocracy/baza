@@ -35,24 +35,14 @@ class TestAlterations < Minitest::Test
     Dir.mktmpdir do |home|
       fb = Factbase.new
       File.binwrite(File.join(home, 'base.fb'), fb.export)
-      FileUtils.mkdir_p(File.join(home, 'alteration-42'))
-      File.write(File.join(home, 'alteration-42/alteration-42.rb'), '$fb.insert.foo = 42;')
-      FileUtils.mkdir_p(File.join(home, 'alteration-7'))
-      File.write(File.join(home, 'alteration-7/alteration-7.rb'), '$fb.insert.bar = 7;')
-      File.write(
-        File.join(home, 'job.json'),
-        JSON.pretty_generate(
-          {
-            alterations: [42, 7]
-          }
-        )
-      )
+      File.write(File.join(home, 'alteration-42.rb'), '$fb.insert.foo = 42;')
+      File.write(File.join(home, 'alteration-7.rb'), '$fb.insert.bar = 7;')
       qbash(
         "#{Shellwords.escape(File.join(__dir__, '../../swarms/alterations/entry.sh'))} 0 #{Shellwords.escape(home)}",
-        loog: Loog::NULL
+        loog: fake_loog
       )
       assert_include(
-        File.read(File.join(home, 'alteration-42/stdout.txt')),
+        File.read(File.join(home, 'alteration-42.txt')),
         '1 judge(s) processed'
       )
       fb.import(File.binread(File.join(home, 'base.fb')))

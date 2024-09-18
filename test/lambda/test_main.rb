@@ -105,9 +105,7 @@ class MainTest < Minitest::Test
         zip = File.join(home, 'result.zip')
         File.binwrite(zip, req.body)
         Baza::Zip.new(zip, loog: fake_loog).unpack(File.join(home, 'result'))
-        ['stdout.txt', 'job.json'].each { |f| assert(File.exist?(File.join(File.join(home, 'result'), f))) }
-        json = JSON.parse(File.read(File.join(home, 'result/job.json')))
-        assert_equal(0, json['exit'])
+        assert(File.exist?(File.join(home, 'result/swarm-001-42-swarmik/stdout.txt')))
         ''
       end
       stub_request(:post, 'https://sqs.us-east-1.amazonaws.com/424242/baza-shift').to_return(
@@ -130,7 +128,14 @@ class MainTest < Minitest::Test
       File.write(
         File.join(home, 'main.rb'),
         [
-          File.read(File.join(__dir__, '../../assets/lambda/main.rb')),
+          Liquid::Template.parse(File.read(File.join(__dir__, '../../assets/lambda/main.rb'))).render(
+            'swarm' => '42',
+            'name' => 'swarmik',
+            'secret' => 'sword-fish',
+            'bucket' => 'foo',
+            'region' => 'us-east-1',
+            'account' => '424242'
+          ),
           "
           def get_object(key, file, loog)
             Dir.mktmpdir do |home|
@@ -207,8 +212,10 @@ class MainTest < Minitest::Test
         end
       assert_include(
         stdout,
-        'inflating: /tmp/result/trails/first/bar.txt',
-        'inflating: /tmp/result/trails/second/hello.txt',
+        'inflating: /tmp/result/swarm-001-42-swarmik/exit.txt',
+        'inflating: /tmp/result/swarm-001-42-swarmik/stdout.txt',
+        'inflating: /tmp/result/swarm-001-42-swarmik/trails/first/bar.txt',
+        'inflating: /tmp/result/swarm-001-42-swarmik/trails/second/hello.txt',
         'Job processing finished'
       )
     end

@@ -150,21 +150,21 @@ end
 # Execute one swarm, collecting trails.
 #
 # @param [String] pack The directory with the unpacked ZIP
+# @param [String] sub The subdir where to store trails
 # @param [Loog] loog The logging facility
-def with_trails(pack, loog)
+def with_trails(pack, sub, loog)
   jfile = File.join(pack, 'job.json')
   before = JSON.parse(File.read(jfile))
   json = before.dup
-  r = 0
   Dir.mktmpdir do |dir|
     json['options'] = {} if json['options'].nil?
     json['options']['TRAILS_DIR'] = dir
     File.write(jfile, JSON.pretty_generate(json))
-    r = yield pack
-    FileUtils.cp_r(dir, File.join(pack, 'trails/'))
+    yield pack
+  ensure
+    FileUtils.cp_r(dir, File.join(File.join(pack, sub), 'trails'))
+    File.write(jfile, JSON.pretty_generate(before))
   end
-  File.write(jfile, JSON.pretty_generate(before))
-  r
 end
 
 # Run one swarm for a particular job, where a ZIP archvie from S3 must be processed.
@@ -182,22 +182,24 @@ def with_zip(id, rec, loog, &)
     Archive::Zip.extract(zip, pack)
     loog.info("Unpacked ZIP (#{File.size(zip)} bytes)")
     File.delete(zip)
-    jfile = File.join(pack, 'job.json')
-    json = JSON.parse(File.read(jfile))
+    json = JSON.parse(File.read(File.join(pack, 'job.json')))
     loog.info("Job ##{json['id']} is coming from @#{json['human']}")
     rec_file = File.join(pack, 'event.json')
     File.write(rec_file, JSON.pretty_generate(rec))
     start = Time.now
-    r = with_trails(pack, loog, &)
-    unless r.zero?
-      loog.warn('This is what was printed by the swarm:')
-      loog.warn(File.binread(File.join(pack, 'stdout.txt')))
-    end
+    before = Dir[File.join(pack, 'swarm-*')].count
+    sub = "swarm-#{format('%03d', before + 1)}-{{ swarm }}-{{ name }}"
+    dir = File.join(pack, sub)
+    FileUtils.mkdir_p(dir)
+    stdout, code = with_trails(pack, sub, loog, &)
     FileUtils.rm_f(rec_file)
-    json['exit'] = r
-    json['msec'] = ((Time.now - start) * 1000).to_i
-    File.write(jfile, JSON.pretty_generate(json))
-    loog.info("JSON updated at #{jfile} (#{File.size(jfile)} bytes), exit=#{json['exit']}, msec=#{json['msec']}")
+    File.write(File.join(dir, 'exit.txt'), code.to_s)
+    File.write(File.join(dir, 'msec.txt'), (Time.now - start) * 1000)
+    File.binwrite(File.join(dir, 'stdout.txt'), stdout)
+    unless code.zero?
+      loog.warn(stdout)
+      loog.warn("FAILURE (#{code})")
+    end
     Archive::Zip.archive(zip, File.join(pack, '/.'))
     loog.info("Packed ZIP (#{File.size(zip)} bytes)")
     put_object(key, zip, loog)
@@ -208,7 +210,7 @@ def with_zip(id, rec, loog, &)
       more = more['stringValue'].split(' ') - ['{{ name }}']
     end
     send_message(id, more, loog)
-    r
+    code
   end
 end
 
@@ -217,18 +219,16 @@ end
 # @param [Integer] id The ID of the job to process
 # @param [String] pack Directory name where the ZIP is unpacked
 # @param [Loog] loog The logging facility
-# @return [Integer] Exit code (zero means success)
+# @return [Array<String, Integer>] Stdout + exit code (zero means success)
 def one(id, pack, loog)
-  cmd =
+  qbash(
     if File.exist?('/swarm/entry.sh')
       "/bin/bash /swarm/entry.sh \"#{id}\" \"#{pack}\" 2>&1"
     elsif File.exist?('/swarm/entry.rb')
       "bundle exec ruby /swarm/entry.rb \"#{id}\" \"#{pack}\" 2>&1"
     else
       "echo 'Cannot figure out how to start the swarm, try creating \"entry.sh\" or \"entry.rb\"'"
-    end
-  stdout, code = qbash(
-    cmd,
+    end,
     both: true,
     loog:,
     env: {
@@ -238,18 +238,6 @@ def one(id, pack, loog)
     },
     accept: []
   )
-  File.binwrite(
-    File.join(pack, 'stdout.txt'),
-    [
-      "Started swarm no.{{ swarm }} ({{ name }}):",
-      stdout,
-      "Finished swarm no.{{ swarm }} ({{ name }}).",
-      "\n"
-    ].join("\n"),
-    mode: 'a+'
-  )
-  loog.warn("FAILURE (#{code})") unless code.zero?
-  code
 end
 
 # This is the entry point called by aws_lambda_ric when a new SQS message arrives.

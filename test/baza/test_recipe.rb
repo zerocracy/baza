@@ -290,7 +290,6 @@ class Baza::RecipeTest < Minitest::Test
         stdout,
         'Unpacked ZIP',
         'Job #42 is coming from @yegor256',
-        'JSON updated at',
         "Reported to host.docker.internal:#{backend_port}, received HTTP #200",
         'Job processing finished'
       )
