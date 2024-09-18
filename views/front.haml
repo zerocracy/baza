@@ -3,16 +3,16 @@
   %head
     %title
       = title
-    %meta{charset:'UTF-8'}
-    %meta{name: 'viewport', content: 'width=device-width, initial-scale=1.0'}
-    %meta{name: 'keywords', content: 'Zerocracy, Zerocrat, AI, Project Management, Management Robotization'}
-    %meta{name: 'description', content: 'Zerocrat: A Project Manager that Never Sleeps'}
-    %link{href: 'https://cdn.jsdelivr.net/gh/yegor256/tacit@gh-pages/tacit-css.min.css', rel: 'stylesheet'}
-    %link{href: 'https://cdn.jsdelivr.net/gh/yegor256/drops@gh-pages/drops.min.css', rel: 'stylesheet'}
-    %link{rel: 'shortcut icon', href: iri.cut('/svg/logo.svg')}
-    %link{href: iri.cut('/css/front.css'), rel: 'stylesheet'}
+    %meta{ charset: 'UTF-8' }
+    %meta{ name: 'viewport', content: 'width=device-width, initial-scale=1.0' }
+    %meta{ name: 'keywords', content: 'Zerocracy, Zerocrat, AI, Project Management, Management Robotization' }
+    %meta{ name: 'description', content: 'Zerocrat: A Project Manager that Never Sleeps' }
+    %link{ href: 'https://cdn.jsdelivr.net/gh/yegor256/tacit@gh-pages/tacit-css.min.css', rel: 'stylesheet' }
+    %link{ href: 'https://cdn.jsdelivr.net/gh/yegor256/drops@gh-pages/drops.min.css', rel: 'stylesheet' }
+    %link{ rel: 'shortcut icon', href: iri.cut('/svg/logo.svg') }
+    %link{ href: iri.cut('/css/front.css'), rel: 'stylesheet' }
   %body
-    %div.outer
+    .outer
       %div
         %div
           %section
@@ -20,37 +20,36 @@
               %nav
                 %ul
                   %li
-                    %a{href: '/'}
-                      %img.logo{src: iri.cut('/svg/logo.svg'), alt: 'Logo'}
+                    %a{ href: '/' }
+                      %img.logo{ src: iri.cut('/svg/logo.svg'), alt: 'Logo' }
             %article
               - if defined?(flash_msg) && !flash_msg.empty?
-                %p.flash{style: 'background-color:' + flash_color + ';'}
+                %p.flash{ style: "background-color:#{flash_color};" }
                   = flash_msg
               != yield
             %footer
               %nav
                 %ul
                   %li
-                    %a{href: ENV['RACK_ENV'] == 'test' ? iri.cut('/fake-login') : github_login_link}
+                    %a{ href: ENV['RACK_ENV'] == 'test' ? iri.cut('/fake-login') : github_login_link }
                       Start
               %nav
                 %ul.smaller
                   %li
-                    != '&#169;'
-                    != '2009' + '&#8211;' + Time.now.strftime('%Y')
+                    != "&#169; 2009&#8211;#{Time.now.strftime('%Y')}"
                   %li
-                    %a{href: iri.cut('/terms')}
+                    %a{ href: iri.cut('/terms') }
                       Terms
                   %li
-                    %a{href: 'mailto:team@zerocracy.com'}
+                    %a{ href: 'mailto:team@zerocracy.com' }
                       team@zerocracy.com
-                  %li{title: 'Currently deployed version'}
-                    = "#{Baza::VERSION}"
+                  %li{ title: 'Currently deployed version' }
+                    = Baza::VERSION
               %nav
                 %ul.larger
                   %li
-                    %a{href: 'https://github.com/zerocracy/'}
-                      %img.logo{style: 'width: 1em; height: 1em;', src: iri.cut('/svg/github.svg'), alt: 'GitHub logo'}
+                    %a{ href: 'https://github.com/zerocracy/' }
+                      %img.logo{ style: 'width: 1em; height: 1em;', src: iri.cut('/svg/github.svg'), alt: 'GitHub logo' }
                   %li
-                    %a{href: 'https://t.me/zerocracy'}
-                      %img.logo{style: 'width: 1em; height: 1em;', src: iri.cut('/svg/telegram.svg'), alt: 'Telegram logo'}
+                    %a{ href: 'https://t.me/zerocracy' }
+                      %img.logo{ style: 'width: 1em; height: 1em;', src: iri.cut('/svg/telegram.svg'), alt: 'Telegram logo' }

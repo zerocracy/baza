@@ -6,7 +6,7 @@
     plugin work in a GitHub Action workflow, it must have a token,
     which you can create here.
 
-%form{method: 'post', action: iri.cut('/tokens/add')}
+%form{ method: 'post', action: iri.cut('/tokens/add') }
   %fieldset
     %input{ type: 'text', name: 'name', tabindex: 1, placeholder: 'Unique token name', size: 40, maxlength: 32, autofocus: true, required: true }
     %input{ type: 'submit', tabindex: 2, value: 'Add' }
@@ -17,17 +17,17 @@
   %table
     %colgroup
       -# ID
-      %col{style: 'width: 4em;'}
+      %col{ style: 'width: 4em;' }
       -# Name
       %col
       -# Token
-      %col{style: 'width: 26em;'}
+      %col{ style: 'width: 26em;' }
       -# Created
-      %col{style: 'width: 10em;'}
+      %col{ style: 'width: 10em;' }
       -# Jobs
-      %col{style: 'width: 4em;'}
+      %col{ style: 'width: 4em;' }
       -# Commands
-      %col{style: 'width: 6em;'}
+      %col{ style: 'width: 6em;' }
     %thead
       %tr
         %th
@@ -43,7 +43,7 @@
         %th
     %tbody
     - paging(tokens, offset:) do |t|
-      %tr{class: t.active? ? '' : 'gray'}
+      %tr{ class: t.active? ? '' : 'gray' }
         %td.ff
           = "##{t.id}"
         %td.ff
@@ -57,8 +57,8 @@
         %td
           - unless t.text == Baza::Tokens::TESTER
             - if t.jobs.zero?
-              %a.ico{href: iri.cut('/tokens').append(t.id).append('delete'), title: 'Delete it forever', onclick: "return confirm('Are you sure you want to delete this token?')"}
+              %a.ico{ href: iri.cut('/tokens').append(t.id).append('delete'), title: 'Delete it forever', onclick: "return confirm('Are you sure you want to delete this token?')" }
                 %i.fa-regular.fa-trash-can
             - elsif t.active?
-              %a.ico{href: iri.cut('/tokens').append(t.id).append('deactivate'), title: 'Deactivate it and no new jobs can use it', onclick: "return confirm('Once you deactive this token, it will be impossible to activate it back. Are you sure you want to deactivate it?')"}
+              %a.ico{ href: iri.cut('/tokens').append(t.id).append('deactivate'), title: 'Deactivate it and no new jobs can use it', onclick: "return confirm('Once you deactive this token, it will be impossible to activate it back. Are you sure you want to deactivate it?')" }
                 %i.fa-solid.fa-ban

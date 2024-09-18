@@ -14,7 +14,7 @@
 
 - bars = account.bars
 - unless bars.empty?
-  - bars.each { |b| b[:max] = b[:debit] > b[:credit] ? b[:debit] : b[:credit] }
+  - bars.each { |b| b[:max] = [b[:debit], b[:credit]].max }
   - max = bars.map { |b| b[:max] }.max
   %p
     Currently, we charge
@@ -22,15 +22,15 @@
     per hour of our server time, prorated to the millisecond.
     This is how much you've been spending, per week (YY.WW):
   %p
-    %div.bars
+    .bars
       - bars.each do |b|
-        %div.week
-          %div.both
-            %div.credit{style: "height: #{100 * b[:credit] / max}%", title: usd(-b[:credit])}
+        .week
+          .both
+            .credit{ style: "height: #{100 * b[:credit] / max}%", title: usd(-b[:credit]) }
               != '&nbsp;'
-            %div.debit{style: "height: #{100 * b[:debit] / max}%", title: usd(b[:debit])}
+            .debit{ style: "height: #{100 * b[:debit] / max}%", title: usd(b[:debit]) }
               != '&nbsp;'
-          %div.legend{title: "Week ##{b[:week]}"}
+          .legend{ title: "Week ##{b[:week]}" }
             = b[:week]
 
 %p
@@ -38,17 +38,17 @@
 %table
   %colgroup
     -# ID
-    %col{style: 'width: 5em;'}
+    %col{ style: 'width: 5em;' }
     -# Job
-    %col{style: 'width: 4em;'}
+    %col{ style: 'width: 4em;' }
     -# Name
-    %col{style: 'width: 8em;'}
+    %col{ style: 'width: 8em;' }
     -# USD
-    %col{style: 'width: 9em;'}
+    %col{ style: 'width: 9em;' }
     -# Summary
     %col
     -# Created
-    %col{style: 'width: 10em;'}
+    %col{ style: 'width: 10em;' }
   %thead
     %tr
       %th
@@ -71,13 +71,13 @@
         = "##{r.id}"
       %td
         - if j.nil?
-          = '—'
+          —
         - else
-          %a{href: iri.cut('/jobs').append(j)}
+          %a{ href: iri.cut('/jobs').append(j) }
             = "##{j}"
       %td.ff
         - unless j.nil?
-          %a{href: iri.cut('/jobs').over(name: r.job_name)}<
+          %a{ href: iri.cut('/jobs').over(name: r.job_name) }<
             = r.job_name
       %td.right.ff
         != zents(r.zents)

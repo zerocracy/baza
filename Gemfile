@@ -42,6 +42,7 @@ gem 'fbe', '>0'
 gem 'get_process_mem', '~>1.0'
 gem 'glogin', '>0'
 gem 'haml', '~>6.3'
+gem 'haml_lint', '0.58.0', require: false
 gem 'iri', '>0'
 gem 'j', path: 'j' if File.exist?('j')
 gem 'judges', '>0'

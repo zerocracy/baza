@@ -1,12 +1,12 @@
 - if the_human.admin?
   %nav
-    %ul{style: 'text-align: left'}
+    %ul{ style: 'text-align: left' }
       - unless job.expired?
         %li
-          %a{href: iri.cut('/jobs').append(job.id).append('expire'), onclick: "return confirm('If you expire this job, there will no way to return its data back. Are you sure want to proceed?')"}
+          %a{ href: iri.cut('/jobs').append(job.id).append('expire'), onclick: "return confirm('If you expire this job, there will no way to return its data back. Are you sure want to proceed?')" }
             Expire!
 
-%div.columns
+.columns
   %p
     Job ID:
     %br
@@ -16,20 +16,20 @@
   %p
     Job name:
     %br
-    %a.ff{href: iri.over(name: job.name)}
+    %a.ff{ href: iri.over(name: job.name) }
       = job.name
 
   %p
     Token:
     %br
-    %a{href: iri.cut('/tokens')}
+    %a{ href: iri.cut('/tokens') }
       %span.ff
         = job.token.name
 
   %p
     Arrived from:
     %br
-    %a{href: Iri.new('https://iplocation.io/ip').append(job.ip)}<
+    %a{ href: Iri.new('https://iplocation.io/ip').append(job.ip) }<
       %span.ff<
         = job.ip
     != country_flag(job.ip)
@@ -67,16 +67,16 @@
       GitHub Workflow:
       %br
       %span.ff= url.split('/')[-1]
-      %a.ico{href: url, title: "Click here to see the workflow in GitHub"}
+      %a.ico{ href: url, title: 'Click here to see the workflow in GitHub' }
         %i.fa-brands.fa-github
 
   - if_meta(job, 'vitals_url') do |url|
     %p
       Vitals:
       %br
-      %a{href: url}<
+      %a{ href: url }<
         Here
-      %a.ico{href: url, title: "Click here to open the published vitals report"}
+      %a.ico{ href: url, title: 'Click here to open the published vitals report' }
         %i.fa-solid.fa-list
 
   %p
@@ -87,7 +87,7 @@
     - else
       - job.metas.each do |m|
         - (k, v) = m.split(':', 2)
-        %span.ff{style: 'margin-right: 2em;'}
+        %span.ff{ style: 'margin-right: 2em;' }
           %i.fa-solid.fa-thumbtack.teal
           - if v.nil?
             != large_text(m)
@@ -125,11 +125,11 @@
     - if job.when_locked.nil?
       None
     - else
-      %a.ico{href: iri.cut('/locks'), title: "The job was locked #{job.when_locked.ago} ago, click to unlock"}
+      %a.ico{ href: iri.cut('/locks'), title: "The job was locked #{job.when_locked.ago} ago, click to unlock" }
         %i.fa-solid.fa-lock
       != ago(job.when_locked)
       - if job.lock_owner.start_with?('http')
-        %a{href: job.lock_owner}
+        %a{ href: job.lock_owner }
           %i.fa-solid.fa-link
 
   %p
@@ -139,11 +139,11 @@
       %span.good
         None
     - else
-      %i.fa-solid.fa-triangle-exclamation.bad{title: 'Find the "judges-summary" fact in the HTML, the error are there'}
+      %i.fa-solid.fa-triangle-exclamation.bad{ title: 'Find the "judges-summary" fact in the HTML, the error are there' }
       %span.bad
         = job.errors
       (
-      %a{href: iri.cut('/jobs').append(job.id).append('input.html')}<>
+      %a{ href: iri.cut('/jobs').append(job.id).append('input.html') }<>
         see input HTML
       )
 
@@ -171,11 +171,11 @@
     %p
       Input Factbase:
       %br
-      %a{href: iri.cut('/inspect').append("#{job.id}.fb")}<
+      %a{ href: iri.cut('/inspect').append("#{job.id}.fb") }<
         Download
       != "(#{bytes(job.size)})"
       = '|'
-      %a{href: iri.cut('/jobs').append(job.id).append('input.html')}<
+      %a{ href: iri.cut('/jobs').append(job.id).append('input.html') }<
         HTML
 
   - if job.finished?
@@ -199,11 +199,11 @@
       %p
         Output Factbase:
         %br
-        %a{href: iri.cut('/pull').append("#{job.id}.fb")}<
+        %a{ href: iri.cut('/pull').append("#{job.id}.fb") }<
           Download
         != "(#{bytes(r.size)})"
         = '|'
-        %a{href: iri.cut('/jobs').append(job.id).append('output.html')}<
+        %a{ href: iri.cut('/jobs').append(job.id).append('output.html') }<
           HTML
       %p
         Output Errors:
@@ -212,11 +212,11 @@
           %span.good
             None
         - else
-          %i.fa-solid.fa-triangle-exclamation.bad{title: 'Find the "judges-summary" fact in the HTML, the error are there'}
+          %i.fa-solid.fa-triangle-exclamation.bad{ title: 'Find the "judges-summary" fact in the HTML, the error are there' }
           %span.bad
             = r.errors
           (
-          %a{href: iri.cut('/jobs').append(job.id).append('output.html')}<>
+          %a{ href: iri.cut('/jobs').append(job.id).append('output.html') }<>
             see output HTML
           )
 

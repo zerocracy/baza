@@ -1,5 +1,5 @@
 - if the_human.admin?
-  %form{method: 'post', action: iri.cut('/valves/add')}
+  %form{ method: 'post', action: iri.cut('/valves/add') }
     %fieldset
       %input{ type: 'text', name: 'name', tabindex: 1, placeholder: 'Job name', size: 14, maxlength: 32, required: true, autofocus: true }
       %input{ type: 'text', name: 'badge', tabindex: 2, placeholder: 'Badge', size: 20, maxlength: 64, required: true }
@@ -16,21 +16,21 @@
   %table
     %colgroup
       -# ID
-      %col{style: 'width: 5em;'}
+      %col{ style: 'width: 5em;' }
       -# Name
-      %col{style: 'width: 14em;'}
+      %col{ style: 'width: 14em;' }
       -# Job
-      %col{style: 'width: 4em;'}
+      %col{ style: 'width: 4em;' }
       -# Badge
-      %col{style: 'width: 18em;'}
+      %col{ style: 'width: 18em;' }
       -# Why
       %col
       -# Result
-      %col{style: 'width: 10em;'}
+      %col{ style: 'width: 10em;' }
       -# Created
-      %col{style: 'width: 10em;'}
+      %col{ style: 'width: 10em;' }
       -# Commands
-      %col{style: 'width: 3em;'}
+      %col{ style: 'width: 3em;' }
     %thead
       %tr
         %th
@@ -56,13 +56,13 @@
         %td.ff
           - if v[:jobs].zero?
             = v[:name]
-            %i.fa-solid.fa-triangle-exclamation.bad{title: 'There is no job by this name, maybe a spelling error?'}
+            %i.fa-solid.fa-triangle-exclamation.bad{ title: 'There is no job by this name, maybe a spelling error?' }
           - else
-            %a{href: iri.cut('/jobs').over(name: v[:name])}<
+            %a{ href: iri.cut('/jobs').over(name: v[:name]) }<
               = v[:name]
         %td
           - unless v[:job].nil?
-            %a{href: iri.cut('/jobs').append(v[:job])}
+            %a{ href: iri.cut('/jobs').append(v[:job]) }
               = "##{v[:job]}"
         %td.ff
           = v[:badge]
@@ -73,5 +73,5 @@
         %td
           != ago(v[:created])
         %td
-          %a.ico{href: iri.cut('/valves').append(v[:id]).append('remove'), title: "Remove valve ##{v[:id]}", onclick: "return confirm('Are you sure you want to remove valve ##{v[:id]}?')"}
+          %a.ico{ href: iri.cut('/valves').append(v[:id]).append('remove'), title: "Remove valve ##{v[:id]}", onclick: "return confirm('Are you sure you want to remove valve ##{v[:id]}?')" }
             %i.fa-regular.fa-trash-can

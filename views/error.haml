@@ -1,8 +1,8 @@
 %p
-  %a{href: iri.cut('')}
-    %img.logo{src: 'https://raw.githubusercontent.com/zerocracy/baza/master/assets/svg/logo.svg', alt: 'Logo'}
+  %a{ href: iri.cut('') }
+    %img.logo{ src: 'https://raw.githubusercontent.com/zerocracy/baza/master/assets/svg/logo.svg', alt: 'Logo' }
 
-%p{style: 'color: red;'}
+%p{ style: 'color: red;' }
   %i.fa-solid.fa-triangle-exclamation.bad
   Oops, there is an internal error :(
 
@@ -12,7 +12,7 @@
   != href('https://github.com/zerocracy/baza', 'zerocracy/baza', dot: true)
 
 %pre
-  &=backtrace
+  &= backtrace
 
 %p
-  =Baza::VERSION
+  = Baza::VERSION

@@ -7,15 +7,15 @@
 %table
   %colgroup
     -# ID
-    %col{style: 'width: 5em;'}
+    %col{ style: 'width: 5em;' }
     -# Job ID
-    %col{style: 'width: 5em;'}
+    %col{ style: 'width: 5em;' }
     -# Code
-    %col{style: 'width: 4em;'}
+    %col{ style: 'width: 4em;' }
     -# Stdout
     %col
     -# Created
-    %col{style: 'width: 10em;'}
+    %col{ style: 'width: 10em;' }
   %thead
     %tr
       %th
@@ -35,7 +35,7 @@
         = "##{i[:id]}"
       %td
         - unless [:job].nil?
-          %a{href: iri.cut('/jobs').append(i[:job])}
+          %a{ href: iri.cut('/jobs').append(i[:job]) }
             = "##{i[:job]}"
       %td.ff
         - if i[:code].zero?

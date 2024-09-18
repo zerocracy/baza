@@ -18,27 +18,27 @@
   %table
     %colgroup
       -# ID
-      %col{style: 'width: 4em;'}
+      %col{ style: 'width: 4em;' }
       -# In
-      %col{style: 'width: 4em;'}
+      %col{ style: 'width: 4em;' }
       -# Name
       %col
       -# Invocations
-      %col{style: 'width: 3em;'}
+      %col{ style: 'width: 3em;' }
       -# Lock
-      %col{style: 'width: 5em;'}
+      %col{ style: 'width: 5em;' }
       -# Token
-      %col{style: 'width: 20em;'}
+      %col{ style: 'width: 20em;' }
       -# Started
-      %col{style: 'width: 9em;'}
+      %col{ style: 'width: 9em;' }
       -# Code
-      %col{style: 'width: 4em;'}
+      %col{ style: 'width: 4em;' }
       -# Time
-      %col{style: 'width: 4em;'}
+      %col{ style: 'width: 4em;' }
       -# Log
-      %col{style: 'width: 3em;'}
+      %col{ style: 'width: 3em;' }
       -# Out
-      %col{style: 'width: 4em;'}
+      %col{ style: 'width: 4em;' }
     %thead
       %tr
         %th
@@ -67,46 +67,46 @@
     - paging(jobs, offset:, name:) do |j|
       %tr
         %td
-          %a{href: iri.cut('/jobs').append(j.id)}
+          %a{ href: iri.cut('/jobs').append(j.id) }
             = "##{j.id}"
         %td
           - unless j.expired?
-            %a.ico{href: iri.cut('/jobs').append(j.id).append('input.html'), title: "Click here to see the HTML of the incoming Factbase file (#{bytes(j.size)})"}
+            %a.ico{ href: iri.cut('/jobs').append(j.id).append('input.html'), title: "Click here to see the HTML of the incoming Factbase file (#{bytes(j.size)})" }
               %i.fa-solid.fa-box-archive
           - if j.errors.positive?
-            %i.fa-solid.fa-triangle-exclamation.bad{title: "#{j.errors} error(s) in the 'judges-summary' fact, before processing"}
+            %i.fa-solid.fa-triangle-exclamation.bad{ title: "#{j.errors} error(s) in the 'judges-summary' fact, before processing" }
         %td.ff
-          %a{href: iri.over(name: j.name)}<
+          %a{ href: iri.over(name: j.name) }<
             = j.name
           - if !j.verified.nil? && j.verified.start_with?('OK: ')
-            %i.fa-solid.fa-certificate.good{title: 'You are doing everything by the rules, your job is verified, thanks!'}
+            %i.fa-solid.fa-certificate.good{ title: 'You are doing everything by the rules, your job is verified, thanks!' }
           - if_meta(j, 'vitals_url') do |url|
-            %a.ico{href: url, title: "Click here to open the published vitals report"}
+            %a.ico{ href: url, title: 'Click here to open the published vitals report' }
               %i.fa-solid.fa-list
           - if_meta(j, 'workflow_url') do |url|
-            %a.ico{href: url, title: "Click here to see the workflow in GitHub"}
+            %a.ico{ href: url, title: 'Click here to see the workflow in GitHub' }
               %i.fa-brands.fa-github
           - if_meta(j, 'duration') do |sec|
-            %span.gray{title: 'How long it took to update the factbase'}
+            %span.gray{ title: 'How long it took to update the factbase' }
               = "#{sec}s"
         %td.ff.right
           = j.invocations.size
         %td.ff
           - unless j.when_locked.nil?
-            %a.ico{href: iri.cut('/locks'), title: "The job was locked #{j.when_locked.ago} ago, click to unlock"}
+            %a.ico{ href: iri.cut('/locks'), title: "The job was locked #{j.when_locked.ago} ago, click to unlock" }
               %i.fa-solid.fa-lock
             - if j.when_locked < Time.now - (60 * 60)
-              %span{title: 'It is locked for too long, something is wrong'}
+              %span{ title: 'It is locked for too long, something is wrong' }
                 %i.fa-solid.fa-triangle-exclamation.bad
             - if j.lock_owner.start_with?('http')
-              %a{href: j.lock_owner}
+              %a{ href: j.lock_owner }
                 %i.fa-solid.fa-link
         %td.ff
           = j.token.name
         %td
           != ago(j.created)
-          - if j.created < Time.now - 24 * 60 * 60
-            %i.fa-solid.fa-triangle-exclamation.bad{title: 'We have not seen updates for a long time'}
+          - if j.created < Time.now - (24 * 60 * 60)
+            %i.fa-solid.fa-triangle-exclamation.bad{ title: 'We have not seen updates for a long time' }
         - if j.finished?
           %td
             - if j.result.exit.zero?
@@ -114,32 +114,32 @@
             - else
               %span.bad
                 = format('%03d', j.result.exit)
-              %i.fa-solid.fa-triangle-exclamation.bad{title: 'The job finished with an error (see the log)'}
+              %i.fa-solid.fa-triangle-exclamation.bad{ title: 'The job finished with an error (see the log)' }
           %td.right.ff
             = msec(j.result.msec)
           - if j.expired?
-            %td.center.orange{colspan: 2}
+            %td.center.orange{ colspan: 2 }
               Expired
           - else
             %td.center.ff
-              %a.ico{href: iri.cut('/stdout').append("#{j.id}.txt"), title: 'See the full stdout'}
+              %a.ico{ href: iri.cut('/stdout').append("#{j.id}.txt"), title: 'See the full stdout' }
                 - if j.result.exit.zero?
                   %i.fa-regular.fa-note-sticky
                 - else
                   %i.fa-solid.fa-note-sticky.bad
             %td
               - if j.result.exit.zero?
-                %a.ico{href: iri.cut('/jobs').append(j.id).append('output.html'), title: "Click here to see the HTML of the output Factbase file (#{bytes(j.result.size)})"}
+                %a.ico{ href: iri.cut('/jobs').append(j.id).append('output.html'), title: "Click here to see the HTML of the output Factbase file (#{bytes(j.result.size)})" }
                   %i.fa-solid.fa-box-archive
               - if j.result.errors&.positive?
-                %span{title: "#{j.result.errors} error(s) in the 'judges-summary' fact, after processing"}
+                %span{ title: "#{j.result.errors} error(s) in the 'judges-summary' fact, after processing" }
                   %i.fa-solid.fa-triangle-exclamation.bad
         - elsif j.expired?
-          %td.center.orange{colspan: 4}
+          %td.center.orange{ colspan: 4 }
             Never finished
         - elsif j.taken.nil?
-          %td.center.orange{colspan: 4}
+          %td.center.orange{ colspan: 4 }
             Waiting...
         - else
-          %td.center.orange{colspan: 4}
+          %td.center.orange{ colspan: 4 }
             In progress...

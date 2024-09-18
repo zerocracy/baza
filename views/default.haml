@@ -3,17 +3,17 @@
   %head
     %title
       = title
-    %meta{charset:'UTF-8'}
-    %meta{name: 'viewport', content: 'width=device-width, initial-scale=1.0'}
-    %link{href: 'https://cdn.jsdelivr.net/gh/yegor256/tacit@gh-pages/tacit-css.min.css', rel: 'stylesheet'}
-    %link{href: 'https://cdn.jsdelivr.net/gh/yegor256/drops@gh-pages/drops.min.css', rel: 'stylesheet'}
-    %link{href: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css', rel: 'stylesheet'}
-    %link{href: iri.cut('/css/main.css'), rel: 'stylesheet'}
-    %link{rel: 'shortcut icon', href: iri.cut('/svg/logo.svg')}
-    %script{src: 'https://code.jquery.com/jquery-3.3.1.min.js'}
-    %script{src: 'https://code.jquery.com/ui/1.13.2/jquery-ui.min.js'}
+    %meta{ charset: 'UTF-8' }
+    %meta{ name: 'viewport', content: 'width=device-width, initial-scale=1.0' }
+    %link{ href: 'https://cdn.jsdelivr.net/gh/yegor256/tacit@gh-pages/tacit-css.min.css', rel: 'stylesheet' }
+    %link{ href: 'https://cdn.jsdelivr.net/gh/yegor256/drops@gh-pages/drops.min.css', rel: 'stylesheet' }
+    %link{ href: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css', rel: 'stylesheet' }
+    %link{ href: iri.cut('/css/main.css'), rel: 'stylesheet' }
+    %link{ rel: 'shortcut icon', href: iri.cut('/svg/logo.svg') }
+    %script{ src: 'https://code.jquery.com/jquery-3.3.1.min.js' }
+    %script{ src: 'https://code.jquery.com/ui/1.13.2/jquery-ui.min.js' }
     - if defined?(css)
-      %link{href: iri.cut("/css/#{css}.css"), rel: 'stylesheet'}
+      %link{ href: iri.cut("/css/#{css}.css"), rel: 'stylesheet' }
     - if the_human.tester?
       :css
         body { background-color: #fff3f3; }
@@ -24,19 +24,19 @@
         %nav
           %ul
             %li
-              %a{href: iri.cut('/dash')}
-                %img.logo{src: iri.cut('/svg/logo.svg'), alt: 'Logo'}
+              %a{ href: iri.cut('/dash') }
+                %img.logo{ src: iri.cut('/svg/logo.svg'), alt: 'Logo' }
             %li
-              %span.login{title: "Current user ##{the_human.id}"}
+              %span.login{ title: "Current user ##{the_human.id}" }
                 = "@#{the_human.github}"
             %li
-              %a{href: 'https://t.me/zerocrat_bot'}
-                %i.fa-brands.fa-telegram.fa-lg{class: ('gray' unless telegram?), title: (telegram? ? 'You are connected already' : 'Click to connect to our Telegram bot')}
+              %a{ href: 'https://t.me/zerocrat_bot' }
+                %i.fa-brands.fa-telegram.fa-lg{ class: ('gray' unless telegram?), title: (telegram? ? 'You are connected already' : 'Click to connect to our Telegram bot') }
             - %w[Jobs Tokens Secrets Durables Valves Account Locks Logout].each do |n|
               != menu("/#{n.downcase}", n)
       %article
         - if defined?(flash_msg) && !flash_msg.empty?
-          %p.flash{style: "background-color:#{flash_color}"}
+          %p.flash{ style: "background-color:#{flash_color}" }
             = flash_msg
         - balance = the_human.account.balance
         - if balance.negative?
@@ -45,33 +45,33 @@
             != "(#{zents(balance)})"
             no more jobs will be accepted.
             Please, contact us
-            %a{href: 'https://t.me/zerocracy'}<
+            %a{ href: 'https://t.me/zerocracy' }<
               in Telegram
             , we'll find a way to give you some funds.
         != yield
       %footer
         %nav
-          %ul{style: 'font-family: monospace;'}
+          %ul{ style: 'font-family: monospace;' }
             %li
-              %a{href: iri.cut('/terms')}
+              %a{ href: iri.cut('/terms') }
                 Terms
             %li
-              %span{title: 'Current Heroku release vs. deployed software version'}
+              %span{ title: 'Current Heroku release vs. deployed software version' }
                 = "#{heroku_release_version}:#{Baza::VERSION}"
-            %li{title: 'How many seconds it took to build this page'}
+            %li{ title: 'How many seconds it took to build this page' }
               = format('%.3f', Time.now - http_start)
-            %li{title: 'The version of Ruby on the server'}
+            %li{ title: 'The version of Ruby on the server' }
               = "rb:#{RUBY_VERSION}"
-            %li{title: 'Current "load average" on the server', class: load_avg > 8 ? 'bad' : ''}
+            %li{ title: 'Current "load average" on the server', class: load_avg > 8 ? 'bad' : '' }
               = format('%0.2f', load_avg)
-            %li{title: 'Currently consumed memory vs. total system memory, in Mb'}
+            %li{ title: 'Currently consumed memory vs. total system memory, in Mb' }
               = "#{(mem / (1024 * 1024)).round}/#{(total_mem / (1024 * 1024)).round}"
-            %li{title: 'The version of PostgreSQL server and the size of the DB'}
+            %li{ title: 'The version of PostgreSQL server and the size of the DB' }
               = "pg:#{pgsql_version}/#{db_size}"
-            %li{title: 'Your visible IP address'}
+            %li{ title: 'Your visible IP address' }
               = request.ip
           - if the_human.admin?
-            %ul{style: 'font-family: monospace;'}
+            %ul{ style: 'font-family: monospace;' }
               - %w[pipeline gc donations tbot verify release].each do |s|
                 %li
                   %span
@@ -83,4 +83,3 @@
             %li
               Spot a glitch or have a bright idea? Share it
               != href('https://github.com/zerocracy/baza/issues', 'here', dot: '!')
-

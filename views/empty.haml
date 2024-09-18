@@ -2,21 +2,20 @@
 %html
   %head
     %title zerocracy
-    %meta{charset:'UTF-8'}
-    %meta{name: 'viewport', content: 'width=device-width, initial-scale=1.0'}
-    %link{href: 'https://cdn.jsdelivr.net/gh/yegor256/tacit@gh-pages/tacit-css.min.css', rel: 'stylesheet'}
-    %link{href: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css', rel: 'stylesheet'}
-    %link{href: iri.cut('/css/empty.css'), rel: 'stylesheet'}
-    %link{rel: 'shortcut icon', href: 'https://raw.githubusercontent.com/zerocracy/baza/master/assets/svg/logo.svg'}
+    %meta{ charset: 'UTF-8' }
+    %meta{ name: 'viewport', content: 'width=device-width, initial-scale=1.0' }
+    %link{ href: 'https://cdn.jsdelivr.net/gh/yegor256/tacit@gh-pages/tacit-css.min.css', rel: 'stylesheet' }
+    %link{ href: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css', rel: 'stylesheet' }
+    %link{ href: iri.cut('/css/empty.css'), rel: 'stylesheet' }
+    %link{ rel: 'shortcut icon', href: 'https://raw.githubusercontent.com/zerocracy/baza/master/assets/svg/logo.svg' }
   %body
     %section
       %article
         %p
-          %a{href: iri.cut('/')}
+          %a{ href: iri.cut('/') }
             Back home
         != yield
         %p
-          != '&#169;'
-          != '2009' + '&#8211;' + Time.now.strftime('%Y')
-          %a{href: iri.cut('/')}
+          != "&#169; 2009&#8211;#{Time.now.strftime('%Y')}"
+          %a{ href: iri.cut('/') }
             Zerocracy

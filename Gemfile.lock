@@ -209,6 +209,12 @@ GEM
       temple (>= 0.8.2)
       thor
       tilt
+    haml_lint (0.58.0)
+      haml (>= 5.0)
+      parallel (~> 1.10)
+      rainbow
+      rubocop (>= 1.0)
+      sysexits (~> 1.1)
     hashdiff (1.1.1)
     i18n (1.14.6)
       concurrent-ruby (~> 1.0)
@@ -439,6 +445,7 @@ GEM
     stringio (3.1.1)
     sys-cpu (1.1.0)
       ffi (~> 1.1)
+    sysexits (1.2.0)
     tago (0.0.2)
     telebot (0.1.2)
       faraday
@@ -522,6 +529,7 @@ DEPENDENCIES
   get_process_mem (~> 1.0)
   glogin (> 0)
   haml (~> 6.3)
+  haml_lint (= 0.58.0)
   iri (> 0)
   judges (> 0)
   liquid (~> 5.5)

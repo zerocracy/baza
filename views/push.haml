@@ -5,12 +5,12 @@
   != href('https://github.com/zerocracy/judges-action', 'zerocracy/judges-action')
   plugin to automatically submit factbases through this form.
 
-%form{method: 'post', action: iri.cut('/push'), enctype: 'multipart/form-data'}
+%form{ method: 'post', action: iri.cut('/push'), enctype: 'multipart/form-data' }
   %fieldset
     %label
       One of your
       = ' '
-      %a{href: iri.cut('/tokens')}> tokens
+      %a{ href: iri.cut('/tokens') }> tokens
       = ':'
     %input{ type: 'text', name: 'token', value: token, tabindex: 1, placeholder: 'Token', size: 40, maxlength: 36, required: true, autofocus: true }
     %label

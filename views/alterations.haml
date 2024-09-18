@@ -21,26 +21,26 @@
       }
     });
   });
-%form{method: 'post', action: iri.cut('/alterations/add')}
+%form{ method: 'post', action: iri.cut('/alterations/add') }
   %fieldset
     %label
       Job name:
     %input{ type: 'text', name: 'name', tabindex: 1, placeholder: "e.g. #{the_human.jobs.names.first}", size: 30, maxlength: 32, required: true, autofocus: true, id: 'job_name' }
     %i
-    %input{ id: 'hidden',  type: 'hidden', name: 'template', value: 'pmp' }
-    %div#tabs
+    %input{ id: 'hidden', type: 'hidden', name: 'template', value: 'pmp' }
+    #tabs
       %label
         Template:
         %ul
           %li
-            %a{href: '#pmp'}= 'PMP area-param'
+            %a{ href: '#pmp' }= 'PMP area-param'
           %li
-            %a{href: '#payout'}= 'Payout'
+            %a{ href: '#payout' }= 'Payout'
           %li
-            %a{href: '#tune'}= 'Tune'
+            %a{ href: '#tune' }= 'Tune'
           %li
-            %a{href: '#ruby'}= 'Ruby script'
-      %div#pmp
+            %a{ href: '#ruby' }= 'Ruby script'
+      #pmp
         %label
           Modify one of the Project Management Plan (PMP) parameters:
         %label
@@ -50,33 +50,33 @@
             %option{ value: a }= a
         %label
           Parameter:
-        %input{ type: 'text', name: 'param', tabindex: 3, size: 30, placeholder: "e.g., qos_interval" }
+        %input{ type: 'text', name: 'param', tabindex: 3, size: 30, placeholder: 'e.g., qos_interval' }
         %label
           Value:
-        %input{ type: 'text', name: 'value', tabindex: 4, size: 10, placeholder: "e.g., 28" }
-      %div#payout
+        %input{ type: 'text', name: 'value', tabindex: 4, size: 10, placeholder: 'e.g., 28' }
+      #payout
         %label
           Once a payout is sent to a team member, register it:
         %label
           Who (GitHub ID):
-        %input{ type: 'text', name: 'who', tabindex: 2, placeholder: "e.g., 526301", size: 13 }
+        %input{ type: 'text', name: 'who', tabindex: 2, placeholder: 'e.g., 526301', size: 13 }
         %label
           Points paid:
-        %input{ type: 'text', name: 'payout', tabindex: 3, size: 8, placeholder: "e.g., 42" }
-      %div#tune
+        %input{ type: 'text', name: 'payout', tabindex: 3, size: 8, placeholder: 'e.g., 42' }
+      #tune
         %label
           Tune the attitude of the bylaws, either making them
           aggressive or forgiving:
         %label
           %i.fa-solid.fa-heart.good
           Love (rewards for doing good):
-        %input{ type: 'range', min: '0', max: '4', name: 'love', tabindex: 2, placeholder: "e.g., 2", size: 4, list: 'attitude', oninput: "$(this).next().val($(this).val());" }
+        %input{ type: 'range', min: '0', max: '4', name: 'love', tabindex: 2, placeholder: 'e.g., 2', size: 4, list: 'attitude', oninput: '$(this).next().val($(this).val());' }
         %output.gray
           2
         %label
           %i.fa-solid.fa-bolt.bad
           Anger (punishments for breaking rules):
-        %input{ type: 'range', min: '0', max: '4', name: 'anger', tabindex: 3, placeholder: "e.g., 4", size: 4, list: 'attitude', oninput: "$(this).next().val($(this).val());" }
+        %input{ type: 'range', min: '0', max: '4', name: 'anger', tabindex: 3, placeholder: 'e.g., 4', size: 4, list: 'attitude', oninput: '$(this).next().val($(this).val());' }
         %output.gray
           2
         %datalist{ id: 'attitude' }
@@ -88,7 +88,7 @@
         %label
           %i.fa-solid.fa-glasses
           Paranoia (the level of meticulousness applied to quality standards):
-        %input{ type: 'range', min: '1', max: '4', name: 'paranoia', tabindex: 3, placeholder: "e.g., 4", size: 4, list: 'meticulousness', oninput: "$(this).next().val($(this).val());" }
+        %input{ type: 'range', min: '1', max: '4', name: 'paranoia', tabindex: 3, placeholder: 'e.g., 4', size: 4, list: 'meticulousness', oninput: '$(this).next().val($(this).val());' }
         %output.gray
           2
         %datalist{ id: 'meticulousness' }
@@ -96,10 +96,10 @@
           %option{ value: '2' }
           %option{ value: '3' }
           %option{ value: '4' }
-      %div#ruby
+      #ruby
         %label
           Ruby:
-        %textarea{ class: 'ff', name: 'script', tabindex: 2, placeholder: "Put your Ruby script here.\nYou can use the $fb variable, which is an instance of a Factbase.\nIt is highly recommended to use one of the templates provided.\n\nPlease, be very careful!", rows: '10', cols: '80' }
+        %textarea.ff{ name: 'script', tabindex: 2, placeholder: "Put your Ruby script here.\nYou can use the $fb variable, which is an instance of a Factbase.\nIt is highly recommended to use one of the templates provided.\n\nPlease, be very careful!", rows: '10', cols: '80' }
     %label
     %input{ type: 'submit', tabindex: 5, value: 'Create' }
 
@@ -111,17 +111,17 @@
   %table
     %colgroup
       -# ID
-      %col{style: 'width: 4em;'}
+      %col{ style: 'width: 4em;' }
       -# Name
-      %col{style: 'width: 16em;'}
+      %col{ style: 'width: 16em;' }
       -# Script
       %col
       -# Created
-      %col{style: 'width: 10em;'}
+      %col{ style: 'width: 10em;' }
       -# Applied
-      %col{style: 'width: 10em;'}
+      %col{ style: 'width: 10em;' }
       -# Commands
-      %col{style: 'width: 6em;'}
+      %col{ style: 'width: 6em;' }
     %thead
       %tr
         %th
@@ -143,9 +143,9 @@
         %td.ff
           - if s[:jobs].zero?
             = s[:name]
-            %i.fa-solid.fa-triangle-exclamation.bad{title: 'There is no job by this name, maybe a spelling error?'}
+            %i.fa-solid.fa-triangle-exclamation.bad{ title: 'There is no job by this name, maybe a spelling error?' }
           - else
-            %a{href: iri.cut('/jobs').over(name: s[:name])}<
+            %a{ href: iri.cut('/jobs').over(name: s[:name]) }<
               = s[:name]
         %td.ff
           != snippet(s[:script], preview: true, unrollable: the_human.admin?)
@@ -156,11 +156,11 @@
             %span.orange
               Not yet
           - else
-            %a{href: iri.cut('/jobs').append(s[:applied])}
+            %a{ href: iri.cut('/jobs').append(s[:applied]) }
               = "##{s[:applied]}"
         %td
           - if s[:applied].nil?
-            %a.ico{href: iri.cut('/alterations').append(s[:id]).append('remove'), title: "Remove alteration ##{s[:id]}", onclick: "return confirm('Are you sure you want to remove the alteration ##{s[:id]}?')"}
+            %a.ico{ href: iri.cut('/alterations').append(s[:id]).append('remove'), title: "Remove alteration ##{s[:id]}", onclick: "return confirm('Are you sure you want to remove the alteration ##{s[:id]}?')" }
               %i.fa-regular.fa-trash-can
-          %a.ico{href: iri.cut('/alterations').append(s[:id]).append('copy'), title: "Make a copy of alteration ##{s[:id]}", onclick: "return confirm('Are you sure you want to make a copy of the alteration ##{s[:id]}?')"}
+          %a.ico{ href: iri.cut('/alterations').append(s[:id]).append('copy'), title: "Make a copy of alteration ##{s[:id]}", onclick: "return confirm('Are you sure you want to make a copy of the alteration ##{s[:id]}?')" }
             %i.fa-regular.fa-copy

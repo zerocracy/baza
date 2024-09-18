@@ -1,4 +1,4 @@
-%form{method: 'post', action: iri.cut('/swarms/add')}
+%form{ method: 'post', action: iri.cut('/swarms/add') }
   %fieldset
     %input{ type: 'text', name: 'name', tabindex: 1, placeholder: 'Name', size: 19, maxlength: 32, required: true, autofocus: true }
     %input{ type: 'text', name: 'repository', tabindex: 2, placeholder: 'Repo, e.g zerocracy/swarm-template', size: 36, maxlength: 64, required: true }
@@ -19,19 +19,19 @@
 %table
   %colgroup
     -# ID
-    %col{style: 'width: 4em;'}
+    %col{ style: 'width: 4em;' }
     -# Name
-    %col{style: 'width: 15em;'}
+    %col{ style: 'width: 15em;' }
     -# Repository
     %col
     -# Head
-    %col{style: 'width: 8em;'}
+    %col{ style: 'width: 8em;' }
     -# Secret
-    %col{style: 'width: 15em;'}
+    %col{ style: 'width: 15em;' }
     -# Invoked
-    %col{style: 'width: 8em;'}
+    %col{ style: 'width: 8em;' }
     -# Commands
-    %col{style: 'width: 6em;'}
+    %col{ style: 'width: 6em;' }
   %thead
     %tr
       %th
@@ -53,16 +53,16 @@
       %td.ff
         = "##{s.id}"
       %td
-        %a.ff{href: iri.cut('/swarms').append(s.id).append('releases'), title: "Releases of the swarm ##{s.id}"}<
+        %a.ff{ href: iri.cut('/swarms').append(s.id).append('releases'), title: "Releases of the swarm ##{s.id}" }<
           = s.name
         - if s.exit.nil?
           %i.fa-solid.fa-hourglass-start.orange
         - elsif s.exit.zero?
           %i.fa-regular.fa-thumbs-up.good
         - else
-          %i.fa-solid.fa-triangle-exclamation.bad{title: 'The latest release was not successful'}
+          %i.fa-solid.fa-triangle-exclamation.bad{ title: 'The latest release was not successful' }
         - why = s.why_not
-        %p.smaller{style: 'margin-bottom: 0; line-height: 1.1em;'}
+        %p.smaller{ style: 'margin-bottom: 0; line-height: 1.1em;' }
           - if why.nil?
             %span.good
               We will try to release this swarm in a few minutes...
@@ -70,20 +70,20 @@
             %span
               = why
       %td.ff
-        %a{href: "https://github.com/#{s.repository}"}<
+        %a{ href: "https://github.com/#{s.repository}" }<
           = s.repository
         %i.fa-brands.fa-github
-        %p.smaller{style: 'margin-bottom: 0; line-height: 1.1em;'}
+        %p.smaller{ style: 'margin-bottom: 0; line-height: 1.1em;' }
           in
-          %a{href: "https://github.com/#{s.repository}/tree/#{s.branch}"}<
+          %a{ href: "https://github.com/#{s.repository}/tree/#{s.branch}" }<
             = s.branch
           at
-          %a{href: "https://github.com/#{s.repository}/tree/#{s.branch}#{s.directory}"}<
+          %a{ href: "https://github.com/#{s.repository}/tree/#{s.branch}#{s.directory}" }<
             = s.directory
       %td.ff
-        %a{href: "https://github.com/#{s.repository}/commit/#{s.head}"}<
+        %a{ href: "https://github.com/#{s.repository}/commit/#{s.head}" }<
           = s.head[0..6].downcase
-        %a.ico{href: iri.cut('/swarms').append(s.id).append('reset'), title: "Reset the head SHA of the swarm ##{s.id}", onclick: "return confirm('Are you sure you want to reset the head SHA of the swarm ##{s.id}?')"}
+        %a.ico{ href: iri.cut('/swarms').append(s.id).append('reset'), title: "Reset the head SHA of the swarm ##{s.id}", onclick: "return confirm('Are you sure you want to reset the head SHA of the swarm ##{s.id}?')" }
           %i.fa-solid.fa-trash-arrow-up
       %td.ff
         != secret(s.secret)
@@ -92,17 +92,17 @@
           %span.orange
             Not yet
         - else
-          %a{href: iri.cut('/swarms').append(s.id).append('invocations'), title: "Invocations of the swarm ##{s.id}"}<
+          %a{ href: iri.cut('/swarms').append(s.id).append('invocations'), title: "Invocations of the swarm ##{s.id}" }<
             != ago(s.invoked)
         - if %w[shift pop finish].include?(s.name) && (s.invoked.nil? || Time.now - s.invoked > 60 * 60)
-          %i.fa-solid.fa-triangle-exclamation.bad{title: 'This swarm has been idle for too long, something is wrong here'}
+          %i.fa-solid.fa-triangle-exclamation.bad{ title: 'This swarm has been idle for too long, something is wrong here' }
       %td
         - if s.enabled?
-          %a.ico{href: iri.cut('/swarms').append(s.id).append('disable'), title: "Disable swarm ##{s.id}", onclick: "return confirm('Are you sure you want to disable the swarm ##{s.id}?')"}
+          %a.ico{ href: iri.cut('/swarms').append(s.id).append('disable'), title: "Disable swarm ##{s.id}", onclick: "return confirm('Are you sure you want to disable the swarm ##{s.id}?')" }
             %i.fa-solid.fa-ban
         - else
-          %a.ico{href: iri.cut('/swarms').append(s.id).append('enable'), title: "Enable swarm ##{s.id}", onclick: "return confirm('Are you sure you want to enable the swarm ##{s.id}?')"}
+          %a.ico{ href: iri.cut('/swarms').append(s.id).append('enable'), title: "Enable swarm ##{s.id}", onclick: "return confirm('Are you sure you want to enable the swarm ##{s.id}?')" }
             %i.fa-solid.fa-circle-play
         - if s.releases_count.positive? && the_human.admin?
-          %a.ico{href: iri.cut('/swarms').append(s.id).append('reset'), title: 'Reset the head SHA of the latest release', onclick: "return confirm('Are you sure you want to reset the head SHA of its release?')"}
+          %a.ico{ href: iri.cut('/swarms').append(s.id).append('reset'), title: 'Reset the head SHA of the latest release', onclick: "return confirm('Are you sure you want to reset the head SHA of its release?')" }
             %i.fa-solid.fa-trash-arrow-up

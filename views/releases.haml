@@ -20,21 +20,21 @@
 %table
   %colgroup
     -# ID
-    %col{style: 'width: 4em;'}
+    %col{ style: 'width: 4em;' }
     -# Head
-    %col{style: 'width: 10em;'}
+    %col{ style: 'width: 10em;' }
     -# Exit
-    %col{style: 'width: 4em;'}
+    %col{ style: 'width: 4em;' }
     -# Seconds
-    %col{style: 'width: 5em;'}
+    %col{ style: 'width: 5em;' }
     -# Tail
     %col
     -# Secret
-    %col{style: 'width: 15em;'}
+    %col{ style: 'width: 15em;' }
     -# Created
-    %col{style: 'width: 10em;'}
+    %col{ style: 'width: 10em;' }
     -# Commands
-    %col{style: 'width: 6em;'}
+    %col{ style: 'width: 6em;' }
   %thead
     %tr
       %th
@@ -58,7 +58,7 @@
       %td.ff
         = "##{r[:id]}"
       - if r[:head].nil?
-        %td.orange{colspan: 3}
+        %td.orange{ colspan: 3 }
           Waiting...
       - else
         - if r[:head] == 'F' * 40
@@ -69,7 +69,7 @@
             Failure
         - else
           %td.ff
-            %a{href: "https://github.com/#{releases.swarm.repository}/commit/#{r[:head]}"}<
+            %a{ href: "https://github.com/#{releases.swarm.repository}/commit/#{r[:head]}" }<
               = r[:head][0..6].downcase
         %td.ff.right
           - if r[:exit].nil?
@@ -79,7 +79,7 @@
           - else
             %span.bad
               = format('%03d', r[:exit])
-            %i.fa-solid.fa-triangle-exclamation.bad{title: 'The swarm release finished with an error (see the log!)'}
+            %i.fa-solid.fa-triangle-exclamation.bad{ title: 'The swarm release finished with an error (see the log!)' }
         %td
           - if r[:msec].nil?
             = '?'
@@ -94,8 +94,8 @@
         != ago(r[:created])
       %td
         - if r[:head].nil?
-          %a.ico{href: iri.cut('/swarms').append(releases.swarm.id).append('releases').append(r[:id]).append('stop'), title: "Stop release ##{r[:id]}", onclick: "return confirm('Are you sure you want to stop the release ##{r[:id]}?')"}
+          %a.ico{ href: iri.cut('/swarms').append(releases.swarm.id).append('releases').append(r[:id]).append('stop'), title: "Stop release ##{r[:id]}", onclick: "return confirm('Are you sure you want to stop the release ##{r[:id]}?')" }
             %i.fa-regular.fa-circle-stop
         - if r[:head] == 'F' * 40 || r[:head] == '0' * 40 || the_human.admin?
-          %a.ico{href: iri.cut('/swarms').append(releases.swarm.id).append('releases').append(r[:id]).append('reset'), title: "Reset the head SHA of the release ##{r[:id]}", onclick: "return confirm('Are you sure you want to reset the head SHA of the release ##{r[:id]}?')"}
+          %a.ico{ href: iri.cut('/swarms').append(releases.swarm.id).append('releases').append(r[:id]).append('reset'), title: "Reset the head SHA of the release ##{r[:id]}", onclick: "return confirm('Are you sure you want to reset the head SHA of the release ##{r[:id]}?')" }
             %i.fa-solid.fa-trash-arrow-up

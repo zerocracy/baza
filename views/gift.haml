@@ -1,7 +1,7 @@
 %p
   You can make a gift to any user with any number of points (both positive and negative).
 
-%form{method: 'post', action: iri.cut('/gift')}
+%form{ method: 'post', action: iri.cut('/gift') }
   %fieldset
     %label Human:
     %input{ type: 'text', name: 'human', tabindex: 1, placeholder: 'To whom?', size: 18, maxlength: 64, value: the_human.github, required: true }

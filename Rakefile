@@ -40,7 +40,7 @@ ARGV.each do |a|
   end
 end
 
-task default: %i[clean test rubocop scss_lint xcop config copyright]
+task default: %i[clean test rubocop haml_lint scss_lint xcop config copyright]
 
 require 'rake/testtask'
 Rake::TestTask.new(test: %i[pgsql liquibase]) do |test|
@@ -49,6 +49,12 @@ Rake::TestTask.new(test: %i[pgsql liquibase]) do |test|
   test.pattern = 'test/**/test_*.rb'
   test.verbose = true
   test.warning = false
+end
+
+require 'haml_lint/rake_task'
+HamlLint::RakeTask.new do |t|
+  t.files = ['views/*.haml']
+  t.quiet = false
 end
 
 require 'rubocop/rake_task'
