@@ -31,7 +31,7 @@ require_relative '../../objects/baza/humans'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class Baza::ValveTest < Minitest::Test
+class Baza::ValvesTest < Minitest::Test
   def test_simple_scenario
     human = fake_human
     valves = human.valves
@@ -43,6 +43,7 @@ class Baza::ValveTest < Minitest::Test
     v = valves.each.to_a.first
     assert(v[:id].positive?)
     assert(!v[:created].nil?)
+    assert_equal(v[:id], valves.get(v[:id]).id)
     assert_equal(n, v[:name])
     assert_equal(b, v[:badge])
     assert_equal(42, v[:result])
