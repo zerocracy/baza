@@ -1,0 +1,29 @@
+.columns
+  %p
+    Valve ID:
+    %br
+    %span.ff
+      = "##{valve.id}"
+
+  %p
+    Valve name:
+    %br
+    %a.ff{ href: iri.over(name: valve.name) }
+      = valve.name
+
+  %p
+    Valve badge:
+    %br
+    %a.ff{ href: iri.over(badge: valve.badge) }
+      = valve.badge
+  %p
+    Valve why:
+    %br
+    %a.ff{ href: iri.over(why: valve.why) }
+      = valve.why
+  %p
+    Valve result:
+    %br
+    %a.ff{ href: iri.over(result: valve.result) }
+      = valve.result
+

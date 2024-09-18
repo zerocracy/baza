@@ -44,6 +44,17 @@ post('/valves/add') do
   flash(iri.cut('/valves'), "The valve '#{params[:badge]}' has been added for '#{params[:name]}'")
 end
 
+get(%r{/valves/([0-9]+)}) do
+  id = params['captures'].first.to_i
+  assemble(
+    :valve,
+    :default,
+    title: "/valves/#{id}",
+    valve: the_human.valves.get(id),
+    css: 'valve'
+  )
+end
+
 get(%r{/valves/([0-9]+)/remove}) do
   id = params['captures'].first.to_i
   the_human.valves.remove(id)
