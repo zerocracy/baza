@@ -75,7 +75,7 @@ class Baza::FrontValvesTest < Minitest::Test
     fake_login(n)
     human = app.humans.ensure(n)
     post('/valves/add', 'name=hi&badge=abc&why=nothing')
-    get("/valves/#{human.valves.each.to_a.first[:id]}")
+    get("/valves/#{human.valves.each.first[:id]}")
     assert_status(200)
   end
 end

@@ -43,11 +43,12 @@ class Baza::ValveTest < Minitest::Test
     b = fake_name
     w = 'why'
     human.valves.enter(n, b, w, job.id) { 42 }
-    valve = human.valves.get(human.valves.each.to_a.first[:id])
+    valve = human.valves.get(human.valves.each.first[:id])
     assert_equal(n, valve.name)
     assert_equal(b, valve.badge)
     assert_equal(w, valve.why)
     assert_equal(job.id, valve.job.id)
+    assert_equal("BAhpLw==\n", valve.result)
   end
 
   def test_enter_valve_without_job
@@ -56,10 +57,11 @@ class Baza::ValveTest < Minitest::Test
     b = fake_name
     w = 'why'
     human.valves.enter(n, b, w, nil) { 42 }
-    valve = human.valves.get(human.valves.each.to_a.first[:id])
+    valve = human.valves.get(human.valves.each.first[:id])
     assert_equal(n, valve.name)
     assert_equal(b, valve.badge)
     assert_equal(w, valve.why)
     assert_nil(valve.job)
+    assert_equal("BAhpLw==\n", valve.result)
   end
 end

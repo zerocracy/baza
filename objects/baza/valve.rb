@@ -67,7 +67,7 @@ class Baza::Valve
   def to_json(*_args)
     @to_json ||=
       begin
-        row = @valves.pgsql.exec(
+        row = pgsql.exec(
           [
             'SELECT valve.*',
             'FROM valve',
