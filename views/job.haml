@@ -33,6 +33,7 @@
       %span.ff<
         = job.ip
     != country_flag(job.ip)
+
   %p
     Created on:
     %br
@@ -108,8 +109,9 @@
         %span.orange
           None
       - else
-        %a{ href: iri.cut('/invocations').append(job.id) }
-          = job.invocations.map { |i| "##{i}" }.join(', ')
+        - job.invocations.each do |i|
+          %a{ href: iri.cut('/invocation').append(i) }
+            = "##{i}"
 
   %p
     Taken:

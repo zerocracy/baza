@@ -62,3 +62,5 @@ settings.humans.gc.stuck_locks(4 * 60) do |human, id|
     'and must be removed manually, [here](//locks).'
   )
 end
+
+settings.sqs.push(nil, 'Just a regular ping to pop some stuck jobs')

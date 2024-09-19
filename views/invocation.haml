@@ -1,0 +1,29 @@
+.columns
+  %p
+    Invocation ID:
+    %br
+    %span.ff
+      = "##{invocation[:id]}"
+
+  %p
+    Code:
+    %br
+    %span.ff
+      = "##{invocation[:code]}"
+
+  %p
+    Job:
+    %br
+    %a{ href: iri.cut('/jobs').append(invocation[:job]) }
+      = "##{invocation[:job]}"
+    %span.ff
+      = "##{invocation[:name]}"
+
+  %p
+    Created on:
+    %br
+    != ago(job.created)
+
+%h2
+  Stdout:
+%pre= invocation[:stdout]

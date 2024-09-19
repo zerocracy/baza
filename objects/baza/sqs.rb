@@ -56,17 +56,18 @@ class Baza::SQS
     if @key.empty?
       42
     else
+      jid = job.nil? ? 0 : job.id
       id = aws.send_message(
         queue_url: @url,
         message_body: body,
         message_attributes: {
           'job' => {
-            string_value: job.id.to_s,
+            string_value: jid.to_s,
             data_type: 'String'
           }
         }
       ).message_id
-      @loog.debug("SQS message ##{id} posted (job=#{job.id}): #{body.inspect}")
+      @loog.debug("SQS message ##{id} posted (job=#{jid}): #{body.inspect}")
       id
     end
   end

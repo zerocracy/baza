@@ -76,6 +76,17 @@ get(%r{/steps/([0-9]+)}) do
   )
 end
 
+get(%r{/invocation/([0-9]+)}) do
+  admin_only
+  id = params['captures'].first.to_i
+  assemble(
+    :invocation,
+    :default,
+    title: '/invocation',
+    invocation: the_human.invocation_by_id(id)
+  )
+end
+
 get(%r{/swarms/([0-9]+)/files}) do
   id = params['captures'].first.to_i
   swarm = settings.humans.swarm_by_id(id)

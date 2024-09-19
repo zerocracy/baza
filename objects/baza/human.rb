@@ -104,6 +104,29 @@ class Baza::Human
     Baza::Account.new(self)
   end
 
+  def invocation_by_id(id)
+    row = pgsql.exec(
+      [
+        'SELECT invocation.*, job.name, swarm.name AS swarm FROM invocation',
+        'JOIN job ON job.id = invocation.job',
+        'JOIN swarm ON swarm.id = invocation.swarm',
+        'WHERE invocation.id = $1 AND job.human = $2'
+      ],
+      [id, @id]
+    ).first
+    raise Baza::Urror, "The invocation ##{id} not found" if row.nil?
+    row = rows.first
+    {
+      id: row['id'].to_i,
+      code: row['code'].to_i,
+      job: row['job']&.to_i,
+      name: row['name'],
+      swarm: row['swarm'],
+      stdout: row['stdout'],
+      created: Time.parse(row['created'])
+    }
+  end
+
   def telegram?
     !@humans.pgsql.exec(
       'SELECT id FROM telechat WHERE human = $1',
