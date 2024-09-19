@@ -82,5 +82,5 @@ def flash(uri, msg = '', alert: false, code: 302)
   cookies[:flash_color] = alert ? 'darkred' : 'darkgreen'
   response.headers['X-Zerocracy-Requested'] = request.url
   response.headers['X-Zerocracy-Flash'] = msg
-  redirect(uri, code)
+  redirect(uri, code, msg)
 end

@@ -46,7 +46,7 @@ attempt=0
 while true; do
   ((++attempt))
   status=$(curl -X PUT -s "${BAZA_URL}/finish?id=${id}&swarm=${SWARM_ID}&secret=${SWARM_SECRET}" \
-    --data-binary '@pack.zip' -o /dev/null \
+    --data-binary '@pack.zip' -o http.txt \
     -H "User-Agent: ${SWARM_NAME}" \
     -H 'Content-Type: application/octet-stream' -w "%{http_code}")
   echo "/finish returned HTTP #${status}"
@@ -55,6 +55,7 @@ while true; do
   sleep "${attempt}"
 done
 if [ "${status}" != '200' ]; then
+  cat http.txt
   echo "Failed to finish (code=${status})"
   exit 1
 fi
