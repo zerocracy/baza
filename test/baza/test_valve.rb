@@ -26,14 +26,13 @@ require 'minitest/autorun'
 require_relative '../test__helper'
 require_relative '../../objects/baza'
 require_relative '../../objects/baza/humans'
-require_relative '../../objects/baza/factbases'
 
 # Test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
 class Baza::ValveTest < Minitest::Test
-  def test_simple
+  def test_enter_valve_with_job
     human = fake_human
     job = human.jobs.get(
       human.tokens.add(fake_name).start(
@@ -49,5 +48,18 @@ class Baza::ValveTest < Minitest::Test
     assert_equal(b, valve.badge)
     assert_equal(w, valve.why)
     assert_equal(job.id, valve.job.id)
+  end
+
+  def test_enter_valve_without_job
+    human = fake_human
+    n = fake_name
+    b = fake_name
+    w = 'why'
+    human.valves.enter(n, b, w, nil) { 42 }
+    valve = human.valves.get(human.valves.each.to_a.first[:id])
+    assert_equal(n, valve.name)
+    assert_equal(b, valve.badge)
+    assert_equal(w, valve.why)
+    assert_nil(valve.job)
   end
 end
