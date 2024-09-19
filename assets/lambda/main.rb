@@ -180,7 +180,7 @@ def with_zip(id, rec, loog, &)
     get_object(key, zip, loog)
     pack = File.join(home, id.to_s)
     Archive::Zip.extract(zip, pack)
-    loog.info("Unpacked ZIP (#{File.size(zip)} bytes)")
+    loog.info("Unpacked ZIP (#{File.size(zip)} bytes, #{Dir[File.join(pack, '**')].count} files)")
     File.delete(zip)
     json = JSON.parse(File.read(File.join(pack, 'job.json')))
     loog.info("Job ##{json['id']} is coming from @#{json['human']}")
@@ -201,7 +201,7 @@ def with_zip(id, rec, loog, &)
       loog.warn("FAILURE (#{code})")
     end
     Archive::Zip.archive(zip, File.join(pack, '/.'))
-    loog.info("Packed ZIP (#{File.size(zip)} bytes)")
+    loog.info("Packed ZIP (#{File.size(zip)} bytes, #{Dir[File.join(pack, '**')].count} files)")
     put_object(key, zip, loog)
     more = rec['messageAttributes']['more']
     if more.nil?
