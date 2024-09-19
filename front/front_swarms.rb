@@ -245,6 +245,7 @@ put '/finish' do
   job_id = params[:id]&.to_i
   raise Baza::Urror, 'The "id" is a mandatory query param' if job_id.nil?
   job = settings.humans.job_by_id(job_id)
+  return "The job #{job.id} is finished already" if job.finished?
   Tempfile.open do |f|
     request.body.rewind
     File.binwrite(f.path, request.body.read)

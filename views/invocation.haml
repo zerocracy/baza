@@ -6,6 +6,12 @@
       = "##{invocation[:id]}"
 
   %p
+    Swarm:
+    %br
+    %a{ href: iri.cut('/swarms').append(invocation[:swarm_id]) }
+      = invocation[:swarm]
+
+  %p
     Code:
     %br
     %span.ff
@@ -16,6 +22,7 @@
     %br
     %a{ href: iri.cut('/jobs').append(invocation[:job]) }
       = "##{invocation[:job]}"
+    %br
     %span.ff
       = invocation[:name]
 

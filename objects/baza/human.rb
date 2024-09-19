@@ -107,7 +107,9 @@ class Baza::Human
   def invocation_by_id(id)
     row = pgsql.exec(
       [
-        'SELECT invocation.*, job.name, swarm.name AS swarm FROM invocation',
+        'SELECT invocation.*, job.name,',
+        'swarm.name AS swarm, swarm.id AS swarm_id',
+        'FROM invocation',
         'JOIN job ON job.id = invocation.job',
         'JOIN token ON token.id = job.token',
         'JOIN swarm ON swarm.id = invocation.swarm',
@@ -122,6 +124,7 @@ class Baza::Human
       job: row['job']&.to_i,
       name: row['name'],
       swarm: row['swarm'],
+      swarm_id: row['swarm_id'].to_i,
       stdout: row['stdout'],
       created: Time.parse(row['created'])
     }

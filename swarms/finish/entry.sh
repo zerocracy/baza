@@ -55,8 +55,7 @@ while true; do
   sleep "${attempt}"
 done
 if [ "${status}" != '200' ]; then
-  cat http.txt
-  echo "Failed to finish (code=${status})"
+  echo "Failed to finish (code=${status}, HTTP response: \"$(cat http.txt)\")"
   exit 1
 fi
 
