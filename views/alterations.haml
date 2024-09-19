@@ -136,7 +136,7 @@
           Applied
         %th
     %tbody
-    - paging(alterations, offset:) do |s|
+    - paging(alterations, 10, offset:) do |s|
       %tr
         %td.ff
           = "##{s[:id]}"

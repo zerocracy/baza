@@ -53,7 +53,7 @@
         Created
       %th
   %tbody
-  - paging(releases, offset:) do |r|
+  - paging(releases, 10, offset:) do |r|
     %tr
       %td.ff
         = "##{r[:id]}"

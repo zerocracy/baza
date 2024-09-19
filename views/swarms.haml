@@ -48,7 +48,7 @@
         Invoked
       %th
   %tbody
-  - paging(swarms, offset:) do |s|
+  - paging(swarms, 10, offset:) do |s|
     %tr
       %td.ff
         = "##{s.id}"

@@ -42,7 +42,7 @@
           Jobs
         %th
     %tbody
-    - paging(tokens, offset:) do |t|
+    - paging(tokens, 10, offset:) do |t|
       %tr{ class: t.active? ? '' : 'gray' }
         %td.ff
           = "##{t.id}"

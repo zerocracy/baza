@@ -34,7 +34,7 @@
       %th
         Created
   %tbody
-  - paging(invocations, offset:) do |i|
+  - paging(invocations, 10, offset:) do |i|
     %tr
       %td.ff
         = "##{i[:id]}"

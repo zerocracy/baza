@@ -29,7 +29,7 @@
       %th
         Created
   %tbody
-  - paging(trails, offset:) do |t|
+  - paging(trails, 10, offset:) do |t|
     %tr
       %td.ff
         = "##{t[:id]}"

@@ -49,7 +49,7 @@
           Created
         %th
     %tbody
-    - paging(valves, offset:) do |v|
+    - paging(valves, 10, offset:) do |v|
       %tr
         %td.ff
           = "##{v[:id]}"

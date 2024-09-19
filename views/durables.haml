@@ -47,7 +47,7 @@
           Created
         %th
     %tbody
-    - paging(durables, offset:) do |d|
+    - paging(durables, 10, offset:) do |d|
       %tr
         %td.ff
           = "##{d[:id]}"

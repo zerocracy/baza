@@ -32,7 +32,7 @@
           Created
         %th
     %tbody
-    - paging(locks, offset:) do |lk|
+    - paging(locks, 10, offset:) do |lk|
       %tr
         %td.ff
           = "##{lk[:id]}"

@@ -64,7 +64,7 @@
       %th
         Created
   %tbody
-  - paging(account, offset:) do |r|
+  - paging(account, 10, offset:) do |r|
     %tr
       - j = r.job_id
       %td

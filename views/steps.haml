@@ -30,7 +30,7 @@
       %th
         Created
   %tbody
-  - paging(steps, offset:) do |s|
+  - paging(steps, 10, offset:) do |s|
     %tr
       %td.ff
         = "##{s[:id]}"

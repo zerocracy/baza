@@ -32,12 +32,11 @@ require_relative '../objects/baza/ipgeolocation'
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
 module Baza::Helpers
-  def paging(items, params = {}, &)
+  def paging(items, window, params = {}, &)
     total = 0
-    page_length = 10 if page_length.nil?
     items.each(**params) do |v|
       total += 1
-      break if total > page_length
+      break if total > window
       yield v
     end
     @_out_buf << html_tag('tr') do
@@ -46,15 +45,15 @@ module Baza::Helpers
           html_tag('ul', style: 'margin-bottom: 0; text-align: left;') do
             [
               params[:offset].zero? ? '' : html_tag('li') do
-                html_tag('a', href: iri.over(offset: params[:offset] - page_length)) do
+                html_tag('a', href: iri.over(offset: params[:offset] - window)) do
                   [
                     html_tag('i', class: 'fa-solid fa-backward'),
                     html_tag('span', style: 'margin-left: .5em') { 'Back' }
                   ].join
                 end
               end,
-              total > page_length ? html_tag('li') do
-                html_tag('a', href: iri.over(offset: params[:offset] + page_length)) do
+              total > window ? html_tag('li') do
+                html_tag('a', href: iri.over(offset: params[:offset] + window)) do
                   [
                     html_tag('span', style: 'margin-right: .5em') { 'More' },
                     html_tag('i', class: 'fa-solid fa-forward')
@@ -133,7 +132,7 @@ module Baza::Helpers
 
   def succeed(txt)
     r = yield
-    "#{r}#{txt} "
+    "#{r.gsub(/\s+$/, '')}#{txt} "
   end
 
   def if_meta(job, name)

@@ -64,7 +64,7 @@
         %th
           Out
     %tbody
-    - paging(jobs, offset:, name:) do |j|
+    - paging(jobs, 10, offset:, name:) do |j|
       %tr
         %td
           %a{ href: iri.cut('/jobs').append(j.id) }

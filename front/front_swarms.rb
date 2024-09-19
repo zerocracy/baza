@@ -71,7 +71,6 @@ get(%r{/steps/([0-9]+)}) do
     :default,
     title: '/steps',
     steps: job.steps,
-    page_length: 50,
     job:,
     offset: (params[:offset] || '0').to_i
   )
