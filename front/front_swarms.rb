@@ -62,6 +62,20 @@ get(%r{/swarms/([0-9]+)/invocations}) do
   )
 end
 
+get(%r{/steps/([0-9]+)}) do
+  admin_only
+  id = params['captures'].first.to_i
+  job = the_human.jobs.get(id)
+  assemble(
+    :steps,
+    :default,
+    title: '/steps',
+    steps: job.steps,
+    job:,
+    offset: (params[:offset] || '0').to_i
+  )
+end
+
 get(%r{/swarms/([0-9]+)/files}) do
   id = params['captures'].first.to_i
   swarm = settings.humans.swarm_by_id(id)

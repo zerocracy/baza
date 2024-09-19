@@ -69,10 +69,10 @@ key="${first}/${id}.zip"
 aws s3 cp pack.zip "s3://${S3_BUCKET}/${key}"
 echo "S3 archive uploaded to ${S3_BUCKET}/${key}"
 
-aws sqs send-message \
+msg=$( aws sqs send-message \
   --queue-url "https://sqs.us-east-1.amazonaws.com/019644334823/${first}" \
   --message-body "Job #${id} needs processing by ${first}" \
-  --message-attributes "job={DataType=String,StringValue='${id}'},previous={DataType=String,StringValue='${SWARM_NAME}'},more={DataType=String,StringValue='${swarms[*]}'}"
-echo "SQS message sent to the ${first} queue"
+  --message-attributes "job={DataType=String,StringValue='${id}'},previous={DataType=String,StringValue='${SWARM_NAME}'},more={DataType=String,StringValue='${swarms[*]}'}" | jq -r .MessageId )
+echo "SQS message ${msg} sent to the ${first} queue"
 
 echo "The job #${id} must be processed by a few swarms: ${swarms[*]}"

@@ -39,7 +39,21 @@ class ShiftTest < Minitest::Test
       Dir.mktmpdir do |home|
         %w[aws].each do |f|
           sh = File.join(home, f)
-          File.write(sh, "#!/bin/bash\necho AWS: $@")
+          File.write(
+            sh,
+            "
+            #!/bin/bash
+            set -e
+            >&2 echo AWS $@
+            if [ \"${1}\" == 's3' ]; then
+              if [ \"${2}\" == 'sqs' ]; then
+                if [ \"${3}\" == 'send-message' ]; then
+                  echo '{ \"MessageId\": \"c5b90e2f-5177-4fc4-b9b2-819582cc5446\" }'
+                fi
+              fi
+            fi
+            "
+          )
           FileUtils.chmod('+x', sh)
         end
         FileUtils.copy(File.join(__dir__, '../../swarms/shift/entry.sh'), home)

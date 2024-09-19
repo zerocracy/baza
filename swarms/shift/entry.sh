@@ -53,10 +53,12 @@ for s in "${!more[@]}"; do
 done
 
 if [ "${#more[@]}" -eq 0 ]; then
-  aws sqs send-message \
-    --queue-url https://sqs.us-east-1.amazonaws.com/019644334823/baza-finish \
+  queue=baza-finish
+  msg=$( aws sqs send-message \
+    --queue-url "https://sqs.us-east-1.amazonaws.com/019644334823/${queue}" \
     --message-body "Job ${id} finished processing" \
-    --message-attributes "job={DataType=String,StringValue='${id}'},previous={DataType=String,StringValue='${previous}'}"
+    --message-attributes "job={DataType=String,StringValue='${id}'},previous={DataType=String,StringValue='${previous}'}" | jq -r .MessageId )
+  echo "SQS message ${msg} sent to the ${queue} queue"
   echo "No more swarms to process, it's time to finish"
 else
   next="${more[0]}"
@@ -65,11 +67,13 @@ else
     printf "Wrong swarm name '%s' found in '%s'" "${next}" "${more[*]}"
     exit 1
   fi
-  aws s3 rm "s3://${S3_BUCKET}/${previous}/${id}.zip"
   aws s3 cp pack.zip "s3://${S3_BUCKET}/${next}/${id}.zip"
-  aws sqs send-message \
+  msg=$( aws sqs send-message \
     --queue-url "https://sqs.us-east-1.amazonaws.com/019644334823/${next}" \
     --message-body "Job #${id} needs further processing by '${more[*]}'" \
-    --message-attributes "job={DataType=String,StringValue='${id}'},previous={DataType=String,StringValue='${previous}'},more={DataType=String,StringValue='${more[*]}'}"
-  printf "The job #${id} now goes to ${next}, later will go to '${more[*]}'"
+    --message-attributes "job={DataType=String,StringValue='${id}'},previous={DataType=String,StringValue='${previous}'},more={DataType=String,StringValue='${more[*]}'}" | jq -r .MessageId )
+  echo "SQS message ${msg} sent to the ${next} queue"
+  aws s3 rm "s3://${S3_BUCKET}/${previous}/${id}.zip"
+  echo "ZIP ($(du -b pack.zip | cut -f1) bytes) moved from ${previous}/${id}.zip to ${next}/${id}.zip"
+  echo "The job #${id} now goes to ${next}, later will go to '${more[*]}'"
 fi

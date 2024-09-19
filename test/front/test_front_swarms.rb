@@ -161,6 +161,8 @@ class Baza::FrontSwarmsTest < Minitest::Test
     fake_login(human.github)
     get("/swarms/#{s.id}/invocations")
     assert_status(200)
+    get("/steps/#{job.id}")
+    assert_status(200)
   end
 
   def test_register_non_job_invocation

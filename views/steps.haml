@@ -1,0 +1,58 @@
+%p
+  Steps of
+  != succeed ':' do
+    %a{ href: iri.cut('/jobs').append(job.id) }
+      job
+      = "##{job.id}"
+
+%table
+  %colgroup
+    -# ID
+    %col{ style: 'width: 5em;' }
+    -# Swarm
+    %col{ style: 'width: 10em;' }
+    -# Job Name
+    %col{ style: 'width: 12em;' }
+    -# Code
+    %col{ style: 'width: 4em;' }
+    -# Stdout
+    %col
+    -# Created
+    %col{ style: 'width: 10em;' }
+  %thead
+    %tr
+      %th
+        = '#'
+      %th
+        Swarm
+      %th
+        Name
+      %th
+        Code
+      %th
+        Stdout
+      %th
+        Created
+  %tbody
+  - paging(steps, offset:) do |s|
+    %tr
+      %td.ff
+        = "##{s[:id]}"
+      %td
+        %a{ href: iri.cut('/swarms') }<
+          = s[:swarm]
+      %td
+        - unless s[:name].nil?
+          %a{ href: iri.over(name: s[:name]) }<
+            = s[:name]
+      %td.ff
+        - if s[:code].zero?
+          %i.fa-regular.fa-thumbs-up.good
+        - else
+          %span.bad
+            = s[:code]
+          %i.fa-solid.fa-triangle-exclamation.bad
+      %td
+        != snippet(s[:stdout])
+      %td
+        != ago(s[:created])

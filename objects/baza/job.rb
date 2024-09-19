@@ -261,6 +261,12 @@ class Baza::Job
     to_json[:ip]
   end
 
+  # Get its invocations.
+  def steps
+    require_relative 'steps'
+    Baza::Steps.new(self)
+  end
+
   def to_json(*_args)
     @to_json ||=
       begin

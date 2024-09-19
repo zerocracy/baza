@@ -101,13 +101,15 @@
             - else
               != large_text(v)
 
-  %p
-    Invocations:
-    - if job.invocations.empty?
-      %span.orange
-        None
-    - else
-      = job.invocations.map { |i| "##{i}" }.join(', ')
+  - if the_human.admin?
+    %p
+      Invocations:
+      - if job.invocations.empty?
+        %span.orange
+          None
+      - else
+        %a{ href: iri.cut('/invocations').append(job.id) }
+          = job.invocations.map { |i| "##{i}" }.join(', ')
 
   %p
     Taken:

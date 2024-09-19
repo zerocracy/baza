@@ -40,7 +40,7 @@ class Baza::Invocations
 
   def each(offset: 0)
     return to_enum(__method__, offset:) unless block_given?
-    rows = @swarm.pgsql.exec(
+    rows = pgsql.exec(
       [
         'SELECT invocation.*, job.name, swarm.name AS swarm FROM invocation',
         'LEFT JOIN job ON job.id = invocation.job',
@@ -73,7 +73,7 @@ class Baza::Invocations
   # @return [Integer] The ID of the added invocation
   def register(stdout, code, job)
     raise Baza::Urror, 'The "stdout" cannot be NIL' if stdout.nil?
-    id = @swarm.pgsql.exec(
+    id = pgsql.exec(
       'INSERT INTO invocation (swarm, code, job, stdout) VALUES ($1, $2, $3, $4) RETURNING id',
       [@swarm.id, code, job.nil? ? nil : job.id, stdout]
     )[0]['id'].to_i

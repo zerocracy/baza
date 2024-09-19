@@ -1,7 +1,8 @@
-#!/bin/bash
+# frozen_string_literal: true
+
 # MIT License
 #
-# Copyright (c) 2024 Zerocracy
+# Copyright (c) 2009-2024 Zerocracy
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -21,50 +22,44 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-set -e
-set -o pipefail
+# All invocations (steps) of a job.
+#
+# Author:: Yegor Bugayenko (yegor256@gmail.com)
+# Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
+# License:: MIT
+class Baza::Steps
+  attr_reader :job
 
-id=$1
-if [ -z "${id}" ]; then
-  echo "The first argument must be the ID of the job to process"
-  exit 1
-fi
-[[ "${id}" =~ ^[0-9]+$ ]]
+  def initialize(job)
+    @job = job
+  end
 
-home=$2
-if [ -z "${home}" ]; then
-  echo "The second argument must be the directory where 'base.fb' is located"
-  exit 1
-fi
+  def pgsql
+    @job.pgsql
+  end
 
-if [ ! -e "${home}/job.json" ]; then
-  echo "There is no JSON description of the job, something is going wrong"
-  exit 1
-fi
-
-if [ ! -e "${home}/base.fb" ]; then
-  echo "There is no Factbase, something is going wrong"
-  exit 1
-fi
-
-self=$(dirname "$0")
-
-options=(
-  '--quiet'
-  '--summary'
-  '--max-cycles=3'
-  '--no-log'
-)
-opts=$( jq -r '.options | keys[] as $k | "\($k)\t\(.[$k])"' "${home}/job.json" )
-while IFS= read -r ln; do
-  options+=("--option=$( echo "${ln}" | cut -f1 )=$( echo "${ln}" | cut -f2 )")
-done <<< "${opts}"
-
-if [ -e "${self}/lib" ]; then
-  options+=('--lib' "${self}/lib")
-fi
-
-export BUNDLE_GEMFILE="${self}/Gemfile"
-
-set -x
-bundle exec judges --verbose update "${options[@]}" "${self}/judges" "${home}/base.fb"
+  def each(offset: 0)
+    return to_enum(__method__, offset:) unless block_given?
+    rows = pgsql.exec(
+      [
+        'SELECT invocation.*, swarm.name AS swarm FROM invocation',
+        'JOIN swarm ON swarm.id = invocation.swarm',
+        'WHERE job = $1',
+        'ORDER BY invocation.id ASC',
+        "OFFSET #{offset.to_i}"
+      ],
+      [job.id]
+    )
+    rows.each do |row|
+      r = {
+        id: row['id'].to_i,
+        code: row['code'].to_i,
+        name: row['name'],
+        swarm: row['swarm'],
+        stdout: row['stdout'],
+        created: Time.parse(row['created'])
+      }
+      yield r
+    end
+  end
+end

@@ -88,7 +88,8 @@ class Baza::Account
       @human.notifications.post(
         "no-funds-#{Time.now.utc.iso8601[0..9]}",
         '🍋 We are very sorry to inform you that [your account](//account) just ran out of funds. ' \
-        'Jobs won\'t be processed until you top up the balance.'
+        'Jobs won\'t be processed until you top up the balance. ' \
+        'If you don\'t know how to top it up, text us: @zerocracy.'
       )
     end
     zents

@@ -44,12 +44,10 @@ class PopTest < Minitest::Test
           "
           #!/bin/bash
           set -e
-          echo AWS $@
+          >&2 echo AWS $@
           if [ \"${1}\" == 'sqs' ]; then
             if [ \"${2}\" == 'send-message' ]; then
-              for a in \"$@\"; do
-                echo SQS-MESSAGE: [\"${a}\"]
-              done
+              echo '{ \"MessageId\": \"c5b90e2f-5177-4fc4-b9b2-819582cc5446\" }'
             fi
           fi
           "

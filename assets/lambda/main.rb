@@ -112,12 +112,12 @@ def send_message(id, more, loog)
     }
   end
   queue = 'baza-shift'
-  Aws::SQS::Client.new(region: '{{ region }}').send_message(
+  msg = Aws::SQS::Client.new(region: '{{ region }}').send_message(
     queue_url: "https://sqs.{{ region }}.amazonaws.com/{{ account }}/#{queue}",
     message_body: "Job ##{id} was processed by {{ name }} (swarm no.{{ swarm }})",
     message_attributes: attrs
-  )
-  loog.info("Swarm {{ name }} sent SQS message about job ##{id} to #{queue} (more=#{more})")
+  ).message_id
+  loog.info("Swarm {{ name }} sent SQS message #{msg} about job ##{id} to #{queue} (more=#{more})")
 end
 
 # Send a report to baza about this particular invocation.
@@ -264,7 +264,7 @@ def go(event:, context:)
           lg.debug("Starting to process '{{ name }}' (system swarm)")
           Dir.mktmpdir do |pack|
             File.write(File.join(pack, 'event.json'), JSON.pretty_generate(rec))
-            code = one(job, pack, lg)
+            _, code = one(job, pack, lg)
           end
         else
           lg.debug("Starting to process '{{ name }}' (normal swarm)")

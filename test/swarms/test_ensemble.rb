@@ -59,7 +59,7 @@ class EnsembleTest < Minitest::Test
         "
         #!/bin/bash
         set -e
-        echo AWS $@
+        >&2 echo AWS $@
         if [ \"${1}\" == 's3' ]; then
           if [ \"${2}\" == 'cp' ]; then
             if [ \"${4}\" == 'pack.zip' ]; then
@@ -70,6 +70,10 @@ class EnsembleTest < Minitest::Test
               echo 'nothing special in the output' > archive/swarm-001-42-baza-foo/stdout.txt
               cd archive && zip -r \"../${4}\" . && cd ..
               rm -rf archive
+            fi
+          elif [ \"${2}\" == 'sqs' ]; then
+            if [ \"${3}\" == 'send-message' ]; then
+              echo '{ \"MessageId\": \"c5b90e2f-5177-4fc4-b9b2-819582cc5446\" }'
             fi
           fi
         fi
