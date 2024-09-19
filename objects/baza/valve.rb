@@ -40,10 +40,6 @@ class Baza::Valve
     @valves.pgsql
   end
 
-  def id
-    to_json[:id]
-  end
-
   def name
     to_json[:name]
   end
