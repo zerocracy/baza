@@ -22,6 +22,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+require 'base64'
+
 # One valve.
 #
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -82,9 +84,17 @@ class Baza::Valve
           created: Time.parse(row['created']),
           badge: row['badge'],
           why: row['why'],
-          result: row['result'],
+          result: row['result'].nil? ? nil : dec(row['result']),
           job: row['job'].nil? ? nil : @valves.human.jobs.get(row['job'].to_i)
         }
       end
+  end
+
+  private
+
+  def dec(base64)
+    # rubocop:disable Security/MarshalLoad
+    Marshal.load(Base64.decode64(base64))
+    # rubocop:enable Security/MarshalLoad
   end
 end

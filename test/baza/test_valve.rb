@@ -48,7 +48,7 @@ class Baza::ValveTest < Minitest::Test
     assert_equal(b, valve.badge)
     assert_equal(w, valve.why)
     assert_equal(job.id, valve.job.id)
-    assert_equal("BAhpLw==\n", valve.result)
+    assert_equal(42, valve.result)
   end
 
   def test_enter_valve_without_job
@@ -62,6 +62,6 @@ class Baza::ValveTest < Minitest::Test
     assert_equal(b, valve.badge)
     assert_equal(w, valve.why)
     assert_nil(valve.job)
-    assert_equal("BAhpLw==\n", valve.result)
+    assert_equal(42, valve.result)
   end
 end
