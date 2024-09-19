@@ -137,6 +137,12 @@ policy='{
       "Resource": "arn:aws:s3:::{{ bucket }}/*"
     },
     {
+      "Sid": "S3Reading2",
+      "Effect": "Allow",
+      "Action": ["s3:ListBucket"],
+      "Resource": "arn:aws:s3:::{{ bucket }}"
+    },
+    {
       "Sid": "S3ReadingAndWriting",
       "Effect": "Allow",
       "Action": [
