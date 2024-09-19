@@ -113,7 +113,8 @@ class Baza::Human
         'JOIN job ON job.id = invocation.job',
         'JOIN token ON token.id = job.token',
         'JOIN swarm ON swarm.id = invocation.swarm',
-        'WHERE invocation.id = $1 AND token.human = $2'
+        'WHERE invocation.id = $1 AND (token.human = $2',
+        extend(Baza::Human::Roles).admin? ? 'OR TRUE)' : ')'
       ],
       [id, @id]
     ).first
