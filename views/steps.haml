@@ -1,7 +1,7 @@
 %p
   Steps of
   != succeed ':' do
-    %a{ href: iri.cut('/jobs').append(job.id) }
+    %a{ href: iri.cut('/jobs').append(job.id) }<
       job
       = "##{job.id}"
 

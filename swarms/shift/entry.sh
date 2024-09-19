@@ -75,5 +75,5 @@ else
   echo "SQS message ${msg} sent to the ${next} queue"
   aws s3 rm "s3://${S3_BUCKET}/${previous}/${id}.zip"
   echo "ZIP ($(du -b pack.zip | cut -f1) bytes) moved from ${previous}/${id}.zip to ${next}/${id}.zip"
-  echo "The job #${id} now goes to ${next}, later will go to '${more[*]}'"
+  echo "The job #${id} now goes to ${next}, after that it will go to '${more[*]}'"
 fi
