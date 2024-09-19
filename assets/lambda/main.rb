@@ -240,6 +240,19 @@ def one(id, pack, loog)
   )
 end
 
+# Pretty print JSON event from SQS.
+#
+# @param [Hash] rec The JSON
+# @return String Multi-line print
+def pretty(rec)
+  head = [
+    "MessageId: #{rec['messageId']}",
+    "Body: #{rec['body']}"
+  ]
+  head << "SenderId: #{rec['attributes']['SenderId'].split(':')[1]}" if rec['attributes']
+  (head + rec['messageAttributes'].map { |a, h| "#{a}: #{h['stringValue']}" }).join("\n")
+end
+
 # This is the entry point called by aws_lambda_ric when a new SQS message arrives.
 #
 # More about the context: https://docs.aws.amazon.com/lambda/latest/dg/ruby-context.html
@@ -255,7 +268,7 @@ def go(event:, context:)
       lg = Loog::Tee.new(loog, buf)
       lg.info('Version: {{ version }}')
       lg.info("Time: #{Time.now.utc.iso8601}")
-      lg.debug("Incoming SQS event: #{JSON.pretty_generate(rec)}")
+      lg.debug("Incoming SQS event:\n#{pretty(rec)}")
       code = 1
       begin
         job = rec['messageAttributes']['job']['stringValue'].to_i
