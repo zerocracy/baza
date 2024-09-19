@@ -230,7 +230,7 @@ def one(id, pack, loog)
       "echo 'Cannot figure out how to start the swarm, try creating \"entry.sh\" or \"entry.rb\"'"
     end,
     both: true,
-    loog: Loog::NULL,
+    loog:,
     env: {
       'SWARM_SECRET' => '{{ secret }}',
       'SWARM_ID' => '{{ swarm }}',
@@ -245,12 +245,13 @@ end
 # @param [Hash] rec The JSON
 # @return String Multi-line print
 def pretty(rec)
-  head = [
+  lines = [
     "MessageId: #{rec['messageId']}",
     "Body: #{rec['body']}"
   ]
-  head << "SenderId: #{rec['attributes']['SenderId'].split(':')[1]}" if rec['attributes']
-  (head + rec['messageAttributes'].map { |a, h| "#{a}: \"#{h['stringValue']}\"" }).join("\n")
+  lines << "SenderId: #{rec['attributes']['SenderId'].split(':')[1]}" if rec['attributes']
+  lines += rec['messageAttributes'].map { |a, h| "#{a}: \"#{h['stringValue']}\"" }
+  lines.map { |ln| "  #{ln}" }.join("\n")
 end
 
 # This is the entry point called by aws_lambda_ric when a new SQS message arrives.

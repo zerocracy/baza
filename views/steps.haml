@@ -30,7 +30,7 @@
       %th
         Created
   %tbody
-  - paging(steps, 10, offset:) do |s|
+  - paging(steps, 50, offset:) do |s|
     %tr
       %td
         %a{ href: iri.cut('/invocation').append(s[:id]) }<
