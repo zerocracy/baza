@@ -80,7 +80,7 @@ class Baza::Invocations
     unless code.zero?
       @swarm.swarms.human.notify(
         "⚠️ The [swarm ##{@swarm.id}](//swarms/#{@swarm.id}/releases) (\"`#{@swarm.name}`\")",
-        "just failed, at the invocation ##{id}",
+        "just failed, at the invocation [##{id}](//invocation/#{id})",
         "(exit code is `#{code}`, there are #{stdout.split("\n").count} lines in the stdout)."
       )
     end

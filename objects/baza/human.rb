@@ -109,13 +109,13 @@ class Baza::Human
       [
         'SELECT invocation.*, job.name, swarm.name AS swarm FROM invocation',
         'JOIN job ON job.id = invocation.job',
+        'JOIN token ON token.id = job.token',
         'JOIN swarm ON swarm.id = invocation.swarm',
-        'WHERE invocation.id = $1 AND job.human = $2'
+        'WHERE invocation.id = $1 AND token.human = $2'
       ],
       [id, @id]
     ).first
     raise Baza::Urror, "The invocation ##{id} not found" if row.nil?
-    row = rows.first
     {
       id: row['id'].to_i,
       code: row['code'].to_i,

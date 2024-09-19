@@ -157,11 +157,14 @@ class Baza::FrontSwarmsTest < Minitest::Test
       'CONTENT_TYPE' => 'text/plain'
     )
     assert_status(200)
-    assert(s.invocations.each.to_a.first[:stdout].include?('this is'))
+    inv = s.invocations.each.to_a.first
+    assert(inv[:stdout].include?('this is'))
     fake_login(human.github)
     get("/swarms/#{s.id}/invocations")
     assert_status(200)
     get("/steps/#{job.id}")
+    assert_status(200)
+    get("/invocation/#{inv[:id]}")
     assert_status(200)
   end
 
