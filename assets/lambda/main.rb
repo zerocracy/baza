@@ -268,31 +268,34 @@ end
 def go(event:, context:)
   loog = ENV['RACK_ENV'] == 'test' ? Loog::VERBOSE : Loog::REGULAR
   loog.debug("Arrived package: #{event}")
-  elapsed(intro: 'Job processing finished') do
+  elapsed(loog, intro: 'Job processing finished', level: Logger::INFO) do
     event['Records']&.each do |rec|
       buf = Loog::Buffer.new
       lg = Loog::Tee.new(loog, buf)
       lg.info('Version: {{ version }}')
       lg.info("Time: #{Time.now.utc.iso8601}")
       lg.debug("Incoming SQS event:\n#{pretty(rec)}")
+      job = 0
       code = 1
       begin
-        job = rec['messageAttributes']['job']['stringValue'].to_i
-        lg.debug("A new event arrived, about job ##{job}")
-        if ['baza-pop', 'baza-shift', 'baza-finish'].include?('{{ name }}')
-          lg.debug("Starting to process '{{ name }}' (system swarm)")
-          Dir.mktmpdir do |pack|
-            File.write(File.join(pack, 'event.json'), JSON.pretty_generate(rec))
-            _, code = one(job, pack, lg)
-          end
-        else
-          lg.debug("Starting to process '{{ name }}' (normal swarm)")
-          code =
-            with_zip(job, rec, lg) do |pack|
-              one(job, pack, lg)
+        elapsed(lg, level: Logger::INFO) do
+          job = rec['messageAttributes']['job']['stringValue'].to_i
+          lg.debug("A new event arrived, about job ##{job}")
+          if ['baza-pop', 'baza-shift', 'baza-finish'].include?('{{ name }}')
+            lg.debug("Starting to process '{{ name }}' (system swarm)")
+            Dir.mktmpdir do |pack|
+              File.write(File.join(pack, 'event.json'), JSON.pretty_generate(rec))
+              _, code = one(job, pack, lg)
             end
+          else
+            lg.debug("Starting to process '{{ name }}' (normal swarm)")
+            code =
+              with_zip(job, rec, lg) do |pack|
+                one(job, pack, lg)
+              end
+          end
+          throw :"Finished processing '{{ name }}' (code=#{code})"
         end
-        lg.debug("Finished processing '{{ name }}' (code=#{code})")
       rescue Exception => e
         lg.error(Backtrace.new(e).to_s)
         code = 255
