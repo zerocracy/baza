@@ -5,8 +5,6 @@
   %colgroup
     -# ID
     %col{ style: 'width: 5em;' }
-    -# Swarm
-    %col{ style: 'width: 10em;' }
     -# Job ID
     %col{ style: 'width: 5em;' }
     -# Job Name
@@ -21,8 +19,6 @@
     %tr
       %th
         = '#'
-      %th
-        Swarm
       %th
         Job
       %th
@@ -39,9 +35,6 @@
       %td
         %a{ href: iri.cut('/invocation').append(i[:id]) }<
           = "##{i[:id]}"
-      %td
-        %a{ href: iri.cut('/swarms') }<
-          = i[:swarm]
       %td
         - unless i[:job].nil?
           %a{ href: iri.cut('/jobs').append(i[:job]) }

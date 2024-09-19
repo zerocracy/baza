@@ -42,7 +42,9 @@ class Baza::Steps
     return to_enum(__method__, offset:) unless block_given?
     rows = pgsql.exec(
       [
-        'SELECT invocation.*, swarm.name AS swarm FROM invocation',
+        'SELECT invocation.*,',
+        'swarm.name AS swarm, swarm.id AS swarm_id',
+        'FROM invocation',
         'JOIN swarm ON swarm.id = invocation.swarm',
         'WHERE job = $1',
         'ORDER BY invocation.id ASC',
@@ -56,6 +58,7 @@ class Baza::Steps
         code: row['code'].to_i,
         name: row['name'],
         swarm: row['swarm'],
+        swarm_id: row['swarm_id'].to_i,
         stdout: row['stdout'],
         created: Time.parse(row['created'])
       }

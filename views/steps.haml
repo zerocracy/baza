@@ -36,7 +36,7 @@
         %a{ href: iri.cut('/invocation').append(s[:id]) }<
           = "##{s[:id]}"
       %td
-        %a{ href: iri.cut('/swarms') }<
+        %a{ href: iri.cut('/swarms').append(s[:swarm_id]).append('invocations') }<
           = s[:swarm]
       %td.ff
         - if s[:code].zero?
