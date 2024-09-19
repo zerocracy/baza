@@ -177,7 +177,12 @@ def with_zip(id, rec, loog, &)
   Dir.mktmpdir do |home|
     zip = File.join(home, "#{id}.zip")
     key = "{{ name }}/#{id}.zip"
-    get_object(key, zip, loog)
+    begin
+      get_object(key, zip, loog)
+    rescue Aws::S3::Errors::NoSuchKey => e
+      loog.warn("Skipping because can't find ZIP in S3: #{e.message}")
+      return 0
+    end
     pack = File.join(home, id.to_s)
     Archive::Zip.extract(zip, pack)
     loog.info("Unpacked ZIP (#{File.size(zip)} bytes, #{Dir[File.join(pack, '**')].count} files)")

@@ -41,8 +41,7 @@ get(%r{/jobs/([0-9]+)}) do
     :job,
     :default,
     title: "/jobs/#{id}",
-    job: the_human.jobs.get(id),
-    css: 'job'
+    job: the_human.jobs.get(id)
   )
 end
 

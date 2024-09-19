@@ -39,7 +39,7 @@ class Baza::FrontPushTest < Minitest::Test
   end
 
   def test_renders_other_css
-    %w[main front account alterations empty job].each do |n|
+    %w[main front account alterations empty].each do |n|
       get("/css/#{n}.css")
       assert_status(200)
     end
