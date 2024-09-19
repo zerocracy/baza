@@ -88,9 +88,9 @@ class Baza::ValvesTest < Minitest::Test
     n = fake_name
     b = fake_name
     valves.enter(n, b, 'you @jeff-lebowski is [awesome] in foo/foo-x.j#42', nil) { 42 }
+    assert_match(/A new \[valve\]\(\/\/valves\/\d+\)/, loog.to_s)
     assert_include(
       loog.to_s,
-      'A new [valve](//valves)',
       '"you [@jeff-lebowski](https://github.com/jeff-lebowski) is \[awesome\]',
       'in [foo/foo-x.j#42](https://github.com/foo/foo-x.j/issues/42)',
       'The result is `42`'

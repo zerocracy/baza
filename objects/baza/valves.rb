@@ -120,7 +120,7 @@ class Baza::Valves
         [enc(r), @human.id, name.downcase, badge]
       ).first
       human.notify(
-        "🍒 A new [valve](//valves) ##{row['id']}",
+        "🍒 A new [valve](//valves/#{row['id']}) ##{row['id']}",
         "just entered for the `#{name}` job",
         job.nil? ? '' : "([##{job}](//jobs/#{job}))",
         ": #{escape(why.inspect)}.",
