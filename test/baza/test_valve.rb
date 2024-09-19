@@ -43,7 +43,7 @@ class Baza::ValveTest < Minitest::Test
     n = fake_name
     b = fake_name
     w = 'why'
-    human.valves.enter(n, b, w, job.id) {}
+    human.valves.enter(n, b, w, job.id) { 42 }
     valve = human.valves.get(human.valves.each.to_a.first[:id])
     assert_equal(n, valve.name)
     assert_equal(b, valve.badge)
