@@ -8,22 +8,23 @@
   %p
     Valve name:
     %br
-    %a.ff{ href: iri.over(name: valve.name) }
+    %span.ff
       = valve.name
 
   %p
-    Valve badge:
+    Badge:
     %br
-    %a.ff{ href: iri.over(badge: valve.badge) }
+    %span.ff
       = valve.badge
-  %p
-    Valve why:
-    %br
-    %a.ff{ href: iri.over(why: valve.why) }
-      = valve.why
-  %p
-    Valve result:
-    %br
-    %a.ff{ href: iri.over(result: valve.result) }
-      = valve.result
 
+  %p
+    Why:
+    %br
+    %span.ff
+      = valve.why
+
+  %p
+    Result:
+    %br
+    %span.ff
+      = valve.result
