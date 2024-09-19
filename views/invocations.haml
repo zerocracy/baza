@@ -36,8 +36,9 @@
   %tbody
   - paging(invocations, 10, offset:) do |i|
     %tr
-      %td.ff
-        = "##{i[:id]}"
+      %td
+        %a{ href: iri.cut('/invocation').append(i[:id]) }<
+          = "##{i[:id]}"
       %td
         %a{ href: iri.cut('/swarms') }<
           = i[:swarm]

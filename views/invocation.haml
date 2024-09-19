@@ -17,7 +17,7 @@
     %a{ href: iri.cut('/jobs').append(invocation[:job]) }
       = "##{invocation[:job]}"
     %span.ff
-      = "##{invocation[:name]}"
+      = invocation[:name]
 
   %p
     Created on:

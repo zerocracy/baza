@@ -95,8 +95,9 @@ class MainTest < Minitest::Test
         assert_include(
           req.body,
           'A new event arrived, about job #7',
-          'Loaded S3 object "swarmik/7.zip" (129 bytes) from bucket "foo"',
-          'Cannot figure out how to start the swarm'
+          'Incoming SQS event:',
+          'job: "7"',
+          'Loaded S3 object "swarmik/7.zip" (129 bytes) from bucket "foo"'
         )
         ''
       end

@@ -230,7 +230,7 @@ def one(id, pack, loog)
       "echo 'Cannot figure out how to start the swarm, try creating \"entry.sh\" or \"entry.rb\"'"
     end,
     both: true,
-    loog:,
+    loog: Loog::NULL,
     env: {
       'SWARM_SECRET' => '{{ secret }}',
       'SWARM_ID' => '{{ swarm }}',
@@ -250,7 +250,7 @@ def pretty(rec)
     "Body: #{rec['body']}"
   ]
   head << "SenderId: #{rec['attributes']['SenderId'].split(':')[1]}" if rec['attributes']
-  (head + rec['messageAttributes'].map { |a, h| "#{a}: #{h['stringValue']}" }).join("\n")
+  (head + rec['messageAttributes'].map { |a, h| "#{a}: \"#{h['stringValue']}\"" }).join("\n")
 end
 
 # This is the entry point called by aws_lambda_ric when a new SQS message arrives.
