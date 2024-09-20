@@ -1,0 +1,43 @@
+.columns
+  %p
+    Valve ID:
+    %br
+    %span.ff
+      = "##{valve.id}"
+
+  %p
+    Valve name:
+    %br
+    %span.ff
+      = valve.name
+
+  - unless valve.job.nil?
+    %p
+      Job:
+      %br
+      %a{ href: iri.cut('/jobs').append(valve.job.id) }
+        %span.ff
+          = valve.job.name
+
+  %p
+    Badge:
+    %br
+    %span.ff
+      = valve.badge
+
+  %p
+    Why:
+    %br
+    %span.ff
+      = valve.why
+
+  %p
+    Result:
+    %br
+    %span.ff
+      = valve.result
+
+  %p
+    Created on:
+    %br
+    != ago(valve.created)

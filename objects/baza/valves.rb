@@ -120,7 +120,7 @@ class Baza::Valves
         [enc(r), @human.id, name.downcase, badge]
       ).first
       human.notify(
-        "🍒 A new [valve](//valves) ##{row['id']}",
+        "🍒 A new [valve](//valves/#{row['id']}) ##{row['id']}",
         "just entered for the `#{name}` job",
         job.nil? ? '' : "([##{job}](//jobs/#{job}))",
         ": #{escape(why.inspect)}.",
@@ -150,6 +150,12 @@ class Baza::Valves
       [enc(result), id, @human.id]
     )
     raise Baza::Urror, "The valve ##{id} cannot be reset" if rows.empty?
+  end
+
+  def get(id)
+    raise 'Valve ID must be an integer' unless id.is_a?(Integer)
+    require_relative 'valve'
+    Baza::Valve.new(self, id)
   end
 
   private

@@ -31,7 +31,7 @@ require_relative '../../objects/baza/humans'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class Baza::ValveTest < Minitest::Test
+class Baza::ValvesTest < Minitest::Test
   def test_simple_scenario
     human = fake_human
     valves = human.valves
@@ -43,6 +43,7 @@ class Baza::ValveTest < Minitest::Test
     v = valves.each.to_a.first
     assert(v[:id].positive?)
     assert(!v[:created].nil?)
+    assert_equal(v[:id], valves.get(v[:id]).id)
     assert_equal(n, v[:name])
     assert_equal(b, v[:badge])
     assert_equal(42, v[:result])
@@ -87,9 +88,9 @@ class Baza::ValveTest < Minitest::Test
     n = fake_name
     b = fake_name
     valves.enter(n, b, 'you @jeff-lebowski is [awesome] in foo/foo-x.j#42', nil) { 42 }
+    assert_match(/A new \[valve\]\(\/\/valves\/\d+\)/, loog.to_s)
     assert_include(
       loog.to_s,
-      'A new [valve](//valves)',
       '"you [@jeff-lebowski](https://github.com/jeff-lebowski) is \[awesome\]',
       'in [foo/foo-x.j#42](https://github.com/foo/foo-x.j/issues/42)',
       'The result is `42`'

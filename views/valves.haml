@@ -52,7 +52,8 @@
     - paging(valves, 10, offset:) do |v|
       %tr
         %td.ff
-          = "##{v[:id]}"
+          %a{ href: iri.cut('/valves').append(v[:id]) }
+            = "##{v[:id]}"
         %td.ff
           - if v[:jobs].zero?
             = v[:name]
