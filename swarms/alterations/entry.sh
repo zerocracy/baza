@@ -53,5 +53,5 @@ while IFS= read -r alt; do
   tmp=$( mktemp -d )
   mkdir -p "${tmp}/${alt}"
   cp "${home}/${alt}.rb" "${tmp}/${alt}/${alt}.rb"
-  bundle exec judges --verbose update --quiet --no-summary --max-cycles=1 --no-log "${tmp}" "${home}/base.fb" > "${home}/${alt}.txt" 2>&1
+  bundle exec judges --verbose update --quiet --no-summary --max-cycles=1 --no-log "${tmp}" "${home}/base.fb" 2>&1 | tee "${home}/${alt}.txt"
 done <<< "${alts}"
