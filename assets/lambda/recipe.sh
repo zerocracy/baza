@@ -88,6 +88,7 @@ if [ ! -e head.txt ] || [ ! -s head.txt ]; then
 fi
 
 curl -s -X PUT --data-binary '@tail.log' \
+  --connect-timeout 10 --max-time 300 \
   -H 'Content-Type: text/plain' \
   -H 'User-Agent: recipe.sh' \
   "{{ host }}/swarms/finish?secret={{ secret }}&head=$(cat head.txt)&exit=$(cat exit.txt)&sec=${SECONDS}"

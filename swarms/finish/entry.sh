@@ -47,9 +47,10 @@ while true; do
   ((++attempt))
   status=$(curl -X PUT -s "${BAZA_URL}/finish?id=${id}&swarm=${SWARM_ID}&secret=${SWARM_SECRET}" \
     --data-binary '@pack.zip' -o http.txt \
+    --connect-timeout 10 --max-time 300 \
     -H "User-Agent: ${SWARM_NAME}" \
     -H 'Content-Type: application/octet-stream' -w "%{http_code}")
-  echo "/finish returned HTTP #${status}"
+  echo "PUT ${BAZA_URL}/finish returned HTTP #${status}"
   if [ "${status}" -lt 500 ]; then break; fi
   cat http.txt
   if [ "${attempt}" -gt 8 ]; then exit 1; fi

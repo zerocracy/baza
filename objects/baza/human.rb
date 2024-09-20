@@ -126,6 +126,7 @@ class Baza::Human
       code: row['code'].to_i,
       job: row['job']&.to_i,
       name: row['name'],
+      human: row['human'],
       swarm: row['swarm'],
       swarm_id: row['swarm_id'].to_i,
       stdout: row['stdout'],
