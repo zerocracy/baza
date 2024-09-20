@@ -52,7 +52,7 @@ while true; do
     -H 'Content-Type: application/octet-stream' -w "%{http_code}")
   echo "PUT ${BAZA_URL}/finish returned HTTP #${status}"
   if [ "${status}" -lt 500 ]; then break; fi
-  cat http.txt
+  echo "HTTP response: $(cat http.txt)"
   if [ "${attempt}" -gt 8 ]; then exit 1; fi
   sleep "${attempt}"
 done
