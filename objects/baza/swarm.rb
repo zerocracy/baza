@@ -132,6 +132,7 @@ class Baza::Swarm
   # @param [Integer] minutes How many minutes to wait between successful releases
   # @return [String] Explanation of why we don't release now (or NIL if we can release)
   def why_not(hours: 24, minutes: 60)
+    return 'The pipeline is used, no need to deploy new swarms' if Baza::Features::PIPELINE
     return "The swarm ##{@id} is disabled." unless enabled?
     return 'The account is out of funds.' unless swarms.human.account.balance.positive? || Baza::Features::TESTS
     if head == '0' * 40
