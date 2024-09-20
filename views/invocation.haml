@@ -22,9 +22,12 @@
     %br
     %a{ href: iri.cut('/jobs').append(invocation[:job]) }
       = "##{invocation[:job]}"
-    %br
-    %span.ff
+    (
+    %span.ff<>
       = invocation[:name]
+    )
+    of
+    != href("https://github.com/#{invocation[:human]}", "@#{invocation[:human]}")
 
   %p
     Created on:
