@@ -120,7 +120,7 @@ GEM
       others (> 0)
       tago (> 0)
       yaml (~> 0.3)
-    faraday (1.10.3)
+    faraday (1.10.4)
       faraday-em_http (~> 1.0)
       faraday-em_synchrony (~> 1.0)
       faraday-excon (~> 1.1)
