@@ -24,6 +24,7 @@
 
 require_relative 'result'
 require_relative 'zents'
+require_relative 'features'
 
 # One job.
 #
@@ -179,7 +180,7 @@ class Baza::Job
         end
       )
       .merge(secrets.to_h { |s| [s['key'], s['value']] })
-      .merge(ENV['RACK_ENV'] == 'test' ? { 'TESTING' => true } : {})
+      .merge(Baza::Features::TESTS ? { 'TESTING' => true } : {})
       .merge(
         {
           'JOB_NAME' => name,

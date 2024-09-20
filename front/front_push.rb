@@ -28,6 +28,7 @@ require 'fileutils'
 require 'zlib'
 require_relative '../objects/baza/errors'
 require_relative '../objects/baza/urror'
+require_relative '../objects/baza/features'
 
 def user_agent
   agent = request.env['HTTP_USER_AGENT']
@@ -63,13 +64,15 @@ def job_start(token, file, name, metas, ip)
     (request.env['HTTP_X_ZEROCRACY_META'] || '').split(/\s+/).map { |v| Base64.decode64(v) } + metas,
     ip
   )
-  begin
-    settings.sqs.push(
-      job,
-      "Job ##{job.id} (\"#{job.name}\") of #{File.size(file.path)} bytes registered from #{ip}"
-    )
-  rescue StandardError => e
-    settings.loog.error(Backtrace.new(e).to_s)
+  unless Baza::Features::PIPELINE
+    begin
+      settings.sqs.push(
+        job,
+        "Job ##{job.id} (\"#{job.name}\") of #{File.size(file.path)} bytes registered from #{ip}"
+      )
+    rescue StandardError => e
+      settings.loog.error(Backtrace.new(e).to_s)
+    end
   end
   job
 end

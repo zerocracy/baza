@@ -45,6 +45,7 @@ require 'truncate'
 require 'yaml'
 require 'zache'
 require_relative 'version'
+require_relative 'objects/baza/features'
 
 # see https://stackoverflow.com/questions/78547207
 disable :method_override
@@ -55,7 +56,7 @@ use Rack::Deflater
 Haml::Template.options[:escape_html] = true
 Haml::Template.options[:format] = :xhtml
 
-unless ENV['RACK_ENV'] == 'test'
+unless Baza::Features::TESTS
   require 'rack/ssl'
   use Rack::SSL
 end
@@ -104,7 +105,7 @@ configure do
       'encryption_secret' => ''
     }
   }
-  unless ENV['RACK_ENV'] == 'test'
+  unless Baza::Features::TESTS
     f = File.join(File.dirname(__FILE__), 'config.yml')
     unless File.exist?(f)
       raise \
@@ -122,7 +123,7 @@ end
 # Logging:
 configure do
   set :logging, false # to disable default Sinatra logging and use Loog
-  if ENV['RACK_ENV'] == 'test'
+  if Baza::Features::TESTS
     set :loog, Loog::NULL
   else
     set :loog, Loog::VERBOSE
@@ -156,7 +157,7 @@ configure do
     ),
     settings.config['tg']['admin_chat']
   )
-  settings.tbot.start unless ENV['RACK_ENV'] == 'test'
+  settings.tbot.start unless Baza::Features::TESTS
   set :telegramers, {}
 end
 
@@ -223,7 +224,7 @@ end
 # Pipeline:
 configure do
   set(:pipeline, Always.new(1).on_error { |e, _| settings.loog.error(Backtrace.new(e)) })
-  unless ENV['RACK_ENV'] == 'test' || ENV['FEATURE_PIPELINE'].nil?
+  unless Baza::Features::TESTS || !Features.PIPELINE
     settings.pipeline.start(5) do
       load('always/always_pipeline.rb', true)
     end
@@ -236,7 +237,7 @@ configure do
   require_relative 'objects/baza/ipgeolocation'
   set :ipgeolocation, Baza::IpGeolocation.new(
     token:,
-    connection: ENV['RACK_ENV'] == 'test' && token.empty? ? Baza::IpGeolocation::FakeConnection : Faraday
+    connection: Baza::Features::TESTS && token.empty? ? Baza::IpGeolocation::FakeConnection : Faraday
   )
 end
 
@@ -244,7 +245,7 @@ end
 configure do
   set :gc, Always.new(1)
   set :expiration_days, 14
-  unless ENV['RACK_ENV'] == 'test'
+  unless Baza::Features::TESTS
     settings.gc.start(30) do
       load('always/always_gc.rb', true)
     end
@@ -254,7 +255,7 @@ end
 # Verify jobs:
 configure do
   set :verify, Always.new(1)
-  unless ENV['RACK_ENV'] == 'test'
+  unless Baza::Features::TESTS
     settings.verify.start(60) do
       load('always/always_verify.rb', true)
     end
@@ -266,7 +267,7 @@ configure do
   set :donations, Always.new(1)
   set :donation_amount, 8 * 100_000
   set :donation_period, 30
-  unless ENV['RACK_ENV'] == 'test'
+  unless Baza::Features::TESTS
     settings.donations.start(60) do
       load('always/always_donations.rb', true)
     end
@@ -276,7 +277,7 @@ end
 # Release all swarms:
 configure do
   set :release, Always.new(1)
-  unless ENV['RACK_ENV'] == 'test'
+  unless Baza::Features::TESTS
     settings.release.start(60) do
       load('always/always_release.rb', true)
     end

@@ -32,7 +32,7 @@
               %nav
                 %ul
                   %li
-                    %a{ href: ENV['RACK_ENV'] == 'test' ? iri.cut('/fake-login') : github_login_link }
+                    %a{ href: Baza::Features::TESTS ? iri.cut('/fake-login') : github_login_link }
                       Start
               %nav
                 %ul.smaller

@@ -24,6 +24,7 @@
 
 require_relative 'urror'
 require_relative 'tbot'
+require_relative 'features'
 
 # Human being.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -158,11 +159,11 @@ class Baza::Human
   # Roles of a human.
   module Roles
     def admin?
-      github == 'yegor256' || ENV['RACK_ENV'] == 'test'
+      github == 'yegor256' || Baza::Features::TESTS
     end
 
     def tester?
-      github == '!tester' || ENV['RACK_ENV'] == 'test'
+      github == '!tester' || Baza::Features::TESTS
     end
   end
 end

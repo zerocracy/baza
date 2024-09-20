@@ -34,6 +34,7 @@ require_relative 'human'
 require_relative 'urror'
 require_relative 'errors'
 require_relative '../../version'
+require_relative 'features'
 
 # Pipeline of jobs.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -163,7 +164,7 @@ class Baza::Pipeline
         File.write(
           File.join(dir, "alternation-#{a[:id]}-#{idx}/alternation-#{a[:id]}-#{idx}.rb"),
           [
-            ENV['RACK_ENV'] == 'test' ? '' : 'require "fbe/fb"',
+            Baza::Features::TESTS ? '' : 'require "fbe/fb"',
             a[:script]
           ].join("\n")
         )

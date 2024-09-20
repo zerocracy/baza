@@ -29,6 +29,7 @@ require 'telepost'
 require 'decoor'
 require 'securerandom'
 require_relative 'humans'
+require_relative 'features'
 
 # Telegram Bot.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -62,7 +63,7 @@ class Baza::Tbot
     end
 
     def notify(human, *msg)
-      unless ENV['RACK_ENV'] == 'test' || human.github == 'yegor256'
+      unless Baza::Features::TESTS || human.github == 'yegor256'
         @tbot.notify(
           human.humans.find('yegor256'),
           ["To [@#{human.github}](https://github.com/#{human.github}):"] + msg

@@ -24,6 +24,7 @@
 
 require 'backtrace'
 require 'sentry-ruby'
+require_relative '../objects/baza/features'
 require_relative '../objects/baza/urror'
 require_relative '../version'
 
@@ -40,7 +41,7 @@ not_found do
 end
 
 configure do
-  unless ENV['RACK_ENV'] == 'test'
+  unless Baza::Features::TESTS
     Sentry.init do |c|
       c.dsn = settings.config['sentry']
       c.logger = settings.loog
@@ -49,7 +50,7 @@ configure do
   end
 end
 
-if ENV['RACK_ENV'] == 'test'
+if Baza::Features::TESTS
   get '/error' do
     raise params[:m] || 'The error is intentional'
   end

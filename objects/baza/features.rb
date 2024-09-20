@@ -22,13 +22,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require_relative '../objects/baza/pipeline'
-require_relative '../objects/baza/features'
+# Runtime features.
+# Author:: Yegor Bugayenko (yegor256@gmail.com)
+# Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
+# License:: MIT
+class Baza::Features
+  # The pipeline is used locally, not through swarms.
+  PIPELINE = !ENV.fetch('FEATURE_PIPELINE', nil).nil?
 
-lib = File.absolute_path(File.join(__dir__, Baza::Features::TESTS ? '../target/j' : '../j'))
-['', 'lib', 'judges'].each { |d| FileUtils.mkdir_p(File.join(lib, d)) }
-
-Baza::Pipeline.new(
-  lib, settings.humans, settings.fbs,
-  settings.loog, settings.trails
-).process_one
+  # Currently, we are in a unit-testing mode.
+  TESTS = ENV['RACK_ENV'] == 'test'
+end

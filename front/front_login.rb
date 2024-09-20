@@ -24,6 +24,7 @@
 
 require 'unpiercable'
 require_relative '../objects/baza/human'
+require_relative '../objects/baza/features'
 
 configure do
   set :glogin, GLogin::Auth.new(
@@ -56,7 +57,7 @@ before '/*' do
 end
 
 get '/fake-login' do
-  flash(iri.cut('/'), 'This URL is for testing only') unless ENV['RACK_ENV'] == 'test'
+  flash(iri.cut('/'), 'This URL is for testing only') unless Baza::Features::TESTS
   login = 'tester'
   cookies[:auth] = GLogin::Cookie::Open.new(
     {

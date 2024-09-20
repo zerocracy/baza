@@ -22,6 +22,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+require_relative '../objects/baza/features'
+
 settings.humans.gc.ready_to_expire(settings.expiration_days) do |j|
   j.expire!(settings.fbs, 'It is garbage')
   settings.loog.debug("Job ##{j.id} is garbage, expired")
