@@ -170,7 +170,8 @@ configure do
     "and started running at [#{Socket.ip_address_list.detect(&:ipv4_private?).ip_address}](//dash).",
     "Ruby version is `#{RUBY_VERSION}`.",
     "PostgreSQL version is `#{settings.pgsql.version}`.",
-    "Total memory on the server: #{Total::Mem.new.bytes / (1024 * 1024 * 1024)}Gb."
+    "Total memory on the server: #{Total::Mem.new.bytes / (1024 * 1024 * 1024)}Gb.",
+    "Features: pipeline=#{Baza::Features::PIPELINE ? 'heroku' : 'lambda'}."
   )
 end
 
@@ -224,7 +225,7 @@ end
 # Pipeline:
 configure do
   set(:pipeline, Always.new(1).on_error { |e, _| settings.loog.error(Backtrace.new(e)) })
-  unless Baza::Features::TESTS || !Features.PIPELINE
+  unless Baza::Features::TESTS || !Baza::Features::PIPELINE
     settings.pipeline.start(5) do
       load('always/always_pipeline.rb', true)
     end
