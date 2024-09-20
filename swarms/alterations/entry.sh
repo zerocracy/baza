@@ -48,9 +48,10 @@ self=$(dirname "$0")
 export BUNDLE_GEMFILE="${self}/Gemfile"
 
 set -x
-for alt in $( find "${home}" -type f -name 'alteration-*.rb' -exec basename {} .rb \; ); do
+alts=$( find "${home}" -type f -name 'alteration-*.rb' -exec basename {} .rb \; )
+while IFS= read -r alt; do
   tmp=$( mktemp -d )
-  mkdir ${tmp}/${alt}
+  mkdir -p "${tmp}/${alt}"
   cp "${home}/${alt}.rb" "${tmp}/${alt}/${alt}.rb"
   bundle exec judges --verbose update --quiet --no-summary --max-cycles=1 --no-log "${tmp}" "${home}/base.fb" > "${home}/${alt}.txt" 2>&1
-done
+done <<< "${alts}"
