@@ -25,6 +25,8 @@
 source 'https://rubygems.org'
 ruby '~>3.2'
 
+# eval File.read(File.join(__dir__, 'swarms/alterations/Gemfile'))
+
 gem 'always', '>0'
 gem 'archive-zip', '0.12.0'
 gem 'aws_lambda_ric', '2.0.0'
