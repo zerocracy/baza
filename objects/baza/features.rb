@@ -32,4 +32,13 @@ class Baza::Features
 
   # Currently, we are in a unit-testing mode.
   TESTS = ENV['RACK_ENV'] == 'test'
+
+  # Summarize them all.
+  # @return [String] Text summary
+  def self.summary
+    [
+      "#{PIPELINE ? 'heroku' : 'lambda'} pipeline",
+      TESTS ? 'testing mode' : nil
+    ].compact.join('; ')
+  end
 end

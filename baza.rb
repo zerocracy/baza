@@ -171,7 +171,7 @@ configure do
     "Ruby version is `#{RUBY_VERSION}`.",
     "PostgreSQL version is `#{settings.pgsql.version}`.",
     "Total memory on the server: #{Total::Mem.new.bytes / (1024 * 1024 * 1024)}Gb.",
-    "Features: pipeline=#{Baza::Features::PIPELINE ? 'heroku' : 'lambda'}."
+    "Features: #{Baza::Features.summary}."
   )
 end
 

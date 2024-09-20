@@ -51,7 +51,7 @@
         != yield
       %footer
         %nav
-          %ul{ style: 'font-family: monospace;' }
+          %ul.ff
             %li
               %a{ href: iri.cut('/terms') }
                 Terms
@@ -71,7 +71,7 @@
             %li{ title: 'Your visible IP address' }
               = request.ip
           - if the_human.admin?
-            %ul{ style: 'font-family: monospace;' }
+            %ul.ff
               - if ENV['FEATURE_PIPELINE']
                 %li
                   %span
@@ -83,6 +83,9 @@
           %ul
             - %w[Alterations Swarms Push SQL Bash Gift Trails Relogin Reset].each do |c|
               != menu("/#{c.downcase}", c)
+          %ul.ff
+            %li
+              = Baza::Features.summary
           %ul
             %li
               Spot a glitch or have a bright idea? Share it
