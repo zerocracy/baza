@@ -166,7 +166,7 @@ class Baza::PipelineTest < Minitest::Test
     process_all(j, human.humans, fbs)
     job = human.jobs.get(job.id)
     assert_equal(0, job.result.exit, job.result.stdout)
-    assert(job.result.errors.zero?)
+    assert(job.result.errors.zero?, job.result.stdout)
   end
 
   private
