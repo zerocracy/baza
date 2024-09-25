@@ -38,4 +38,12 @@ class Baza::MetasTest < Minitest::Test
     assert_equal('234 где? :888', metas.maybe('foo'))
     assert_equal('', metas.maybe('bar'))
   end
+
+  def test_has
+    array = ['foo:1', 'bar:']
+    metas = Baza::Metas.new(array)
+    assert(metas.has?('foo'))
+    assert(metas.has?('bar'))
+    assert(!metas.has?('xyz'))
+  end
 end

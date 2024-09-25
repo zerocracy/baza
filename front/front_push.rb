@@ -66,12 +66,14 @@ def job_start(token, file, name, metas, ip)
     ip
   )
   url = job.metas.maybe('workflow_url')
+  version = job.metas.maybe('action_version')
   unless errors.empty?
     job.jobs.human.notify(
       "⚠️ The job [##{job.id}](//jobs/#{job.id}) (`#{job.name}`)",
       "arrived with #{errors} errors:",
       "\n```\n#{errors.to_a.join("\n")}\n```\n",
       url.nil? ? '' : "Its GitHub workflow is [here](#{url}).",
+      version.nil? ? '' : "The version of judges-action is `#{version}`.",
       'You better look at it now, before it gets too late.'
     )
   end
