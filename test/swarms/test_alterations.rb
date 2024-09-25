@@ -39,7 +39,7 @@ class TestAlterations < Minitest::Test
       File.write(File.join(home, 'alteration-7.rb'), '$fb.insert.bar = 7;')
       qbash(
         "#{Shellwords.escape(File.join(__dir__, '../../swarms/alterations/entry.sh'))} 0 #{Shellwords.escape(home)}",
-        loog: fake_loog
+        log: fake_loog
       )
       assert_include(
         File.read(File.join(home, 'alteration-42.txt')),

@@ -56,14 +56,25 @@ def job_start(token, file, name, metas, ip)
   end
   raise Baza::Urror, "An existing job named '#{name}' is running now" if token.human.jobs.busy?(name)
   uuid = settings.fbs.save(file.path)
+  errors = Baza::Errors.new(file.path)
   job = token.start(
     name, uuid,
     File.size(file.path),
-    Baza::Errors.new(file.path).count,
+    errors.count,
     user_agent,
     (request.env['HTTP_X_ZEROCRACY_META'] || '').split(/\s+/).map { |v| Base64.decode64(v) } + metas,
     ip
   )
+  url = job.metas.maybe('workflow_url')
+  unless errors.empty?
+    job.jobs.human.notify(
+      "⚠️ The job [##{job.id}](//jobs/#{job.id}) (`#{job.name}`)",
+      "arrived with #{errors} errors:",
+      "\n```\n#{errors.to_a.join("\n")}\n```\n",
+      url.nil? ? '' : "Its GitHub workflow is [here](#{url}).",
+      'You better look at it now, before it gets too late.'
+    )
+  end
   unless Baza::Features::PIPELINE
     begin
       settings.sqs.push(

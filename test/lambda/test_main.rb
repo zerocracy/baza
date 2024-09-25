@@ -197,7 +197,7 @@ class MainTest < Minitest::Test
         '
       )
       img = 'test-main-in-docker'
-      qbash("docker build #{home} -t #{img}", loog: fake_loog)
+      qbash("docker build #{home} -t #{img}", log: fake_loog)
       stdout =
         begin
           qbash(
@@ -206,10 +206,10 @@ class MainTest < Minitest::Test
               '/bin/bash -c',
               Shellwords.escape('ruby main.rb; unzip /tmp/result.zip -d /tmp/result')
             ],
-            loog: fake_loog
+            log: fake_loog
           )
         ensure
-          qbash("docker rmi #{img}", loog: fake_loog)
+          qbash("docker rmi #{img}", log: fake_loog)
         end
       assert_include(
         stdout,

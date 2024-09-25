@@ -34,19 +34,27 @@ class Baza::Errors
   end
 
   def count
-    @count ||=
+    to_a.count
+  end
+
+  def empty?
+    to_a.empty?
+  end
+
+  def to_a
+    @to_a ||=
       begin
         fb = Factbase.new
         fb.import(File.binread(@file))
         s = fb.query('(eq what "judges-summary")').each.to_a.first
         if s.nil?
-          0
+          []
         else
           es = s['error']
           if es.nil?
-            0
+            []
           else
-            es.count
+            es
           end
         end
       end

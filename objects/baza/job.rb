@@ -25,6 +25,7 @@
 require_relative 'result'
 require_relative 'zents'
 require_relative 'features'
+require_relative 'metas'
 
 # One job.
 #
@@ -173,7 +174,7 @@ class Baza::Job
     @jobs.human.humans.ensure('yegor256').secrets.each.to_a
       .select { |s| s[:shareable] }.to_h { |s| [s[:key], s[:value]] }
       .merge(
-        metas.to_h do |m|
+        metas.to_a.to_h do |m|
           a = m.split(':', 2)
           a[1] = '' if a.size == 1
           a
@@ -243,7 +244,7 @@ class Baza::Job
   end
 
   def metas
-    to_json[:metas]
+    Baza::Metas.new(to_json[:metas])
   end
 
   def invocations

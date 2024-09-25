@@ -86,7 +86,7 @@
     - if job.metas.empty?
       None
     - else
-      - job.metas.each do |m|
+      - job.metas.to_a.each do |m|
         - (k, v) = m.split(':', 2)
         %span.ff{ style: 'margin-right: 2em;' }
           %i.fa-solid.fa-thumbtack.teal

@@ -22,56 +22,38 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require 'minitest/autorun'
-require 'factbase'
-require_relative '../test__helper'
-require_relative '../../objects/baza'
-require_relative '../../objects/baza/errors'
-
-# Test.
+# Metas in array.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class Baza::ErrorsTest < Minitest::Test
-  def test_counting
-    Tempfile.open do |f|
-      fb = Factbase.new
-      s = fb.insert
-      s.what = 'judges-summary'
-      s.error = 'oops, failed'
-      s.error = 'second failure'
-      File.binwrite(f, fb.export)
-      assert_equal(2, Baza::Errors.new(f).count)
-    end
+class Baza::Metas
+  def initialize(array)
+    @array = array
   end
 
-  def test_listing
-    Tempfile.open do |f|
-      fb = Factbase.new
-      s = fb.insert
-      s.what = 'judges-summary'
-      s.error = 'oops, failed'
-      s.error = 'second failure'
-      File.binwrite(f, fb.export)
-      assert_equal('oops, failed', Baza::Errors.new(f).to_a.first)
-    end
+  def to_a
+    @array
   end
 
-  def test_counting_no_summary
-    Tempfile.open do |f|
-      fb = Factbase.new
-      File.binwrite(f, fb.export)
-      assert_equal(0, Baza::Errors.new(f).count)
-    end
+  def empty?
+    @array.empty?
   end
 
-  def test_counting_no_errors
-    Tempfile.open do |f|
-      fb = Factbase.new
-      s = fb.insert
-      s.what = 'judges-summary'
-      File.binwrite(f, fb.export)
-      assert_equal(0, Baza::Errors.new(f).count)
-    end
+  def maybe(name)
+    prefix = "#{name}:"
+    meta = @array.find { |m| m.start_with?(prefix) }
+    return nil if meta.nil?
+    meta.split(prefix, 2)[1]
+  end
+
+  def get(name)
+    meta = maybe(name)
+    raise "The meta #{name} doesn't exist" if meta.nil?
+    meta
+  end
+
+  def has?(name)
+    prefix = "#{name}:"
+    @array.any? { |m| m.start_with?(prefix) }
   end
 end

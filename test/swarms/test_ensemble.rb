@@ -97,7 +97,7 @@ class EnsembleTest < Minitest::Test
         '
       )
       img = 'test-ensemble'
-      qbash("docker build #{home} -t #{img}", loog: fake_loog)
+      qbash("docker build #{home} -t #{img}", log: fake_loog)
       RandomPort::Pool::SINGLETON.acquire do |port|
         fake_front(port, loog: fake_loog) do
           stdout = qbash(
@@ -106,7 +106,7 @@ class EnsembleTest < Minitest::Test
               "--user #{Process.uid}:#{Process.gid} ",
               "-e BAZA_URL -e SWARM_ID -e SWARM_SECRET --rm #{img}"
             ].join,
-            loog: fake_loog,
+            log: fake_loog,
             env: {
               'BAZA_URL' => "http://host.docker.internal:#{port}",
               'SWARM_ID' => s.id.to_s,
@@ -121,7 +121,7 @@ class EnsembleTest < Minitest::Test
             '--message-attributes'
           )
         ensure
-          qbash("docker rmi #{img}", loog: fake_loog)
+          qbash("docker rmi #{img}", log: fake_loog)
         end
       end
     end

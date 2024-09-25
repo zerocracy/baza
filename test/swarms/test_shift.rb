@@ -70,7 +70,7 @@ class ShiftTest < Minitest::Test
           '
         )
         img = 'test-shift'
-        qbash("docker build #{home} -t #{img}", loog: fake_loog)
+        qbash("docker build #{home} -t #{img}", log: fake_loog)
         name = "baza-#{s.name}"
         Dir.mktmpdir do |dir|
           File.write(
@@ -90,10 +90,10 @@ class ShiftTest < Minitest::Test
               "--user #{Process.uid}:#{Process.gid}",
               "--rm #{img} #{job.id} /temp"
             ],
-            loog: fake_loog
+            log: fake_loog
           )
         ensure
-          qbash("docker rmi #{img}", loog: fake_loog)
+          qbash("docker rmi #{img}", log: fake_loog)
         end
       end
     assert_include(

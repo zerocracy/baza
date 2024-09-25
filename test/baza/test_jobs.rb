@@ -47,7 +47,7 @@ class Baza::JobsTest < Minitest::Test
     assert(!job.size.nil?)
     assert(!job.errors.nil?)
     assert(!job.ip.nil?)
-    assert_equal('boom', job.metas.first)
+    assert_equal('boom', job.metas.to_a.first)
   end
 
   def test_list_names

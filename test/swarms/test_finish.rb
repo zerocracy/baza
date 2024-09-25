@@ -72,7 +72,7 @@ class FinishTest < Minitest::Test
         '
       )
       img = 'test-finish'
-      qbash("docker build #{home} -t #{img}", loog: fake_loog)
+      qbash("docker build #{home} -t #{img}", log: fake_loog)
       RandomPort::Pool::SINGLETON.acquire do |port|
         fake_front(port, loog: fake_loog) do
           Dir.mktmpdir do |dir|
@@ -87,7 +87,7 @@ class FinishTest < Minitest::Test
                 '-e BAZA_URL -e SWARM_ID -e SWARM_SECRET',
                 "-v #{dir}:/temp --rm #{img} #{job.id} /temp"
               ],
-              loog: fake_loog,
+              log: fake_loog,
               env: {
                 'BAZA_URL' => "http://host.docker.internal:#{port}",
                 'SWARM_ID' => s.id.to_s,
@@ -97,7 +97,7 @@ class FinishTest < Minitest::Test
           end
         end
       ensure
-        qbash("docker rmi #{img}", loog: fake_loog)
+        qbash("docker rmi #{img}", log: fake_loog)
       end
     end
   end

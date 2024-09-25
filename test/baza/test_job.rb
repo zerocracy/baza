@@ -49,8 +49,8 @@ class Baza::JobTest < Minitest::Test
     assert(!job.ip.nil?)
     assert_nil(job.result)
     assert_nil(job.receipt)
-    assert_equal('hello, dude!', job.metas[0])
-    assert_equal('пока!', job.metas[1])
+    assert_equal('hello, dude!', job.metas.to_a.first)
+    assert_equal('пока!', job.metas.to_a[1])
     assert_equal(ip, job.ip)
   end
 

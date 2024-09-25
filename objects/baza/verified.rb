@@ -40,9 +40,8 @@ class Baza::Verified
   # Get the verdict.
   def verdict
     return "FAKE: IP #{@job.ip} is not from Microsoft." unless ip_from_microsoft?(@job.ip)
-    meta = @job.metas.find { |m| m.start_with?('workflow_url:') }
-    return 'FAKE: There is no workflow_url meta' if meta.nil?
-    url = meta.split(':', 2)[1]
+    url = @job.metas.maybe('workflow_url')
+    return 'FAKE: There is no workflow_url meta' if url.nil?
     mtc = url.match(%r{^https://github\.com/(?<org>[^/]+)/(?<repo>[^/]+)/actions/runs/(?<id>[0-9]+)$})
     return "FAKE: Wrong URL at workflow_url: #{url.inspect}." unless mtc
     octo = Octokit::Client.new

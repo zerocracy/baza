@@ -235,7 +235,7 @@ def one(id, pack, loog)
       "echo 'Cannot figure out how to start the swarm, try creating \"entry.sh\" or \"entry.rb\"'"
     end,
     both: true,
-    loog:,
+    log: loog,
     env: {
       'SWARM_SECRET' => '{{ secret }}',
       'SWARM_ID' => '{{ swarm }}',

@@ -23,6 +23,7 @@
 # SOFTWARE.
 
 require 'veil'
+require_relative 'metas'
 
 # Jobs of a human.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -107,7 +108,7 @@ class Baza::Jobs
         size: row['size'].to_i,
         taken: row['taken'],
         errors: row['errors'].to_i,
-        metas: (row['metas'] || '').split(sep),
+        metas: Baza::Metas.new((row['metas'] || '').split(sep)),
         invocations: (row['invocations'] || '').split(sep),
         verified: row['verified'],
         when_locked: row['when_locked'].nil? ? nil : Time.parse(row['when_locked']),

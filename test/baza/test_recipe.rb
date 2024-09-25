@@ -96,7 +96,7 @@ class Baza::RecipeTest < Minitest::Test
         '
       )
       img = 'test-recipe-script'
-      qbash("docker build #{File.join(home, '.docker')} -t #{img}", loog: fake_loog)
+      qbash("docker build #{File.join(home, '.docker')} -t #{img}", log: fake_loog)
       begin
         RandomPort::Pool::SINGLETON.acquire do |port|
           fake_front(port, loog: fake_loog) do
@@ -114,12 +114,12 @@ class Baza::RecipeTest < Minitest::Test
                 "--user #{Process.uid}:#{Process.gid}",
                 "-v #{home}:/r #{img}"
               ],
-              loog: fake_loog
+              log: fake_loog
             )
           end
         end
       ensure
-        qbash("docker rmi #{img}", loog: fake_loog)
+        qbash("docker rmi #{img}", log: fake_loog)
       end
     end
     assert(swarm.releases.get(r.id).exit.zero?)
@@ -147,7 +147,7 @@ class Baza::RecipeTest < Minitest::Test
             step, fake_live_cfg['lambda']['account'], fake_live_cfg['lambda']['region'], 'fake'
           )
         )
-        stdout = qbash("/bin/bash #{sh}", loog: fake_loog)
+        stdout = qbash("/bin/bash #{sh}", log: fake_loog)
         assert(stdout.include?('exit=0&'))
       end
     end
@@ -166,9 +166,9 @@ class Baza::RecipeTest < Minitest::Test
         )
       end
       FileUtils.mkdir_p(File.join(home, 'swarm'))
-      qbash("docker build #{home} -t #{img}", loog: fake_loog)
+      qbash("docker build #{home} -t #{img}", log: fake_loog)
     ensure
-      qbash("docker rmi -f #{img}", loog: fake_loog)
+      qbash("docker rmi -f #{img}", log: fake_loog)
     end
   end
 
@@ -194,7 +194,7 @@ class Baza::RecipeTest < Minitest::Test
             host: "http://host.docker.internal:#{backend_port}"
           )
         )
-        qbash("/bin/bash #{sh}", loog: fake_loog)
+        qbash("/bin/bash #{sh}", log: fake_loog)
         File.write(
           File.join(home, 'main.rb'),
           [
@@ -237,7 +237,7 @@ class Baza::RecipeTest < Minitest::Test
           "
         }.each { |f, txt| File.write(File.join(home, f), txt) }
         image = 'local-lambda-test'
-        qbash("docker build #{home} -t #{image}", loog: fake_loog)
+        qbash("docker build #{home} -t #{image}", log: fake_loog)
         begin
           ret =
             fake_front(backend_port, loog: fake_loog) do
@@ -247,7 +247,7 @@ class Baza::RecipeTest < Minitest::Test
                   "--user #{Process.uid}:#{Process.gid}",
                   "-d -p #{lambda_port}:8080 #{image}"
                 ],
-                loog: fake_loog
+                log: fake_loog
               ).split("\n")[-1]
               begin
                 wait_for { Typhoeus::Request.get("http://localhost:#{lambda_port}/test").code == 404 }
@@ -275,15 +275,15 @@ class Baza::RecipeTest < Minitest::Test
                 request.run
                 request.response
               ensure
-                stdout = qbash("docker logs #{container}", loog: fake_loog)
-                qbash("docker rm -f #{container}", loog: fake_loog)
+                stdout = qbash("docker logs #{container}", log: fake_loog)
+                qbash("docker rm -f #{container}", log: fake_loog)
               end
             end
           assert_equal(200, ret.response_code, ret.response_body)
           assert_equal('"Done!"', ret.response_body, ret.response_body)
           assert_equal(1, s.invocations.each.to_a.size)
         ensure
-          qbash("docker rmi #{image}", loog: fake_loog)
+          qbash("docker rmi #{image}", log: fake_loog)
         end
       end
       assert_include(

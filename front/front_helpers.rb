@@ -26,6 +26,7 @@ require 'tago'
 require 'cgi'
 require 'securerandom'
 require_relative '../objects/baza/ipgeolocation'
+require_relative '../objects/baza/metas'
 
 # Front helpers.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
@@ -136,11 +137,10 @@ module Baza::Helpers
   end
 
   def if_meta(job, name)
-    meta = job.metas.find { |m| m.start_with?("#{name}:") }
-    if meta.nil?
-      ''
+    if job.metas.has?(name)
+      yield job.metas.get(name)
     else
-      yield meta.split("#{name}:", 2)[1]
+      ''
     end
   end
 
