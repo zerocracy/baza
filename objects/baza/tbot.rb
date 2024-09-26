@@ -149,6 +149,7 @@ class Baza::Tbot
         .compact
         .reject(&:empty?)
         .join(' ')
+        .gsub("\n ", "\n")
         .gsub(%r{\(//([^)]+)\)}, '(https://www.zerocracy.com/\1)')
         .strip
     )

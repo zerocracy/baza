@@ -70,10 +70,15 @@ def job_start(token, file, name, metas, ip)
   unless errors.empty?
     job.jobs.human.notify(
       "⚠️ The job [##{job.id}](//jobs/#{job.id}) (`#{job.name}`)",
-      "arrived with #{errors} errors:",
+      "arrived with #{errors.count} errors:",
       "\n```\n#{errors.to_a.join("\n")}\n```\n",
       url.nil? ? '' : "Its GitHub workflow is [here](#{url}).",
-      version.nil? ? '' : "The version of judges-action is `#{version}`.",
+      unless version.nil?
+        [
+          "The version of judges-action is `#{version}`.",
+          version.include?('!') ? 'This version is **outdated**, which may be the reason for the error.' : ''
+        ].join
+      end,
       'You better look at it now, before it gets too late.'
     )
   end
