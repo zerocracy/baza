@@ -75,8 +75,9 @@ def job_start(token, file, name, metas, ip)
       url.nil? ? '' : "Its GitHub workflow is [here](#{url}).",
       unless version.nil?
         [
-          "The version of [judges-action](https://github.com/zerocracy/judges-action) is `#{version}`.",
-          version.include?('!') ? 'This version is **outdated**, which may be the reason for the error.' : ''
+          "The version of [judges-action](https://github.com/zerocracy/judges-action) is `#{version}`",
+          version.include?('!') ? ' (this version is **outdated**, which may be the reason for the error)' : '',
+          '.'
         ].join
       end,
       'You better look at it now, before it gets too late.'
