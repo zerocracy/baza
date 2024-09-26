@@ -88,7 +88,10 @@
               %i.fa-brands.fa-github
           - if_meta(j, 'duration') do |sec|
             %span.gray{ title: 'How long it took to update the factbase' }
-              = "#{sec}s"
+              - if sec > 120
+                = "#{format('%d', sec / 60)}m"
+              - else
+                = "#{sec}s"
         %td
           - if the_human.admin?
             %a{ href: iri.cut('/steps').append(j.id) }
