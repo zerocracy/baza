@@ -43,7 +43,7 @@ end
 task default: %i[clean test rubocop haml_lint scss_lint xcop config copyright]
 
 require 'rake/testtask'
-Rake::TestTask.new(test: %i[pgsql liquibase]) do |test|
+Rake::TestTask.new(test: %i[liquibase]) do |test|
   Rake::Cleaner.cleanup_files(['coverage'])
   require 'simplecov'
   SimpleCov.start
@@ -102,7 +102,7 @@ task(:config) do
   YAML.safe_load(File.open(f)).to_yaml if File.exist?(f)
 end
 
-task(run: %i[pgsql liquibase]) do
+task(run: %i[liquibase]) do
   `rerun -b "RACK_ENV=test bundle exec ruby baza.rb"`
 end
 

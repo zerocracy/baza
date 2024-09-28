@@ -39,16 +39,28 @@ jobs:
         os: [ubuntu-24.04]
         ruby: [3.3]
     runs-on: ${{ matrix.os }}
+
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - uses: actions/checkout@v4
-      - run: |
-          sudo apt-get update
-          sudo apt-get install -y libpq-dev postgresql-client postgresql
-          sudo ln -s "$(realpath /usr/lib/postgresql/*/bin/initdb)" /bin/initdb
-          sudo ln -s "$(realpath /usr/lib/postgresql/*/bin/postgres)" /bin/postgres
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby }}
+      - run: mkdir -p target
+      - run: cp pgsql-config.yml.example target/pgsql-config.yml
       - run: bundle update
       - run: bundle update --gemfile=swarms/alterations/Gemfile
       - run: bundle exec rake
