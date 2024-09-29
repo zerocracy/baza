@@ -152,6 +152,8 @@ class Baza::Human
   end
 
   # Notify this user via telegram.
+  #
+  # @param [Array<String>] lines List of lines to post, to be joined with a space
   def notify(*lines)
     @tbot.notify(self, *lines)
   end

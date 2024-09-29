@@ -33,7 +33,15 @@ require_relative '../../objects/baza'
 class Baza::NotificationsTest < Minitest::Test
   def test_simple_post
     human = fake_human
-    human.notifications.post('something', 'how are you?')
-    human.notifications.post('something', 'are you still there?')
+    badge = 'foo'
+    assert(human.notifications.post(badge, 'how are you?'))
+    assert(!human.notifications.post(badge, 'are you still there?'))
+  end
+
+  def test_zero_lifetime
+    human = fake_human
+    badge = 'alpha'
+    assert(human.notifications.post(badge, 'how are you?'))
+    assert(human.notifications.post(badge, 'one more', lifetime: 0))
   end
 end

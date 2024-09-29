@@ -37,15 +37,31 @@ class Baza::Notifications
     @human.pgsql
   end
 
-  def post(badge, text)
-    return unless pgsql.exec(
-      'SELECT id FROM notification WHERE badge = $1 AND human = $2',
+  # Post a single notification to the human. The notification will be
+  # ignored if another notification with the same +badge+ (no matter
+  # what was the text) has already been posted.
+  #
+  # @param [String] badge A unique short text, as a marker
+  # @param [Array<String>] lines List of lines to post, to be joined with a space
+  # @param [Integer] lifetime How many seconds to wait until a similar post is possible (NIL means forever)
+  # @return [Boolean] TRUE if human was notified, FALSE otherwise
+  def post(badge, *lines, lifetime: nil)
+    return false unless pgsql.exec(
+      [
+        'SELECT id FROM notification',
+        'WHERE badge = $1 AND human = $2',
+        lifetime.nil? ? '' : "AND created > NOW() - INTERVAL '#{lifetime.to_i} SECONDS'"
+      ],
       [badge, @human.id]
     ).empty?
     pgsql.exec(
-      'INSERT INTO notification (human, badge, text) VALUES ($1, $2, $3)',
-      [@human.id, badge, text]
+      [
+        'INSERT INTO notification (human, badge, text) VALUES ($1, $2, $3)',
+        'ON CONFLICT (human, badge) DO UPDATE SET created = NOW()'
+      ],
+      [@human.id, badge, lines.join(' ')]
     )
-    @human.notify(text)
+    @human.notify(lines)
+    true
   end
 end
