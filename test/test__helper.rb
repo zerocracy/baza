@@ -83,8 +83,10 @@ class Minitest::Test
     # rubocop:disable Style/ClassVars
     @@fake_pgsql ||= Pgtk::Pool.new(
       Pgtk::Wire::Yaml.new(File.join(__dir__, '../target/pgsql-config.yml')),
-      log: Loog::NULL
+      log: fake_loog
     ).start
+    @@fake_pgsql.exec('SET client_min_messages TO WARNING;')
+    @@fake_pgsql
     # rubocop:enable Style/ClassVars
   end
 

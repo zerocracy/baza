@@ -144,7 +144,7 @@ GEM
       net-http
     faraday-retry (2.2.1)
       faraday (~> 2.0)
-    fbe (0.0.72)
+    fbe (0.0.73)
       backtrace (> 0)
       decoor (> 0)
       factbase (> 0)
@@ -291,11 +291,12 @@ GEM
       ast (~> 2.4.1)
       racc
     pg (1.5.8)
-    pgtk (0.9.6)
-      backtrace (~> 0.3)
-      loog (~> 0.2)
+    pgtk (0.10.0)
+      backtrace (> 0)
+      loog (> 0)
       pg (~> 1.1)
-      random-port (~> 0.3)
+      qbash (> 0)
+      random-port (> 0)
     psych (5.1.2)
       stringio
     public_suffix (6.0.1)
