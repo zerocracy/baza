@@ -267,6 +267,7 @@ end
 # @param [LambdaContext] context I don't know what this is for
 def go(event:, context:)
   loog = ENV['RACK_ENV'] == 'test' ? Loog::VERBOSE : Loog::REGULAR
+  loog = Loog::NULL if event['quiet']
   loog.debug("Arrived package: #{event}")
   elapsed(loog, intro: 'Job processing finished', level: Logger::INFO) do
     event['Records']&.each do |rec|

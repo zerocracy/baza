@@ -89,9 +89,9 @@ class EnsembleTest < Minitest::Test
         FROM ruby:3.3
         WORKDIR /r
         RUN apt-get update -y && apt-get install -y jq zip unzip curl
-        COPY entry.sh pop.sh shift.sh finish.sh aws .
+        COPY entry.sh pop.sh shift.sh finish.sh aws ./
         RUN chmod a+x entry.sh pop.sh shift.sh finish.sh aws
-        COPY empty.fb .
+        COPY empty.fb ./
         ENV PATH=/r:${PATH}
         ENTRYPOINT ["/bin/bash", "entry.sh"]
         '

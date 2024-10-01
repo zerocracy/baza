@@ -63,7 +63,7 @@ class ShiftTest < Minitest::Test
           FROM ruby:3.3
           WORKDIR /r
           RUN apt-get update -y && apt-get install -y jq zip unzip curl
-          COPY entry.sh aws .
+          COPY entry.sh aws ./
           RUN chmod a+x aws
           ENV PATH=/r:${PATH}
           ENTRYPOINT ["/bin/bash", "entry.sh"]

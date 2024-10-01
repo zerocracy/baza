@@ -190,10 +190,10 @@ class MainTest < Minitest::Test
         FROM ruby:3.3
         WORKDIR /r
         RUN apt-get update -y && apt-get install -y jq unzip
-        COPY Gemfile .
+        COPY Gemfile ./
         RUN bundle install
         COPY swarm/ /swarm
-        COPY main.rb Gemfile .
+        COPY main.rb Gemfile ./
         '
       )
       img = 'test-main-in-docker'

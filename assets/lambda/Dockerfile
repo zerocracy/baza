@@ -46,7 +46,7 @@ RUN bundle install --retry=5 --quiet "--gemfile=${LAMBDA}/Gemfile"
 
 COPY swarm/ /swarm
 
-COPY install.sh .
+COPY install.sh ./
 RUN /bin/bash ${LAMBDA}/install.sh
 
 COPY entry.sh main.rb ./
