@@ -36,6 +36,7 @@ install: |-
   sudo ln -s "$(realpath /usr/lib/postgresql/*/bin/postgres)" /bin/postgres
   pdd -f /dev/null
   bundle install --no-color
+  bundle install --no-color --gemfile=assets/lambda/Gemfile
 release:
   pre: false
   sensitive:
