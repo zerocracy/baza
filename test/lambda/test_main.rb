@@ -56,6 +56,7 @@ class MainTest < Minitest::Test
           "
           go(
             event: {
+              #{ENV['RACK_RUN'] ? '"quiet" => "true",' : ''}
               'Records' => [
                 {
                   'messageId' => 'defd997b-4675-42fc-9f33-9457011de8b3',
