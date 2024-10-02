@@ -197,21 +197,17 @@ class MainTest < Minitest::Test
         COPY main.rb Gemfile ./
         '
       )
-      img = 'test-main-in-docker'
-      qbash("docker build #{home} -t #{img}", log: fake_loog)
       stdout =
-        begin
+        fake_image(home) do |image|
           qbash(
             [
-              "docker run --user #{Process.uid}:#{Process.gid} --rm #{img}",
+              "docker run --user #{Process.uid}:#{Process.gid} --rm #{image}",
               '/bin/bash -c',
               Shellwords.escape('ruby main.rb; unzip /tmp/result.zip -d /tmp/result')
             ],
             timeout: 10,
             log: fake_loog
           )
-        ensure
-          qbash("docker rmi #{img}", log: fake_loog)
         end
       assert_include(
         stdout,

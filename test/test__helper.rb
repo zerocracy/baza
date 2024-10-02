@@ -41,6 +41,7 @@ require 'minitest/autorun'
 require 'open3'
 require 'pgtk/pool'
 require 'rack/test'
+require 'retries'
 require 'securerandom'
 require 'yaml'
 require_relative '../baza'
@@ -211,6 +212,16 @@ class Minitest::Test
     ensure
       Process.kill('QUIT', pid)
       server.join
+    end
+  end
+
+  def fake_image(dir)
+    img = fake_name
+    qbash("docker build #{Shellwords.escape(dir)} -t #{img}", log: fake_loog)
+    begin
+      yield img
+    ensure
+      qbash("docker rmi #{img}", log: fake_loog, timeout: 10)
     end
   end
 

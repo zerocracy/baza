@@ -40,8 +40,6 @@ fi
 previous=$( jq -r .messageAttributes.previous.stringValue < event.json )
 key="${previous}/${id}.zip"
 
-ls -al .
-
 aws s3 cp "s3://${S3_BUCKET}/${key}" pack.zip
 
 attempt=0

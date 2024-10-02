@@ -78,28 +78,26 @@ class FinishTest < Minitest::Test
         ENTRYPOINT [\"/bin/bash\", \"entry.sh\"]
         "
       )
-      img = 'test-finish'
-      qbash("docker build #{home} -t #{img}", log: fake_loog)
-      RandomPort::Pool::SINGLETON.acquire do |port|
-        fake_front(port, loog: fake_loog) do
-          qbash(
-            [
-              'docker run --add-host host.docker.internal:host-gateway',
-              "--user #{Process.uid}:#{Process.gid}",
-              '-e BAZA_URL -e SWARM_ID -e SWARM_SECRET',
-              "--rm #{img} #{job.id} /tmp/work"
-            ],
-            timeout: 10,
-            log: fake_loog,
-            env: {
-              'BAZA_URL' => "http://host.docker.internal:#{port}",
-              'SWARM_ID' => s.id.to_s,
-              'SWARM_SECRET' => s.secret
-            }
-          )
+      fake_image(home) do |image|
+        RandomPort::Pool::SINGLETON.acquire do |port|
+          fake_front(port, loog: fake_loog) do
+            qbash(
+              [
+                'docker run --add-host host.docker.internal:host-gateway',
+                "--user #{Process.uid}:#{Process.gid}",
+                '-e BAZA_URL -e SWARM_ID -e SWARM_SECRET',
+                "--rm #{image} #{job.id} /tmp/work"
+              ],
+              timeout: 10,
+              log: fake_loog,
+              env: {
+                'BAZA_URL' => "http://host.docker.internal:#{port}",
+                'SWARM_ID' => s.id.to_s,
+                'SWARM_SECRET' => s.secret
+              }
+            )
+          end
         end
-      ensure
-        qbash("docker rmi #{img}", log: fake_loog)
       end
     end
   end

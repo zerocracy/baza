@@ -96,33 +96,31 @@ class EnsembleTest < Minitest::Test
         ENTRYPOINT ["/bin/bash", "entry.sh"]
         '
       )
-      img = 'test-ensemble'
-      qbash("docker build #{home} -t #{img}", log: fake_loog)
-      RandomPort::Pool::SINGLETON.acquire do |port|
-        fake_front(port, loog: fake_loog) do
-          stdout = qbash(
-            [
-              'docker run --add-host host.docker.internal:host-gateway ',
-              "--user #{Process.uid}:#{Process.gid} ",
-              "-e BAZA_URL -e SWARM_ID -e SWARM_SECRET --rm #{img}"
-            ].join,
-            timeout: 10,
-            log: fake_loog,
-            env: {
-              'BAZA_URL' => "http://host.docker.internal:#{port}",
-              'SWARM_ID' => s.id.to_s,
-              'SWARM_SECRET' => s.secret
-            }
-          )
-          assert_include(
-            stdout,
-            'adding: base.fb',
-            'adding: swarm-001-42-baza-foo/stdout.txt',
-            'AWS s3 rm s3://swarms.zerocracy.com/',
-            '--message-attributes'
-          )
-        ensure
-          qbash("docker rmi #{img}", log: fake_loog)
+      fake_image(home) do |image|
+        RandomPort::Pool::SINGLETON.acquire do |port|
+          fake_front(port, loog: fake_loog) do
+            stdout = qbash(
+              [
+                'docker run --add-host host.docker.internal:host-gateway ',
+                "--user #{Process.uid}:#{Process.gid} ",
+                "-e BAZA_URL -e SWARM_ID -e SWARM_SECRET --rm #{image}"
+              ].join,
+              timeout: 10,
+              log: fake_loog,
+              env: {
+                'BAZA_URL' => "http://host.docker.internal:#{port}",
+                'SWARM_ID' => s.id.to_s,
+                'SWARM_SECRET' => s.secret
+              }
+            )
+            assert_include(
+              stdout,
+              'adding: base.fb',
+              'adding: swarm-001-42-baza-foo/stdout.txt',
+              'AWS s3 rm s3://swarms.zerocracy.com/',
+              '--message-attributes'
+            )
+          end
         end
       end
     end

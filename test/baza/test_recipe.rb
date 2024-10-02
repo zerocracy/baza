@@ -81,46 +81,45 @@ class Baza::RecipeTest < Minitest::Test
     r = swarm.releases.start('just start', secret)
     id_rsa_file = File.join(Dir.home, '.ssh/id_rsa')
     id_rsa = File.exist?(id_rsa_file) ? File.read(id_rsa_file) : ''
-    Dir.mktmpdir do |home|
-      %w[aws docker shutdown].each { |f| stub_cli(home, f) }
-      FileUtils.mkdir_p(File.join(home, '.docker'))
-      File.write(
-        File.join(home, '.docker/Dockerfile'),
-        '
-        FROM ubuntu
-        RUN apt-get -y update
-        RUN apt-get -y install ssh-client git curl
-        WORKDIR /r
-        ENV HOME=/r
-        ENTRYPOINT ["/bin/bash", "recipe.sh"]
-        '
-      )
-      img = 'test-recipe-script'
-      qbash("docker build #{File.join(home, '.docker')} -t #{img}", log: fake_loog)
-      begin
-        RandomPort::Pool::SINGLETON.acquire do |port|
+    RandomPort::Pool::SINGLETON.acquire do |port|
+      Dir.mktmpdir do |home|
+        dock = File.join(home, '.docker')
+        FileUtils.mkdir_p(dock)
+        %w[aws docker shutdown].each { |f| stub_cli(dock, f) }
+        sh = File.join(dock, 'recipe.sh')
+        File.write(
+          sh,
+          Baza::Recipe.new(swarm, id_rsa, 'bucket').to_bash(
+            :release, 'accout', 'us-east-1', secret,
+            host: "http://host.docker.internal:#{port}"
+          )
+        )
+        File.write(
+          File.join(dock, 'Dockerfile'),
+          "
+          FROM ubuntu
+          RUN apt-get -y update
+          RUN apt-get -y install ssh-client git curl
+          WORKDIR /r
+          ENV HOME=/r
+          COPY recipe.sh aws docker shutdown ./
+          RUN chmod a+x recipe.sh aws docker shutdown
+          RUN chown -R #{Process.uid}:#{Process.gid} /r
+          ENTRYPOINT [\"/bin/bash\", \"recipe.sh\"]
+          "
+        )
+        fake_image(dock) do |image|
           fake_front(port, loog: fake_loog) do
-            sh = File.join(home, 'recipe.sh')
-            File.write(
-              sh,
-              Baza::Recipe.new(swarm, id_rsa, 'bucket').to_bash(
-                :release, 'accout', 'us-east-1', secret,
-                host: "http://host.docker.internal:#{port}"
-              )
-            )
             qbash(
               [
                 'docker run --rm --add-host host.docker.internal:host-gateway',
-                "--user #{Process.uid}:#{Process.gid}",
-                "-v #{home}:/r #{img}"
+                "--user #{Process.uid}:#{Process.gid} #{image}"
               ],
               timeout: 10,
               log: fake_loog
             )
           end
         end
-      ensure
-        qbash("docker rmi #{img}", log: fake_loog)
       end
     end
     assert(swarm.releases.get(r.id).exit.zero?)
@@ -158,7 +157,6 @@ class Baza::RecipeTest < Minitest::Test
   # that we use inside AWS Lambda function. If something is wrong in the
   # Dockerfile, this test must highlight such a problem.
   def test_build_docker_image
-    img = 'test-recipe-build'
     Dir.mktmpdir do |home|
       ['Dockerfile', 'Gemfile', 'entry.sh', 'main.rb', 'install.sh'].each do |f|
         FileUtils.copy(
@@ -167,9 +165,9 @@ class Baza::RecipeTest < Minitest::Test
         )
       end
       FileUtils.mkdir_p(File.join(home, 'swarm'))
-      qbash("docker build #{home} -t #{img}", log: fake_loog)
-    ensure
-      qbash("docker rmi -f #{img}", log: fake_loog)
+      fake_image(home) do |image|
+        qbash("docker image inspect #{image}", log: fake_loog)
+      end
     end
   end
 
@@ -237,9 +235,7 @@ class Baza::RecipeTest < Minitest::Test
             mv curl /var/task
           "
         }.each { |f, txt| File.write(File.join(home, f), txt) }
-        image = 'local-lambda-test'
-        qbash("docker build #{home} -t #{image}", log: fake_loog)
-        begin
+        fake_image(home) do |image|
           ret =
             fake_front(backend_port, loog: fake_loog) do
               container = qbash(
@@ -284,8 +280,6 @@ class Baza::RecipeTest < Minitest::Test
           assert_equal(200, ret.response_code, ret.response_body)
           assert_equal('"Done!"', ret.response_body, ret.response_body)
           assert_equal(1, s.invocations.each.to_a.size)
-        ensure
-          qbash("docker rmi #{image}", log: fake_loog)
         end
       end
       assert_include(

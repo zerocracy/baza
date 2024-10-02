@@ -84,19 +84,15 @@ class ShiftTest < Minitest::Test
           ENTRYPOINT [\"/bin/bash\", \"entry.sh\"]
           "
         )
-        img = 'test-shift'
-        qbash("docker build #{home} -t #{img}", log: fake_loog)
-        begin
+        fake_image(home) do |image|
           qbash(
             [
               "docker run --user #{Process.uid}:#{Process.gid}",
-              "--rm #{img} #{job.id} /tmp/work"
+              "--rm #{image} #{job.id} /tmp/work"
             ],
             timeout: 10,
             log: fake_loog
           )
-        ensure
-          qbash("docker rmi #{img}", log: fake_loog)
         end
       end
     assert_include(
