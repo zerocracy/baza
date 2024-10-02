@@ -74,7 +74,7 @@ fi
 
 image="{{ repository }}/{{ name }}:latest"
 docker pull "${image}" --quiet --platform "linux/${arch}" || echo 'Maybe it is absent'
-docker build . -t "${image}" --platform "linux/${arch}"
+docker build . -t "${image}" --platform "linux/${arch}" --progress=plain
 docker push "${image}" --quiet --platform "linux/${arch}"
 
 # Create new IAM role, which will be assumed by Lambda function executions:

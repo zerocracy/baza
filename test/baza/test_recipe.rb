@@ -96,7 +96,7 @@ class Baza::RecipeTest < Minitest::Test
         '
       )
       img = 'test-recipe-script'
-      qbash("docker build #{File.join(home, '.docker')} -t #{img}", log: fake_loog)
+      qbash("docker build #{File.join(home, '.docker')} -t #{img} --progress=plain", log: fake_loog)
       begin
         RandomPort::Pool::SINGLETON.acquire do |port|
           fake_front(port, loog: fake_loog) do
@@ -114,6 +114,7 @@ class Baza::RecipeTest < Minitest::Test
                 "--user #{Process.uid}:#{Process.gid}",
                 "-v #{home}:/r #{img}"
               ],
+              timeout: 10,
               log: fake_loog
             )
           end
@@ -166,7 +167,7 @@ class Baza::RecipeTest < Minitest::Test
         )
       end
       FileUtils.mkdir_p(File.join(home, 'swarm'))
-      qbash("docker build #{home} -t #{img}", log: fake_loog)
+      qbash("docker build #{home} -t #{img} --progress=plain", log: fake_loog)
     ensure
       qbash("docker rmi -f #{img}", log: fake_loog)
     end
@@ -222,7 +223,7 @@ class Baza::RecipeTest < Minitest::Test
           'swarm/entry.sh' => "
             #!/bin/bash
             set -ex
-            cd \"$(dirname \"$0\")\"
+            cd \"$(dirname \"$0\")\" || exit 1
             export BUNDLE_GEMFILE=\"$(dirname \"$0\")/Gemfile\"
             bundle exec judges --version
           ",
@@ -237,7 +238,7 @@ class Baza::RecipeTest < Minitest::Test
           "
         }.each { |f, txt| File.write(File.join(home, f), txt) }
         image = 'local-lambda-test'
-        qbash("docker build #{home} -t #{image}", log: fake_loog)
+        qbash("docker build #{home} -t #{image} --progress=plain", log: fake_loog)
         begin
           ret =
             fake_front(backend_port, loog: fake_loog) do
@@ -247,6 +248,7 @@ class Baza::RecipeTest < Minitest::Test
                   "--user #{Process.uid}:#{Process.gid}",
                   "-d -p #{lambda_port}:8080 #{image}"
                 ],
+                timeout: 10,
                 log: fake_loog
               ).split("\n")[-1]
               begin

@@ -60,41 +60,43 @@ class FinishTest < Minitest::Test
       FileUtils.copy(File.join(__dir__, '../../swarms/finish/entry.sh'), home)
       File.binwrite(File.join(home, 'empty.fb'), Factbase.new.export)
       File.write(
+        File.join(home, 'event.json'),
+        JSON.pretty_generate({ messageAttributes: { swarm: { stringValue: s.name } } })
+      )
+      File.write(
         File.join(home, 'Dockerfile'),
-        '
+        "
         FROM ruby:3.3
         WORKDIR /r
         RUN apt-get update -y && apt-get install -y jq zip unzip curl
         COPY entry.sh aws empty.fb ./
         RUN chmod a+x aws
+        RUN mkdir -p /tmp/work
+        COPY event.json /tmp/work
+        RUN chown -R #{Process.uid}:#{Process.gid} /tmp/work
         ENV PATH=/r:${PATH}
-        ENTRYPOINT ["/bin/bash", "entry.sh"]
-        '
+        ENTRYPOINT [\"/bin/bash\", \"entry.sh\"]
+        "
       )
       img = 'test-finish'
-      qbash("docker build #{home} -t #{img}", log: fake_loog)
+      qbash("docker build #{home} -t #{img} --progress=plain", log: fake_loog)
       RandomPort::Pool::SINGLETON.acquire do |port|
         fake_front(port, loog: fake_loog) do
-          Dir.mktmpdir do |dir|
-            File.write(
-              File.join(dir, 'event.json'),
-              JSON.pretty_generate({ messageAttributes: { swarm: { stringValue: s.name } } })
-            )
-            qbash(
-              [
-                'docker run --add-host host.docker.internal:host-gateway',
-                "--user #{Process.uid}:#{Process.gid}",
-                '-e BAZA_URL -e SWARM_ID -e SWARM_SECRET',
-                "-v #{dir}:/temp --rm #{img} #{job.id} /temp"
-              ],
-              log: fake_loog,
-              env: {
-                'BAZA_URL' => "http://host.docker.internal:#{port}",
-                'SWARM_ID' => s.id.to_s,
-                'SWARM_SECRET' => s.secret
-              }
-            )
-          end
+          qbash(
+            [
+              'docker run --add-host host.docker.internal:host-gateway',
+              "--user #{Process.uid}:#{Process.gid}",
+              '-e BAZA_URL -e SWARM_ID -e SWARM_SECRET',
+              "--rm #{img} #{job.id} /tmp/work"
+            ],
+            timeout: 10,
+            log: fake_loog,
+            env: {
+              'BAZA_URL' => "http://host.docker.internal:#{port}",
+              'SWARM_ID' => s.id.to_s,
+              'SWARM_SECRET' => s.secret
+            }
+          )
         end
       ensure
         qbash("docker rmi #{img}", log: fake_loog)
