@@ -198,7 +198,7 @@ class MainTest < Minitest::Test
         '
       )
       img = 'test-main-in-docker'
-      qbash("docker build #{home} -t #{img} --progress=plain", log: fake_loog)
+      qbash("docker build #{home} -t #{img}", log: fake_loog)
       stdout =
         begin
           qbash(

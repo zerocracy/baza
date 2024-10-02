@@ -96,7 +96,7 @@ class Baza::RecipeTest < Minitest::Test
         '
       )
       img = 'test-recipe-script'
-      qbash("docker build #{File.join(home, '.docker')} -t #{img} --progress=plain", log: fake_loog)
+      qbash("docker build #{File.join(home, '.docker')} -t #{img}", log: fake_loog)
       begin
         RandomPort::Pool::SINGLETON.acquire do |port|
           fake_front(port, loog: fake_loog) do
@@ -167,7 +167,7 @@ class Baza::RecipeTest < Minitest::Test
         )
       end
       FileUtils.mkdir_p(File.join(home, 'swarm'))
-      qbash("docker build #{home} -t #{img} --progress=plain", log: fake_loog)
+      qbash("docker build #{home} -t #{img}", log: fake_loog)
     ensure
       qbash("docker rmi -f #{img}", log: fake_loog)
     end
@@ -238,7 +238,7 @@ class Baza::RecipeTest < Minitest::Test
           "
         }.each { |f, txt| File.write(File.join(home, f), txt) }
         image = 'local-lambda-test'
-        qbash("docker build #{home} -t #{image} --progress=plain", log: fake_loog)
+        qbash("docker build #{home} -t #{image}", log: fake_loog)
         begin
           ret =
             fake_front(backend_port, loog: fake_loog) do

@@ -79,7 +79,7 @@ class FinishTest < Minitest::Test
         "
       )
       img = 'test-finish'
-      qbash("docker build #{home} -t #{img} --progress=plain", log: fake_loog)
+      qbash("docker build #{home} -t #{img}", log: fake_loog)
       RandomPort::Pool::SINGLETON.acquire do |port|
         fake_front(port, loog: fake_loog) do
           qbash(

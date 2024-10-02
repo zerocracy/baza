@@ -85,7 +85,7 @@ class ShiftTest < Minitest::Test
           "
         )
         img = 'test-shift'
-        qbash("docker build #{home} -t #{img} --progress=plain", log: fake_loog)
+        qbash("docker build #{home} -t #{img}", log: fake_loog)
         begin
           qbash(
             [

@@ -68,7 +68,7 @@ class PopTest < Minitest::Test
         '
       )
       img = 'test-pop'
-      qbash("docker build #{home} -t #{img} --progress=plain", log: fake_loog)
+      qbash("docker build #{home} -t #{img}", log: fake_loog)
       stdout =
         RandomPort::Pool::SINGLETON.acquire do |port|
           fake_front(port, loog: fake_loog) do
