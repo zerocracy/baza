@@ -113,7 +113,15 @@ class Minitest::Test
       input = File.join(dir, 'foo.fb')
       File.binwrite(input, Factbase.new.export)
       uri = fbs.save(input)
-      fake_token(human).start(fake_name, uri, 1, 0, 'n/a', [], '127.0.0.1')
+      fake_token(human).start(
+        fake_name, uri, 1, 0, 'n/a',
+        [
+          'duration:360',
+          'workflow_url:https://google.com',
+          'vitals_url:https://twitter.com'
+        ],
+        '127.0.0.1'
+      )
     end
   end
 
