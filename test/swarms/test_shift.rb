@@ -85,14 +85,7 @@ class ShiftTest < Minitest::Test
           "
         )
         fake_image(home) do |image|
-          qbash(
-            [
-              "docker run --user #{Process.uid}:#{Process.gid}",
-              "--rm #{image} #{job.id} /tmp/work"
-            ],
-            timeout: 10,
-            log: fake_loog
-          )
+          fake_container(image, '', "#{job.id} /tmp/work")
         end
       end
     assert_include(

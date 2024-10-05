@@ -110,14 +110,7 @@ class Baza::RecipeTest < Minitest::Test
         )
         fake_image(dock) do |image|
           fake_front(port, loog: fake_loog) do
-            qbash(
-              [
-                'docker run --rm --add-host host.docker.internal:host-gateway',
-                "--user #{Process.uid}:#{Process.gid} #{image}"
-              ],
-              timeout: 10,
-              log: fake_loog
-            )
+            fake_container(image)
           end
         end
       end
@@ -238,15 +231,7 @@ class Baza::RecipeTest < Minitest::Test
         fake_image(home) do |image|
           ret =
             fake_front(backend_port, loog: fake_loog) do
-              container = qbash(
-                [
-                  'docker run --add-host host.docker.internal:host-gateway',
-                  "--user #{Process.uid}:#{Process.gid}",
-                  "-d -p #{lambda_port}:8080 #{image}"
-                ],
-                timeout: 10,
-                log: fake_loog
-              ).split("\n")[-1]
+              container = fake_container(image, "-d -p #{lambda_port}:8080").split("\n")[-1]
               begin
                 wait_for { Typhoeus::Request.get("http://localhost:#{lambda_port}/test").code == 404 }
                 request = Typhoeus::Request.new(

@@ -42,11 +42,7 @@ class Baza::FakeImageTest < Minitest::Test
         "
       )
       fake_image(home) do |image|
-        stdout = qbash(
-          "docker run --rm --user #{Process.uid}:#{Process.gid} #{image}",
-          timeout: 10,
-          log: fake_loog
-        )
+        stdout = fake_container(image)
         assert_equal("/tmp\n", stdout, stdout)
       end
     end

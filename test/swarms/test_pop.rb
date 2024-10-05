@@ -71,14 +71,8 @@ class PopTest < Minitest::Test
         fake_image(home) do |image|
           RandomPort::Pool::SINGLETON.acquire do |port|
             fake_front(port, loog: fake_loog) do
-              qbash(
-                [
-                  'docker run --add-host host.docker.internal:host-gateway',
-                  "--user #{Process.uid}:#{Process.gid}",
-                  "-e BAZA_URL -e SWARM_ID -e SWARM_SECRET -e SWARM_NAME --rm #{image} 0 /tmp"
-                ],
-                timeout: 10,
-                log: fake_loog,
+              fake_container(
+                image, '', '0 /tmp',
                 env: {
                   'BAZA_URL' => "http://host.docker.internal:#{port}",
                   'SWARM_ID' => s.id.to_s,

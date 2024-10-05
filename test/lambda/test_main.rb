@@ -199,14 +199,9 @@ class MainTest < Minitest::Test
       )
       stdout =
         fake_image(home) do |image|
-          qbash(
-            [
-              "docker run --user #{Process.uid}:#{Process.gid} --rm #{image}",
-              '/bin/bash -c',
-              Shellwords.escape('ruby main.rb; unzip /tmp/result.zip -d /tmp/result')
-            ],
-            timeout: 10,
-            log: fake_loog
+          fake_container(
+            image, '',
+            "/bin/bash -c #{Shellwords.escape('ruby main.rb; unzip /tmp/result.zip -d /tmp/result')}"
           )
         end
       assert_include(

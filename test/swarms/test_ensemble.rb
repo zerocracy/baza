@@ -99,14 +99,8 @@ class EnsembleTest < Minitest::Test
       fake_image(home) do |image|
         RandomPort::Pool::SINGLETON.acquire do |port|
           fake_front(port, loog: fake_loog) do
-            stdout = qbash(
-              [
-                'docker run --add-host host.docker.internal:host-gateway ',
-                "--user #{Process.uid}:#{Process.gid} ",
-                "-e BAZA_URL -e SWARM_ID -e SWARM_SECRET --rm #{image}"
-              ].join,
-              timeout: 10,
-              log: fake_loog,
+            stdout = fake_container(
+              image,
               env: {
                 'BAZA_URL' => "http://host.docker.internal:#{port}",
                 'SWARM_ID' => s.id.to_s,

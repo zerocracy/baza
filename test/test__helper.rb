@@ -233,6 +233,23 @@ class Minitest::Test
     end
   end
 
+  def fake_container(image, args = '', cmd = '', loog: fake_loog, env: {})
+    qbash(
+      [
+        'docker run --rm --add-host host.docker.internal:host-gateway',
+        args,
+        env.keys.map { |k| "-e #{Shellwords.escape(k)}" }.join(' '),
+        '--user',
+        Shellwords.escape("#{Process.uid}:#{Process.gid}"),
+        Shellwords.escape(image),
+        cmd
+      ],
+      timeout: 25,
+      log: loog,
+      env:
+    )
+  end
+
   def wait_for(seconds = 5)
     start = Time.now
     loop do
