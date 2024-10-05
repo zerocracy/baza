@@ -22,6 +22,8 @@
 ---
 docker:
   image: yegor256/rultor-java
+ec2:
+  type: t2.medium
 readers:
   - "urn:github:526301"
 assets:
