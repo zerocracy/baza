@@ -87,8 +87,15 @@ if [ ! -e head.txt ] || [ ! -s head.txt ]; then
   printf '0000000000000000000000000000000000000000' > head.txt
 fi
 
-curl -s -X PUT --data-binary '@tail.log' \
+status=$( curl -s -X PUT --data-binary '@tail.log' \
   --connect-timeout 10 --max-time 300 \
   -H 'Content-Type: text/plain' \
   -H 'User-Agent: recipe.sh' \
-  "{{ host }}/swarms/finish?secret={{ secret }}&head=$(cat head.txt)&exit=$(cat exit.txt)&sec=${SECONDS}"
+  "{{ host }}/swarms/finish?secret={{ secret }}&head=$(cat head.txt)&exit=$(cat exit.txt)&sec=${SECONDS}" \
+  --fail-with-body -o http.txt -w "%{http_code}" )
+if [ "${status}" == '200' ]; then
+  echo "Reported the finish to {{ host }}"
+else
+  echo "Failed to finish (code=${status}, HTTP response: \"$(cat http.txt)\")"
+  exit 1
+fi

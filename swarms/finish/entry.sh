@@ -45,11 +45,11 @@ aws s3 cp "s3://${S3_BUCKET}/${key}" pack.zip
 attempt=0
 while true; do
   ((++attempt))
-  status=$(curl -X PUT -s "${BAZA_URL}/finish?id=${id}&swarm=${SWARM_ID}&secret=${SWARM_SECRET}" \
+  status=$( curl -X PUT -s "${BAZA_URL}/finish?id=${id}&swarm=${SWARM_ID}&secret=${SWARM_SECRET}" \
     --data-binary '@pack.zip' -o http.txt \
     --connect-timeout 10 --max-time 300 \
     -H "User-Agent: ${SWARM_NAME}" \
-    -H 'Content-Type: application/octet-stream' -w "%{http_code}")
+    -H 'Content-Type: application/octet-stream' -w "%{http_code}" )
   echo "PUT ${BAZA_URL}/finish returned HTTP #${status}"
   if [ "${status}" -lt 500 ]; then break; fi
   echo "HTTP response: $(cat http.txt)"

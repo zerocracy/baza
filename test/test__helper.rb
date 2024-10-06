@@ -258,7 +258,9 @@ class Minitest::Test
       )
       unless code.zero?
         fake_loog.error(stdout)
-        raise "Failed to run docker container #{n} with #{image}"
+        raise \
+          "Failed to run docker container #{n} with #{image}, " \
+          "exit code is ##{code}, stdout has #{stdout.split("\n").count} lines"
       end
       return yield n if block_given?
     ensure

@@ -176,7 +176,8 @@ class Baza::RecipeTest < Minitest::Test
     s = job.jobs.human.swarms.add('st', 'zerocracy/swarm-template', 'master', '/')
     RandomPort::Pool::SINGLETON.acquire(2) do |lambda_port, backend_port|
       Dir.mktmpdir do |home|
-        %w[curl shutdown aws].each { |f| stub_cli(home, f) }
+        %w[shutdown aws].each { |f| stub_cli(home, f) }
+        stub_cli(home, 'curl', 'echo 200')
         sh = File.join(home, 'recipe.sh')
         File.write(
           sh,
@@ -274,9 +275,9 @@ class Baza::RecipeTest < Minitest::Test
 
   private
 
-  def stub_cli(home, name)
+  def stub_cli(home, name, content = 'echo FAKE-$(basename $0) $@')
     sh = File.join(home, name)
-    File.write(sh, 'echo FAKE-$(basename $0) $@')
+    File.write(sh, content)
     FileUtils.chmod('+x', sh)
   end
 end
