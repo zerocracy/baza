@@ -96,6 +96,7 @@ status=$( curl -s -X PUT --data-binary '@tail.log' \
 if [ "${status}" == '200' ]; then
   echo "Reported the finish to {{ host }}"
 else
-  echo "Failed to finish (code=${status}, HTTP response: \"$(cat http.txt)\")"
+  cat http.txt
+  echo "Failed to finish to {{ host }} (code=${status})"
   exit 1
 fi

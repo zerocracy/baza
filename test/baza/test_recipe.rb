@@ -232,9 +232,9 @@ class Baza::RecipeTest < Minitest::Test
           ret =
             fake_front(backend_port, loog: fake_loog) do
               fake_container(image, "-d -p #{lambda_port}:8080") do |container|
-                wait_for { Typhoeus::Request.get("http://localhost:#{lambda_port}/test").code == 404 }
+                wait_for { Typhoeus::Request.get("http://127.0.0.1:#{lambda_port}/test").code == 404 }
                 request = Typhoeus::Request.new(
-                  "http://localhost:#{lambda_port}/2015-03-31/functions/function/invocations",
+                  "http://127.0.0.1:#{lambda_port}/2015-03-31/functions/function/invocations",
                   body: JSON.pretty_generate(
                     {
                       'Records' => [
