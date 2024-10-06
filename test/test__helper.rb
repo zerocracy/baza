@@ -78,7 +78,7 @@ class Minitest::Test
   end
 
   def fake_loog
-    ENV['RACK_RUN'] ? Loog::NULL : Loog::VERBOSE
+    ENV['RACK_RUN'] ? Loog::ERRORS : Loog::VERBOSE
   end
 
   def fake_pgsql

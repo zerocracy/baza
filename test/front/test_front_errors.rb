@@ -27,7 +27,7 @@ require 'iri'
 require_relative '../test__helper'
 require_relative '../../baza'
 
-class Baza::AppTest < Minitest::Test
+class Baza::FrontErrorsTest < Minitest::Test
   def app
     Sinatra::Application
   end

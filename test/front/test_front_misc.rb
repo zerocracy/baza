@@ -26,13 +26,13 @@ require 'minitest/autorun'
 require_relative '../test__helper'
 require_relative '../../baza'
 
-class Baza::FrontTelegramTest < Minitest::Test
+class Baza::FrontMiscTest < Minitest::Test
   def app
     Sinatra::Application
   end
 
-  def test_telegram_auth
-    get('/tauth?secret=wrong')
-    assert_status(303)
+  def test_robots
+    get('/robots.txt')
+    assert_status(200)
   end
 end
