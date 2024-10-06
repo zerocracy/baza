@@ -1,10 +1,11 @@
 !!! 5
-%html
+%html{ lang: 'en-US' }
   %head
     %title
       = title
     %meta{ charset: 'UTF-8' }
     %meta{ name: 'viewport', content: 'width=device-width, initial-scale=1.0' }
+    %meta{ name: 'description', content: 'Zerocracy Dashboard (logged in users only)' }
     %link{ href: 'https://cdn.jsdelivr.net/gh/yegor256/tacit@gh-pages/tacit-css.min.css', rel: 'stylesheet' }
     %link{ href: 'https://cdn.jsdelivr.net/gh/yegor256/drops@gh-pages/drops.min.css', rel: 'stylesheet' }
     %link{ href: 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css', rel: 'stylesheet' }
@@ -15,9 +16,7 @@
     - if defined?(css)
       %link{ href: iri.cut("/css/#{css}.css"), rel: 'stylesheet' }
     - if the_human.tester?
-      :css
-        body { background-color: #fff3f3; }
-        .login { background-color: darkred; color: white; padding: .1em .3em; }
+      %link{ href: iri.cut('/css/tester.css'), rel: 'stylesheet' }
   %body
     %section
       %header
