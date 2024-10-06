@@ -241,7 +241,7 @@ def one(id, pack, loog)
       'SWARM_ID' => '{{ swarm }}',
       'SWARM_NAME' => '{{ name }}'
     },
-    accept: []
+    accept: nil
   )
 end
 

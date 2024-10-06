@@ -92,7 +92,7 @@ class Minitest::Test
   end
 
   def fake_name
-    "jeff#{SecureRandom.hex(8)}"
+    "fake#{SecureRandom.hex(8)}"
   end
 
   def fake_humans
@@ -234,20 +234,30 @@ class Minitest::Test
   end
 
   def fake_container(image, args = '', cmd = '', loog: fake_loog, env: {})
-    qbash(
+    n = fake_name
+    stdout, code = qbash(
       [
-        'docker run --rm --add-host host.docker.internal:host-gateway',
+        'docker run',
+        "--name #{Shellwords.escape(n)}",
+        '--rm',
+        '--add-host host.docker.internal:host-gateway',
         args,
         env.keys.map { |k| "-e #{Shellwords.escape(k)}" }.join(' '),
-        '--user',
-        Shellwords.escape("#{Process.uid}:#{Process.gid}"),
+        '--user', Shellwords.escape("#{Process.uid}:#{Process.gid}"),
         Shellwords.escape(image),
         cmd
       ],
       timeout: 25,
       log: loog,
+      accept: nil,
+      both: true,
       env:
     )
+    unless code.zero?
+      fake_loog.error(qbash("docker logs #{Shellwords.escape(n)}"))
+      raise "Failed to run docker container #{n} with #{image}"
+    end
+    stdout
   end
 
   def wait_for(seconds = 5)
