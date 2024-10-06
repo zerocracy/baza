@@ -175,7 +175,6 @@ class Baza::RecipeTest < Minitest::Test
     job = fake_job(fake_human('yegor256'))
     s = job.jobs.human.swarms.add('st', 'zerocracy/swarm-template', 'master', '/')
     RandomPort::Pool::SINGLETON.acquire(2) do |lambda_port, backend_port|
-      stdout = nil
       Dir.mktmpdir do |home|
         %w[curl shutdown aws].each { |f| stub_cli(home, f) }
         sh = File.join(home, 'recipe.sh')
@@ -231,8 +230,7 @@ class Baza::RecipeTest < Minitest::Test
         fake_image(home) do |image|
           ret =
             fake_front(backend_port, loog: fake_loog) do
-              container = fake_container(image, "-d -p #{lambda_port}:8080").split("\n")[-1]
-              begin
+              fake_container(image, "-d -p #{lambda_port}:8080") do |container|
                 wait_for { Typhoeus::Request.get("http://localhost:#{lambda_port}/test").code == 404 }
                 request = Typhoeus::Request.new(
                   "http://localhost:#{lambda_port}/2015-03-31/functions/function/invocations",
@@ -256,10 +254,14 @@ class Baza::RecipeTest < Minitest::Test
                   }
                 )
                 request.run
+                assert_include(
+                  qbash("docker logs #{Shellwords.escape(container)}", log: fake_loog),
+                  'Unpacked ZIP',
+                  'Job #42 is coming from @yegor256',
+                  "Reported to host.docker.internal:#{backend_port}, received HTTP #200",
+                  'Job processing finished'
+                )
                 request.response
-              ensure
-                stdout = qbash("docker logs #{container}", log: fake_loog)
-                qbash("docker rm -f #{container}", log: fake_loog)
               end
             end
           assert_equal(200, ret.response_code, ret.response_body)
@@ -267,13 +269,6 @@ class Baza::RecipeTest < Minitest::Test
           assert_equal(1, s.invocations.each.to_a.size)
         end
       end
-      assert_include(
-        stdout,
-        'Unpacked ZIP',
-        'Job #42 is coming from @yegor256',
-        "Reported to host.docker.internal:#{backend_port}, received HTTP #200",
-        'Job processing finished'
-      )
     end
   end
 

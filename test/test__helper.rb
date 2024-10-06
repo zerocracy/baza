@@ -43,6 +43,7 @@ require 'pgtk/pool'
 require 'rack/test'
 require 'retries'
 require 'securerandom'
+require 'tago'
 require 'yaml'
 require_relative '../baza'
 require_relative '../objects/baza/humans'
@@ -235,35 +236,46 @@ class Minitest::Test
 
   def fake_container(image, args = '', cmd = '', loog: fake_loog, env: {})
     n = fake_name
-    stdout, code = qbash(
-      [
-        'docker run',
-        "--name #{Shellwords.escape(n)}",
-        '--rm',
-        '--add-host host.docker.internal:host-gateway',
-        args,
-        env.keys.map { |k| "-e #{Shellwords.escape(k)}" }.join(' '),
-        '--user', Shellwords.escape("#{Process.uid}:#{Process.gid}"),
-        Shellwords.escape(image),
-        cmd
-      ],
-      timeout: 25,
-      log: loog,
-      accept: nil,
-      both: true,
-      env:
-    )
-    unless code.zero?
-      fake_loog.error(qbash("docker logs #{Shellwords.escape(n)}"))
-      raise "Failed to run docker container #{n} with #{image}"
+    stdout = nil
+    code = nil
+    begin
+      stdout, code = qbash(
+        [
+          'docker run',
+          "--name #{Shellwords.escape(n)}",
+          '--add-host host.docker.internal:host-gateway',
+          args,
+          env.keys.map { |k| "-e #{Shellwords.escape(k)}" }.join(' '),
+          '--user', Shellwords.escape("#{Process.uid}:#{Process.gid}"),
+          Shellwords.escape(image),
+          cmd
+        ],
+        timeout: 25,
+        log: loog,
+        accept: nil,
+        both: true,
+        env:
+      )
+      unless code.zero?
+        fake_loog.error(stdout)
+        raise "Failed to run docker container #{n} with #{image}"
+      end
+      return yield n if block_given?
+    ensure
+      qbash(
+        "docker logs #{Shellwords.escape(n)}",
+        level: code.zero? ? Logger::DEBUG : Logger::ERROR,
+        log: fake_loog
+      )
+      qbash("docker rm -f #{Shellwords.escape(n)}", log: fake_loog)
     end
     stdout
   end
 
-  def wait_for(seconds = 5)
+  def wait_for(seconds = 20)
     start = Time.now
     loop do
-      raise 'Timed out' if Time.now - start > seconds
+      raise "Timed out after waiting for #{start.ago}" if Time.now - start > seconds
       break if yield
     end
   end
