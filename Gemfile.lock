@@ -300,7 +300,7 @@ GEM
     psych (5.1.2)
       stringio
     public_suffix (6.0.1)
-    qbash (0.0.5)
+    qbash (0.0.7)
       backtrace (> 0)
       elapsed (> 0)
       loog (> 0)
