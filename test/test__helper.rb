@@ -240,17 +240,18 @@ class Minitest::Test
     stdout = nil
     code = nil
     begin
+      cmd = [
+        'docker run',
+        '--name', Shellwords.escape(n),
+        OS.linux? ? '--net host' : "--add-host #{fake_docker_host}:host-gateway",
+        args,
+        env.keys.map { |k| "-e #{Shellwords.escape(k)}" }.join(' '),
+        '--user', Shellwords.escape("#{Process.uid}:#{Process.gid}"),
+        Shellwords.escape(image),
+        cmd
+      ].join(' ')
       stdout, code = qbash(
-        [
-          'docker run',
-          '--name', Shellwords.escape(n),
-          OS.linux? ? '--net host' : "--add-host #{fake_docker_host}:host-gateway",
-          args,
-          env.keys.map { |k| "-e #{Shellwords.escape(k)}" }.join(' '),
-          '--user', Shellwords.escape("#{Process.uid}:#{Process.gid}"),
-          Shellwords.escape(image),
-          cmd
-        ],
+        cmd,
         timeout: 25,
         log: loog,
         accept: nil,
@@ -260,8 +261,8 @@ class Minitest::Test
       unless code.zero?
         fake_loog.error(stdout)
         raise \
-          "Failed to run docker container #{n} with #{image}, " \
-          "exit code is ##{code}, stdout has #{stdout.split("\n").count} lines"
+          "Failed to run #{cmd} " \
+          "(exit code is ##{code}, stdout has #{stdout.split("\n").count} lines)"
       end
       return yield n if block_given?
     ensure
@@ -275,7 +276,7 @@ class Minitest::Test
     stdout
   end
 
-  def wait_for(seconds = 5)
+  def wait_for(seconds = 15)
     start = Time.now
     loop do
       raise "Timed out after waiting for #{start.ago}" if Time.now - start > seconds

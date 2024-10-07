@@ -39,6 +39,7 @@ install: |-
   pdd -f /dev/null
   bundle install --no-color
   bundle install --no-color --gemfile=assets/lambda/Gemfile
+  bundle install --no-color --gemfile=swarms/alterations/Gemfile
 release:
   pre: false
   sensitive:
