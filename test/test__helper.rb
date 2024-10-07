@@ -39,6 +39,7 @@ require 'glogin/cookie'
 require 'loog'
 require 'minitest/autorun'
 require 'open3'
+require 'os'
 require 'pgtk/pool'
 require 'rack/test'
 require 'retries'
@@ -242,8 +243,8 @@ class Minitest::Test
       stdout, code = qbash(
         [
           'docker run',
-          "--name #{Shellwords.escape(n)}",
-          '--add-host host.docker.internal:host-gateway',
+          '--name', Shellwords.escape(n),
+          OS.linux? ? '--net host' : "--add-host #{fake_docker_host}:host-gateway",
           args,
           env.keys.map { |k| "-e #{Shellwords.escape(k)}" }.join(' '),
           '--user', Shellwords.escape("#{Process.uid}:#{Process.gid}"),
@@ -274,7 +275,7 @@ class Minitest::Test
     stdout
   end
 
-  def wait_for(seconds = 20)
+  def wait_for(seconds = 5)
     start = Time.now
     loop do
       raise "Timed out after waiting for #{start.ago}" if Time.now - start > seconds
@@ -285,6 +286,14 @@ class Minitest::Test
   def assert_include(text, *subs)
     subs.each do |s|
       assert(text.include?(s), "Can't find #{s.inspect} in\n#{text}")
+    end
+  end
+
+  def fake_docker_host
+    if OS.linux?
+      '172.17.0.1'
+    else
+      'host.docker.internal'
     end
   end
 end

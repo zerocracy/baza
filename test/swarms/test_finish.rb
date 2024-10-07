@@ -84,7 +84,7 @@ class FinishTest < Minitest::Test
             fake_container(
               image, '', "#{job.id} /tmp/work",
               env: {
-                'BAZA_URL' => "http://host.docker.internal:#{port}",
+                'BAZA_URL' => "http://#{fake_docker_host}:#{port}",
                 'SWARM_ID' => s.id.to_s,
                 'SWARM_SECRET' => s.secret
               }

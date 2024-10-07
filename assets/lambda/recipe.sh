@@ -32,8 +32,8 @@ PATH=$(pwd):$PATH
 
 # If the "aws" file exists right here, it's a testing mode:
 if [ ! -e curl ] && [ ! -e aws ]; then
-  AWS_TOKEN=$(curl -s -X PUT 'http://169.254.169.254/latest/api/token' -H 'X-aws-ec2-metadata-token-ttl-seconds: 21600')
-  AWS_JSON=$(curl -s -H "X-aws-ec2-metadata-token: ${AWS_TOKEN}" 'http://169.254.169.254/latest/meta-data/iam/security-credentials/baza-release')
+  AWS_TOKEN=$(curl --silent --request PUT 'http://169.254.169.254/latest/api/token' --header 'X-aws-ec2-metadata-token-ttl-seconds: 21600')
+  AWS_JSON=$(curl --silent --header "X-aws-ec2-metadata-token: ${AWS_TOKEN}" 'http://169.254.169.254/latest/meta-data/iam/security-credentials/baza-release')
   AWS_ACCESS_KEY_ID=$(echo "${AWS_JSON}" | jq -r '.AccessKeyId')
   export AWS_ACCESS_KEY_ID
   AWS_SECRET_ACCESS_KEY=$(echo "${AWS_JSON}" | jq -r '.SecretAccessKey')
@@ -87,16 +87,21 @@ if [ ! -e head.txt ] || [ ! -s head.txt ]; then
   printf '0000000000000000000000000000000000000000' > head.txt
 fi
 
-status=$( curl -s -X PUT --data-binary '@tail.log' \
+status=$( curl --silent --request PUT --data-binary '@tail.log' \
+  --retry 3 --retry-all-errors --show-error \
   --connect-timeout 10 --max-time 300 \
-  -H 'Content-Type: text/plain' \
-  -H 'User-Agent: recipe.sh' \
+  --header 'Content-Type: text/plain' \
+  --header 'User-Agent: recipe.sh' \
   "{{ host }}/swarms/finish?secret={{ secret }}&head=$(cat head.txt)&exit=$(cat exit.txt)&sec=${SECONDS}" \
-  --fail-with-body -o http.txt -w "%{http_code}" )
-if [ "${status}" == '200' ]; then
-  echo "Reported the finish to {{ host }}"
-else
-  cat http.txt
+  --fail-with-body --output http.txt -w "%{http_code}" ||: )
+if [ "${status}" == '000' ]; then
+  echo "Failed to connect to {{ host }}"
+  exit 1
+fi
+if [ "${status}" != '200' ]; then
+  cat http.txt ||:
   echo "Failed to finish to {{ host }} (code=${status})"
   exit 1
 fi
+
+echo "Finished and repoted to {{ host }} in ${SECONDS} sec"

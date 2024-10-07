@@ -55,6 +55,7 @@ gem 'net-ping', '~>2.0', require: false
 gem 'net-scp', '~>4.0'
 gem 'net-ssh', '~>7.2'
 gem 'octokit', '>0'
+gem 'os', '>0', require: false
 gem 'pgtk', '>0'
 gem 'qbash', '>0'
 gem 'rack', '~>3.1'

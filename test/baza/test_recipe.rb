@@ -63,7 +63,7 @@ class Baza::RecipeTest < Minitest::Test
     assert_include(
       Baza::Recipe.new(s, '', '').to_lite(:release, '424242', 'us-east-1a', 'sword-fish'),
       "#!/bin/bash\n",
-      "curl -s --fail-with-body 'https://www.zerocracy.com/swarms/#{s.id}/files?"
+      "curl --silent --fail-with-body 'https://www.zerocracy.com/swarms/#{s.id}/files?"
     )
   end
 
@@ -259,7 +259,7 @@ class Baza::RecipeTest < Minitest::Test
                   qbash("docker logs #{Shellwords.escape(container)}", log: fake_loog),
                   'Unpacked ZIP',
                   'Job #42 is coming from @yegor256',
-                  "Reported to host.docker.internal:#{backend_port}, received HTTP #200",
+                  "Reported to #{fake_docker_host}:#{backend_port}, received HTTP #200",
                   'Job processing finished'
                 )
                 request.response
