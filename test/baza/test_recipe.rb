@@ -91,7 +91,7 @@ class Baza::RecipeTest < Minitest::Test
           sh,
           Baza::Recipe.new(swarm, id_rsa, 'bucket').to_bash(
             :release, 'accout', 'us-east-1', secret,
-            host: "http://host.docker.internal:#{port}"
+            host: "http://#{fake_docker_host}:#{port}"
           )
         )
         File.write(
@@ -183,7 +183,7 @@ class Baza::RecipeTest < Minitest::Test
           sh,
           Baza::Recipe.new(s, '', '').to_bash(
             :release, '019644334823', 'us-east-1', 'fake',
-            host: "http://host.docker.internal:#{backend_port}"
+            host: "http://#{fake_docker_host}:#{backend_port}"
           )
         )
         qbash("/bin/bash #{sh}", log: fake_loog)
@@ -232,9 +232,9 @@ class Baza::RecipeTest < Minitest::Test
           ret =
             fake_front(backend_port, loog: fake_loog) do
               fake_container(image, "-d -p #{lambda_port}:8080") do |container|
-                wait_for { Typhoeus::Request.get("http://127.0.0.1:#{lambda_port}/test").code == 404 }
+                wait_for { Typhoeus::Request.get("http://localhost:#{lambda_port}/test").code == 404 }
                 request = Typhoeus::Request.new(
-                  "http://127.0.0.1:#{lambda_port}/2015-03-31/functions/function/invocations",
+                  "http://localhost:#{lambda_port}/2015-03-31/functions/function/invocations",
                   body: JSON.pretty_generate(
                     {
                       'Records' => [
