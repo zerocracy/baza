@@ -26,6 +26,7 @@ require 'backtrace'
 require 'factbase'
 require 'fileutils'
 require 'zlib'
+require 'digest'
 require_relative '../objects/baza/errors'
 require_relative '../objects/baza/urror'
 require_relative '../objects/baza/features'
@@ -68,10 +69,12 @@ def job_start(token, file, name, metas, ip)
   url = job.metas.maybe('workflow_url')
   version = job.metas.maybe('action_version')
   unless errors.empty?
-    job.jobs.human.notify(
+    par = errors.to_a.join("\n")
+    job.jobs.human.notifications.post(
+      "#{job.name}-#{Digest::MD5.hexdigest(par)}",
       "⚠️ The job [##{job.id}](//jobs/#{job.id}) (`#{job.name}`)",
       "arrived with #{errors.count} errors:",
-      "\n```\n#{errors.to_a.join("\n")}\n```\n",
+      "\n```\n#{par}\n```\n",
       url.nil? ? '' : "Its GitHub workflow is [here](#{url}).",
       unless version.nil?
         [

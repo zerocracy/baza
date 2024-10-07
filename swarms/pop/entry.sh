@@ -28,7 +28,7 @@ set -o pipefail
 id=$1
 [[ "${id}" =~ ^[0-9]+$ ]]
 home=$2
-cd "${home}"
+cd "${home}" || exit 1
 
 if [ -z "${S3_BUCKET}" ]; then
   S3_BUCKET=swarms.zerocracy.com
@@ -39,10 +39,10 @@ fi
 
 attempt=0
 while true; do
-  status=$(curl -s "${BAZA_URL}/pop?swarm=${SWARM_ID}&secret=${SWARM_SECRET}" \
+  status=$(curl --silent "${BAZA_URL}/pop?swarm=${SWARM_ID}&secret=${SWARM_SECRET}" \
     --connect-timeout 10 --max-time 300 \
-    -H 'User-Agent: baza-pop' \
-    -o pack.zip -w "%{http_code}")
+    --header 'User-Agent: baza-pop' \
+    --output pack.zip -w "%{http_code}")
   echo "/pop returned HTTP #${status}"
   ((++attempt))
   if [ "${status}" -lt 500 ]; then break; fi

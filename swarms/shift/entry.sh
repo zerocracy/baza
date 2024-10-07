@@ -28,7 +28,7 @@ set -o pipefail
 id=$1
 [[ "${id}" =~ ^[0-9]+$ ]]
 home=$2
-cd "${home}"
+cd "${home}" || exit 1
 
 if [ -z "${S3_BUCKET}" ]; then
   S3_BUCKET=swarms.zerocracy.com

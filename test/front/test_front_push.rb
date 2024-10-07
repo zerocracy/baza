@@ -216,6 +216,18 @@ class Baza::FrontPushTest < Minitest::Test
     assert_status(200)
   end
 
+  def test_pushes_with_factbase_errors
+    token = make_valid_token
+    fb = Factbase.new
+    sum = fb.insert
+    sum.what = 'judges-summary'
+    sum.error = 'there is some intentional error'
+    header('X-Zerocracy-Token', token)
+    header('User-Agent', 'something else')
+    put("/push/#{fake_name}", fb.export, 'CONTENT_TYPE' => 'application/octet-stream')
+    assert_status(200)
+  end
+
   def test_rejects_duplicate_puts
     token = make_valid_token
     fb = Factbase.new

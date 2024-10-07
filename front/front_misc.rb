@@ -53,7 +53,10 @@ end
 
 get '/robots.txt' do
   content_type 'text/plain'
-  "User-agent: *\nDisallow: /"
+  [
+    'User-agent: *',
+    'Disallow: /dash'
+  ].join("\n")
 end
 
 get '/version' do

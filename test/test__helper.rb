@@ -39,9 +39,12 @@ require 'glogin/cookie'
 require 'loog'
 require 'minitest/autorun'
 require 'open3'
+require 'os'
 require 'pgtk/pool'
 require 'rack/test'
+require 'retries'
 require 'securerandom'
+require 'tago'
 require 'yaml'
 require_relative '../baza'
 require_relative '../objects/baza/humans'
@@ -76,20 +79,22 @@ class Minitest::Test
   end
 
   def fake_loog
-    ENV['RACK_RUN'] ? Loog::NULL : Loog::VERBOSE
+    ENV['RACK_RUN'] ? Loog::ERRORS : Loog::VERBOSE
   end
 
   def fake_pgsql
     # rubocop:disable Style/ClassVars
     @@fake_pgsql ||= Pgtk::Pool.new(
       Pgtk::Wire::Yaml.new(File.join(__dir__, '../target/pgsql-config.yml')),
-      log: Loog::NULL
+      log: fake_loog
     ).start
+    @@fake_pgsql.exec('SET client_min_messages TO WARNING;')
+    @@fake_pgsql
     # rubocop:enable Style/ClassVars
   end
 
   def fake_name
-    "jeff#{SecureRandom.hex(8)}"
+    "fake#{SecureRandom.hex(8)}"
   end
 
   def fake_humans
@@ -110,7 +115,15 @@ class Minitest::Test
       input = File.join(dir, 'foo.fb')
       File.binwrite(input, Factbase.new.export)
       uri = fbs.save(input)
-      fake_token(human).start(fake_name, uri, 1, 0, 'n/a', [], '127.0.0.1')
+      fake_token(human).start(
+        fake_name, uri, 1, 0, 'n/a',
+        [
+          'duration:360',
+          'workflow_url:https://google.com',
+          'vitals_url:https://twitter.com'
+        ],
+        '127.0.0.1'
+      )
     end
   end
 
@@ -212,10 +225,61 @@ class Minitest::Test
     end
   end
 
-  def wait_for(seconds = 5)
+  def fake_image(dir)
+    img = fake_name
+    qbash("docker build #{Shellwords.escape(dir)} -t #{img}", log: fake_loog)
+    begin
+      yield img
+    ensure
+      qbash("docker rmi #{img}", log: fake_loog, timeout: 10)
+    end
+  end
+
+  def fake_container(image, args = '', cmd = '', loog: fake_loog, env: {})
+    n = fake_name
+    stdout = nil
+    code = nil
+    begin
+      cmd = [
+        'docker run',
+        '--name', Shellwords.escape(n),
+        OS.linux? ? '' : "--add-host #{fake_docker_host}:host-gateway",
+        args,
+        env.keys.map { |k| "-e #{Shellwords.escape(k)}" }.join(' '),
+        '--user', Shellwords.escape("#{Process.uid}:#{Process.gid}"),
+        Shellwords.escape(image),
+        cmd
+      ].join(' ')
+      stdout, code = qbash(
+        cmd,
+        timeout: 25,
+        log: loog,
+        accept: nil,
+        both: true,
+        env:
+      )
+      unless code.zero?
+        fake_loog.error(stdout)
+        raise \
+          "Failed to run #{cmd} " \
+          "(exit code is ##{code}, stdout has #{stdout.split("\n").count} lines)"
+      end
+      return yield n if block_given?
+    ensure
+      qbash(
+        "docker logs #{Shellwords.escape(n)}",
+        level: code.zero? ? Logger::DEBUG : Logger::ERROR,
+        log: fake_loog
+      )
+      qbash("docker rm -f #{Shellwords.escape(n)}", log: fake_loog)
+    end
+    stdout
+  end
+
+  def wait_for(seconds = 15)
     start = Time.now
     loop do
-      raise 'Timed out' if Time.now - start > seconds
+      raise "Timed out after waiting for #{start.ago}" if Time.now - start > seconds
       break if yield
     end
   end
@@ -223,6 +287,14 @@ class Minitest::Test
   def assert_include(text, *subs)
     subs.each do |s|
       assert(text.include?(s), "Can't find #{s.inspect} in\n#{text}")
+    end
+  end
+
+  def fake_docker_host
+    if OS.linux?
+      '172.17.0.1'
+    else
+      'host.docker.internal'
     end
   end
 end

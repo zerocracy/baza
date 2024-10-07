@@ -34,7 +34,7 @@ RUN curl -Lso /usr/local/bin/aws-lambda-rie \
 
 RUN apt-get -qq update \
     && apt-get -qq install -y --no-install-recommends unzip=* curl=* jq=* zip=* \
-    && curl -s https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -o awscliv2.zip \
+    && curl --silent https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip -o awscliv2.zip \
     && unzip -q awscliv2.zip \
     && ./aws/install \
     && rm -rf awscliv2.zip aws \
@@ -46,7 +46,7 @@ RUN bundle install --retry=5 --quiet "--gemfile=${LAMBDA}/Gemfile"
 
 COPY swarm/ /swarm
 
-COPY install.sh .
+COPY install.sh ./
 RUN /bin/bash ${LAMBDA}/install.sh
 
 COPY entry.sh main.rb ./

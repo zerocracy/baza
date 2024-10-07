@@ -23,24 +23,16 @@
 # SOFTWARE.
 
 require 'minitest/autorun'
-require 'factbase'
 require_relative '../test__helper'
-require_relative '../../objects/baza'
 require_relative '../../baza'
 
-class Baza::FrontJobsTest < Minitest::Test
+class Baza::FrontMiscTest < Minitest::Test
   def app
     Sinatra::Application
   end
 
-  def test_read_job
-    job = fake_job
-    fake_login(job.jobs.human.github)
-    get('/jobs')
-    assert_status(200)
-    get("/jobs/#{job.id}")
-    assert_status(200)
-    get("/jobs/#{job.id}/verified.txt")
+  def test_robots
+    get('/robots.txt')
     assert_status(200)
   end
 end

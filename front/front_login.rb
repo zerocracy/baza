@@ -73,7 +73,13 @@ end
 get '/github-callback' do
   code = params[:code]
   error(400) if code.nil?
-  json = settings.glogin.user(code)
+  json =
+    begin
+      settings.glogin.user(code)
+    rescue StandardError => e
+      cookies.delete(:auth)
+      flash(iri.cut('/'), "Can't login now, try one more time please: #{e.message}")
+    end
   login = json['login']
   cookies[:auth] = GLogin::Cookie::Open.new(
     {

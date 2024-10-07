@@ -30,6 +30,7 @@ require 'fileutils'
 require 'glogin'
 require 'glogin/codec'
 require 'haml'
+require 'htmlcompressor'
 require 'iri'
 require 'json'
 require 'loog'
@@ -52,6 +53,14 @@ disable :method_override
 use Rack::RewindableInput::Middleware
 use Rack::MethodOverride
 use Rack::Deflater
+use HtmlCompressor::Rack, {
+  enabled: true,
+  remove_spaces_inside_tags: true,
+  remove_multi_spaces: true,
+  remove_comments: true,
+  remove_intertag_spaces: false,
+  remove_quotes: false
+}
 
 Haml::Template.options[:escape_html] = true
 Haml::Template.options[:format] = :xhtml

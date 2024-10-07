@@ -23,24 +23,28 @@
 # SOFTWARE.
 
 require 'minitest/autorun'
-require 'factbase'
+require 'qbash'
 require_relative '../test__helper'
-require_relative '../../objects/baza'
-require_relative '../../baza'
 
-class Baza::FrontJobsTest < Minitest::Test
-  def app
-    Sinatra::Application
-  end
-
-  def test_read_job
-    job = fake_job
-    fake_login(job.jobs.human.github)
-    get('/jobs')
-    assert_status(200)
-    get("/jobs/#{job.id}")
-    assert_status(200)
-    get("/jobs/#{job.id}/verified.txt")
-    assert_status(200)
+# Test for Docker.
+# Author:: Yegor Bugayenko (yegor256@gmail.com)
+# Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
+# License:: MIT
+class Baza::FakeImageTest < Minitest::Test
+  def test_simple_container
+    Dir.mktmpdir do |home|
+      File.write(
+        File.join(home, 'Dockerfile'),
+        "
+        FROM ubuntu
+        WORKDIR /tmp
+        ENTRYPOINT [\"/bin/bash\", \"-c\", \"pwd\"]
+        "
+      )
+      fake_image(home) do |image|
+        stdout = fake_container(image)
+        assert_equal("/tmp\n", stdout, stdout)
+      end
+    end
   end
 end

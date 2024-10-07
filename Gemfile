@@ -42,7 +42,8 @@ gem 'fbe', '>0'
 gem 'get_process_mem', '~>1.0'
 gem 'glogin', '>0'
 gem 'haml', '~>6.3'
-gem 'haml_lint', '0.58.0', require: false
+gem 'haml_lint', '0.59.0', require: false
+gem 'htmlcompressor', '0.4.0'
 gem 'iri', '>0'
 gem 'j', path: 'j' if File.exist?('j')
 gem 'judges', '>0'
@@ -54,8 +55,9 @@ gem 'net-ping', '~>2.0', require: false
 gem 'net-scp', '~>4.0'
 gem 'net-ssh', '~>7.2'
 gem 'octokit', '>0'
+gem 'os', '>0', require: false
 gem 'pgtk', '>0'
-gem 'qbash', '0.0.3'
+gem 'qbash', '>0'
 gem 'rack', '~>3.1'
 gem 'rack-ssl', '~>1.4'
 gem 'rack-test', '~>2.1'

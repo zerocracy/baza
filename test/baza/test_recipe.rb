@@ -63,7 +63,7 @@ class Baza::RecipeTest < Minitest::Test
     assert_include(
       Baza::Recipe.new(s, '', '').to_lite(:release, '424242', 'us-east-1a', 'sword-fish'),
       "#!/bin/bash\n",
-      "curl -s --fail-with-body 'https://www.zerocracy.com/swarms/#{s.id}/files?"
+      "curl --silent --fail-with-body 'https://www.zerocracy.com/swarms/#{s.id}/files?"
     )
   end
 
@@ -81,45 +81,38 @@ class Baza::RecipeTest < Minitest::Test
     r = swarm.releases.start('just start', secret)
     id_rsa_file = File.join(Dir.home, '.ssh/id_rsa')
     id_rsa = File.exist?(id_rsa_file) ? File.read(id_rsa_file) : ''
-    Dir.mktmpdir do |home|
-      %w[aws docker shutdown].each { |f| stub_cli(home, f) }
-      FileUtils.mkdir_p(File.join(home, '.docker'))
-      File.write(
-        File.join(home, '.docker/Dockerfile'),
-        '
-        FROM ubuntu
-        RUN apt-get -y update
-        RUN apt-get -y install ssh-client git curl
-        WORKDIR /r
-        ENV HOME=/r
-        ENTRYPOINT ["/bin/bash", "recipe.sh"]
-        '
-      )
-      img = 'test-recipe-script'
-      qbash("docker build #{File.join(home, '.docker')} -t #{img}", log: fake_loog)
-      begin
-        RandomPort::Pool::SINGLETON.acquire do |port|
+    RandomPort::Pool::SINGLETON.acquire do |port|
+      Dir.mktmpdir do |home|
+        dock = File.join(home, '.docker')
+        FileUtils.mkdir_p(dock)
+        %w[aws docker shutdown].each { |f| stub_cli(dock, f) }
+        sh = File.join(dock, 'recipe.sh')
+        File.write(
+          sh,
+          Baza::Recipe.new(swarm, id_rsa, 'bucket').to_bash(
+            :release, 'accout', 'us-east-1', secret,
+            host: "http://#{fake_docker_host}:#{port}"
+          )
+        )
+        File.write(
+          File.join(dock, 'Dockerfile'),
+          "
+          FROM ubuntu
+          RUN apt-get -y update
+          RUN apt-get -y install ssh-client git curl
+          WORKDIR /r
+          ENV HOME=/r
+          COPY recipe.sh aws docker shutdown ./
+          RUN chmod a+x recipe.sh aws docker shutdown
+          RUN chown -R #{Process.uid}:#{Process.gid} /r
+          ENTRYPOINT [\"/bin/bash\", \"recipe.sh\"]
+          "
+        )
+        fake_image(dock) do |image|
           fake_front(port, loog: fake_loog) do
-            sh = File.join(home, 'recipe.sh')
-            File.write(
-              sh,
-              Baza::Recipe.new(swarm, id_rsa, 'bucket').to_bash(
-                :release, 'accout', 'us-east-1', secret,
-                host: "http://host.docker.internal:#{port}"
-              )
-            )
-            qbash(
-              [
-                'docker run --rm --add-host host.docker.internal:host-gateway',
-                "--user #{Process.uid}:#{Process.gid}",
-                "-v #{home}:/r #{img}"
-              ],
-              log: fake_loog
-            )
+            fake_container(image)
           end
         end
-      ensure
-        qbash("docker rmi #{img}", log: fake_loog)
       end
     end
     assert(swarm.releases.get(r.id).exit.zero?)
@@ -157,7 +150,6 @@ class Baza::RecipeTest < Minitest::Test
   # that we use inside AWS Lambda function. If something is wrong in the
   # Dockerfile, this test must highlight such a problem.
   def test_build_docker_image
-    img = 'test-recipe-build'
     Dir.mktmpdir do |home|
       ['Dockerfile', 'Gemfile', 'entry.sh', 'main.rb', 'install.sh'].each do |f|
         FileUtils.copy(
@@ -166,9 +158,9 @@ class Baza::RecipeTest < Minitest::Test
         )
       end
       FileUtils.mkdir_p(File.join(home, 'swarm'))
-      qbash("docker build #{home} -t #{img}", log: fake_loog)
-    ensure
-      qbash("docker rmi -f #{img}", log: fake_loog)
+      fake_image(home) do |image|
+        qbash("docker image inspect #{image}", log: fake_loog)
+      end
     end
   end
 
@@ -183,15 +175,15 @@ class Baza::RecipeTest < Minitest::Test
     job = fake_job(fake_human('yegor256'))
     s = job.jobs.human.swarms.add('st', 'zerocracy/swarm-template', 'master', '/')
     RandomPort::Pool::SINGLETON.acquire(2) do |lambda_port, backend_port|
-      stdout = nil
       Dir.mktmpdir do |home|
-        %w[curl shutdown aws].each { |f| stub_cli(home, f) }
+        %w[shutdown aws].each { |f| stub_cli(home, f) }
+        stub_cli(home, 'curl', 'echo 200')
         sh = File.join(home, 'recipe.sh')
         File.write(
           sh,
           Baza::Recipe.new(s, '', '').to_bash(
             :release, '019644334823', 'us-east-1', 'fake',
-            host: "http://host.docker.internal:#{backend_port}"
+            host: "http://#{fake_docker_host}:#{backend_port}"
           )
         )
         qbash("/bin/bash #{sh}", log: fake_loog)
@@ -222,7 +214,7 @@ class Baza::RecipeTest < Minitest::Test
           'swarm/entry.sh' => "
             #!/bin/bash
             set -ex
-            cd \"$(dirname \"$0\")\"
+            cd \"$(dirname \"$0\")\" || exit 1
             export BUNDLE_GEMFILE=\"$(dirname \"$0\")/Gemfile\"
             bundle exec judges --version
           ",
@@ -236,20 +228,10 @@ class Baza::RecipeTest < Minitest::Test
             mv curl /var/task
           "
         }.each { |f, txt| File.write(File.join(home, f), txt) }
-        image = 'local-lambda-test'
-        qbash("docker build #{home} -t #{image}", log: fake_loog)
-        begin
+        fake_image(home) do |image|
           ret =
             fake_front(backend_port, loog: fake_loog) do
-              container = qbash(
-                [
-                  'docker run --add-host host.docker.internal:host-gateway',
-                  "--user #{Process.uid}:#{Process.gid}",
-                  "-d -p #{lambda_port}:8080 #{image}"
-                ],
-                log: fake_loog
-              ).split("\n")[-1]
-              begin
+              fake_container(image, "-d -p #{lambda_port}:8080") do |container|
                 wait_for { Typhoeus::Request.get("http://localhost:#{lambda_port}/test").code == 404 }
                 request = Typhoeus::Request.new(
                   "http://localhost:#{lambda_port}/2015-03-31/functions/function/invocations",
@@ -273,34 +255,29 @@ class Baza::RecipeTest < Minitest::Test
                   }
                 )
                 request.run
+                assert_include(
+                  qbash("docker logs #{Shellwords.escape(container)}", log: fake_loog),
+                  'Unpacked ZIP',
+                  'Job #42 is coming from @yegor256',
+                  "Reported to #{fake_docker_host}:#{backend_port}, received HTTP #200",
+                  'Job processing finished'
+                )
                 request.response
-              ensure
-                stdout = qbash("docker logs #{container}", log: fake_loog)
-                qbash("docker rm -f #{container}", log: fake_loog)
               end
             end
           assert_equal(200, ret.response_code, ret.response_body)
           assert_equal('"Done!"', ret.response_body, ret.response_body)
           assert_equal(1, s.invocations.each.to_a.size)
-        ensure
-          qbash("docker rmi #{image}", log: fake_loog)
         end
       end
-      assert_include(
-        stdout,
-        'Unpacked ZIP',
-        'Job #42 is coming from @yegor256',
-        "Reported to host.docker.internal:#{backend_port}, received HTTP #200",
-        'Job processing finished'
-      )
     end
   end
 
   private
 
-  def stub_cli(home, name)
+  def stub_cli(home, name, content = 'echo FAKE-$(basename $0) $@')
     sh = File.join(home, name)
-    File.write(sh, 'echo FAKE-$(basename $0) $@')
+    File.write(sh, content)
     FileUtils.chmod('+x', sh)
   end
 end

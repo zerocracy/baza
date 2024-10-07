@@ -81,7 +81,7 @@ class Baza::Recipe
       script, account, region, secret,
       host:,
       files: [
-        'curl -s --fail-with-body ',
+        'curl --silent --fail-with-body ',
         "'#{host}/swarms/#{@swarm.id}/files?script=#{script}&secret=#{@swarm.secret}' ",
         '| /bin/bash'
       ].join

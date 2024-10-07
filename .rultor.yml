@@ -21,7 +21,9 @@
 # SOFTWARE.
 ---
 docker:
-  image: yegor256/rultor-image:1.23.1
+  image: yegor256/rultor-java
+ec2:
+  type: t2.medium
 readers:
   - "urn:github:526301"
 assets:
@@ -30,11 +32,14 @@ assets:
   id_rsa: yegor256/home#assets/heroku-key
   id_rsa.pub: yegor256/home#assets/heroku-key.pub
 install: |-
-  export PATH=$PATH:/usr/lib/postgresql/10/bin
-  sudo apt-get -y update
-  sudo apt-get -y install libpq-dev
+  sudo apt-get update
+  sudo apt-get install -y libpq-dev postgresql-client postgresql
+  sudo ln -s "$(realpath /usr/lib/postgresql/*/bin/initdb)" /bin/initdb
+  sudo ln -s "$(realpath /usr/lib/postgresql/*/bin/postgres)" /bin/postgres
   pdd -f /dev/null
   bundle install --no-color
+  bundle install --no-color --gemfile=assets/lambda/Gemfile
+  bundle install --no-color --gemfile=swarms/alterations/Gemfile
 release:
   pre: false
   sensitive:

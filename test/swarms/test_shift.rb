@@ -57,43 +57,35 @@ class ShiftTest < Minitest::Test
           FileUtils.chmod('+x', sh)
         end
         FileUtils.copy(File.join(__dir__, '../../swarms/shift/entry.sh'), home)
+        name = "baza-#{s.name}"
+        File.write(
+          File.join(home, 'event.json'),
+          JSON.pretty_generate(
+            {
+              messageAttributes: {
+                previous: { stringValue: name },
+                more: { stringValue: 'baza-foo baza-bar baza-xyz' }
+              }
+            }
+          )
+        )
         File.write(
           File.join(home, 'Dockerfile'),
-          '
+          "
           FROM ruby:3.3
           WORKDIR /r
           RUN apt-get update -y && apt-get install -y jq zip unzip curl
-          COPY entry.sh aws .
+          COPY entry.sh aws ./
           RUN chmod a+x aws
+          RUN mkdir -p /tmp/work
+          COPY event.json /tmp/work
+          RUN chown -R #{Process.uid}:#{Process.gid} /tmp/work
           ENV PATH=/r:${PATH}
-          ENTRYPOINT ["/bin/bash", "entry.sh"]
-          '
+          ENTRYPOINT [\"/bin/bash\", \"entry.sh\"]
+          "
         )
-        img = 'test-shift'
-        qbash("docker build #{home} -t #{img}", log: fake_loog)
-        name = "baza-#{s.name}"
-        Dir.mktmpdir do |dir|
-          File.write(
-            File.join(dir, 'event.json'),
-            JSON.pretty_generate(
-              {
-                messageAttributes: {
-                  previous: { stringValue: name },
-                  more: { stringValue: 'baza-foo baza-bar baza-xyz' }
-                }
-              }
-            )
-          )
-          qbash(
-            [
-              "docker run -v #{dir}:/temp",
-              "--user #{Process.uid}:#{Process.gid}",
-              "--rm #{img} #{job.id} /temp"
-            ],
-            log: fake_loog
-          )
-        ensure
-          qbash("docker rmi #{img}", log: fake_loog)
+        fake_image(home) do |image|
+          fake_container(image, '', "#{job.id} /tmp/work")
         end
       end
     assert_include(

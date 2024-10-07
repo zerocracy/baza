@@ -56,6 +56,7 @@ class MainTest < Minitest::Test
           "
           go(
             event: {
+              #{ENV['RACK_RUN'] ? '"quiet" => "true",' : ''}
               'Records' => [
                 {
                   'messageId' => 'defd997b-4675-42fc-9f33-9457011de8b3',
@@ -190,26 +191,18 @@ class MainTest < Minitest::Test
         FROM ruby:3.3
         WORKDIR /r
         RUN apt-get update -y && apt-get install -y jq unzip
-        COPY Gemfile .
+        COPY Gemfile ./
         RUN bundle install
         COPY swarm/ /swarm
-        COPY main.rb Gemfile .
+        COPY main.rb Gemfile ./
         '
       )
-      img = 'test-main-in-docker'
-      qbash("docker build #{home} -t #{img}", log: fake_loog)
       stdout =
-        begin
-          qbash(
-            [
-              "docker run --user #{Process.uid}:#{Process.gid} --rm #{img}",
-              '/bin/bash -c',
-              Shellwords.escape('ruby main.rb; unzip /tmp/result.zip -d /tmp/result')
-            ],
-            log: fake_loog
+        fake_image(home) do |image|
+          fake_container(
+            image, '',
+            "/bin/bash -c #{Shellwords.escape('ruby main.rb; unzip /tmp/result.zip -d /tmp/result')}"
           )
-        ensure
-          qbash("docker rmi #{img}", log: fake_loog)
         end
       assert_include(
         stdout,
