@@ -144,7 +144,7 @@ GEM
       net-http
     faraday-retry (2.2.1)
       faraday (~> 2.0)
-    fbe (0.0.74)
+    fbe (0.0.75)
       backtrace (> 0)
       decoor (> 0)
       factbase (> 0)
@@ -196,7 +196,7 @@ GEM
     google-protobuf (4.28.2-x86_64-linux)
       bigdecimal
       rake (>= 13)
-    graphql (2.3.17)
+    graphql (2.3.18)
       base64
       fiber-storage
     graphql-client (0.23.0)
