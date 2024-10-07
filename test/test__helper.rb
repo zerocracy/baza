@@ -243,7 +243,7 @@ class Minitest::Test
       cmd = [
         'docker run',
         '--name', Shellwords.escape(n),
-        OS.linux? ? '--net host' : "--add-host #{fake_docker_host}:host-gateway",
+        OS.linux? ? '' : "--add-host #{fake_docker_host}:host-gateway",
         args,
         env.keys.map { |k| "-e #{Shellwords.escape(k)}" }.join(' '),
         '--user', Shellwords.escape("#{Process.uid}:#{Process.gid}"),
