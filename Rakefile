@@ -45,6 +45,8 @@ task default: %i[clean test rubocop haml_lint scss_lint xcop config copyright]
 require 'rake/testtask'
 Rake::TestTask.new(test: %i[pgsql liquibase]) do |test|
   Rake::Cleaner.cleanup_files(['coverage'])
+  require 'simplecov'
+  SimpleCov.start
   test.libs << 'lib' << 'test'
   test.pattern = 'test/**/test_*.rb'
   test.verbose = true
