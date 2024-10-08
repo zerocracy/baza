@@ -52,3 +52,26 @@ RACK_LIVE_YAML_FILE=/path/to/yaml/file.yml bundle exec ruby test/base/test_ec2.r
 ```
 
 Should work.
+
+## Postgres prerequisite
+
+### Option 1: Using pgsql task
+
+```bash
+# Install postgres locally
+sudo apt-get update
+sudo apt-get install -y postgresql-16
+sudo ln -s /usr/lib/postgresql/16/bin/initdb /bin/initdb
+sudo ln -s /usr/lib/postgresql/16/bin/postgres /bin/postgres
+# Run pgsql task
+bundle exec rake pgsql
+```
+
+### Option 2: Using external postgres installation
+
+```bash
+mkdir -p target
+cp pgsql-config.yml.example target/pgsql-config.yml
+```
+
+Adjust `target/pgsql-config.yml` with the configuration of your postgres installation.
