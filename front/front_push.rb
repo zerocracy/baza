@@ -70,6 +70,8 @@ def job_start(token, file, name, metas, ip)
   version = job.metas.maybe('action_version')
   unless errors.empty?
     par = errors.to_a.join("\n")
+    max = 3600
+    par = "#{par[0..(max / 2) - 8]}\n\n... skipped ...\n\n#{par[(max / 2) + 8...]}" if par.length > max
     job.jobs.human.notifications.post(
       "#{job.name}-#{Digest::MD5.hexdigest(par)}",
       "⚠️ The job [##{job.id}](//jobs/#{job.id}) (`#{job.name}`)",
