@@ -46,6 +46,13 @@ post('/valves/add') do
   flash(iri.cut('/valves'), "The valve '#{params[:badge]}' has been added for '#{params[:name]}'")
 end
 
+get('/valves/result') do
+  badge = params[:badge]
+  v = the_human.valves.find(badge)
+  return [204, "Valve #{badge.inspect} not found"] if v.nil?
+  v.result.to_s
+end
+
 get(%r{/valves/([0-9]+)}) do
   id = params['captures'].first.to_i
   assemble(

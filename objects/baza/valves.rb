@@ -162,6 +162,19 @@ class Baza::Valves
     ).empty?
   end
 
+  # Find valve by badge (or NIL if not found).
+  #
+  # @param [String] badge Unique badge of the valve
+  # @return [nil|Baza::Valve] Found valve or NIL
+  def find(badge)
+    rows = pgsql.exec(
+      'SELECT id FROM valve WHERE badge = $1 AND human = $2',
+      [badge, @human.id]
+    )
+    return nil if rows.empty?
+    get(rows.first['id'].to_i)
+  end
+
   # Remove the valve by ID.
   #
   # @param [Integer] id The ID of it

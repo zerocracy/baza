@@ -77,5 +77,9 @@ class Baza::FrontValvesTest < Minitest::Test
     post('/valves/add', 'name=hi&badge=abc&why=nothing')
     get("/valves/#{human.valves.each.first[:id]}")
     assert_status(200)
+    get('/valves/result?badge=abc')
+    assert_status(200)
+    get('/valves/result?badge=another-badge-not-found')
+    assert_status(204)
   end
 end
