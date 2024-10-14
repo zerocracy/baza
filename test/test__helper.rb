@@ -224,7 +224,9 @@ class Minitest::Test
 
   def fake_image(dir)
     img = fake_name
-    qbash("docker build #{Shellwords.escape(dir)} -t #{img}", log: fake_loog)
+    with_retries do
+      qbash("docker build #{Shellwords.escape(dir)} -t #{img}", log: fake_loog)
+    end
     begin
       yield img
     ensure

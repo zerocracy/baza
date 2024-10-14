@@ -75,6 +75,19 @@ class Baza::Valves
     end
   end
 
+  # Create a new valve (guaranteed to be unique).
+  #
+  # A block must be provided, which will calculate the value of the valve:
+  #
+  #  valves.enter('foo', 'email-sent', 'sent only once!', nil) do
+  #    467747897 # this is the ID of the email sent, to be calculated only once
+  #  end
+  #
+  # @param [String] name Job name
+  # @param [String] badge Unique name of the badge
+  # @param [String] why The reason for creating this valve (any text)
+  # @param [nil|Integer] job NIL if not related to any running job, or job ID
+  # @return [nil] Nothing
   def enter(name, badge, why, job)
     raise 'A block is required by the enter()' unless block_given?
     raise Baza::Urror, 'The name cannot be nil' if name.nil?
@@ -83,7 +96,9 @@ class Baza::Valves
     raise Baza::Urror, 'The badge cannot be nil' if badge.nil?
     raise Baza::Urror, 'The badge cannot be empty' if badge.empty?
     raise Baza::Urror, "The badge '#{badge}' is not valid" unless badge.match?(/^[a-zA-Z0-9_-]+$/)
+    raise Baza::Urror, 'The reason cannot be nil' if why.nil?
     raise Baza::Urror, 'The reason cannot be empty' if why.empty?
+    raise Baza::Urror, 'The job may either be NIL or Integer' unless job.nil? || job.is_a?(Integer)
     start = Time.now
     catch :stop do
       loop do
