@@ -137,8 +137,7 @@ class Baza::Valves
       human.notify(
         "🍒 A new [valve](//valves/#{row['id']}) ##{row['id']}",
         "just entered for the `#{name}` job",
-        job.nil? ? '' : "([##{job}](//jobs/#{job}))",
-        ": #{escape(why.inspect)}.",
+        "#{job.nil? ? '' : "([##{job}](//jobs/#{job}))"}: #{escape(why.inspect)}.",
         "The result is #{show(r)}."
       )
       r
