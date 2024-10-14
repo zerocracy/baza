@@ -87,9 +87,9 @@ class Baza::Valves
   # @param [String] badge Unique name of the badge
   # @param [String] why The reason for creating this valve (any text)
   # @param [nil|Integer] job NIL if not related to any running job, or job ID
-  # @return [nil] Nothing
+  # @return [Object] The result returned by the block given
   def enter(name, badge, why, job)
-    raise 'A block is required by the enter()' unless block_given?
+    raise 'A block is required by the #enter()' unless block_given?
     raise Baza::Urror, 'The name cannot be nil' if name.nil?
     raise Baza::Urror, 'The name cannot be empty' if name.empty?
     raise Baza::Urror, 'The name is not valid' unless name.match?(/^[a-z0-9]+$/)
@@ -151,7 +151,22 @@ class Baza::Valves
     end
   end
 
+  # The valve with this badge exists?
+  #
+  # @param [String] badge Unique badge of the valve
+  # @return [Boolean] TRUE if exists
+  def exists?(badge)
+    !pgsql.exec(
+      'SELECT id FROM valve WHERE badge = $1 AND human = $2',
+      [badge, @human.id]
+    ).empty?
+  end
+
+  # Remove the valve by ID.
+  #
+  # @param [Integer] id The ID of it
   def remove(id)
+    raise 'Valve ID must be an integer' unless id.is_a?(Integer)
     rows = pgsql.exec(
       'DELETE FROM valve WHERE id = $1 AND human = $2 RETURNING id',
       [id, @human.id]
@@ -159,7 +174,12 @@ class Baza::Valves
     raise Baza::Urror, "The valve ##{id} cannot be removed" if rows.empty?
   end
 
+  # Set it to a different result.
+  #
+  # @param [Integer] id The ID of it
+  # @param [String] result The result to set
   def reset(id, result)
+    raise 'Valve ID must be an integer' unless id.is_a?(Integer)
     rows = pgsql.exec(
       'UPDATE valve SET result = $1 WHERE id = $2 AND human = $3 RETURNING id',
       [enc(result), id, @human.id]
@@ -167,6 +187,10 @@ class Baza::Valves
     raise Baza::Urror, "The valve ##{id} cannot be reset" if rows.empty?
   end
 
+  # Get one valve.
+  #
+  # @param [Integer] id The ID of it
+  # @return [Baza::Valve] The valve found
   def get(id)
     raise 'Valve ID must be an integer' unless id.is_a?(Integer)
     require_relative 'valve'

@@ -40,6 +40,7 @@ class Baza::ValvesTest < Minitest::Test
     x = valves.enter(n, b, 'why', nil) { 42 }
     assert_equal(42, x)
     assert(!valves.empty?)
+    assert(valves.exists?(b))
     v = valves.each.to_a.first
     assert(v[:id].positive?)
     assert(!v[:created].nil?)

@@ -40,7 +40,9 @@ def as_result(text)
 end
 
 post('/valves/add') do
-  the_human.valves.enter(params[:name], params[:badge], params[:why], nil) { as_result(params[:result]) }
+  badge = params[:badge]
+  raise Baza::Urror, "The valve #{badge.inspect} already exists" if the_human.valves.exists?(badge)
+  the_human.valves.enter(params[:name], badge, params[:why], nil) { as_result(params[:result]) }
   flash(iri.cut('/valves'), "The valve '#{params[:badge]}' has been added for '#{params[:name]}'")
 end
 

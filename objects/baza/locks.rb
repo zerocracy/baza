@@ -71,6 +71,10 @@ class Baza::Locks
     end
   end
 
+  # Is this name locked?
+  #
+  # @param [String] name The name of the job
+  # @return [Boolean] TRUE if locked
   def locked?(name)
     !pgsql.exec(
       'SELECT id FROM lock WHERE human = $1 AND name = $2',
@@ -78,6 +82,12 @@ class Baza::Locks
     ).empty?
   end
 
+  # Lock one job name.
+  #
+  # @param [String] name The name of the job
+  # @param [String] owner Unique name of the requester (make sure it's unique!)
+  # @param [String] ip The IP address of the requester
+  # @return [Integer] ID of the lock just created in the DB
   def lock(name, owner, ip)
     unless @human.account.balance.positive? || @human.extend(Baza::Human::Roles).tester?
       raise Baza::Urror, 'The balance is negative, you cannot lock jobs'
@@ -88,15 +98,21 @@ class Baza::Locks
         [
           'INSERT INTO lock (human, name, owner, ip)',
           'VALUES ($1, $2, $3, $4)',
-          'ON CONFLICT (human, name, owner) DO UPDATE SET owner = lock.owner'
+          'ON CONFLICT (human, name, owner) DO UPDATE SET owner = lock.owner',
+          'RETURNING id'
         ],
         [@human.id, name.downcase, owner, ip]
-      )
+      ).first['id'].to_i
     rescue PG::UniqueViolation
       raise Busy, "The '#{name}' lock is occupied by another owner, '#{owner}' can't get it now"
     end
   end
 
+  # Unlock one job name.
+  #
+  # @param [String] name The name of the job
+  # @param [String] owner Unique name of the requester (make sure it's unique!)
+  # @return [nil] Nothing
   def unlock(name, owner)
     pgsql.exec(
       'DELETE FROM lock WHERE human = $1 AND owner = $3 AND name = $2',
@@ -104,6 +120,10 @@ class Baza::Locks
     )
   end
 
+  # Delete lock by ID.
+  #
+  # @param [Integer] id The ID of the lock in the DB
+  # @return [nil] Nothing
   def delete(id)
     pgsql.exec(
       'DELETE FROM lock WHERE id = $1 AND human = $2',
