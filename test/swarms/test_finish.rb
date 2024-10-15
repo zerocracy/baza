@@ -61,7 +61,14 @@ class FinishTest < Minitest::Test
       File.binwrite(File.join(home, 'empty.fb'), Factbase.new.export)
       File.write(
         File.join(home, 'event.json'),
-        JSON.pretty_generate({ messageAttributes: { swarm: { stringValue: s.name } } })
+        JSON.pretty_generate(
+          {
+            messageAttributes: {
+              swarm: { stringValue: s.name },
+              hops: { stringValue: '5' }
+            }
+          }
+        )
       )
       File.write(
         File.join(home, 'Dockerfile'),

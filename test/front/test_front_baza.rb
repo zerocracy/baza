@@ -59,8 +59,12 @@ class Baza::FrontBazaTest < Minitest::Test
       assert(xml.errors.empty?, xml)
       assert(!xml.xpath('/html').empty?, xml)
       WebMock.enable_net_connect!
-      v = W3CValidators::NuValidator.new.validate_text(html)
-      assert(v.errors.empty?, "#{html}\n\n#{v.errors.join('; ')}")
+      begin
+        v = W3CValidators::NuValidator.new.validate_text(html)
+        assert(v.errors.empty?, "#{html}\n\n#{v.errors.join('; ')}")
+      rescue Errno::ECONNRESET
+        skip
+      end
     end
   end
 

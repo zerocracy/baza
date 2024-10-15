@@ -75,8 +75,12 @@ echo "S3 archive uploaded to ${S3_BUCKET}/${key}"
 
 msg=$( aws sqs send-message \
   --queue-url "https://sqs.us-east-1.amazonaws.com/019644334823/${first}" \
-  --message-body "Job #${id} needs processing by ${first}" \
-  --message-attributes "job={DataType=String,StringValue='${id}'},previous={DataType=String,StringValue='${SWARM_NAME}'},more={DataType=String,StringValue='${swarms[*]}'}" | jq -r .MessageId )
+  --message-body "Job #${id} needs processing by ${first} (${#swarms[@]} swarms in total)" \
+  --message-attributes "
+    job={DataType=String,StringValue='${id}'},
+    previous={DataType=String,StringValue='${SWARM_NAME}'},
+    hops={DataType=Number,StringValue='1'},
+    more={DataType=String,StringValue='${swarms[*]}'}" | jq -r .MessageId )
 echo "SQS message ${msg} sent to the ${first} queue"
 
 echo "The job #${id} must be processed by a few swarms: ${swarms[*]}"

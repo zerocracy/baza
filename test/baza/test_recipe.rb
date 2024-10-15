@@ -200,7 +200,7 @@ class Baza::RecipeTest < Minitest::Test
             end
             def put_object(key, file, loog)
             end
-            def send_message(id, more, loog)
+            def send_message(id, more, hops, loog)
             end
             '
           ].join
@@ -242,6 +242,7 @@ class Baza::RecipeTest < Minitest::Test
                           'messageId' => 'defd997b-4675-42fc-9f33-9457011de8b3',
                           'messageAttributes' => {
                             'job' => { 'stringValue' => job.id.to_s },
+                            'hops' => { 'stringValue' => '5' },
                             'more' => { 'stringValue' => '' }
                           },
                           'body' => 'something funny...'

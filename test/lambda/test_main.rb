@@ -62,7 +62,8 @@ class MainTest < Minitest::Test
                   'messageId' => 'defd997b-4675-42fc-9f33-9457011de8b3',
                   'messageAttributes' => {
                     'job' => { 'stringValue' => '7' },
-                    'more' => { 'stringValue' => '' }
+                    'more' => { 'stringValue' => '' },
+                    'hops' => { 'stringValue' => '11' }
                   },
                   'body' => 'something funny...'
                 }
@@ -114,7 +115,7 @@ class MainTest < Minitest::Test
         body: JSON.pretty_generate(
           {
             'MD5OfMessageBody' => '8c2abe2dedea4b54103ab99e6ef3691d',
-            'MD5OfMessageAttributes' => '142e94b739a5d4997cbab2ccad33b8e0'
+            'MD5OfMessageAttributes' => '493b8186a1fb7db4ea4df1677a8a25d5'
           }
         )
       )
@@ -151,7 +152,7 @@ class MainTest < Minitest::Test
           def put_object(key, file, loog)
             FileUtils.copy(file, '/tmp/result.zip')
           end
-          def send_message(id, more, loog); end
+          def send_message(id, more, hops, loog); end
           def report(stdout, code, job); end
           go(
             event: {
@@ -159,7 +160,8 @@ class MainTest < Minitest::Test
                 {
                   'messageId' => 'defd997b-4675-42fc-9f33-9457011de8b3',
                   'messageAttributes' => {
-                    'job' => { 'stringValue' => '7' }
+                    'job' => { 'stringValue' => '7' },
+                    'hops' => { 'stringValue' => '5' }
                   },
                   'body' => 'something funny...'
                 }

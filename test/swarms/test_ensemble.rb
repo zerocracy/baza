@@ -46,10 +46,12 @@ class EnsembleTest < Minitest::Test
         rm -rf /tmp/e/*
         echo '{\"messageAttributes\":{
           \"previous\": {\"stringValue\": \"#{s.name}\"},
+          \"hops\": {\"stringValue\": \"1\"},
           \"more\": {\"stringValue\": \"baza-#{s.name}\"}}}' > /tmp/e/event.json
         ./shift.sh #{job.id} /tmp/e
         rm -rf /tmp/e/*
         echo '{\"messageAttributes\":{
+          \"hops\": {\"stringValue\": \"2\"},
           \"previous\": {\"stringValue\": \"baza-#{s.name}\"}}}' > /tmp/e/event.json
         ./finish.sh #{job.id} /tmp/e
         "

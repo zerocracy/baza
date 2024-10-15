@@ -36,6 +36,14 @@ fi
 
 previous=$(jq -r .messageAttributes.previous.stringValue < event.json)
 
+hops=$(jq -r .messageAttributes.hops.stringValue < event.json)
+[[ "${hops}" =~ [0-9]+ ]]
+
+if [ "${hops}" -gt 20 ]; then
+  echo "Something is wrong here, too many hops (${hops})"
+  exit 1
+fi
+
 aws s3 cp "s3://${S3_BUCKET}/${previous}/${id}.zip" pack.zip
 
 read -r -a more <<< "$( jq -r .messageAttributes.more.stringValue < event.json )"
@@ -57,7 +65,10 @@ if [ "${#more[@]}" -eq 0 ]; then
   msg=$( aws sqs send-message \
     --queue-url "https://sqs.us-east-1.amazonaws.com/019644334823/${queue}" \
     --message-body "Job ${id} finished processing" \
-    --message-attributes "job={DataType=String,StringValue='${id}'},previous={DataType=String,StringValue='${previous}'}" | jq -r .MessageId )
+    --message-attributes "
+      job={DataType=String,StringValue='${id}'},
+      hops={DataType=Number,StringValue='$((hops + 1))'},
+      previous={DataType=String,StringValue='${previous}'}" | jq -r .MessageId )
   echo "SQS message ${msg} sent to the ${queue} queue"
   echo "No more swarms to process, it's time to finish"
 else
@@ -71,7 +82,11 @@ else
   msg=$( aws sqs send-message \
     --queue-url "https://sqs.us-east-1.amazonaws.com/019644334823/${next}" \
     --message-body "Job #${id} needs further processing by '${more[*]}'" \
-    --message-attributes "job={DataType=String,StringValue='${id}'},previous={DataType=String,StringValue='${previous}'},more={DataType=String,StringValue='${more[*]}'}" | jq -r .MessageId )
+    --message-attributes "
+      job={DataType=String,StringValue='${id}'},
+      hops={DataType=Number,StringValue='$((hops + 1))'},
+      previous={DataType=String,StringValue='${previous}'},
+      more={DataType=String,StringValue='${more[*]}'}" | jq -r .MessageId )
   echo "SQS message ${msg} sent to the ${next} queue"
   aws s3 rm "s3://${S3_BUCKET}/${previous}/${id}.zip"
   echo "ZIP ($(du -b pack.zip | cut -f1) bytes) moved from ${previous}/${id}.zip to ${next}/${id}.zip"

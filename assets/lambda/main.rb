@@ -93,8 +93,9 @@ end
 #
 # @param [Integer] id The ID of the job just processed
 # @param [Array<String>] more List of swarm names to be processed later
+# @param [Integer] hops How many hops have already been made
 # @param [Loog] loog The logging facility
-def send_message(id, more, loog)
+def send_message(id, more, hops, loog)
   attrs = {
     'previous' => {
       string_value: '{{ name }}',
@@ -103,6 +104,10 @@ def send_message(id, more, loog)
     'job' => {
       string_value: id.to_s,
       data_type: 'String'
+    },
+    'hops' => {
+      string_value: hops.to_s,
+      data_type: 'Number'
     }
   }
   unless more.empty?
@@ -171,9 +176,10 @@ end
 #
 # @param [Integer] id The ID of the job to process
 # @param [Hash] rec JSON event from the SQS message
+# @param [Integer] hops How many hops have already been made
 # @param [Loog] loog The logging facility
 # @return [Integer] Exit code (zero means success)
-def with_zip(id, rec, loog, &)
+def with_zip(id, rec, hops, loog, &)
   Dir.mktmpdir do |home|
     zip = File.join(home, "#{id}.zip")
     key = "{{ name }}/#{id}.zip"
@@ -214,7 +220,7 @@ def with_zip(id, rec, loog, &)
     else
       more = more['stringValue'].split(' ') - ['{{ name }}']
     end
-    send_message(id, more, loog)
+    send_message(id, more, hops, loog)
     code
   end
 end
@@ -281,7 +287,8 @@ def go(event:, context:)
       begin
         elapsed(lg, level: Logger::INFO) do
           job = rec['messageAttributes']['job']['stringValue'].to_i
-          lg.debug("A new event arrived, about job ##{job}")
+          hops = rec['messageAttributes']['hops']['stringValue'].to_i
+          lg.debug("A new event arrived, about job ##{job} (hops=#{hops})")
           if ['baza-pop', 'baza-shift', 'baza-finish'].include?('{{ name }}')
             lg.debug("Starting to process '{{ name }}' (system swarm)")
             Dir.mktmpdir do |pack|
@@ -291,7 +298,7 @@ def go(event:, context:)
           else
             lg.debug("Starting to process '{{ name }}' (normal swarm)")
             code =
-              with_zip(job, rec, lg) do |pack|
+              with_zip(job, rec, hops, lg) do |pack|
                 one(job, pack, lg)
               end
           end

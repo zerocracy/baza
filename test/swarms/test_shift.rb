@@ -64,6 +64,7 @@ class ShiftTest < Minitest::Test
             {
               messageAttributes: {
                 previous: { stringValue: name },
+                hops: { stringValue: '5' },
                 more: { stringValue: 'baza-foo baza-bar baza-xyz' }
               }
             }

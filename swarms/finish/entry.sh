@@ -37,6 +37,9 @@ if [ -z "${BAZA_URL}" ]; then
   BAZA_URL=https://www.zerocracy.com
 fi
 
+hops=$(jq -r .messageAttributes.hops.stringValue < event.json)
+[[ "${hops}" =~ [0-9]+ ]]
+
 previous=$( jq -r .messageAttributes.previous.stringValue < event.json )
 key="${previous}/${id}.zip"
 
@@ -64,4 +67,4 @@ fi
 
 aws s3 rm "s3://${S3_BUCKET}/${key}"
 
-echo "Job #${id} processing finished"
+echo "Job #${id} processing finished (after ${hops} hops)"
