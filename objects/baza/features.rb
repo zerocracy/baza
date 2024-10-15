@@ -27,7 +27,7 @@
 # These features are set in the runtime environment, for example in Heroku.
 # This is how you do it:
 #
-#  heroku config:set FEATURE_PIPELINE true
+#  heroku config:set FEATURE_PIPELINE=true
 #
 # You can unset it too:
 #
