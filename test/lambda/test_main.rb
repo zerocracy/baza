@@ -217,4 +217,64 @@ class MainTest < Minitest::Test
       )
     end
   end
+
+  def test_with_failure
+    WebMock.disable_net_connect!
+    fake_pgsql.exec('TRUNCATE job CASCADE')
+    Dir.mktmpdir do |home|
+      FileUtils.mkdir_p(File.join(home, 'swarm'))
+      FileUtils.copy(File.join(__dir__, '../../assets/lambda/Gemfile'), home)
+      File.write(
+        File.join(home, 'main.rb'),
+        [
+          Liquid::Template.parse(File.read(File.join(__dir__, '../../assets/lambda/main.rb'))).render(
+            'swarm' => '42',
+            'name' => 'swarmik',
+            'secret' => 'sword-fish',
+            'bucket' => 'foo',
+            'region' => 'us-east-1',
+            'account' => '424242'
+          ),
+          "
+          def report(stdout, code, job); puts 'Reported!'; end
+          go(
+            event: {
+              'Records' => [
+                {
+                  'messageId' => 'defd997b-4675-42fc-9f33-9457011de8b3',
+                  'messageAttributes' => {
+                    'job' => { 'stringValue' => '7' },
+                    'hops' => { 'stringValue' => '5' }
+                  },
+                  'body' => 'something funny...'
+                }
+              ]
+            },
+            context: nil
+          )
+          "
+        ].join
+      )
+      File.write(
+        File.join(home, 'Dockerfile'),
+        '
+        FROM ruby:3.3
+        WORKDIR /r
+        RUN apt-get update -y && apt-get install -y jq unzip
+        COPY Gemfile ./
+        RUN bundle install
+        COPY swarm/ /swarm
+        COPY main.rb Gemfile ./
+        '
+      )
+      stdout =
+        fake_image(home) do |image|
+          fake_container(
+            image, '',
+            "/bin/bash -c #{Shellwords.escape('ruby main.rb || echo expected failure')}"
+          )
+        end
+      assert_include(stdout, 'Reported!')
+    end
+  end
 end
