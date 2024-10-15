@@ -23,6 +23,16 @@
 # SOFTWARE.
 
 # Runtime features.
+#
+# These features are set in the runtime environment, for example in Heroku.
+# This is how you do it:
+#
+#  heroku config:set FEATURE_PIPELINE true
+#
+# You can unset it too:
+#
+#  heroku config:unset FEATURE_PIPELINE
+#
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
@@ -37,8 +47,8 @@ class Baza::Features
   # @return [String] Text summary
   def self.summary
     [
-      "#{PIPELINE ? 'heroku' : 'lambda'} pipeline",
-      TESTS ? 'testing mode' : nil
+      "#{PIPELINE ? 'heroku' : 'lambda'}-pipeline",
+      TESTS ? 'testing-mode' : nil
     ].compact.join('; ')
   end
 end
