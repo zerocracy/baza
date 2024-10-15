@@ -120,9 +120,10 @@ get(%r{/swarms/([0-9]+)/releases/([0-9]+)/reset}) do
 end
 
 put('/swarms/finish') do
+  request.body.rewind
+  tail = request.body.read
   secret = params[:secret]
   return 'No secret? No update!' if secret.nil? || secret.empty?
-  request.body.rewind
   r = settings.humans.find_release(secret)
   raise Baza::Urror, 'The "secret" is not valid, cannot find a release' if r.nil?
   head = params[:head]
@@ -131,7 +132,7 @@ put('/swarms/finish') do
   raise Baza::Urror, 'The "exit" HTTP param is mandatory' if code.nil?
   sec = params[:sec]
   raise Baza::Urror, 'The "sec" HTTP param is mandatory' if sec.nil?
-  r.finish!(head, request.body.read, code.to_i, 1000 * sec.to_i)
+  r.finish!(head, tail, code.to_i, 1000 * sec.to_i)
   "The release ##{r.id} was finished"
 end
 
