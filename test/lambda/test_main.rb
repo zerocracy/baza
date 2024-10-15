@@ -271,7 +271,7 @@ class MainTest < Minitest::Test
         fake_image(home) do |image|
           fake_container(
             image, '',
-            "/bin/bash -c #{Shellwords.escape('ruby main.rb || echo expected failure')}"
+            "/bin/bash -c #{Shellwords.escape('ruby main.rb')}"
           )
         end
       assert_include(stdout, 'Reported!')

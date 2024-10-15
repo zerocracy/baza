@@ -308,10 +308,8 @@ def go(event:, context:)
       rescue Exception => e
         lg.error(Backtrace.new(e).to_s)
         code = 255
-        raise e
-      ensure
-        report(buf.to_s, code, job)
       end
+      report(buf.to_s, code, job)
     end
   end
   'Done!'
