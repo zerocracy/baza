@@ -61,6 +61,10 @@ class Baza::SQS
         queue_url: @url,
         message_body: body,
         message_attributes: {
+          'baza' => {
+            string_value: Baza::VERSION,
+            data_type: 'String'
+          },
           'job' => {
             string_value: jid.to_s,
             data_type: 'String'

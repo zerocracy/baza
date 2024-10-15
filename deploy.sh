@@ -51,7 +51,7 @@ git add .gitignore
 sed -i "s/0\.0\.0/0.$(git rev-parse --short HEAD)/g" version.rb
 git add version.rb
 git commit -m 'config.yml for heroku and j sources'
-trap 'git reset HEAD~1 && rm -rf j && rm -f config.yml && git checkout -- .gitignore && git checkout -- Gemfile.lock' EXIT
+trap 'git reset HEAD~1 && rm -rf j && rm -f config.yml && git checkout -- version.rb && git checkout -- .gitignore && git checkout -- Gemfile.lock' EXIT
 
 git push heroku master -f
 rm -f target/pgsql-config.yml
