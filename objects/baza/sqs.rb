@@ -64,6 +64,10 @@ class Baza::SQS
           'job' => {
             string_value: jid.to_s,
             data_type: 'String'
+          },
+          'hops' => {
+            string_value: '0',
+            data_type: 'Number'
           }
         }
       ).message_id
