@@ -87,7 +87,7 @@ if [ ! -e head.txt ] || [ ! -s head.txt ]; then
   printf '0000000000000000000000000000000000000000' > head.txt
 fi
 
-status=$( curl --silent --request PUT --data-binary '@tail.log' \
+status=$( curl --silent --verbose --request PUT --data-binary '@tail.log' \
   --retry 3 --retry-all-errors --show-error \
   --connect-timeout 10 --max-time 300 \
   --header 'Content-Type: text/plain' \

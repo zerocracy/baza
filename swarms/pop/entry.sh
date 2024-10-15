@@ -39,7 +39,8 @@ fi
 
 attempt=0
 while true; do
-  status=$(curl --silent "${BAZA_URL}/pop?swarm=${SWARM_ID}&secret=${SWARM_SECRET}" \
+  status=$(curl --silent --verbose \
+    "${BAZA_URL}/pop?swarm=${SWARM_ID}&secret=${SWARM_SECRET}" \
     --connect-timeout 10 --max-time 300 \
     --header 'User-Agent: baza-pop' \
     --output pack.zip -w "%{http_code}")
