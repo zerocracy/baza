@@ -81,10 +81,14 @@ else
       unset 'more[s]'
     fi
   done
+  attrs="job={DataType=String,StringValue='${id}'},hops={DataType=Number,StringValue='$((hops + 1))'},previous={DataType=String,StringValue='${previous}'}"
+  if [ ! "${#more[@]}" -eq 0 ]; then
+    attrs="${attrs},more={DataType=String,StringValue='${more[*]}'}"
+  fi
   msg=$( aws sqs send-message \
     --queue-url "https://sqs.us-east-1.amazonaws.com/019644334823/${next}" \
     --message-body "Job #${id} needs further processing by '${more[*]}'" \
-    --message-attributes "job={DataType=String,StringValue='${id}'},hops={DataType=Number,StringValue='$((hops + 1))'},previous={DataType=String,StringValue='${previous}'},more={DataType=String,StringValue='${more[*]}'}" | jq -r .MessageId )
+    --message-attributes "${attrs}" | jq -r .MessageId )
   echo "SQS message ${msg} sent to the ${next} queue"
   aws s3 rm "s3://${S3_BUCKET}/${previous}/${id}.zip"
   echo "ZIP ($(du -b pack.zip | cut -f1) bytes) moved from ${previous}/${id}.zip to ${next}/${id}.zip"
