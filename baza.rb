@@ -166,7 +166,12 @@ configure do
     ),
     settings.config['tg']['admin_chat']
   )
-  settings.tbot.start unless Baza::Features::TESTS
+  set(:tg, Always.new(1).on_error { |e, _| settings.loog.error(Backtrace.new(e)) })
+  unless Baza::Features::TESTS
+    settings.tg.start do
+      settings.tbot.start
+    end
+  end
   set :telegramers, {}
 end
 

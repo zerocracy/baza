@@ -55,12 +55,6 @@ class Baza::TbotTest < Minitest::Test
     )
   end
 
-  def test_to_string
-    tbot = Baza::Tbot::Spy.new(Baza::Tbot.new(fake_pgsql, ''), 0)
-    assert(!tbot.to_s.nil?)
-    assert(tbot.to_s.match?(%r{^[0-9]/[0-9]/[0-9]$}))
-  end
-
   def test_auth_wrong
     humans = Baza::Humans.new(fake_pgsql)
     human = humans.ensure(fake_name)
@@ -86,5 +80,13 @@ class Baza::TbotTest < Minitest::Test
     chat = tbot.auth(human, secret)
     assert(chat.positive?)
     tbot.notify(human, 'Hey')
+  end
+
+  def test_live_bot
+    skip
+    tbot = Baza::Tbot.new(fake_pgsql, fake_live_cfg['tg']['token'], loog: Loog::VERBOSE)
+    t = Thread.new { tbot.start }
+    sleep 60
+    t.terminate
   end
 end

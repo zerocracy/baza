@@ -68,11 +68,17 @@ class Minitest::Test
   end
 
   def fake_live_cfg
-    # It is configured in Rackfile:
-    file = ENV.fetch('RACK_LIVE_YAML_FILE', nil)
-    skip if file.nil?
-    skip unless File.exist?(file)
-    YAML.safe_load(File.open(file))
+    # In order to use any of the following options, you must run rake like this:
+    #   rake -- --live=my.yml
+    # Pay attention to the double dash that splits "rake" and the list of options.
+    ARGV.each do |a|
+      opt, value = a.split('=', 2)
+      next unless opt == '--live'
+      file = value
+      raise "File not found: #{file}" unless File.exist?(file)
+      return YAML.safe_load(File.open(file))
+    end
+    skip
   end
 
   def fake_loog

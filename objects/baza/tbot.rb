@@ -23,7 +23,6 @@
 # SOFTWARE.
 
 require 'iri'
-require 'always'
 require 'loog'
 require 'telepost'
 require 'decoor'
@@ -77,25 +76,14 @@ class Baza::Tbot
     @pgsql = pgsql
     @tp = token.empty? ? Telepost::Fake.new : Telepost.new(token)
     @loog = loog
-    @always = Always.new(1).on_error { |e, _| @loog.error(Backtrace.new(e)) }
-  end
-
-  def to_s
-    @always.to_s
-  end
-
-  def backtraces
-    @always.backtraces
   end
 
   def start
-    @always.start do
-      @tp.run do |_client, message|
-        next if message.nil?
-        chat = message.chat.id
-        @loog.debug("TG incoming message in chat ##{chat}: #{message.inspect}")
-        entry(chat)
-      end
+    @tp.run do |_client, message|
+      next if message.nil?
+      chat = message.chat.id
+      @loog.debug("TG incoming message in chat ##{chat}: #{message.inspect}")
+      entry(chat)
     end
   end
 

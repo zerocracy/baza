@@ -69,7 +69,7 @@ class Baza::FrontBazaTest < Minitest::Test
   end
 
   def test_all_daemons
-    %w[gc verify tbot donations gc].each do |d|
+    %w[gc verify tg donations gc].each do |d|
       a = app.settings.send(d)
       s = a.to_s
       assert(s.end_with?('/0'), "#{d} (#{s}) fails with #{a.backtraces}")
