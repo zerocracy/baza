@@ -238,19 +238,19 @@ end
 
 # Put back the result of its processing (the body is a ZIP file).
 put '/finish' do
-  id = params[:swarm]&.to_i
-  raise Baza::Urror, 'The "swarm" is a mandatory query param' if id.nil?
-  swarm = settings.humans.swarm_by_id(id)
-  secret = params[:secret]
-  return [401, "Invalid secret for the swarm ##{swarm.id}"] if swarm.secret != secret
-  job_id = params[:id]&.to_i
-  raise Baza::Urror, 'The "id" is a mandatory query param' if job_id.nil?
-  job = settings.humans.job_by_id(job_id)
-  return "The job #{job.id} is finished already" if job.finished?
   Tempfile.open do |f|
     request.body.rewind
     File.binwrite(f.path, request.body.read)
+    id = params[:swarm]&.to_i
+    raise Baza::Urror, 'The "swarm" is a mandatory query param' if id.nil?
+    swarm = settings.humans.swarm_by_id(id)
+    secret = params[:secret]
+    return [401, "Invalid secret for the swarm ##{swarm.id}"] if swarm.secret != secret
+    job_id = params[:id]&.to_i
+    raise Baza::Urror, 'The "id" is a mandatory query param' if job_id.nil?
+    job = settings.humans.job_by_id(job_id)
+    return "The job #{job.id} is finished already" if job.finished?
     settings.humans.pipe(settings.fbs, settings.trails).unpack(job, f.path)
+    "Job ##{job.id} finished, thanks!"
   end
-  "Job ##{job.id} finished, thanks!"
 end
