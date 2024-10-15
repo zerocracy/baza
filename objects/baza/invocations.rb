@@ -69,7 +69,7 @@ class Baza::Invocations
   #
   # @param [String] stdout The output
   # @param [Integer] code The code (zero means success)
-  # @param [Baza::Job] job The ID of the job
+  # @param [Baza::Job|nil] job The ID of the job
   # @return [Integer] The ID of the added invocation
   def register(stdout, code, job)
     raise Baza::Urror, 'The "stdout" cannot be NIL' if stdout.nil?

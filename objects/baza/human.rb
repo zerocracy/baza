@@ -112,10 +112,10 @@ class Baza::Human
         'swarm.name AS swarm, swarm.id AS swarm_id,',
         'human.github AS human',
         'FROM invocation',
-        'JOIN job ON job.id = invocation.job',
-        'JOIN token ON token.id = job.token',
-        'JOIN human ON token.human = human.id',
         'JOIN swarm ON swarm.id = invocation.swarm',
+        'LEFT JOIN job ON job.id = invocation.job',
+        'LEFT JOIN token ON token.id = job.token',
+        'LEFT JOIN human ON token.human = human.id',
         'WHERE invocation.id = $1 AND (token.human = $2',
         extend(Baza::Human::Roles).admin? ? 'OR TRUE)' : ')'
       ],

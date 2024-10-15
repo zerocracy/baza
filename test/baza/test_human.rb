@@ -38,4 +38,14 @@ class Baza::HumanTest < Minitest::Test
     human = humans.ensure(login)
     assert_equal(human.github, login)
   end
+
+  def test_get_invocation_by_id
+    human = fake_human
+    swarms = human.swarms
+    swarms.add(fake_name, "#{fake_name}/swarm", 'master', '/')
+    s = swarms.each.to_a.first
+    id = s.invocations.register('stdout', 1, nil)
+    inv = human.invocation_by_id(id)
+    assert(!inv.nil?)
+  end
 end
