@@ -46,6 +46,7 @@ class MainTest < Minitest::Test
         rb,
         [
           Liquid::Template.parse(File.read(File.join(__dir__, '../../assets/lambda/main.rb'))).render(
+            'version' => '1.1.1',
             'swarm' => '42',
             'name' => 'swarmik',
             'secret' => 'sword-fish',
@@ -93,7 +94,7 @@ class MainTest < Minitest::Test
           }
         )
       )
-      stub_request(:put, 'http://swarms/42/invocation?code=0&job=7&secret=sword-fish').with do |req|
+      stub_request(:put, 'http://swarms/42/invocation?code=0&job=7&secret=sword-fish&version=1.1.1').with do |req|
         assert_include(
           req.body,
           'A new event arrived, about job #7',

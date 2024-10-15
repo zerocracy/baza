@@ -203,8 +203,9 @@ put(%r{/swarms/([0-9]+)/invocation}) do
   job_id = params[:job].to_i
   job = job_id.zero? ? nil : settings.humans.job_by_id(job_id)
   code = (params[:code] || '1').to_i
+  version = params[:version] || 'unknown'
   request.body.rewind
-  id = swarm.invocations.register(request.body.read, code, job)
+  id = swarm.invocations.register(request.body.read, code, job, version)
   "Invocation ##{id} registered for swarm ##{swarm.id} (code=#{code})"
 end
 

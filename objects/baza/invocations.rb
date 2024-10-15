@@ -70,9 +70,11 @@ class Baza::Invocations
   # @param [String] stdout The output
   # @param [Integer] code The code (zero means success)
   # @param [Baza::Job|nil] job The ID of the job
+  # @param [String] version The version of the software in the AWS Lambda
   # @return [Integer] The ID of the added invocation
-  def register(stdout, code, job)
+  def register(stdout, code, job, version)
     raise Baza::Urror, 'The "stdout" cannot be NIL' if stdout.nil?
+    raise Baza::Urror, 'The "version" cannot be NIL' if version.nil?
     id = pgsql.exec(
       'INSERT INTO invocation (swarm, code, job, stdout) VALUES ($1, $2, $3, $4) RETURNING id',
       [@swarm.id, code, job.nil? ? nil : job.id, stdout]
@@ -82,7 +84,14 @@ class Baza::Invocations
         "⚠️ The [swarm ##{@swarm.id}](//swarms/#{@swarm.id}/releases) (\"`#{@swarm.name}`\")",
         "just failed, at the invocation [##{id}](//invocation/#{id})",
         job.nil? ? '' : "for the job ##{job.id} (`#{job.name}`) of @#{job.jobs.human.github}",
-        "(exit code is `#{code}`, there are #{stdout.split("\n").count} lines in the stdout)."
+        "(exit code is `#{code}`, there are #{stdout.split("\n").count} lines in the stdout).",
+        unless version == Baza::VERSION
+          [
+            "The version of the swarm is `#{version}`, ",
+            "while the version of Baza is `#{Baza::VERSION}` — ",
+            'maybe this is the root cause of the failure.'
+          ].join
+        end
       )
     end
     id
