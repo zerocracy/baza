@@ -93,7 +93,7 @@ class ShiftTest < Minitest::Test
       stdout,
       "StringValue='#{job.id}'",
       "StringValue='baza-#{s.name}'",
-      "StringValue='baza-foo baza-bar baza-xyz'"
+      "StringValue='baza-bar baza-xyz'"
     )
   end
 end

@@ -79,6 +79,11 @@ else
     exit 1
   fi
   aws s3 cp pack.zip "s3://${S3_BUCKET}/${next}/${id}.zip"
+  for s in "${!more[@]}"; do
+    if [[ "${more[s]}" = "${next}" ]]; then
+      unset 'more[s]'
+    fi
+  done
   msg=$( aws sqs send-message \
     --queue-url "https://sqs.us-east-1.amazonaws.com/019644334823/${next}" \
     --message-body "Job #${id} needs further processing by '${more[*]}'" \
@@ -90,5 +95,9 @@ else
   echo "SQS message ${msg} sent to the ${next} queue"
   aws s3 rm "s3://${S3_BUCKET}/${previous}/${id}.zip"
   echo "ZIP ($(du -b pack.zip | cut -f1) bytes) moved from ${previous}/${id}.zip to ${next}/${id}.zip"
-  echo "The job #${id} now goes to ${next}, after that it will go to '${more[*]}'"
+  if [ "${#more[@]}" -eq 0 ]; then
+    echo "The job #${id} now goes to ${next}, this will be its last stop"
+  else
+    echo "The job #${id} now goes to ${next}, after that it will go to '${more[*]}'"
+  fi
 fi
