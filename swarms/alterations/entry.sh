@@ -49,9 +49,13 @@ export BUNDLE_GEMFILE="${self}/Gemfile"
 
 set -x
 alts=$( find "${home}" -type f -name 'alteration-*.rb' -exec basename {} .rb \; )
-while IFS= read -r alt; do
-  tmp=$( mktemp -d )
-  mkdir -p "${tmp}/${alt}"
-  cp "${home}/${alt}.rb" "${tmp}/${alt}/${alt}.rb"
-  bundle exec judges --verbose update --quiet --no-summary --max-cycles=1 --no-log "${tmp}" "${home}/base.fb" 2>&1 | tee "${home}/${alt}.txt"
-done <<< "${alts}"
+if [ -n "${alts}" ]; then
+  while IFS= read -r alt; do
+    tmp=$( mktemp -d )
+    mkdir -p "${tmp}/${alt}"
+    cp "${home}/${alt}.rb" "${tmp}/${alt}/${alt}.rb"
+    bundle exec judges --verbose update --quiet --no-summary --max-cycles=1 --no-log "${tmp}" "${home}/base.fb" 2>&1 | tee "${home}/${alt}.txt"
+  done <<< "${alts}"
+else
+  echo "No alterations found in ${home}"
+fi

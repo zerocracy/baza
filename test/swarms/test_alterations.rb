@@ -50,4 +50,16 @@ class TestAlterations < Minitest::Test
       assert_equal(1, fb.query('(eq bar 7)').each.to_a.size)
     end
   end
+
+  def test_no_alterations
+    Dir.mktmpdir do |home|
+      fb = Factbase.new
+      File.binwrite(File.join(home, 'base.fb'), fb.export)
+      stdout = qbash(
+        "#{Shellwords.escape(File.join(__dir__, '../../swarms/alterations/entry.sh'))} 0 #{Shellwords.escape(home)}",
+        log: fake_loog
+      )
+      assert(stdout.include?('No alterations found'))
+    end
+  end
 end
