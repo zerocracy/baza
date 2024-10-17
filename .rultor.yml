@@ -73,5 +73,6 @@ release:
       https://www.zerocracy.com > /dev/null
 merge:
   script: |-
+    bundle exec rake pgsql
     bundle exec rake
     bundle exec rake clean
