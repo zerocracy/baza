@@ -22,6 +22,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+require 'tago'
 require_relative '../objects/baza/features'
 
 settings.humans.gc.ready_to_expire(settings.expiration_days) do |j|
@@ -57,11 +58,12 @@ rescue Baza::Humans::TokenNotFound
   settings.loog.warn('There is not tester in the system')
 end
 
-settings.humans.gc.stuck_locks(4 * 60) do |human, id|
+settings.humans.gc.stuck_locks(8 * 60) do |human, id, created|
   human.notifications.post(
     "lock-#{id}-is-stuck",
-    "⚠️ The lock ##{id} exists for too long. Most probably it is stuck " \
-    'and must be removed manually, [here](//locks).'
+    "⚠️ The lock ##{id} exists for #{created.ago} (it's too long).",
+    'Most probably the lock is stuck.',
+    'It must be removed manually, [here](//locks).'
   )
 end
 
