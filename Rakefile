@@ -32,14 +32,15 @@ ENV['RACK_RUN'] = 'true'
 task default: %i[clean test rubocop haml_lint scss_lint xcop config copyright]
 
 require 'rake/testtask'
-Rake::TestTask.new(test: %i[pgsql liquibase]) do |test|
+Rake::TestTask.new(test: %i[pgsql liquibase]) do |t|
   Rake::Cleaner.cleanup_files(['coverage'])
   require 'simplecov'
   SimpleCov.start
-  test.libs << 'lib' << 'test'
-  test.pattern = 'test/**/test_*.rb'
-  test.verbose = true
-  test.warning = false
+  t.libs << 'lib' << 'test'
+  t.pattern = 'test/**/test_*.rb'
+  t.verbose = true
+  t.warning = false
+  t.options = ARGV.join(' ')
 end
 
 require 'haml_lint/rake_task'
@@ -49,9 +50,9 @@ HamlLint::RakeTask.new do |t|
 end
 
 require 'rubocop/rake_task'
-RuboCop::RakeTask.new(:rubocop) do |task|
-  task.fail_on_error = true
-  task.requires << 'rubocop-rspec'
+RuboCop::RakeTask.new(:rubocop) do |t|
+  t.fail_on_error = true
+  t.requires << 'rubocop-rspec'
 end
 
 require 'pgtk/pgsql_task'
@@ -74,10 +75,10 @@ Pgtk::LiquibaseTask.new(:liquibase) do |t|
 end
 
 require 'xcop/rake_task'
-Xcop::RakeTask.new(:xcop) do |task|
-  task.license = 'LICENSE.txt'
-  task.includes = ['**/*.xml', '**/*.xsl', '**/*.xsd', '**/*.html']
-  task.excludes = ['target/**/*', 'coverage/**/*']
+Xcop::RakeTask.new(:xcop) do |t|
+  t.license = 'LICENSE.txt'
+  t.includes = ['**/*.xml', '**/*.xsl', '**/*.xsd', '**/*.html']
+  t.excludes = ['target/**/*', 'coverage/**/*']
 end
 
 require 'scss_lint/rake_task'

@@ -67,22 +67,31 @@ class Minitest::Test
     page.driver.header 'User-Agent', 'Capybara'
   end
 
-  def fake_live_cfg
-    # In order to use any of the following options, you must run rake like this:
-    #   rake -- --live=my.yml
-    # Pay attention to the double dash that splits "rake" and the list of options.
+  # Returns TRUE if this opt is provided in the command line.
+  #
+  # In order to use any of the following options, you must run rake like this:
+  #   rake -- --live=my.yml
+  # Pay attention to the double dash that splits "rake" and the list of options.
+  #
+  # @param [String] opt The name of the opt
+  # @return [boolean] TRUE if set
+  def fake_opt?(opt)
     ARGV.each do |a|
-      opt, value = a.split('=', 2)
-      next unless opt == '--live'
-      file = value
-      raise "File not found: #{file}" unless File.exist?(file)
-      return YAML.safe_load(File.open(file))
+      left, right = a.split('=', 2)
+      return (right || true) if left == "--#{opt}"
     end
-    skip
+    false
+  end
+
+  def fake_live_cfg
+    file = fake_opt?('live')
+    skip unless file
+    raise "File not found: #{file}" unless File.exist?(file)
+    return YAML.safe_load(File.open(file))
   end
 
   def fake_loog
-    ENV['RACK_RUN'] ? Loog::ERRORS : Loog::VERBOSE
+    ENV['RACK_RUN'] && !fake_opt?('verbose') ? Loog::ERRORS : Loog::VERBOSE
   end
 
   def fake_pgsql
@@ -216,9 +225,11 @@ class Minitest::Test
         loog.error(Backtrace.new(e))
         raise e
       end
+    start = Time.now
     loop do
       sleep 0.1
       break if started
+      raise 'Timeout' if Time.now - start > 15
     end
     begin
       yield
