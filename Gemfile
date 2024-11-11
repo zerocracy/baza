@@ -86,5 +86,6 @@ gem 'truncate', '~>0.1'
 gem 'veils', '~>0'
 gem 'w3c_validators', '~>1.3', require: false
 gem 'webmock', '~>3.23', require: false
+gem 'webrick', '~>1.8.2'
 gem 'xcop', '~>0'
 gem 'zache', '~>0'

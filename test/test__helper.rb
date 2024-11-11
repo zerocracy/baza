@@ -78,7 +78,7 @@ class Minitest::Test
   def fake_opt?(opt)
     ARGV.each do |a|
       left, right = a.split('=', 2)
-      return (right || true) if left == "--#{opt}"
+      return right || true if left == "--#{opt}"
     end
     false
   end
@@ -87,7 +87,7 @@ class Minitest::Test
     file = fake_opt?('live')
     skip unless file
     raise "File not found: #{file}" unless File.exist?(file)
-    return YAML.safe_load(File.open(file))
+    YAML.safe_load(File.open(file))
   end
 
   def fake_loog
