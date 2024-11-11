@@ -50,7 +50,7 @@ get %r{/css/([a-z0-9-]+).css} do
   Sass.compile(template, style: :compressed).css
 end
 
-get(%r{/(terms)}) do
+get(%r{/(terms|how-it-works)}) do
   n = params['captures'].first
   f = File.join(File.absolute_path('./assets/markdown/'), "#{n}.md")
   html = Redcarpet::Markdown.new(Redcarpet::Render::HTML).render(File.read(f))

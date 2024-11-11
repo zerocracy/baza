@@ -45,10 +45,12 @@ class Baza::FrontPushTest < Minitest::Test
     end
   end
 
-  def test_renders_terms
-    get('/terms')
-    assert_status(200)
-    assert(last_response.body.include?('Terms'))
+  def test_renders_markdown_pages
+    %w[terms how-it-works].each do |p|
+      get("/#{p}")
+      assert_status(200)
+      assert(last_response.body.include?('<h1>'))
+    end
   end
 
   def test_returns_image_as_binary_data
