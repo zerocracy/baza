@@ -20,7 +20,7 @@ significantly [improve][effect] team productivity and reduce turnover.
 Here's how it works:
 
 1. You create an [account][baza] and get a token.
-1. You create a new GitHub Actions workflow.
+1. You create a new GitHub Actions [workflow][judges-action].
 1. The workflow publishes points earned by each programmer.
 1. [Zerocrat][0crat] on GitHub informs programmers when they score.
 
