@@ -44,8 +44,6 @@
                   %li
                     %a{ href: iri.cut('/how-it-works') }
                       How It Works
-                  %li{ title: 'Currently deployed version' }
-                    = Baza::VERSION
               %nav
                 %ul.larger
                   %li
@@ -60,3 +58,7 @@
                   %li
                     %a{ href: 'mailto:team@zerocracy.com' }
                       %i.fa-solid.fa-envelope
+              %nav
+                %ul.smaller
+                  %li.ff{ title: 'Currently deployed version' }
+                    = Baza::VERSION
