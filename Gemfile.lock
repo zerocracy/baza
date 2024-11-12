@@ -200,7 +200,7 @@ GEM
     google-protobuf (4.28.3-x86_64-linux)
       bigdecimal
       rake (>= 13)
-    graphql (2.4.2)
+    graphql (2.4.3)
       base64
       fiber-storage
     graphql-client (0.23.0)
@@ -372,7 +372,7 @@ GEM
       rspec-mocks (~> 3.13)
       rspec-support (~> 3.13)
     rspec-support (3.13.1)
-    rubocop (1.66.1)
+    rubocop (1.68.0)
       json (~> 2.3)
       language_server-protocol (>= 3.17.0)
       parallel (~> 1.10)
@@ -556,7 +556,7 @@ DEPENDENCIES
   rerun (~> 0.14)
   retries (> 0)
   rspec-rails (~> 7.0)
-  rubocop (= 1.66.1)
+  rubocop (= 1.68.0)
   rubocop-rspec (= 3.2.0)
   rubyzip (> 0)
   sass-embedded (~> 1)

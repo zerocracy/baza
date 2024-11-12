@@ -124,7 +124,7 @@ class Baza::PipeTest < Minitest::Test
   end
 
   def test_unpack_with_trails
-    job = fake_job
+    fake_job
     job = fake_pipe.pop('owner')
     Dir.mktmpdir do |home|
       zip = File.join(home, 'foo.zip')
