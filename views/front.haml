@@ -42,8 +42,8 @@
                     %a{ href: iri.cut('/terms') }
                       Terms
                   %li
-                    %a{ href: 'mailto:team@zerocracy.com' }
-                      team@zerocracy.com
+                    %a{ href: iri.cut('/how-it-works') }
+                      How It Works
                   %li{ title: 'Currently deployed version' }
                     = Baza::VERSION
               %nav
@@ -57,3 +57,6 @@
                   %li
                     %a{ href: 'https://t.me/zerocracy' }
                       %i.fa-brands.fa-telegram
+                  %li
+                    %a{ href: 'mailto:team@zerocracy.com' }
+                      %i.fa-solid.fa-envelope
