@@ -135,8 +135,8 @@ GEM
       others (> 0)
       tago (> 0)
       yaml (~> 0.3)
-    faraday (2.12.0)
-      faraday-net_http (>= 2.0, < 3.4)
+    faraday (2.12.1)
+      faraday-net_http (>= 2.0, < 3.5)
       json
       logger
     faraday-http-cache (2.5.1)
@@ -470,7 +470,7 @@ GEM
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
     unicode-display_width (2.6.0)
-    uri (1.0.1)
+    uri (1.0.2)
     useragent (0.16.10)
     veils (0.4.0)
     verbose (0.0.2)
