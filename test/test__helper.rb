@@ -239,15 +239,19 @@ class Minitest::Test
     end
   end
 
+  def fake_docker
+    'docker'
+  end
+
   def fake_image(dir)
     img = fake_name
     with_retries do
-      qbash("docker build #{Shellwords.escape(dir)} -t #{img}", log: fake_loog)
+      qbash("#{fake_docker} build #{Shellwords.escape(dir)} -t #{img}", log: fake_loog)
     end
     begin
       yield img
     ensure
-      qbash("docker rmi #{img}", log: fake_loog, timeout: 10)
+      qbash("#{fake_docker} rmi #{img}", log: fake_loog, timeout: 10)
     end
   end
 
@@ -257,7 +261,7 @@ class Minitest::Test
     code = nil
     begin
       cmd = [
-        'docker run',
+        "#{fake_docker} run",
         '--name', Shellwords.escape(n),
         OS.linux? ? '' : "--add-host #{fake_docker_host}:host-gateway",
         args,
@@ -283,11 +287,11 @@ class Minitest::Test
       return yield n if block_given?
     ensure
       qbash(
-        "docker logs #{Shellwords.escape(n)}",
+        "#{fake_docker} logs #{Shellwords.escape(n)}",
         level: code.zero? ? Logger::DEBUG : Logger::ERROR,
         log: fake_loog
       )
-      qbash("docker rm -f #{Shellwords.escape(n)}", log: fake_loog)
+      qbash("#{fake_docker} rm -f #{Shellwords.escape(n)}", log: fake_loog)
     end
     stdout
   end

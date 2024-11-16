@@ -32,6 +32,7 @@ assets:
   id_rsa: yegor256/home#assets/heroku-key
   id_rsa.pub: yegor256/home#assets/heroku-key.pub
 install: |-
+  sudo printf '#!/bin/bash\nsudo docker $@' > /bin/docker && chmod a+x /bin/docker
   sudo apt-get update
   sudo apt-get install -y libpq-dev postgresql-client postgresql
   sudo ln -s "$(realpath /usr/lib/postgresql/*/bin/initdb)" /bin/initdb

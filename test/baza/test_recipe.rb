@@ -159,7 +159,7 @@ class Baza::RecipeTest < Minitest::Test
       end
       FileUtils.mkdir_p(File.join(home, 'swarm'))
       fake_image(home) do |image|
-        qbash("docker image inspect #{image}", log: fake_loog)
+        qbash("#{fake_docker} image inspect #{image}", log: fake_loog)
       end
     end
   end
@@ -257,7 +257,7 @@ class Baza::RecipeTest < Minitest::Test
                 )
                 request.run
                 assert_include(
-                  qbash("docker logs #{Shellwords.escape(container)}", log: fake_loog),
+                  qbash("#{fake_docker} logs #{Shellwords.escape(container)}", log: fake_loog),
                   'Unpacked ZIP',
                   'Job #42 is coming from @yegor256',
                   "Reported to #{fake_docker_host}:#{backend_port}, received HTTP #200",
