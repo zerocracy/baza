@@ -58,10 +58,10 @@ rescue Baza::Humans::TokenNotFound
   settings.loog.warn('There is not tester in the system')
 end
 
-settings.humans.gc.stuck_locks(8 * 60) do |human, id, created|
+settings.humans.gc.stuck_locks(8 * 60) do |human, id, created, name|
   human.notifications.post(
     "lock-#{id}-is-stuck",
-    "⚠️ The lock ##{id} exists for #{created.ago} (it's too long).",
+    "⚠️ The lock `#{name}` (##{id}) exists for #{created.ago} (it's too long).",
     'Most probably the lock is stuck.',
     'It must be removed manually, [here](//locks).'
   )

@@ -74,10 +74,10 @@ class Baza::Gc
   def stuck_locks(minutes = 4 * 60)
     return to_enum(__method__, minutes) unless block_given?
     q =
-      'SELECT human, id, created FROM lock ' \
+      'SELECT human, id, created, name FROM lock ' \
       "WHERE created < NOW() - INTERVAL '#{minutes.to_i} MINUTES'"
     pgsql.exec(q).each do |row|
-      yield [@humans.get(row['human'].to_i), row['id'].to_i, Time.parse(row['created'])]
+      yield [@humans.get(row['human'].to_i), row['id'].to_i, Time.parse(row['created']), row['name']]
     end
   end
 
