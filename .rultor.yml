@@ -74,5 +74,4 @@ release:
       https://www.zerocracy.com > /dev/null
 merge:
   script: |-
-    bundle exec rake
-    bundle exec rake clean
+    sudo bundle exec rake "--gemfile=$(pwd)/Gemfile"
