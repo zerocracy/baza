@@ -111,6 +111,7 @@ class Baza::Recipe
         'bucket' => @bucket
       ),
       cat_of('Gemfile'),
+      cat_of('Gemfile.lock'),
       cat_of('entry.sh'),
       cat_of('default-entry.sh'),
       cat_of(

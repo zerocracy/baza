@@ -1,0 +1,106 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    archive-zip (0.12.0)
+      io-like (~> 0.3.0)
+    aws-eventstream (1.3.0)
+    aws-partitions (1.1025.0)
+    aws-sdk-core (3.214.0)
+      aws-eventstream (~> 1, >= 1.3.0)
+      aws-partitions (~> 1, >= 1.992.0)
+      aws-sigv4 (~> 1.9)
+      jmespath (~> 1, >= 1.6.1)
+    aws-sdk-kms (1.96.0)
+      aws-sdk-core (~> 3, >= 3.210.0)
+      aws-sigv4 (~> 1.5)
+    aws-sdk-s3 (1.176.1)
+      aws-sdk-core (~> 3, >= 3.210.0)
+      aws-sdk-kms (~> 1)
+      aws-sigv4 (~> 1.5)
+    aws-sdk-sqs (1.89.0)
+      aws-sdk-core (~> 3, >= 3.210.0)
+      aws-sigv4 (~> 1.5)
+    aws-sigv4 (1.10.1)
+      aws-eventstream (~> 1, >= 1.0.2)
+    aws_lambda_ric (2.0.0)
+    backtrace (0.4.0)
+    elapsed (0.0.1)
+      loog (> 0)
+      tago (> 0)
+    ethon (0.16.0)
+      ffi (>= 1.15.0)
+    ffi (1.17.0-aarch64-linux-gnu)
+    ffi (1.17.0-aarch64-linux-musl)
+    ffi (1.17.0-arm-linux-gnu)
+    ffi (1.17.0-arm-linux-musl)
+    ffi (1.17.0-arm64-darwin)
+    ffi (1.17.0-x86-linux-gnu)
+    ffi (1.17.0-x86-linux-musl)
+    ffi (1.17.0-x86_64-darwin)
+    ffi (1.17.0-x86_64-linux-gnu)
+    ffi (1.17.0-x86_64-linux-musl)
+    io-like (0.3.1)
+    iri (0.8.0)
+    jmespath (1.6.2)
+    json (2.9.1)
+    loog (0.6.0)
+    nokogiri (1.17.2-aarch64-linux)
+      racc (~> 1.4)
+    nokogiri (1.17.2-arm-linux)
+      racc (~> 1.4)
+    nokogiri (1.17.2-arm64-darwin)
+      racc (~> 1.4)
+    nokogiri (1.17.2-x86-linux)
+      racc (~> 1.4)
+    nokogiri (1.17.2-x86_64-darwin)
+      racc (~> 1.4)
+    nokogiri (1.17.2-x86_64-linux)
+      racc (~> 1.4)
+    qbash (0.0.8)
+      backtrace (> 0)
+      elapsed (> 0)
+      loog (> 0)
+      tago (> 0)
+    racc (1.8.1)
+    stringio (3.1.2)
+    tago (0.0.2)
+    typhoeus (1.4.1)
+      ethon (>= 0.9.0)
+
+PLATFORMS
+  aarch64-linux
+  aarch64-linux-gnu
+  aarch64-linux-musl
+  arm-linux
+  arm-linux-gnu
+  arm-linux-musl
+  arm64-darwin
+  x86-linux
+  x86-linux-gnu
+  x86-linux-musl
+  x86_64-darwin
+  x86_64-linux
+  x86_64-linux-gnu
+  x86_64-linux-musl
+
+DEPENDENCIES
+  archive-zip (= 0.12.0)
+  aws-sdk-core (~> 3.202)
+  aws-sdk-s3 (~> 1.159)
+  aws-sdk-sqs (~> 1.80)
+  aws_lambda_ric (= 2.0.0)
+  backtrace (> 0)
+  elapsed (> 0)
+  iri (> 0)
+  json (> 0)
+  loog (> 0)
+  nokogiri (> 0)
+  qbash (>= 0.0.8)
+  stringio (~> 3.1)
+  typhoeus (~> 1.3)
+
+RUBY VERSION
+   ruby 3.2.1p31
+
+BUNDLED WITH
+   2.5.16

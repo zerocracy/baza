@@ -32,6 +32,7 @@ assets:
   id_rsa: yegor256/home#assets/heroku-key
   id_rsa.pub: yegor256/home#assets/heroku-key.pub
 install: |-
+  set -x
   sudo printf '#!/bin/bash\nsudo docker $@' > /bin/docker && chmod a+x /bin/docker
   sudo apt-get update
   sudo apt-get install -y libpq-dev postgresql-client postgresql
@@ -46,6 +47,7 @@ release:
   sensitive:
     - config.yml
   script: |-
+    set -x
     mv ../netrc ~/.netrc
     bundle exec rake
     git remote add heroku https://git.heroku.com/zerocracy.git
@@ -74,4 +76,5 @@ release:
       https://www.zerocracy.com > /dev/null
 merge:
   script: |-
+    set -x
     sudo bundle exec rake "--gemfile=$(pwd)/Gemfile"
