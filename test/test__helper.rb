@@ -269,7 +269,7 @@ class Minitest::Test
         '--name', Shellwords.escape(n),
         OS.linux? ? '' : "--add-host #{fake_docker_host}:host-gateway",
         args,
-        env.keys.map { |k| "-e #{Shellwords.escape(k)}" }.join(' '),
+        env.map { |k, v| "-e #{Shellwords.escape("#{k}=#{v}")}" }.join(' '),
         '--user', Shellwords.escape("#{Process.uid}:#{Process.gid}"),
         Shellwords.escape(image),
         cmd
