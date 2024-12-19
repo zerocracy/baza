@@ -77,4 +77,4 @@ release:
 merge:
   script: |-
     set -x
-    sudo bundle exec rake "--gemfile=$(pwd)/Gemfile"
+    sudo bundle "--gemfile=$(pwd)/Gemfile" exec rake
