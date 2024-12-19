@@ -240,7 +240,11 @@ class Minitest::Test
   end
 
   def fake_docker
-    'docker'
+    if ENV['DOCKER_SUDO']
+      'sudo docker'
+    else
+      'docker'
+    end
   end
 
   def fake_image(dir)
