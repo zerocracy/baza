@@ -116,15 +116,19 @@ configure do
   }
   unless Baza::Features::TESTS
     f = File.join(File.dirname(__FILE__), 'config.yml')
-    unless File.exist?(f)
+    if File.exist?(f)
+      config = YAML.safe_load(File.open(f))
+      File.delete(f)
+    elsif ENV['YAML_CONFIG']
+      config = YAML.safe_load(ENV['YAML_CONFIG'])
+    else
       raise \
         "The config file #{f} is absent, can't start the app. " \
+        'Also, there is not YAML_CONFIG environment variable. ' \
         'If you are running in a staging/testing mode, set RACK_ENV ' \
         "envirornemt variable to 'test' and run again:\n" \
         'RACK_ENV=test ruby baza.app -p 8888'
     end
-    config = YAML.safe_load(File.open(f))
-    File.delete(f)
   end
   set :config, config
 end
