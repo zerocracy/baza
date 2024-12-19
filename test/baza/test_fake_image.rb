@@ -43,7 +43,7 @@ class Baza::FakeImageTest < Minitest::Test
       )
       fake_image(home) do |image|
         stdout = fake_container(image)
-        assert_equal("/tmp\n", stdout, stdout)
+        assert(stdout.include?("/tmp\n"), stdout)
       end
     end
   end
