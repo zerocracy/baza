@@ -84,7 +84,9 @@
               != menu("/#{c.downcase}", c)
           %ul.ff
             %li
-              Features:
+              %a{ href: 'https://github.com/zerocracy/baza/blob/master/objects/baza/features.rb' }<>
+                Features
+              = ':'
               = Baza::Features.summary
           %ul
             %li
