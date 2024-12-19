@@ -39,12 +39,12 @@ fi
 
 attempt=0
 while true; do
-  status=$(curl --silent --verbose \
+  status=$(curl --silent \
     "${BAZA_URL}/pop?swarm=${SWARM_ID}&secret=${SWARM_SECRET}" \
     --connect-timeout 10 --max-time 300 \
     --header 'User-Agent: baza-pop' \
     --output pack.zip -w "%{http_code}")
-  echo "/pop returned HTTP #${status}"
+  echo "GET ${BAZA_URL}/pop returned HTTP #${status}"
   ((++attempt))
   if [ "${status}" -lt 500 ]; then break; fi
   if [ "${attempt}" -gt 8 ]; then exit 1; fi

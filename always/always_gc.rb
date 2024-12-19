@@ -67,4 +67,4 @@ settings.humans.gc.stuck_locks(8 * 60) do |human, id, created, name|
   )
 end
 
-settings.sqs.push(nil, 'Just a regular ping to pop some stuck jobs') unless Baza::Features::PIPELINE
+settings.sqs.push(nil, 'Just a regular ping from baza') unless Baza::Features::PIPELINE

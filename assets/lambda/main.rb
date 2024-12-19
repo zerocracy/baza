@@ -289,7 +289,11 @@ def go(event:, context:)
         elapsed(lg, level: Logger::INFO) do
           job = rec['messageAttributes']['job']['stringValue'].to_i
           hops = rec['messageAttributes']['hops']['stringValue'].to_i
-          lg.debug("A new event arrived, about job ##{job} (hops=#{hops})")
+          if job.zero?
+            lg.debug("A new event arrived, not related to any job (hops=#{hops})")
+          else
+            lg.debug("A new event arrived, about job ##{job} (hops=#{hops})")
+          end
           if ['baza-pop', 'baza-shift', 'baza-finish'].include?('{{ name }}')
             lg.debug("Starting to process '{{ name }}' (system swarm)")
             Dir.mktmpdir do |pack|
