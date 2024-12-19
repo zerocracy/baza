@@ -23,6 +23,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+SimpleCov.command_name('tests')
 SimpleCov.formatter =
   if Gem.win_platform?
     SimpleCov::Formatter::MultiFormatter[

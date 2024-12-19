@@ -92,7 +92,7 @@ class Baza::Secrets
       'INSERT INTO secret (human, name, key, value) VALUES ($1, $2, $3, $4) RETURNING id',
       [@human.id, name.downcase, key, value]
     )[0]['id'].to_i
-    @human.notify("✅ Secret with ID #{id} has been successfully added.")
+    @human.notify("🥕 Secret with ID #{id} has been successfully added.")
     id
   end
 

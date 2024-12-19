@@ -76,5 +76,4 @@ release:
       https://www.zerocracy.com > /dev/null
 merge:
   script: |-
-    set -x
-    DOCKER_SUDO=true bundle exec --gemfile "$(pwd)/Gemfile" rake --directory "$(pwd)"
+    DOCKER_SUDO=true bundle exec rake
