@@ -27,10 +27,7 @@ ec2:
 readers:
   - "urn:github:526301"
 assets:
-  netrc: yegor256/home#assets/heroku-netrc
   config.yml: yegor256/home#assets/zerocracy/baza.yml
-  id_rsa: yegor256/home#assets/heroku-key
-  id_rsa.pub: yegor256/home#assets/heroku-key.pub
 install: |-
   set -x
   sudo apt-get update
@@ -41,38 +38,13 @@ install: |-
   bundle install --no-color
   bundle install --no-color --gemfile=assets/lambda/Gemfile
   bundle install --no-color --gemfile=swarms/alterations/Gemfile
-release:
-  pre: false
-  sensitive:
-    - config.yml
-  script: |-
-    set -x
-    mv ../netrc ~/.netrc
-    bundle exec rake
-    git remote add heroku https://git.heroku.com/zerocracy.git
-    rm -rf ~/.ssh
-    mkdir ~/.ssh
-    mv ../id_rsa ../id_rsa.pub ~/.ssh
-    chmod -R 600 ~/.ssh/*
-    cat <<EOF
-    Host *
-      StrictHostKeyChecking no
-      UserKnownHostsFile=/dev/null
-    EOF > ~/.ssh/config
-    sed -i "s/0\.0\.0/${tag}/g" ./version.rb
-    git add ./version.rb
-    git commit -m 'build number set'
-    cp ../config.yml config.yml
-    git add config.yml
-    git commit -m 'config.yml'
-    git push -f heroku $(git symbolic-ref --short HEAD):master
-    git reset HEAD~1
-    rm -f target/pgsql-config.yml
-    bundle exec rake liquibase
-    rm -rf config.yml
-    curl -f --connect-timeout 15 \
-      --retry 5 --retry-delay 30 \
-      https://www.zerocracy.com > /dev/null
 merge:
   script: |-
-    DOCKER_SUDO=true bundle exec rake
+    set -x
+    bundle exec rake
+    sed -i "s/0\.0\.0/v${BRANCH}/g" ./version.rb
+    git add ./version.rb
+    git commit -m 'build number set'
+    cp ../config.yml target/pgsql-config.yml
+    bundle exec rake liquibase
+    rm target/pgsql-config.yml

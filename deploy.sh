@@ -24,6 +24,9 @@
 set -e
 set -x
 
+echo "This script doesn't work"
+exit 1
+
 cd "$(dirname "$0")" || exit 1
 
 if [ ! -e /code/z/j ]; then
