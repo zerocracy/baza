@@ -94,9 +94,14 @@ end
 # @param [Integer] id The ID of the job just processed
 # @param [Array<String>] more List of swarm names to be processed later
 # @param [Integer] hops How many hops have already been made
+# @param [Hash] rec JSON event from the SQS message
 # @param [Loog] loog The logging facility
-def send_message(id, more, hops, loog)
+def send_message(id, more, hops, rec, loog)
   attrs = {
+    'shift_message' => {
+      string_value: rec['messageId'],
+      data_type: 'String'
+    },
     'previous' => {
       string_value: '{{ name }}',
       data_type: 'String'
@@ -221,7 +226,7 @@ def with_zip(id, rec, hops, loog, &)
     else
       more = more['stringValue'].split(' ') - ['{{ name }}']
     end
-    send_message(id, more, hops, loog)
+    send_message(id, more, hops, rec, loog)
     code
   end
 end

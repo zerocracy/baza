@@ -70,6 +70,7 @@ if [ "${#more[@]}" -eq 0 ]; then
     "job={DataType=String,StringValue='${id}'}"
     "hops={DataType=Number,StringValue='$((hops + 1))'}"
     "previous={DataType=String,StringValue='${previous}'}"
+    "shift_message={DataType=String,StringValue='${MESSAGE_ID}'}"
   )
   msg=$( aws sqs send-message \
     --queue-url "https://sqs.us-east-1.amazonaws.com/019644334823/${queue}" \
