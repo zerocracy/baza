@@ -62,6 +62,7 @@ class ShiftTest < Minitest::Test
           File.join(home, 'event.json'),
           JSON.pretty_generate(
             {
+              messageId: 'b94df65a-97f2-4566-876a-576e1fc1890e',
               messageAttributes: {
                 previous: { stringValue: name },
                 hops: { stringValue: '5' },
@@ -86,7 +87,13 @@ class ShiftTest < Minitest::Test
           "
         )
         fake_image(home) do |image|
-          fake_container(image, '', "#{job.id} /tmp/work")
+          fake_container(
+            image,
+            '', "#{job.id} /tmp/work",
+            env: {
+              'MESSAGE_ID' => 'b94df65a-97f2-4566-876a-576e1fc1890e'
+            }
+          )
         end
       end
     assert_include(

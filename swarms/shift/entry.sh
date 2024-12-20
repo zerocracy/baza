@@ -30,6 +30,10 @@ id=$1
 home=$2
 cd "${home}" || exit 1
 
+if [ -z "${MESSAGE_ID}" ]; then
+  echo "MESSAGE_ID environment variable is not set: $(printenv | cut -d= -f1 | paste -sd, -)"
+  exit 1
+fi
 if [ -z "${S3_BUCKET}" ]; then
   S3_BUCKET=swarms.zerocracy.com
 fi

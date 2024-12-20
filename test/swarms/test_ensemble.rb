@@ -105,6 +105,7 @@ class EnsembleTest < Minitest::Test
               image,
               env: {
                 'BAZA_URL' => "http://#{fake_docker_host}:#{port}",
+                'MESSAGE_ID' => 'b94df65a-97f2-4566-876a-576e1fc1890e',
                 'SWARM_ID' => s.id.to_s,
                 'SWARM_SECRET' => s.secret
               }
