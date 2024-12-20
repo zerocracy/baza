@@ -56,7 +56,7 @@ GEM
       racc (~> 1.4)
     nokogiri (1.17.2-x86_64-linux)
       racc (~> 1.4)
-    qbash (0.0.8)
+    qbash (0.1.0)
       backtrace (> 0)
       elapsed (> 0)
       loog (> 0)
