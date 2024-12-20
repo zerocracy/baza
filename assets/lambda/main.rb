@@ -230,9 +230,10 @@ end
 #
 # @param [Integer] id The ID of the job to process
 # @param [String] pack Directory name where the ZIP is unpacked
+# @param [Hash] rec JSON record arrived
 # @param [Loog] loog The logging facility
 # @return [Array<String, Integer>] Stdout + exit code (zero means success)
-def one(id, pack, loog)
+def one(id, pack, rec, loog)
   qbash(
     if File.exist?('/swarm/entry.sh')
       "/bin/bash /swarm/entry.sh \"#{id}\" \"#{pack}\" 2>&1"
@@ -244,6 +245,7 @@ def one(id, pack, loog)
     both: true,
     log: loog,
     env: {
+      'MESSAGE_ID' => rec['messageId'],
       'SWARM_SECRET' => '{{ secret }}',
       'SWARM_ID' => '{{ swarm }}',
       'SWARM_NAME' => '{{ name }}'
@@ -298,13 +300,13 @@ def go(event:, context:)
             lg.debug("Starting to process '{{ name }}' (system swarm)")
             Dir.mktmpdir do |pack|
               File.write(File.join(pack, 'event.json'), JSON.pretty_generate(rec))
-              _, code = one(job, pack, lg)
+              _, code = one(job, pack, rec, lg)
             end
           else
             lg.debug("Starting to process '{{ name }}' (normal swarm)")
             code =
               with_zip(job, rec, hops, lg) do |pack|
-                one(job, pack, lg)
+                one(job, pack, rec, lg)
               end
           end
           throw :"Finished processing '{{ name }}' (code=#{code})"

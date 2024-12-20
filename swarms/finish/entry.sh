@@ -48,7 +48,7 @@ aws s3 cp "s3://${S3_BUCKET}/${key}" pack.zip
 attempt=0
 while true; do
   ((++attempt))
-  status=$( curl --request PUT --silent --verbose \
+  status=$( curl --request PUT --silent \
     "${BAZA_URL}/finish?id=${id}&swarm=${SWARM_ID}&secret=${SWARM_SECRET}" \
     --data-binary '@pack.zip' --output http.txt \
     --connect-timeout 10 --max-time 300 \
