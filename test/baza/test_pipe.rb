@@ -23,6 +23,7 @@
 # SOFTWARE.
 
 require 'minitest/autorun'
+require 'threads'
 require_relative '../test__helper'
 require_relative '../../objects/baza'
 require_relative '../../objects/baza/factbases'
@@ -42,6 +43,19 @@ class Baza::PipeTest < Minitest::Test
     assert(!fake_pipe.pop(owner).nil?)
     assert(!fake_pipe.pop(owner).nil?)
     assert(fake_pipe.pop('another owner').nil?)
+  end
+
+  def test_pop_in_threads
+    fake_pgsql.exec('TRUNCATE job CASCADE')
+    total = 5
+    total.times { fake_job }
+    pipe = fake_pipe
+    popped = Concurrent::Array.new
+    Threads.new(total * 10).assert do
+      job = pipe.pop(fake_name)
+      popped.push(job.id) unless job.nil?
+    end
+    assert_equal(total, popped.size)
   end
 
   def test_pop_the_same_if_not_processed
