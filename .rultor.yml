@@ -41,7 +41,7 @@ install: |-
 merge:
   script: |-
     set -x
-    bundle exec rake
+    DOCKER_SUDO=true bundle exec rake
     sed -i "s/0\.0\.0/v${BRANCH}/g" ./version.rb
     git add ./version.rb
     git commit -m 'build number set'
