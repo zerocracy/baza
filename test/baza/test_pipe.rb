@@ -40,8 +40,8 @@ class Baza::PipeTest < Minitest::Test
     fake_job
     owner = fake_name
     assert(!fake_pipe.pop(owner).nil?)
-    assert(!fake_pipe.pop(owner).nil?)
-    assert(!fake_pipe.pop(owner).nil?)
+    assert(fake_pipe.pop(owner).nil?)
+    assert(fake_pipe.pop(owner).nil?)
     assert(fake_pipe.pop('another owner').nil?)
   end
 
@@ -58,12 +58,25 @@ class Baza::PipeTest < Minitest::Test
     assert_equal(total, popped.size)
   end
 
-  def test_pop_the_same_if_not_processed
+  def test_pop_in_threads_same_owner
+    fake_pgsql.exec('TRUNCATE job CASCADE')
+    total = 5
+    total.times { fake_job }
+    pipe = fake_pipe
+    popped = Concurrent::Array.new
+    owner = fake_name
+    Threads.new(total * 10).assert do
+      job = pipe.pop(owner)
+      popped.push(job.id) unless job.nil?
+    end
+    assert_equal(total, popped.size)
+  end
+
+  def test_untake_after_pop
     fake_pgsql.exec('TRUNCATE job CASCADE')
     fake_job
     owner = fake_name
     job = fake_pipe.pop(owner)
-    assert_equal(job.id, fake_pipe.pop(owner).id)
     job.untake!
     assert(!fake_pipe.pop('another owner').nil?)
   end

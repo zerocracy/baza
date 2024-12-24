@@ -56,7 +56,7 @@ class Baza::FrontSwarmsTest < Minitest::Test
     get("/pop?swarm=#{first.id}&secret=#{first.secret}")
     assert_status(200)
     get("/pop?swarm=#{first.id}&secret=#{first.secret}")
-    assert_status(200)
+    assert_status(204)
     get("/pop?swarm=#{second.id}&secret=#{second.secret}")
     assert_status(204)
     humans = fake_humans

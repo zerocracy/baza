@@ -51,7 +51,7 @@ class Baza::Pipe
           [
             'WITH waiting AS (',
             '  SELECT job.id FROM job',
-            '  WHERE (taken IS NULL OR taken = $1)',
+            '  WHERE taken IS NULL',
             '  AND NOT EXISTS (SELECT 1 FROM result WHERE result.job = job.id)',
             '  ORDER BY job.id',
             '  FOR UPDATE SKIP LOCKED',
