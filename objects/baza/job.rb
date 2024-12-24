@@ -277,8 +277,10 @@ class Baza::Job
           [
             'SELECT job.*, result.id AS rid, receipt.id AS tid, ',
             'lock.created AS when_locked, lock.owner AS lock_owner,',
-            '(SELECT STRING_AGG(meta.text, $2) FROM meta WHERE meta.job = job.id) AS metas,',
-            '(SELECT STRING_AGG(invocation.id::TEXT, $2) FROM invocation WHERE invocation.job = job.id) AS invocations',
+            '(SELECT STRING_AGG(meta.text, $2 ORDER BY meta.text) FROM meta',
+            '  WHERE meta.job = job.id) AS metas,',
+            '(SELECT STRING_AGG(invocation.id::TEXT, $2 ORDER BY invocation.id) FROM invocation',
+            '  WHERE invocation.job = job.id) AS invocations',
             'FROM job',
             'JOIN token ON token.id = job.token',
             'LEFT JOIN result ON result.job = job.id',
