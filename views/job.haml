@@ -104,11 +104,15 @@
 
   - if the_human.admin?
     %p
-      Invocations:
       - if job.invocations.empty?
+        Invocations:
+        %br
         %span.orange
           None
       - else
+        = job.invocations.count
+        invocations:
+        %br
         - job.invocations.each do |i|
           %a{ href: iri.cut('/invocation').append(i) }<
             = "##{i}"

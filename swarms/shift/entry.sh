@@ -76,7 +76,7 @@ if [ "${#more[@]}" -eq 0 ]; then
     --queue-url "https://sqs.us-east-1.amazonaws.com/019644334823/${queue}" \
     --message-body "Job ${id} finished processing" \
     --message-attributes "$(IFS=, ; echo "${attrs[*]}")" | jq -r .MessageId )
-  echo "SQS message ${msg} sent to the ${queue} queue"
+  echo "SQS message ${msg} sent to the '${queue}' queue"
   echo "No more swarms to process, it's time to finish"
 else
   next="${more[0]}"
@@ -103,7 +103,7 @@ else
     --queue-url "https://sqs.us-east-1.amazonaws.com/019644334823/${next}" \
     --message-body "Job #${id} needs further processing by '${more[*]}'" \
     --message-attributes "$(IFS=, ; echo "${attrs[*]}")" | jq -r .MessageId )
-  echo "SQS message ${msg} sent to the ${next} queue"
+  echo "SQS message ${msg} sent to the '${next}' queue"
   aws s3 rm "s3://${S3_BUCKET}/${previous}/${id}.zip"
   echo "ZIP ($(du -b pack.zip | cut -f1) bytes) moved from ${previous}/${id}.zip to ${next}/${id}.zip"
   if [ "${#more[@]}" -eq 0 ]; then

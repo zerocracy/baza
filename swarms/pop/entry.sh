@@ -88,6 +88,6 @@ msg=$( aws sqs send-message \
   --queue-url "https://sqs.us-east-1.amazonaws.com/019644334823/${first}" \
   --message-body "Job #${id} needs processing by ${first} (${#swarms[@]} swarms in total)" \
   --message-attributes "$(IFS=, ; echo "${attrs[*]}")" | jq -r .MessageId )
-echo "SQS message ${msg} sent to the ${first} queue"
+echo "SQS message ${msg} sent to the '${first}' queue"
 
 echo "The job #${id} must be processed by a few swarms: ${swarms[*]}"
