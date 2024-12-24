@@ -25,6 +25,9 @@
 set -e
 set -o pipefail
 
+# Print the list of all environment variables, for debugging:
+printenv | cut -d= -f1 | paste -sd, -
+
 id=$1
 if [ -z "${id}" ]; then
   echo "The first argument must be the ID of the job to process"
