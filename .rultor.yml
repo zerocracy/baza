@@ -42,9 +42,10 @@ merge:
   script: |-
     set -x
     DOCKER_SUDO=true bundle exec rake
-    sed -i "s/VERSION = '[^']'/VERSION = '0.$(git rev-list --count master)'/g" ./version.rb
+    n=$(git rev-list --count master)
+    sed -i "s/VERSION = '[^']\+'/VERSION = '0.${n}'/g" ./version.rb
     git add ./version.rb
-    git commit -m 'build number set'
+    git commit -m "build number set to ${n}"
     cp ../config.yml target/pgsql-config.yml
     bundle exec rake liquibase
     rm target/pgsql-config.yml
