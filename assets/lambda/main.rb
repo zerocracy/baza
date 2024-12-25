@@ -35,6 +35,7 @@ require 'json'
 require 'loog'
 require 'loog/tee'
 require 'qbash'
+require 'timeout'
 require 'typhoeus'
 
 # This is needed because of this: https://github.com/aws/aws-lambda-ruby-runtime-interface-client/issues/14
@@ -239,27 +240,28 @@ end
 # @param [Loog] loog The logging facility
 # @return [Array<String, Integer>] Stdout + exit code (zero means success)
 def one(id, pack, rec, loog)
-  qbash(
-    if File.exist?('/swarm/entry.sh')
-      "/bin/bash /swarm/entry.sh \"#{id}\" \"#{pack}\" 2>&1"
-    elsif File.exist?('/swarm/entry.rb')
-      "bundle exec ruby /swarm/entry.rb \"#{id}\" \"#{pack}\" 2>&1"
-    else
-      "echo 'Cannot figure out how to start the swarm, try creating \"entry.sh\" or \"entry.rb\"'"
-    end,
-    both: true,
-    log: loog,
-    env: {
-      'MESSAGE_ID' => rec['messageId'],
-      'SWARM_SECRET' => '{{ secret }}',
-      'SWARM_ID' => '{{ swarm }}',
-      'SWARM_NAME' => '{{ name }}'
-    },
-    accept: nil,
-    timeout: 500
-  )
-rescue Exception => e
-  [Backtrace.new(e).to_s, 1]
+  Timeout.timeout(500) do
+    qbash(
+      if File.exist?('/swarm/entry.sh')
+        "/bin/bash /swarm/entry.sh \"#{id}\" \"#{pack}\" 2>&1"
+      elsif File.exist?('/swarm/entry.rb')
+        "bundle exec ruby /swarm/entry.rb \"#{id}\" \"#{pack}\" 2>&1"
+      else
+        "echo 'Cannot figure out how to start the swarm, try creating \"entry.sh\" or \"entry.rb\"'"
+      end,
+      both: true,
+      log: loog,
+      env: {
+        'MESSAGE_ID' => rec['messageId'],
+        'SWARM_SECRET' => '{{ secret }}',
+        'SWARM_ID' => '{{ swarm }}',
+        'SWARM_NAME' => '{{ name }}'
+      },
+      accept: nil
+    )
+  rescue Timeout::Error => e
+    [Backtrace.new(e).to_s, 1]
+  end
 end
 
 # Pretty print JSON event from SQS.

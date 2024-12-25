@@ -42,6 +42,7 @@ require 'rack/test'
 require 'retries'
 require 'securerandom'
 require 'tago'
+require 'timeout'
 require 'yaml'
 require_relative '../baza'
 require_relative '../objects/baza/humans'
@@ -255,7 +256,9 @@ class Minitest::Test
     begin
       yield img
     ensure
-      qbash("#{fake_docker} rmi #{img}", log: fake_loog, timeout: 10)
+      Timeout.timeout(10) do
+        qbash("#{fake_docker} rmi #{img}", log: fake_loog)
+      end
     end
   end
 
@@ -274,14 +277,16 @@ class Minitest::Test
         Shellwords.escape(image),
         cmd
       ].join(' ')
-      stdout, code = qbash(
-        cmd,
-        timeout: 25,
-        log: loog,
-        accept: nil,
-        both: true,
-        env:
-      )
+      stdout, code =
+        Timeout.timeout(25) do
+          qbash(
+            cmd,
+            log: loog,
+            accept: nil,
+            both: true,
+            env:
+          )
+        end
       unless code.zero?
         fake_loog.error(stdout)
         raise \
