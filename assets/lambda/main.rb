@@ -259,9 +259,9 @@ def one(id, pack, rec, loog)
       },
       accept: nil
     )
-  rescue Timeout::Error => e
-    [Backtrace.new(e).to_s, 1]
   end
+rescue Timeout::Error => e
+  [Backtrace.new(e).to_s, 1]
 end
 
 # Pretty print JSON event from SQS.
