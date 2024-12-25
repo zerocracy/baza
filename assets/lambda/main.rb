@@ -258,6 +258,8 @@ def one(id, pack, rec, loog)
     accept: nil,
     timeout: 500
   )
+rescue Exception => e
+  [Backtrace.new(e).to_s, 1]
 end
 
 # Pretty print JSON event from SQS.
