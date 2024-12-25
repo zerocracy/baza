@@ -1,4 +1,4 @@
-#!/bin/bash
+\#!/bin/bash
 # MIT License
 #
 # Copyright (c) 2009-2024 Zerocracy

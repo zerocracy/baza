@@ -255,7 +255,8 @@ def one(id, pack, rec, loog)
       'SWARM_ID' => '{{ swarm }}',
       'SWARM_NAME' => '{{ name }}'
     },
-    accept: nil
+    accept: nil,
+    timeout: 500
   )
 end
 
