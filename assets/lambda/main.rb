@@ -240,7 +240,7 @@ end
 # @param [Loog] loog The logging facility
 # @return [Array<String, Integer>] Stdout + exit code (zero means success)
 def one(id, pack, rec, loog)
-  Timeout.timeout(500) do
+  Timeout.timeout(9 * 60) do
     qbash(
       if File.exist?('/swarm/entry.sh')
         "/bin/bash /swarm/entry.sh \"#{id}\" \"#{pack}\" 2>&1"
