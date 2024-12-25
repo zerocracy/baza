@@ -68,7 +68,7 @@ gem 'rerun', '~>0.14', require: false
 gem 'retries', '>0'
 gem 'rspec-rails', '~>7.0', require: false
 gem 'rubocop', '1.69.2', require: false
-gem 'rubocop-rspec', '3.2.0', require: false
+gem 'rubocop-rspec', '3.3.0', require: false
 gem 'rubyzip', '>0'
 gem 'sass-embedded', '~>1'
 gem 'scss_lint', '~>0', require: false
