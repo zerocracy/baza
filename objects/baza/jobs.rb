@@ -47,6 +47,16 @@ class Baza::Jobs
     ).empty?
   end
 
+  # Start a new job.
+  # @param [Integer] token The ID of the token
+  # @param [String] name The name of the job
+  # @param [String] uri1 The URI of the factbase file (usually in AWS S3)
+  # @param [Integer] size The size of the factbase file, in bytes
+  # @param [Integer] errors How many errors are in the factbase file
+  # @param [String] agent HTTP "user_agent" header of the sender of the file
+  # @param [Array<String>] meta List of metas (in "key=value" format)
+  # @param [String] ip The IP address of the job submitter
+  # @return [Baza::Job] The job just started
   def start(token, name, uri1, size, errors, agent, meta, ip)
     unless @human.account.balance.positive? || @human.extend(Baza::Human::Roles).tester?
       raise Baza::Urror, 'The balance is negative, you cannot post new jobs'
@@ -73,6 +83,10 @@ class Baza::Jobs
     get(id)
   end
 
+  # Iterate over the jobs visible to the user.
+  # @param [String] name The name of the job
+  # @param [Integer] offset Where to start
+  # @yield [Baza::Job]
   def each(name: nil, offset: 0)
     return to_enum(__method__, name:, offset:) unless block_given?
     sep = ' -===&62la(o$3s===- '

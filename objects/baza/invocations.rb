@@ -73,6 +73,7 @@ class Baza::Invocations
   # @param [String] version The version of the software in the AWS Lambda
   # @return [Integer] The ID of the added invocation
   def register(stdout, code, job, version)
+    raise Baza::Urror, 'The "code" must be an integer' unless code.is_a?(Integer)
     raise Baza::Urror, 'The "stdout" cannot be NIL' if stdout.nil?
     raise Baza::Urror, 'The "version" cannot be NIL' if version.nil?
     id = pgsql.exec(
