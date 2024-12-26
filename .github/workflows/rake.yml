@@ -28,9 +28,6 @@ name: rake
   pull_request:
     branches:
       - master
-concurrency:
-  group: ${{ github.ref }}
-  cancel-in-progress: true
 jobs:
   rake:
     name: rake
@@ -51,4 +48,5 @@ jobs:
           ruby-version: ${{ matrix.ruby }}
       - run: bundle update
       - run: bundle update --gemfile=swarms/alterations/Gemfile
+      - run: bundle update --gemfile=assets/lambda/Gemfile
       - run: bundle exec rake
