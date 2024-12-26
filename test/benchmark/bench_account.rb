@@ -38,7 +38,7 @@ class BenchAccount < Minitest::Test
     acc = human.account
     total = 1000
     total.times do
-      acc.top_up(42, 'nothing')
+      acc.top_up(42, SecureRandom.alphanumeric(100))
     end
     Benchmark.bm do |b|
       b.report('balance') { acc.balance }
