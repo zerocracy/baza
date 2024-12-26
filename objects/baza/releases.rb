@@ -44,6 +44,7 @@ class Baza::Releases
     Baza::Release.new(self, id)
   end
 
+  # Iterate over releases.
   def each(offset: 0)
     return to_enum(__method__, offset:) unless block_given?
     rows = @swarm.pgsql.exec(

@@ -34,6 +34,9 @@ SOFTWARE.
       CREATE INDEX idx_swarm_created ON swarm(created);
     </sql>
     <sql>
+      CREATE INDEX idx_release_swarm ON release(swarm);
+    </sql>
+    <sql>
       CREATE INDEX idx_release_id_swarm ON release(id, swarm);
     </sql>
     <sql>
