@@ -18,6 +18,12 @@
       = "##{invocation[:code]}"
 
   %p
+    Steps:
+    %br
+    %a{ href: iri.cut('/steps').append(invocation[:job]) }
+      here
+
+  %p
     Job:
     %br
     %a{ href: iri.cut('/jobs').append(invocation[:job]) }<
