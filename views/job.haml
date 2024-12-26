@@ -196,9 +196,11 @@
       Exit Code:
       %br
       - if r.exit.zero?
-        %i.fa-regular.fa-thumbs-up.good
-      %span.ff
-        = r.exit
+        %i.fa-regular.fa-thumbs-up.good{ title: 'exit code is zero' }
+      - else
+        %i.fa-regular.fa-thumbs-down.bad
+        %span.ff
+          = r.exit
     %p
       Duration:
       %br
