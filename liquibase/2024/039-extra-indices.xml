@@ -40,6 +40,9 @@ SOFTWARE.
       CREATE INDEX idx_release_id_swarm ON release(id, swarm);
     </sql>
     <sql>
+      CREATE INDEX idx_invocation_swarm ON invocation(swarm);
+    </sql>
+    <sql>
       CREATE INDEX idx_invocation_id_swarm ON invocation(id, swarm);
     </sql>
   </changeSet>

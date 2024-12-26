@@ -38,6 +38,9 @@ class Baza::Invocations
     @swarm.pgsql
   end
 
+  # Iterate over invocations.
+  # @param [Integer] offset The offset to start with
+  # @yield [Hash] Data about an invocation
   def each(offset: 0)
     return to_enum(__method__, offset:) unless block_given?
     rows = pgsql.exec(

@@ -45,6 +45,8 @@ class Baza::Releases
   end
 
   # Iterate over releases.
+  # @param [Integer] offset The offset to start with
+  # @yield [Hash] Data about a release
   def each(offset: 0)
     return to_enum(__method__, offset:) unless block_given?
     rows = @swarm.pgsql.exec(
