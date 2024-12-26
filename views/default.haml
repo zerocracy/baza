@@ -57,12 +57,14 @@
             %li
               %span{ title: 'Current Heroku release vs. deployed software version' }
                 = "#{heroku_release_version}:#{Baza::VERSION}"
-            %li{ title: 'How many seconds it took to build this page' }
-              = format('%.3f', Time.now - http_start)
+            - msec = Time.now - http_start
+            %li{ title: 'How many seconds it took to build this page', class: msec > 3 ? 'bad' : '' }
+              = format('%.3f', msec)
             %li{ title: 'The version of Ruby on the server' }
               = "rb:#{RUBY_VERSION}"
-            %li{ title: 'Current "load average" on the server', class: load_avg > 8 ? 'bad' : '' }
-              = format('%0.2f', load_avg)
+            - lavg = load_avg
+            %li{ title: 'Current "load average" on the server', class: lavg > 8 ? 'bad' : '' }
+              = format('%0.2f', lavg)
             %li{ title: 'Currently consumed memory vs. total system memory, in Mb' }
               = "#{(mem / (1024 * 1024)).round}/#{(total_mem / (1024 * 1024)).round}"
             %li{ title: 'The version of PostgreSQL server and the size of the DB' }
