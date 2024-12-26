@@ -14,7 +14,7 @@
   %p
     Code:
     %br
-    %span.ff
+    %span.ff{ class: invocation[:code].zero? ? '' : 'bad' }
       = "##{invocation[:code]}"
 
   %p
