@@ -16,7 +16,7 @@
   %p
     Job name:
     %br
-    %a.ff{ href: iri.over(name: job.name) }
+    %a.ff{ href: iri.cut('/jobs').add(name: job.name) }
       = job.name
 
   %p

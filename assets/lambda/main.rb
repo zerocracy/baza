@@ -128,7 +128,7 @@ def send_message(id, more, hops, rec, loog)
     message_body: "Job ##{id} was processed by {{ name }} (swarm no.{{ swarm }})",
     message_attributes: attrs
   ).message_id
-  loog.info("Swarm {{ name }} sent SQS message #{msg} about job ##{id} to #{queue} (more=#{more})")
+  loog.info("Swarm {{ name }} sent SQS message #{msg} about job ##{id} to '#{queue}' (more=#{more})")
 end
 
 # Send a report to baza about this particular invocation.
