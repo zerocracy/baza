@@ -94,7 +94,7 @@ class MainTest < Minitest::Test
           }
         )
       )
-      stub_request(:put, 'http://swarms/42/invocation?code=0&job=7&secret=sword-fish&version=1.1.1').with do |req|
+      stub_request(:put, %r{.*/invocation\?code=0&job=7&msec=[0-9]+&secret=sword-fish&version=1.1.1}).with do |req|
         assert_include(
           req.body,
           'A new event arrived, about job #7',
@@ -154,7 +154,7 @@ class MainTest < Minitest::Test
             FileUtils.copy(file, '/tmp/result.zip')
           end
           def send_message(id, more, hops, loog); end
-          def report(stdout, code, job); end
+          def report(stdout, code, msec, job); end
           go(
             event: {
               'Records' => [
@@ -236,7 +236,7 @@ class MainTest < Minitest::Test
             'account' => '424242'
           ),
           "
-          def report(stdout, code, job); puts 'Reported!'; end
+          def report(stdout, code, msec, job); puts 'Reported!'; end
           go(
             event: {
               'Records' => [

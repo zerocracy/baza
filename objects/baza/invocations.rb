@@ -58,6 +58,8 @@ class Baza::Invocations
       r = {
         id: row['id'].to_i,
         code: row['code'].to_i,
+        msec: row['msec'].to_i,
+        version: row['version'],
         job: row['job']&.to_i,
         name: row['name'],
         swarm: row['swarm'],
@@ -72,21 +74,24 @@ class Baza::Invocations
   #
   # @param [String] stdout The output
   # @param [Integer] code The code (zero means success)
+  # @param [Integer] msec How long it took (in milliseconds)
   # @param [Baza::Job|nil] job The ID of the job
   # @param [String] version The version of the software in the AWS Lambda
   # @return [Integer] The ID of the added invocation
-  def register(stdout, code, job, version)
+  def register(stdout, code, msec, job, version)
     raise Baza::Urror, 'The "code" must be an integer' unless code.is_a?(Integer)
+    raise Baza::Urror, 'The "msec" must be an integer' unless msec.is_a?(Integer)
     raise Baza::Urror, 'The "stdout" cannot be NIL' if stdout.nil?
     raise Baza::Urror, 'The "version" cannot be NIL' if version.nil?
     id = pgsql.exec(
-      'INSERT INTO invocation (swarm, code, job, stdout) VALUES ($1, $2, $3, $4) RETURNING id',
-      [@swarm.id, code, job.nil? ? nil : job.id, stdout]
+      'INSERT INTO invocation (swarm, code, msec, version, job, stdout) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id',
+      [@swarm.id, code, msec, version, job.nil? ? nil : job.id, stdout]
     )[0]['id'].to_i
     unless code.zero?
       @swarm.swarms.human.notify(
         "⚠️ The [swarm ##{@swarm.id}](//swarms/#{@swarm.id}/releases) (\"`#{@swarm.name}`\")",
-        "just failed, at the invocation [##{id}](//invocation/#{id})",
+        "just failed after #{msec} milliseconds of work,",
+        "at the invocation [##{id}](//invocation/#{id})",
         job.nil? ? '' : "for the job ##{job.id} (`#{job.name}`) of @#{job.jobs.human.github}",
         "(exit code is `#{code}`, there are #{stdout.split("\n").count} lines in the stdout).",
         unless version == Baza::VERSION

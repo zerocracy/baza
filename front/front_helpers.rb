@@ -183,9 +183,9 @@ module Baza::Helpers
 
   def msec(msec)
     if msec < 1000
-      "#{msec}㎳"
+      "#{msec.to_i}㎳"
     elsif msec < 60 * 1000
-      "#{msec / 1000}s"
+      "#{(msec / 1000).to_i}s"
     else
       format('%.1fm', msec / (1000 * 60))
     end

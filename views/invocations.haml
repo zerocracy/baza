@@ -16,6 +16,10 @@
     %col{ style: 'width: 12em;' }
     -# Code
     %col{ style: 'width: 4em;' }
+    -# Msec
+    %col{ style: 'width: 4em;' }
+    -# Version
+    %col{ style: 'width: 5em;' }
     -# Stdout
     %col
     -# Created
@@ -30,6 +34,10 @@
         Name
       %th
         Code
+      %th
+        Msec
+      %th
+        Version
       %th
         Stdout
       %th
@@ -55,6 +63,10 @@
           %span.bad
             = i[:code]
           %i.fa-solid.fa-triangle-exclamation.bad
+      %td.rigth.ff
+        != msec(i[:msec])
+      %td.ff
+        = i[:version]
       %td
         != snippet(i[:stdout])
       %td

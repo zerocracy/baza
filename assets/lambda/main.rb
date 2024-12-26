@@ -135,14 +135,16 @@ end
 #
 # @param [String] stdout Full log of the swarm
 # @param [Integer] code Exit code (zero if success, something else otherwise)
+# @param [Integer] msec How long it took, in milliseconds
 # @param [Integer] job The ID of the job just processed (or NIL)
-def report(stdout, code, job)
+def report(stdout, code, msec, job)
   home = Iri.new('{{ host }}')
     .append('swarms')
     .append('{{ swarm }}'.to_i)
     .append('invocation')
     .add(secret: '{{ secret }}')
     .add(code: code)
+    .add(msec: msec)
     .add(version: '{{ version }}')
   home = home.add(job: job) unless job.nil?
   ret = Typhoeus::Request.put(
@@ -297,6 +299,7 @@ def go(event:, context:)
       lg.debug("Incoming SQS event:\n#{pretty(rec)}")
       job = 0
       code = 1
+      start = Time.now
       begin
         elapsed(lg, level: Logger::INFO) do
           job = rec['messageAttributes']['job']['stringValue'].to_i
@@ -325,7 +328,7 @@ def go(event:, context:)
         lg.error(Backtrace.new(e).to_s)
         code = 255
       end
-      report(buf.to_s, code, job)
+      report(buf.to_s, code, ((Time.now - start) * 1000).to_i, job)
     end
   end
   'Done!'

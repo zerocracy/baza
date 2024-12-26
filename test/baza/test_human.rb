@@ -44,7 +44,7 @@ class Baza::HumanTest < Minitest::Test
     swarms = human.swarms
     swarms.add(fake_name, "#{fake_name}/swarm", 'master', '/')
     s = swarms.each.to_a.first
-    id = s.invocations.register('stdout', 1, nil, '0.0.0')
+    id = s.invocations.register('stdout', 1, 1, nil, '0.0.0')
     inv = human.invocation_by_id(id)
     assert(!inv.nil?)
   end

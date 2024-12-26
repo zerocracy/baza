@@ -61,6 +61,7 @@ class BenchJobs < Minitest::Test
         swarm.invocations.register(
           SecureRandom.alphanumeric(total), # stdout
           0, # exit code
+          222, # msec
           job, # job
           '0.0.0' # swarm version
         )

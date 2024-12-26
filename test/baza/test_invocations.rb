@@ -35,7 +35,7 @@ class Baza::InvocationsTest < Minitest::Test
     human = fake_human
     swarms = human.swarms
     s = swarms.add(fake_name.downcase, "zerocracy/#{fake_name}", 'master', '/')
-    id = s.invocations.register('stdout', 0, nil, '0.0.0')
+    id = s.invocations.register('stdout', 0, 1, nil, '0.0.0')
     assert(!id.nil?)
   end
 end
