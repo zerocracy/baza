@@ -28,7 +28,7 @@ ENV LAMBDA=/var/task
 RUN mkdir -p ${LAMBDA}
 WORKDIR ${LAMBDA}
 
-RUN curl -Lso /usr/local/bin/aws-lambda-rie \
+RUN curl --silent --location --output /usr/local/bin/aws-lambda-rie \
   https://github.com/aws/aws-lambda-runtime-interface-emulator/releases/latest/download/aws-lambda-rie \
   && chmod +x /usr/local/bin/aws-lambda-rie
 
