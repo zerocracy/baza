@@ -13,6 +13,10 @@
     %col{ style: 'width: 10em;' }
     -# Code
     %col{ style: 'width: 4em;' }
+    -# Msec
+    %col{ style: 'width: 4em;' }
+    -# Version
+    %col{ style: 'width: 5em;' }
     -# Stdout
     %col
     -# Created
@@ -25,6 +29,10 @@
         Swarm
       %th
         Code
+      %th
+        Msec
+      %th
+        Version
       %th
         Stdout
       %th
@@ -45,6 +53,10 @@
           %span.bad
             = s[:code]
           %i.fa-solid.fa-triangle-exclamation.bad
+      %td.right.ff
+        != msec(s[:msec])
+      %td.ff
+        = s[:version]
       %td
         != snippet(s[:stdout])
       %td

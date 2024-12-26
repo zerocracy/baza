@@ -56,6 +56,8 @@ class Baza::Steps
       r = {
         id: row['id'].to_i,
         code: row['code'].to_i,
+        msec: row['msec'].to_i,
+        version: row['version'],
         name: row['name'],
         swarm: row['swarm'],
         swarm_id: row['swarm_id'].to_i,
