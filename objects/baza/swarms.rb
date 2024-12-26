@@ -54,6 +54,9 @@ class Baza::Swarms
     ).empty?
   end
 
+  # Iterate over all swarms.
+  # @param [Integer] offset The offset to start with
+  # @yield [Baza::Swarm] A swarm
   def each(offset: 0)
     return to_enum(__method__, offset:) unless block_given?
     rows = pgsql.exec(
