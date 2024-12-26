@@ -45,23 +45,20 @@ class Baza::Pipe
   # @param [String] owner Unique name of the owner
   # @return [Baza::Job|nil] Job or nil
   def pop(owner)
-    rows =
-      @humans.pgsql.transaction do |t|
-        t.exec(
-          [
-            'WITH waiting AS (',
-            '  SELECT job.id FROM job',
-            '  WHERE taken IS NULL',
-            '  AND NOT EXISTS (SELECT 1 FROM result WHERE result.job = job.id)',
-            '  ORDER BY job.id',
-            '  FOR UPDATE SKIP LOCKED',
-            '  LIMIT 1)',
-            'UPDATE job SET taken = $1 FROM waiting WHERE job.id = waiting.id',
-            'RETURNING job.id'
-          ],
-          [owner]
-        )
-      end
+    rows = @humans.pgsql.exec(
+      [
+        'WITH waiting AS (',
+        '  SELECT job.id FROM job',
+        '  WHERE taken IS NULL',
+        '  AND NOT EXISTS (SELECT 1 FROM result WHERE result.job = job.id)',
+        '  ORDER BY job.id',
+        '  FOR UPDATE SKIP LOCKED',
+        '  LIMIT 1)',
+        'UPDATE job SET taken = $1 FROM waiting WHERE job.id = waiting.id',
+        'RETURNING job.id'
+      ],
+      [owner]
+    )
     if rows.empty?
       @loog.debug('There are no not-yet-taken jobs in the pipeline now')
       return nil

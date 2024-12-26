@@ -43,6 +43,14 @@ Rake::TestTask.new(test: %i[pgsql liquibase]) do |t|
   t.options = ARGV.join(' ')
 end
 
+require 'rake/testtask'
+Rake::TestTask.new(benchmark: %i[pgsql liquibase]) do |t|
+  t.libs << 'lib' << 'test'
+  t.pattern = 'test/benchmark/bench_*.rb'
+  t.verbose = true
+  t.warning = false
+end
+
 require 'haml_lint/rake_task'
 HamlLint::RakeTask.new do |t|
   t.files = ['views/*.haml']

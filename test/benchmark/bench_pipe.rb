@@ -34,30 +34,40 @@ require_relative '../../objects/baza/factbases'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class BenchSwarms < Minitest::Test
-  def test_swarms_retrieval
+class BenchPipe < Minitest::Test
+  def test_pop
     human = fake_human
+    token = human.tokens.add(fake_name)
+    swarm = human.swarms.add(fake_name.downcase, "zerocracy/#{fake_name}", 'master', '/')
     total = 1000
     total.times do
-      swarm = human.swarms.add(fake_name.downcase, "zerocracy/#{fake_name}", 'master', '/')
-      (total / 100).times do
-        swarm.invocations.register(
-          SecureRandom.alphanumeric(total), # stdout
-          0, # exit code
-          nil, # job
-          '0.0.0' # swarm version
-        )
-      end
-      (total / 100).times do
-        swarm.releases.start(
-          SecureRandom.alphanumeric(total), # tail
-          fake_name # secrete
-        )
-      end
+      job = token.start(
+        fake_name, # job name
+        fake_name, # URI of the factbase file
+        1, # size of .fb file
+        0, # how many errors
+        'n/a', # user-agent
+        [], # metas
+        '192.168.1.1' # IP of sender
+      )
     end
+    humans = fake_humans
+    fbs = Baza::Factbases.new('', '', loog: fake_loog)
+    pipe = Baza::Pipe.new(humans, fbs, Baza::Trails.new(fake_pgsql), loog: fake_loog)
     Benchmark.bm do |b|
-      b.report('all') { human.swarms.each.to_a }
-      b.report('with offset') { human.swarms.each(offset: total / 2).to_a }
+      b.report('just pop') do
+        total.times do
+          job = pipe.pop(fake_name)
+          job.finish!(
+            fake_name, # uri2
+            SecureRandom.alphanumeric(total), # stdout
+            0, # exit code
+            555, # msec
+            4444, # size
+            0 # count of errors
+          )
+        end
+      end
     end
   end
 end
