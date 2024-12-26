@@ -122,14 +122,14 @@ class Minitest::Test
     human.tokens.add(fake_name)
   end
 
-  def fake_job(human = fake_human)
+  def fake_job(human = fake_human, name: fake_name)
     fbs = Baza::Factbases.new('', '', loog: Loog::NULL)
     Dir.mktmpdir do |dir|
       input = File.join(dir, 'foo.fb')
       File.binwrite(input, Factbase.new.export)
       uri = fbs.save(input)
       fake_token(human).start(
-        fake_name, uri, 1, 0, 'n/a',
+        name, uri, 1, 0, 'n/a',
         [
           'duration:360',
           'workflow_url:https://google.com',

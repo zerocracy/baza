@@ -58,7 +58,7 @@
               %span{ title: 'Current Heroku release vs. deployed software version' }
                 = "#{heroku_release_version}:#{Baza::VERSION}"
             - msec = Time.now - http_start
-            %li{ title: 'How many seconds it took to build this page', class: msec > 3 ? 'bad' : '' }
+            %li{ title: 'How many seconds it took to build this page', class: msec > 1 ? 'bad' : '' }
               = format('%.3f', msec)
             %li{ title: 'The version of Ruby on the server' }
               = "rb:#{RUBY_VERSION}"

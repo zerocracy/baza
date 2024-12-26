@@ -48,6 +48,9 @@ class Baza::Valves
     ).empty?
   end
 
+  # Iterate over valves.
+  # @param [Integer] offset The offset to start with
+  # @yield [Hash] Data about a valve
   def each(offset: 0)
     return to_enum(__method__, offset:) unless block_given?
     pgsql.exec(
