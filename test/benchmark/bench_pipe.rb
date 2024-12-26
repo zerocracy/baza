@@ -38,10 +38,9 @@ class BenchPipe < Minitest::Test
   def test_pop
     human = fake_human
     token = human.tokens.add(fake_name)
-    swarm = human.swarms.add(fake_name.downcase, "zerocracy/#{fake_name}", 'master', '/')
     total = 1000
     total.times do
-      job = token.start(
+      token.start(
         fake_name, # job name
         fake_name, # URI of the factbase file
         1, # size of .fb file

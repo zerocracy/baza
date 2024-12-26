@@ -22,16 +22,22 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-require 'rubygems'
+require 'haml_lint/rake_task'
+require 'pgtk/liquibase_task'
+require 'pgtk/pgsql_task'
 require 'rake'
 require 'rake/clean'
+require 'rake/testtask'
+require 'rubocop/rake_task'
+require 'rubygems'
+require 'scss_lint/rake_task'
+require 'xcop/rake_task'
 require 'yaml'
 
 ENV['RACK_RUN'] = 'true'
 
-task default: %i[clean test rubocop haml_lint scss_lint xcop config copyright]
+task default: %i[clean test benchmark rubocop haml_lint scss_lint xcop config copyright]
 
-require 'rake/testtask'
 Rake::TestTask.new(test: %i[pgsql liquibase]) do |t|
   Rake::Cleaner.cleanup_files(['coverage'])
   require 'simplecov'
@@ -43,7 +49,6 @@ Rake::TestTask.new(test: %i[pgsql liquibase]) do |t|
   t.options = ARGV.join(' ')
 end
 
-require 'rake/testtask'
 Rake::TestTask.new(benchmark: %i[pgsql liquibase]) do |t|
   t.libs << 'lib' << 'test'
   t.pattern = 'test/benchmark/bench_*.rb'
@@ -51,19 +56,16 @@ Rake::TestTask.new(benchmark: %i[pgsql liquibase]) do |t|
   t.warning = false
 end
 
-require 'haml_lint/rake_task'
 HamlLint::RakeTask.new do |t|
   t.files = ['views/*.haml']
   t.quiet = false
 end
 
-require 'rubocop/rake_task'
 RuboCop::RakeTask.new(:rubocop) do |t|
   t.fail_on_error = true
   t.requires << 'rubocop-rspec'
 end
 
-require 'pgtk/pgsql_task'
 Pgtk::PgsqlTask.new(:pgsql) do |t|
   t.dir = 'target/pgsql'
   t.fresh_start = true
@@ -73,7 +75,6 @@ Pgtk::PgsqlTask.new(:pgsql) do |t|
   t.yaml = 'target/pgsql-config.yml'
 end
 
-require 'pgtk/liquibase_task'
 Pgtk::LiquibaseTask.new(:liquibase) do |t|
   t.master = 'liquibase/master.xml'
   t.yaml = ['target/pgsql-config.yml', 'config.yml']
@@ -82,14 +83,12 @@ Pgtk::LiquibaseTask.new(:liquibase) do |t|
   t.liquibase_version = '4.25.1'
 end
 
-require 'xcop/rake_task'
 Xcop::RakeTask.new(:xcop) do |t|
   t.license = 'LICENSE.txt'
   t.includes = ['**/*.xml', '**/*.xsl', '**/*.xsd', '**/*.html']
   t.excludes = ['target/**/*', 'coverage/**/*']
 end
 
-require 'scss_lint/rake_task'
 SCSSLint::RakeTask.new do |t|
   t.files = Dir.glob(['assets/scss/*.scss'])
 end
