@@ -55,7 +55,7 @@ class Baza::PipelineTest < Minitest::Test
       )
       human = humans.ensure(fake_name)
       admin = humans.ensure('yegor256')
-      admin.secrets.add(fake_name, 'ZEROCRAT_TOKEN', 'nothing interesting')
+      admin.secrets.add(fake_name, 'ZEROCRAT_TOKEN', 'here secret stop')
       token = fake_token(human)
       job = token.start(fake_name, uri(fbs), 1, 0, 'n/a', ['vitals_url:abc', 'ppp:hello'], '192.168.1.1')
       assert(!human.jobs.get(job.id).finished?)
@@ -68,7 +68,7 @@ class Baza::PipelineTest < Minitest::Test
         'The following options provided',
         'PPP → "swor*fish"',
         'VITALS_URL → "abc"',
-        'ZEROCRAT_TOKEN → "start***********stop"',
+        'ZEROCRAT_TOKEN → "here********stop"',
         'Update finished in 2 cycle(s), modified 1/0 fact(s)'
       )
       Tempfile.open do |f|
