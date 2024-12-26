@@ -294,7 +294,6 @@ def go(event:, context:)
       lg = Loog::Tee.new(loog, buf)
       lg.info('Version: {{ version }}')
       lg.info("Time: #{Time.now.utc.iso8601}")
-      lg.debug("Env vars: #{ENV.keys.join(', ')}")
       lg.debug("Incoming SQS event:\n#{pretty(rec)}")
       job = 0
       code = 1
