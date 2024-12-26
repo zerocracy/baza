@@ -144,6 +144,7 @@ def report(stdout, code, msec, job)
     .append('invocation')
     .add(secret: '{{ secret }}')
     .add(code: code)
+    .add(msec: msec)
     .add(version: '{{ version }}')
   home = home.add(job: job) unless job.nil?
   ret = Typhoeus::Request.put(
