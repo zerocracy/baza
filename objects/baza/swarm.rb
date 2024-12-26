@@ -157,7 +157,7 @@ class Baza::Swarm
     pause = minutes * 60
     if Time.now - pause < last[:created]
       return \
-        "The latest successfull release ##{last[:id]} just happened #{last[:created].ago} ago, " \
+        "The latest successful release ##{last[:id]} just happened #{last[:created].ago} ago, " \
         "we'll wait #{(last[:created] + pause).ago} " \
         'and only then will release again.'
     end

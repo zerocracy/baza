@@ -21,4 +21,6 @@
 # SOFTWARE.
 
 [files]
-extend-exclude = []
+extend-exclude = [
+  'liquibase/2024/035-swarm-unique.xml'
+]

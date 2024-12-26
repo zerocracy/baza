@@ -68,7 +68,7 @@ class Baza::PipelineTest < Minitest::Test
         'The following options provided',
         'PPP → "swor*fish"',
         'VITALS_URL → "abc"',
-        'ZEROCRAT_TOKEN → "noth***********ting"',
+        'ZEROCRAT_TOKEN → "start***********stop"',
         'Update finished in 2 cycle(s), modified 1/0 fact(s)'
       )
       Tempfile.open do |f|

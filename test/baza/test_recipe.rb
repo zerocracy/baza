@@ -90,7 +90,7 @@ class Baza::RecipeTest < Minitest::Test
         File.write(
           sh,
           Baza::Recipe.new(swarm, id_rsa, 'bucket').to_bash(
-            :release, 'accout', 'us-east-1', secret,
+            :release, 'account', 'us-east-1', secret,
             host: "http://#{fake_docker_host}:#{port}"
           )
         )

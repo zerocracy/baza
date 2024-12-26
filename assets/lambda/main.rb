@@ -179,7 +179,7 @@ def with_trails(pack, sub, loog)
   end
 end
 
-# Run one swarm for a particular job, where a ZIP archvie from S3 must be processed.
+# Run one swarm for a particular job, where a ZIP archive from S3 must be processed.
 #
 # @param [Integer] id The ID of the job to process
 # @param [Hash] rec JSON event from the SQS message

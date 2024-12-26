@@ -60,5 +60,5 @@
               %a.ico{ href: iri.cut('/tokens').append(t.id).append('delete'), title: 'Delete it forever', onclick: "return confirm('Are you sure you want to delete this token?')" }
                 %i.fa-regular.fa-trash-can
             - elsif t.active?
-              %a.ico{ href: iri.cut('/tokens').append(t.id).append('deactivate'), title: 'Deactivate it and no new jobs can use it', onclick: "return confirm('Once you deactive this token, it will be impossible to activate it back. Are you sure you want to deactivate it?')" }
+              %a.ico{ href: iri.cut('/tokens').append(t.id).append('deactivate'), title: 'Deactivate it and no new jobs can use it', onclick: "return confirm('Once you deactivate this token, it will be impossible to activate it back. Are you sure you want to deactivate it?')" }
                 %i.fa-solid.fa-ban

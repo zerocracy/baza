@@ -87,7 +87,7 @@ class Baza::Durable
     ).empty?
   end
 
-  # Dowload the durable from the cloud and save into the file provided.
+  # Download the durable from the cloud and save into the file provided.
   #
   # @param [String] file The file where to save it
   def load(file)

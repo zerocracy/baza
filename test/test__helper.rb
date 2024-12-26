@@ -209,8 +209,8 @@ class Minitest::Test
     pid = nil
     server =
       Thread.new do
-        Open3.popen2e({}, "ruby baza.rb -p #{port}") do |stdin, stdout, thr|
-          pid = thr.pid
+        Open3.popen2e({}, "ruby baza.rb -p #{port}") do |stdin, stdout, thread|
+          pid = thread.pid
           stdin.close
           until stdout.eof?
             begin
