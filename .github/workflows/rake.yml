@@ -40,7 +40,7 @@ jobs:
       - uses: actions/checkout@v4
       - run: |
           sudo apt-get update
-          sudo apt-get install -y libpq-dev postgresql-client postgresql postgresql-server-dev
+          sudo apt-get install -y libpq-dev postgresql-client postgresql postgresql-server-dev-16
           dir=$(realpath "/usr/lib/postgresql"/*)
           for c in initdb postgres pg_ctl; do
             sudo ln -s "$(realpath "${dir}/bin/${c}")" "/bin/${c}"
