@@ -248,8 +248,8 @@ def one(id, pack, rec, loog)
     elsif File.exist?('/swarm/entry.rb')
       ['bundle', 'exec', 'ruby', '/swarm/entry.rb', Shellwords.escape(id), Shellwords.escape(pack)]
     else
-      "echo 'Cannot figure out how to start the swarm, try creating \"entry.sh\" or \"entry.rb\"'"
-    end
+      ['echo', "Cannot figure out how to start the swarm, try creating 'entry.sh' or 'entry.rb'"]
+    end.join(' ')
   sec = 9 * 60
   Timeout.timeout(sec) do
     qbash(
