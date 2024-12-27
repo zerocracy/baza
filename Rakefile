@@ -41,6 +41,9 @@ require 'yaml'
 
 ENV['RACK_RUN'] = 'true'
 
+CLEAN.include 'coverage'
+CLEAN.include 'target'
+
 task default: %i[clean hypopg test benchmark dexter rubocop haml_lint scss_lint xcop config copyright]
 
 Rake::TestTask.new(test: %i[pgsql liquibase]) do |t|
@@ -73,10 +76,17 @@ end
 Pgtk::PgsqlTask.new(:pgsql) do |t|
   t.dir = 'target/pgsql'
   t.fresh_start = true
+  t.quiet = true
   t.user = 'test'
   t.password = 'test'
   t.dbname = 'test'
   t.yaml = 'target/pgsql-config.yml'
+  t.config = {
+    log_min_duration_statement: 10,
+    log_directory: File.absolute_path('./target'),
+    logging_collector: 'on',
+    log_filename: 'pgsql.log'
+  }
 end
 
 Pgtk::LiquibaseTask.new(:liquibase) do |t|
@@ -111,10 +121,6 @@ task(hypopg: %i[pgsql liquibase]) do
   )
   pgsql.start(1)
   pgsql.exec('CREATE EXTENSION hypopg')
-  pgsql.exec("SET log_statement = 'all'")
-  pgsql.exec("SET log_filename = 'target/pgsql.log'")
-  # pgsql.exec('CREATE EXTENSION pg_stat_statements')
-  # pgsql.exec('CREATE EXTENSION pg_stat_activity')
 end
 
 task(dexter: %i[hypopg benchmark]) do
@@ -126,16 +132,15 @@ task(dexter: %i[hypopg benchmark]) do
       '-U', Shellwords.escape(cfg['user']),
       '-p', Shellwords.escape(cfg['port']),
       '-d', Shellwords.escape(cfg['dbname']),
-      '--log-sql',
-      '--log-level=debug2',
-      'target/pgsql.sql'
+      '--log-level=info',
+      'target/pgsql.log'
     ],
     log: Loog::VERBOSE
   )
 end
 
 task(run: %i[pgsql liquibase]) do
-  `rerun -b "RACK_ENV=test bundle exec ruby baza.rb"`
+  qbash("rerun -b 'RACK_ENV=test bundle exec ruby baza.rb'")
 end
 
 task(:copyright) do
