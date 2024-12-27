@@ -1,8 +1,7 @@
 %p
-  Steps of
+  Steps of job
   != succeed ':' do
     %a{ href: iri.cut('/jobs').append(job.id) }<
-      job
       = "##{job.id}"
 
 %table
