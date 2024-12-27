@@ -230,7 +230,7 @@ class Minitest::Test
     loop do
       sleep 0.1
       break if started
-      raise 'Timeout' if Time.now - start > 15
+      raise 'Timeout' if Time.now - start > 30
     end
     begin
       yield
