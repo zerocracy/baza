@@ -24,3 +24,6 @@
 extend-exclude = [
   'liquibase/2024/035-swarm-unique.xml'
 ]
+
+[default.extend-words]
+WRONLY = "WRONLY"
