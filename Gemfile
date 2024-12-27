@@ -36,6 +36,7 @@ gem 'backtrace', '~>0'
 gem 'benchmark', '~>0'
 gem 'capybara', '~>3', require: false
 gem 'concurrent-ruby', '~>1.3'
+gem 'pgdexter', '0.5.4', require: false
 gem 'elapsed', '~>0'
 gem 'factbase', '~>0'
 gem 'faraday', '>=2'

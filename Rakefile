@@ -23,24 +23,28 @@
 # SOFTWARE.
 
 require 'haml_lint/rake_task'
+require 'pgtk'
 require 'pgtk/liquibase_task'
 require 'pgtk/pgsql_task'
+require 'pgtk/pool'
+require 'qbash'
 require 'rake'
 require 'rake/clean'
 require 'rake/testtask'
 require 'rubocop/rake_task'
 require 'rubygems'
 require 'scss_lint/rake_task'
+require 'shellwords'
+require 'simplecov'
 require 'xcop/rake_task'
 require 'yaml'
 
 ENV['RACK_RUN'] = 'true'
 
-task default: %i[clean test benchmark rubocop haml_lint scss_lint xcop config copyright]
+task default: %i[clean hypopg test benchmark dexter rubocop haml_lint scss_lint xcop config copyright]
 
 Rake::TestTask.new(test: %i[pgsql liquibase]) do |t|
   Rake::Cleaner.cleanup_files(['coverage'])
-  require 'simplecov'
   SimpleCov.start
   t.libs << 'lib' << 'test'
   t.pattern = 'test/**/test_*.rb'
@@ -97,6 +101,37 @@ desc 'Check the quality of config file'
 task(:config) do
   f = 'config.yml'
   YAML.safe_load(File.open(f)).to_yaml if File.exist?(f)
+end
+
+task(hypopg: %i[pgsql liquibase]) do
+  pgsql = Pgtk::Pool.new(
+    Pgtk::Wire::Yaml.new(
+      File.join(__dir__, 'target/pgsql-config.yml')
+    )
+  )
+  pgsql.start(1)
+  pgsql.exec('CREATE EXTENSION hypopg')
+  pgsql.exec("SET log_statement = 'all'")
+  pgsql.exec("SET log_filename = 'target/pgsql.log'")
+  # pgsql.exec('CREATE EXTENSION pg_stat_statements')
+  # pgsql.exec('CREATE EXTENSION pg_stat_activity')
+end
+
+task(dexter: %i[hypopg benchmark]) do
+  cfg = YAML.load_file(File.join(__dir__, 'target/pgsql-config.yml'))['pgsql']
+  qbash(
+    [
+      'dexter',
+      '-h', Shellwords.escape(cfg['host']),
+      '-U', Shellwords.escape(cfg['user']),
+      '-p', Shellwords.escape(cfg['port']),
+      '-d', Shellwords.escape(cfg['dbname']),
+      '--log-sql',
+      '--log-level=debug2',
+      'target/pgsql.sql'
+    ],
+    log: Loog::VERBOSE
+  )
 end
 
 task(run: %i[pgsql liquibase]) do
