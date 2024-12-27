@@ -41,8 +41,9 @@ jobs:
       - run: |
           sudo apt-get update
           sudo apt-get install -y libpq-dev postgresql-client postgresql
+          dir=$(realpath "/usr/lib/postgresql"/*)
           for c in initdb postgres pg_ctl; do
-            sudo ln -s "$(realpath "/usr/lib/postgresql/*/bin/${c}")" "/bin/${c}"
+            sudo ln -s "$(realpath "${dir}/bin/${c}")" "/bin/${c}"
           done
           curl -L https://github.com/HypoPG/hypopg/archive/1.4.1.tar.gz | tar xz
           cd hypopg-1.4.1
