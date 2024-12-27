@@ -242,15 +242,18 @@ end
 # @param [Loog] loog The logging facility
 # @return [Array<String, Integer>] Stdout + exit code (zero means success)
 def one(id, pack, rec, loog)
-  Timeout.timeout(9 * 60) do
+  cmd =
+    if File.exist?('/swarm/entry.sh')
+      ['/bin/bash', '/swarm/entry.sh', Shellwords.escape(id), Shellwords.escape(pack)]
+    elsif File.exist?('/swarm/entry.rb')
+      ['bundle', 'exec', 'ruby', '/swarm/entry.rb', Shellwords.escape(id), Shellwords.escape(pack)]
+    else
+      "echo 'Cannot figure out how to start the swarm, try creating \"entry.sh\" or \"entry.rb\"'"
+    end
+  sec = 9 * 60
+  Timeout.timeout(sec) do
     qbash(
-      if File.exist?('/swarm/entry.sh')
-        "/bin/bash /swarm/entry.sh \"#{id}\" \"#{pack}\" 2>&1"
-      elsif File.exist?('/swarm/entry.rb')
-        "bundle exec ruby /swarm/entry.rb \"#{id}\" \"#{pack}\" 2>&1"
-      else
-        "echo 'Cannot figure out how to start the swarm, try creating \"entry.sh\" or \"entry.rb\"'"
-      end,
+      cmd,
       both: true,
       log: loog,
       env: {
@@ -263,6 +266,7 @@ def one(id, pack, rec, loog)
     )
   end
 rescue Timeout::Error => e
+  loog.error("The command was stopped due to timeout of #{sec} seconds: #{cmd}")
   [Backtrace.new(e).to_s, 1]
 end
 
