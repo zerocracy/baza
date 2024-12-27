@@ -27,16 +27,15 @@ ruby '~>3.2'
 
 gem 'always', '~>0'
 gem 'archive-zip', '~>0'
-gem 'aws_lambda_ric', '~>2'
 gem 'aws-sdk-core', '~>3.202'
 gem 'aws-sdk-ec2', '~>1.470'
 gem 'aws-sdk-s3', '~>1.159'
 gem 'aws-sdk-sqs', '~>1.80'
+gem 'aws_lambda_ric', '~>2'
 gem 'backtrace', '~>0'
 gem 'benchmark', '~>0'
 gem 'capybara', '~>3', require: false
 gem 'concurrent-ruby', '~>1.3'
-gem 'pgdexter', '0.5.4', require: false
 gem 'elapsed', '~>0'
 gem 'factbase', '~>0'
 gem 'faraday', '>=2'
@@ -58,6 +57,7 @@ gem 'net-scp', '~>4.0'
 gem 'net-ssh', '~>7.2'
 gem 'octokit', '~>9'
 gem 'os', '>0', require: false
+gem 'pgdexter', '0.5.4', require: false
 gem 'pgtk', '~>0'
 gem 'qbash', '~>0'
 gem 'rack', '~>3.1'

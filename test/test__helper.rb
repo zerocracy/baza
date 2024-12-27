@@ -106,7 +106,7 @@ class Minitest::Test
             File.join(__dir__, '../target/queries.sql'),
             File::CREAT | File::WRONLY
           ),
-          formatter: proc { |severity, datetime, progname, msg| "#{msg}\n" }
+          formatter: proc { |_severity, _time, _program, msg| "#{msg}\n" }
         )
       )
     ).start
