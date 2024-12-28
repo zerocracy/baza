@@ -50,8 +50,18 @@ class Baza::SwarmTest < Baza::Test
     assert(s.why_not.include?('not yet finished'), s.why_not)
   end
 
+  def test_no_release_when_heads_are_similar
+    human = fake_human
+    s = human.swarms.add(fake_name.downcase, "zerocracy/#{fake_name}", 'master', '/')
+    sha = fake_sha
+    s.head!(sha)
+    r = s.releases.start('no tail', fake_name, created: Time.now - 100 * 60 * 60)
+    r.finish!(sha, Baza::VERSION, 'tail', 0, 42)
+    assert(s.why_not.include?('equals to the SHA of the head'), s.why_not)
+  end
+
   def test_no_release_when_no_head
-    human = fake_human('yegor256')
+    human = fake_human
     s = human.swarms.add(fake_name.downcase, "zerocracy/#{fake_name}", 'master', '/')
     assert(s.why_not.include?('has just been created'), s.why_not)
   end
