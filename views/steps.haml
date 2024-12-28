@@ -1,9 +1,10 @@
 %p
   Steps of
+  job
+  %a{ href: iri.cut('/jobs').append(job.id) }<
+    = "##{job.id}"
   != succeed ':' do
-    %a{ href: iri.cut('/jobs').append(job.id) }<
-      job
-      = "##{job.id}"
+    = "(#{job.name})"
 
 %table
   %colgroup
@@ -12,7 +13,7 @@
     -# Swarm
     %col{ style: 'width: 10em;' }
     -# Code
-    %col{ style: 'width: 4em;' }
+    %col{ style: 'width: 5em;' }
     -# Msec
     %col{ style: 'width: 4em;' }
     -# Version
