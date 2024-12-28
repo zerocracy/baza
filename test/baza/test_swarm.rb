@@ -74,7 +74,7 @@ class Baza::SwarmTest < Baza::Test
     s = human.swarms.add(fake_name.downcase, "zerocracy/#{fake_name}", 'master', '/')
     sha = fake_sha
     s.head!(sha)
-    r = s.releases.start('no tail', fake_name)
+    r = s.releases.start('no tail', fake_name, created: Time.now - (100 * 60 * 60))
     r.finish!(sha, '0.0.0', 'tail', 0, 42)
     assert(s.why_not.nil?, s.why_not)
   end
