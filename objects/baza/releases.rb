@@ -53,7 +53,7 @@ class Baza::Releases
       [
         'SELECT * FROM release',
         'WHERE swarm = $1',
-        'ORDER BY created DESC',
+        'ORDER BY id DESC',
         "OFFSET #{offset.to_i}"
       ],
       [@swarm.id]
@@ -76,14 +76,15 @@ class Baza::Releases
   #
   # @param [String] instance AWS EC2 instance ID
   # @param [String] secret A secret
+  # @param [Float] created When did it start?
   # @return [Integer] The ID of the added release
-  def start(tail, secret)
+  def start(tail, secret, created: Time.now)
     raise Baza::Urror, 'The "tail" cannot be NIL' if tail.nil?
     raise Baza::Urror, 'The "secret" cannot be empty' if secret.nil?
     get(
       @swarm.pgsql.exec(
-        'INSERT INTO release (swarm, tail, secret) VALUES ($1, $2, $3) RETURNING id',
-        [@swarm.id, tail, secret]
+        'INSERT INTO release (swarm, tail, secret, created) VALUES ($1, $2, $3, $4) RETURNING id',
+        [@swarm.id, tail, secret, created]
       )[0]['id'].to_i
     )
   end

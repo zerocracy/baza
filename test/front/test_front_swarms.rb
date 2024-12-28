@@ -74,19 +74,20 @@ class Baza::FrontSwarmsTest < Baza::Test
       JSON.pretty_generate(
         {
           ref: "refs/head/#{branch}",
-          after: '373737373737373737373737373737373737abcd',
+          after: fake_sha,
           repository: { full_name: repo }
         }
       ),
       'CONTENT_TYPE' => 'application/json'
     )
     assert_status(200)
+    sha = fake_sha
     post(
       '/swarms/webhook',
       JSON.pretty_generate(
         {
           ref: 'refs/head/another-branch',
-          after: '3737373737373737373737373737373737373737',
+          after: sha,
           repository: { full_name: repo }
         }
       ),
@@ -98,7 +99,7 @@ class Baza::FrontSwarmsTest < Baza::Test
       JSON.pretty_generate(
         {
           ref: "refs/head/#{branch}",
-          after: '3737373737373737373737373737373737373737',
+          after: sha,
           repository: { full_name: 'wrong-org/wrong-repo' }
         }
       ),
@@ -115,7 +116,7 @@ class Baza::FrontSwarmsTest < Baza::Test
     secret = fake_name
     r = s.releases.start('tail', secret)
     put(
-      "/swarms/finish?head=4242424242424242424242424242424242424242&version=0.555&exit=0&sec=42&secret=#{secret}",
+      "/swarms/finish?head=#{fake_sha}&version=0.555&exit=0&sec=42&secret=#{secret}",
       'this is stdout',
       'CONTENT_TYPE' => 'text/plain'
     )

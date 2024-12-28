@@ -121,6 +121,10 @@ class Baza::Test < Minitest::Test
     # rubocop:enable Style/ClassVars
   end
 
+  def fake_sha
+    SecureRandom.hex(20).upcase
+  end
+
   def fake_name
     "fake#{SecureRandom.hex(8)}"
   end

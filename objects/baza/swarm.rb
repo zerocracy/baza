@@ -141,12 +141,14 @@ class Baza::Swarm
     return "The swarm ##{@id} is disabled." unless enabled?
     return 'The account is out of funds.' unless swarms.human.account.balance.positive? || Baza::Features::TESTS
     if head == '0' * 40
-      return 'The swarm has just been created, we are waiting for the first webhook to arrive (did you configure it?).'
+      return \
+        'The swarm has just been created, we are waiting ' \
+        'for the first webhook to arrive (did you configure it?).'
     end
     last = releases.each.to_a.first
     return nil if last.nil?
     return "The release ##{last[:id]} is not yet finished, we're waiting for it." if last[:exit].nil?
-    if last[:head] == head
+    if last[:head] == head && !version.nil? && version == Baza::VERSION
       return \
         "The SHA of the head of the release ##{last[:id]} (#{last[:head][0..6].downcase}) " \
         'equals to the SHA of the head of the swarm, no need to release.'
@@ -169,7 +171,7 @@ class Baza::Swarm
     if %w[shift pop finish alternations].include?(name) && !version.nil? && version == Baza::VERSION
       return \
         "Recently released version #{version} is the same as the version of Baza, " \
-        'there is no point for a new release yet'
+        'there is no point for a new release yet.'
     end
     nil
   end

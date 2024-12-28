@@ -108,6 +108,9 @@ class Baza::Swarms
     raise Baza::Urror, "The name #{name.inspect} is not valid" unless name.match?(/^[a-z0-9-]+$/)
     raise Baza::Urror, 'The "repo" cannot be empty' if repo.empty?
     raise Baza::Urror, 'The "directory" cannot be empty' if directory.empty?
+    if %w[pop shift alterations finish].include?(name) && !@human.extend(Baza::Human::Roles).admin?
+      raise Baza::Urror, "The name #{name.inspect} can be used only by admin"
+    end
     unless repo.match?(%r{^[a-zA-Z][a-zA-Z0-9\-.]*/[a-zA-Z][a-z0-9\-.]*$})
       raise Baza::Urror, "The repo #{repo.inspect} is not valid"
     end
