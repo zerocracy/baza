@@ -53,7 +53,7 @@ class Baza::SwarmTest < Baza::Test
   def test_no_release_when_no_head
     human = fake_human('yegor256')
     s = human.swarms.add(fake_name.downcase, "zerocracy/#{fake_name}", 'master', '/')
-    assert(!s.why_not.nil?, s.why_not)
+    assert(s.why_not.include?('has just been created'), s.why_not)
   end
 
   def test_no_release_when_special_same_version
@@ -63,7 +63,7 @@ class Baza::SwarmTest < Baza::Test
     s.head!(fake_sha)
     r = s.releases.start('no tail', fake_name, created: Time.now - 100 * 60 * 60)
     r.finish!(fake_sha, Baza::VERSION, 'tail', 0, 42)
-    assert(!s.why_not.nil?, s.why_not)
+    assert(s.why_not.include?('the same as the version of Baza'), s.why_not)
   end
 
   def test_release_when_special_different_versions
