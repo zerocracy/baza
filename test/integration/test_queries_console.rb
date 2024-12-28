@@ -25,10 +25,6 @@
 require_relative '../test__helper'
 
 class Baza::QueriesConsoleTest < Baza::Test
-  def app
-    Sinatra::Application
-  end
-
   def test_checks_that_query_field_is_filled_by_default
     start_as_tester
     visit '/sql'

@@ -29,10 +29,6 @@ require_relative '../../baza'
 class Baza::FrontHelpersTest < Baza::Test
   include Baza::Helpers
 
-  def app
-    Sinatra::Application
-  end
-
   def test_snippet
     t = snippet('hello, world!')
     assert(t.include?('$(this)'))

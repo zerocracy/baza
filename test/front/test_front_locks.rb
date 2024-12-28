@@ -27,10 +27,6 @@ require_relative '../test__helper'
 require_relative '../../baza'
 
 class Baza::FrontLocksTest < Baza::Test
-  def app
-    Sinatra::Application
-  end
-
   def test_lock_unlock
     fake_login(fake_name)
     name = fake_name

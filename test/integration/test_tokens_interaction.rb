@@ -25,10 +25,6 @@
 require_relative '../test__helper'
 
 class Baza::TokensInteractionTest < Baza::Test
-  def app
-    Sinatra::Application
-  end
-
   def test_adds_token
     start_as_tester
     click_link 'Tokens'

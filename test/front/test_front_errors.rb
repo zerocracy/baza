@@ -28,10 +28,6 @@ require_relative '../test__helper'
 require_relative '../../baza'
 
 class Baza::FrontErrorsTest < Baza::Test
-  def app
-    Sinatra::Application
-  end
-
   def test_not_found
     pages = [
       '/unknown_path',

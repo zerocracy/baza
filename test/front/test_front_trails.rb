@@ -28,10 +28,6 @@ require_relative '../../baza'
 require_relative '../../objects/baza/trails'
 
 class Baza::FrontTrailsTest < Baza::Test
-  def app
-    Sinatra::Application
-  end
-
   def test_trails_list
     fake_login('yegor256')
     get('/trails')

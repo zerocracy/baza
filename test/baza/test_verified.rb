@@ -35,10 +35,6 @@ require_relative '../../objects/baza/verified'
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
 class Baza::VerifiedTest < Baza::Test
-  def app
-    Sinatra::Application
-  end
-
   def test_simple_check
     WebMock.disable_net_connect!
     human = fake_human

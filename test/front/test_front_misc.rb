@@ -27,10 +27,6 @@ require_relative '../test__helper'
 require_relative '../../baza'
 
 class Baza::FrontMiscTest < Baza::Test
-  def app
-    Sinatra::Application
-  end
-
   def test_robots
     get('/robots.txt')
     assert_status(200)

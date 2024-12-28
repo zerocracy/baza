@@ -27,10 +27,6 @@ require_relative '../test__helper'
 require_relative '../../baza'
 
 class Baza::AlwaysGcTest < Baza::Test
-  def app
-    Sinatra::Application
-  end
-
   def test_simple
     load(File.join(__dir__, '../../always/always_gc.rb'))
   end

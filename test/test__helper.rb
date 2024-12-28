@@ -64,6 +64,10 @@ class Baza::Test < Minitest::Test
   include Rack::Test::Methods
   include Capybara::DSL
 
+  def app
+    Sinatra::Application
+  end
+
   # Run it before every test method.
   def setup
     Capybara.app = Sinatra::Application.new

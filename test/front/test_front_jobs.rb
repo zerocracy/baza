@@ -29,10 +29,6 @@ require_relative '../../objects/baza'
 require_relative '../../baza'
 
 class Baza::FrontJobsTest < Baza::Test
-  def app
-    Sinatra::Application
-  end
-
   def test_read_job
     job = fake_job
     fake_login(job.jobs.human.github)

@@ -25,10 +25,6 @@
 require_relative '../test__helper'
 
 class Baza::PushJobsTest < Baza::Test
-  def app
-    Sinatra::Application
-  end
-
   def test_runs_job
     start_as_tester
     human = tester_human

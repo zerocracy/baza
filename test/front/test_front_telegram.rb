@@ -27,10 +27,6 @@ require_relative '../test__helper'
 require_relative '../../baza'
 
 class Baza::FrontTelegramTest < Baza::Test
-  def app
-    Sinatra::Application
-  end
-
   def test_telegram_auth
     get('/tauth?secret=wrong')
     assert_status(303)

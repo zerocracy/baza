@@ -25,10 +25,6 @@
 require_relative '../test__helper'
 
 class Baza::SecretsInteractionTest < Baza::Test
-  def app
-    Sinatra::Application
-  end
-
   def test_adds_secret
     start_as_tester
     human = tester_human

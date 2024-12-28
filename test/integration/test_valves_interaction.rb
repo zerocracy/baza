@@ -25,10 +25,6 @@
 require_relative '../test__helper'
 
 class Baza::ValvesInteractionTest < Baza::Test
-  def app
-    Sinatra::Application
-  end
-
   def test_adds_valve
     start_as_tester
     human = tester_human

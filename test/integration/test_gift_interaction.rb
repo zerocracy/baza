@@ -25,10 +25,6 @@
 require_relative '../test__helper'
 
 class Baza::GiftInteractionTest < Baza::Test
-  def app
-    Sinatra::Application
-  end
-
   def test_adds_positive_gift
     start_as_tester
     visit '/gift'

@@ -32,10 +32,6 @@ require_relative '../../objects/baza/pipeline'
 require_relative '../../baza'
 
 class Baza::FrontPushTest < Baza::Test
-  def app
-    Sinatra::Application
-  end
-
   def setup
     loop do
       process_pipeline

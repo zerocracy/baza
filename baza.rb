@@ -74,6 +74,7 @@ end
 configure do
   set :bind, '0.0.0.0'
   set :server_settings, timeout: 25
+  set :views, File.expand_path('views', __dir__)
 end
 
 # Global config data:

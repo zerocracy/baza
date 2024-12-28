@@ -28,10 +28,6 @@ require_relative '../../objects/baza'
 require_relative '../../baza'
 
 class Baza::FrontDurablesTest < Baza::Test
-  def app
-    Sinatra::Application
-  end
-
   def test_full_cycle
     fake_login
     body = 'hello, world!'

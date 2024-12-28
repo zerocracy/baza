@@ -28,10 +28,6 @@ require_relative '../../objects/baza'
 require_relative '../../baza'
 
 class Baza::FrontPushTest < Baza::Test
-  def app
-    Sinatra::Application
-  end
-
   def test_renders_css
     get('/css/main.css')
     assert_status(200)

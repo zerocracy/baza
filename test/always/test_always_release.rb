@@ -28,10 +28,6 @@ require_relative '../test__helper'
 require_relative '../../baza'
 
 class Baza::AlwaysReleaseTest < Baza::Test
-  def app
-    Sinatra::Application
-  end
-
   def test_simple
     WebMock.disable_net_connect!
     app.set :config, {

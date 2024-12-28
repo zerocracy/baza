@@ -32,10 +32,6 @@ require_relative '../test__helper'
 require_relative '../../baza'
 
 class Baza::FrontBazaTest < Baza::Test
-  def app
-    Sinatra::Application
-  end
-
   def test_w3c_validity
     skip unless Net::Ping::External.new('8.8.8.8').ping?
     pages = []

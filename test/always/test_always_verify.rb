@@ -27,10 +27,6 @@ require_relative '../test__helper'
 require_relative '../../baza'
 
 class Baza::AlwaysVerifyTest < Baza::Test
-  def app
-    Sinatra::Application
-  end
-
   def test_simple
     WebMock.disable_net_connect!
     stub_request(:get, %r{https://api.github.com/repos/.*/.*/actions/runs/.*}).to_return(status: 200)

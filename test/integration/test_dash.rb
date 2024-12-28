@@ -25,10 +25,6 @@
 require_relative '../test__helper'
 
 class Baza::DashTest < Baza::Test
-  def app
-    Sinatra::Application
-  end
-
   def test_redirects_to_root
     visit '/dash'
     assert_current_path '/'

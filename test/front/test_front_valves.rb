@@ -29,10 +29,6 @@ require_relative '../../objects/baza'
 require_relative '../../baza'
 
 class Baza::FrontValvesTest < Baza::Test
-  def app
-    Sinatra::Application
-  end
-
   def test_add
     fake_login
     post('/valves/add', 'name=hi&badge=abc&why=nothing')

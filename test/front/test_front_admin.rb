@@ -27,10 +27,6 @@ require_relative '../test__helper'
 require_relative '../../baza'
 
 class Baza::FrontAdminTest < Baza::Test
-  def app
-    Sinatra::Application
-  end
-
   def test_renders_admin_pages
     pages = [
       '/sql',

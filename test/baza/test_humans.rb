@@ -32,10 +32,6 @@ require_relative '../../objects/baza/humans'
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
 class Baza::HumansTest < Baza::Test
-  def app
-    Sinatra::Application
-  end
-
   def test_simple_fetching
     humans = Baza::Humans.new(fake_pgsql, tbot: Baza::Tbot::Fake.new(fake_loog))
     login = fake_name
