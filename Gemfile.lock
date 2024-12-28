@@ -185,11 +185,6 @@ GEM
       base58 (>= 0.2)
       openssl (>= 2.0)
     google-protobuf (3.25.5)
-    google-protobuf (3.25.5-aarch64-linux)
-    google-protobuf (3.25.5-arm64-darwin)
-    google-protobuf (3.25.5-x86-linux)
-    google-protobuf (3.25.5-x86_64-darwin)
-    google-protobuf (3.25.5-x86_64-linux)
     graphql (2.4.8)
       base64
       fiber-storage
