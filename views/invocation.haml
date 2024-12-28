@@ -8,7 +8,7 @@
   %p
     Swarm:
     %br
-    %a{ href: iri.cut('/swarms').append(invocation[:swarm_id]) }
+    %a{ href: iri.cut('/swarms').append(invocation[:swarm_id]).append('invocations') }
       = invocation[:swarm]
 
   %p
