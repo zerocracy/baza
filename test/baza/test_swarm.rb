@@ -44,19 +44,39 @@ class Baza::SwarmTest < Baza::Test
   def test_why_not
     human = fake_human
     s = human.swarms.add(fake_name.downcase, "zerocracy/#{fake_name}", 'master', '/')
-    s.head!('4242424242424242424242424242424242424242')
+    s.head!(fake_sha)
     assert_nil(s.why_not)
     s.releases.start('no tail', fake_name)
     assert(!s.why_not.nil?)
   end
 
+  def test_no_release_when_special_same_version
+    human = fake_human('yegor256')
+    s = human.swarms.each.to_a.find { |e| e.name == 'pop' }
+    s = human.swarms.add('pop', "zerocracy/#{fake_name}", 'master', '/') if s.nil?
+    s.head!(fake_sha)
+    r = s.releases.start('no tail', fake_name, created: Time.now - 100 * 60 * 60)
+    r.finish!(fake_sha, Baza::VERSION, 'tail', 0, 42)
+    assert(!s.why_not.nil?, s.why_not)
+  end
+
+  def test_release_when_special_different_versions
+    human = fake_human('yegor256')
+    s = human.swarms.each.to_a.find { |e| e.name == 'pop' }
+    s = human.swarms.add('pop', "zerocracy/#{fake_name}", 'master', '/') if s.nil?
+    s.head!(fake_sha)
+    r = s.releases.start('no tail', fake_name, created: Time.now - 100 * 60 * 60)
+    r.finish!(fake_sha, '0.0.0', 'tail', 0, 42)
+    assert(s.why_not.nil?, s.why_not)
+  end
+
   def test_pick_latest
     human = fake_human
     s = human.swarms.add(fake_name.downcase, "zerocracy/#{fake_name}", 'master', '/')
-    s.head!('4242424242424242424242424242424242424242')
+    s.head!(fake_sha)
     assert_nil(s.why_not)
     r = s.releases.start('no tail', fake_name)
-    r.finish!('4242424242424242424242424242424242424242', '0.999', 'tail', 0, 42)
+    r.finish!(fake_sha, '0.999', 'tail', 0, 42)
     s.releases.start('no tail', fake_name)
     assert(!s.why_not.nil?)
   end
