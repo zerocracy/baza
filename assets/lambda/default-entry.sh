@@ -52,14 +52,17 @@ self=$(dirname "$0")
 
 options=(
   '--quiet'
+  '--timeout=30'
   '--summary'
   '--max-cycles=3'
   '--no-log'
 )
 opts=$( jq -r '.options | keys[] as $k | "\($k)\t\(.[$k])"' "${home}/job.json" )
+ofile=${home}/options.txt
 while IFS= read -r ln; do
-  options+=("--option=$( echo "${ln}" | cut -f1 )=$( echo "${ln}" | cut -f2 )")
+  echo "$(echo "${ln}" | cut -f1 )=$( echo "${ln}" | cut -f2 )" >> "${ofile}"
 done <<< "${opts}"
+options+=("--options-file=${ofile}")
 
 if [ -e "${self}/lib" ]; then
   options+=('--lib' "${self}/lib")

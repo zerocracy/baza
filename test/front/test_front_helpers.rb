@@ -33,6 +33,11 @@ class Baza::FrontHelpersTest < Minitest::Test
     Sinatra::Application
   end
 
+  def test_snippet
+    t = snippet('hello, world!')
+    assert(t.include?('$(this)'))
+  end
+
   def test_large_text
     t = large_text('hello, world!')
     assert_equal(14, t.scan('span').count, t)
