@@ -42,6 +42,11 @@ class Baza::Swarm
     @swarms.pgsql
   end
 
+  # This swarm is one of those hosted inside baza?
+  def special?
+    %w[shift pop finish alternations].include?(name)
+  end
+
   # Change head SHA of the swarm.
   #
   # @param [String] sha The hash of the Git head
@@ -146,7 +151,7 @@ class Baza::Swarm
     last = releases.each.to_a.first
     return nil if last.nil?
     return "The release ##{last[:id]} is not yet finished, we're waiting for it." if last[:exit].nil?
-    if last[:head] == head
+    if last[:head] == head && !special? && !version.nil? && version == Baza::VERSION
       return \
         "The SHA of the head of the release ##{last[:id]} (#{last[:head][0..6].downcase}) " \
         'equals to the SHA of the head of the swarm, no need to release.'
@@ -166,7 +171,7 @@ class Baza::Swarm
         "we'll wait #{(last[:created] + pause).ago} " \
         'and only then will release again.'
     end
-    if %w[shift pop finish alternations].include?(name) && !version.nil? && version == Baza::VERSION
+    if special? && !version.nil? && version == Baza::VERSION
       return \
         "Recently released version #{version} is the same as the version of Baza, " \
         'there is no point for a new release yet'
