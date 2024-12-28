@@ -23,6 +23,8 @@
     %col{ style: 'width: 4em;' }
     -# Head
     %col{ style: 'width: 10em;' }
+    -# Version
+    %col{ style: 'width: 8em;' }
     -# Exit
     %col{ style: 'width: 4em;' }
     -# Seconds
@@ -41,6 +43,8 @@
         = '#'
       %th
         Head
+      %th
+        Version
       %th
         Exit
       %th
@@ -71,6 +75,8 @@
           %td.ff
             %a{ href: "https://github.com/#{releases.swarm.repository}/commit/#{r[:head]}" }<
               = r[:head][0..6].downcase
+        %td
+          = r[:version]
         %td.ff.right
           - if r[:exit].nil?
             = '?'

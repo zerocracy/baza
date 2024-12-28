@@ -56,7 +56,7 @@ class Baza::SwarmTest < Baza::Test
     s.head!('4242424242424242424242424242424242424242')
     assert_nil(s.why_not)
     r = s.releases.start('no tail', fake_name)
-    r.finish!('4242424242424242424242424242424242424242', 'tail', 0, 42)
+    r.finish!('4242424242424242424242424242424242424242', '0.999', 'tail', 0, 42)
     s.releases.start('no tail', fake_name)
     assert(!s.why_not.nil?)
   end

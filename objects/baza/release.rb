@@ -60,18 +60,19 @@ class Baza::Release
   # Finish the release to the swarm.
   #
   # @param [String] head SHA of the Git head just released
+  # @param [String] version Baza version that made this release
   # @param [String] tail STDOUT tail
   # @param [String] code Exit code
   # @param [String] msec How many msec it took to build this one
   # @return [Integer] The ID of the added release
-  def finish!(head, tail, code, msec)
+  def finish!(head, version, tail, code, msec)
     raise Baza::Urror, 'The "head" cannot be NIL' if head.nil?
     raise Baza::Urror, 'The "head" cannot be empty' if head.empty?
     raise Baza::Urror, 'The "code" must be Integer' unless code.is_a?(Integer)
     raise Baza::Urror, 'The "msec" must be Integer' unless msec.is_a?(Integer)
     @releases.pgsql.exec(
-      'UPDATE release SET head = $2, tail = $3, exit = $4, msec = $5 WHERE id = $1 AND swarm = $6',
-      [@id, head, tail, code, msec, @releases.swarm.id]
+      'UPDATE release SET head = $2, version = $3, tail = $4, exit = $5, msec = $6 WHERE id = $1 AND swarm = $7',
+      [@id, head, version, tail, code, msec, @releases.swarm.id]
     )
     s = @releases.swarm
     human = s.swarms.human
@@ -84,7 +85,8 @@ class Baza::Release
     destroyed = head == '0' * 40
     human.notify(
       code.zero? ? '🫐' : '⚠️',
-      "The release ##{@id} of the swarm ##{s.id} (\"`#{s.name}`\")",
+      "The release ##{@id} of the swarm ##{s.id} (\"`#{s.name}`\"),",
+      "initiated by Baza #{version},",
       if destroyed
         code.zero? ? 'destroyed the swarm' : 'failed to destroy the swarm'
       elsif code.zero?

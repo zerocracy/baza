@@ -109,6 +109,11 @@ class Baza::Swarm
     to_json[:invoked]
   end
 
+  # Get the version of the latest release.
+  def version
+    to_json[:version]
+  end
+
   # Get the count of releases.
   def releases_count
     to_json[:releases_count]
@@ -172,6 +177,9 @@ class Baza::Swarm
         row = swarms.pgsql.exec(
           [
             'SELECT s.*, COUNT(release.id) AS releases_count,',
+            '(SELECT version FROM release',
+            '  WHERE swarm = s.id AND version IS NOT NULL',
+            '  ORDER BY release.id DESC LIMIT 1) AS version,',
             '(SELECT exit FROM release WHERE swarm = s.id ORDER BY release.id DESC LIMIT 1) AS exit,',
             '(SELECT created FROM invocation WHERE swarm = s.id ORDER BY invocation.id DESC LIMIT 1) AS invoked',
             'FROM swarm AS s',
@@ -187,6 +195,7 @@ class Baza::Swarm
           name: row['name'],
           exit: row['exit']&.to_i,
           enabled: row['enabled'] == 't',
+          version: row['version'],
           releases_count: row['releases_count'].to_i,
           repository: row['repository'],
           branch: row['branch'],

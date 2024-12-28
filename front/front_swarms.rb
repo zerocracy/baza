@@ -99,7 +99,7 @@ get(%r{/swarms/([0-9]+)/releases/([0-9]+)/stop}) do
   admin_only
   swarm = the_human.swarms.get(params['captures'].first.to_i)
   r = swarm.releases.get(params['captures'][1].to_i)
-  r.finish!('FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF', "stopped by @#{the_human.github}", 1, 42)
+  r.finish!('FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF', nil, "stopped by @#{the_human.github}", 1, 42)
   flash(iri.cut('/swarms').append(swarm.id).append('releases'), "The release ##{r.id} was stopped")
 end
 
@@ -128,11 +128,13 @@ put('/swarms/finish') do
   raise Baza::Urror, 'The "secret" is not valid, cannot find a release' if r.nil?
   head = params[:head]
   raise Baza::Urror, 'The "head" HTTP param is mandatory' if head.nil?
+  version = params[:version]
+  raise Baza::Urror, 'The "version" HTTP param is mandatory' if head.nil?
   code = params[:exit]
   raise Baza::Urror, 'The "exit" HTTP param is mandatory' if code.nil?
   sec = params[:sec]
   raise Baza::Urror, 'The "sec" HTTP param is mandatory' if sec.nil?
-  r.finish!(head, tail, code.to_i, 1000 * sec.to_i)
+  r.finish!(head, version, tail, code.to_i, 1000 * sec.to_i)
   "The release ##{r.id} was finished"
 end
 

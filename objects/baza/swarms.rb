@@ -62,6 +62,9 @@ class Baza::Swarms
     rows = pgsql.exec(
       [
         'SELECT s.*, COUNT(release.id) AS releases_count,',
+        '(SELECT version FROM release',
+        '  WHERE swarm = s.id AND version IS NOT NULL',
+        '  ORDER BY release.id DESC LIMIT 1) AS version,',
         '(SELECT exit FROM release WHERE swarm = s.id ORDER BY release.id DESC LIMIT 1) AS exit,',
         '(SELECT created FROM invocation WHERE swarm = s.id ORDER BY invocation.id DESC LIMIT 1) AS invoked',
         'FROM swarm AS s',
@@ -80,6 +83,7 @@ class Baza::Swarms
         name: row['name'],
         exit: row['exit']&.to_i,
         releases_count: row['releases_count'].to_i,
+        version: row['version'],
         enabled: row['enabled'] == 't',
         repository: row['repository'],
         directory: row['directory'],

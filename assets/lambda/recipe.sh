@@ -92,7 +92,7 @@ status=$( curl --silent --verbose --request PUT --data-binary '@tail.log' \
   --connect-timeout 10 --max-time 300 \
   --header 'Content-Type: text/plain' \
   --header 'User-Agent: recipe.sh' \
-  "{{ host }}/swarms/finish?secret={{ secret }}&head=$(cat head.txt)&exit=$(cat exit.txt)&sec=${SECONDS}" \
+  "{{ host }}/swarms/finish?secret={{ secret }}&version={{ version }}&head=$(cat head.txt)&exit=$(cat exit.txt)&sec=${SECONDS}" \
   --fail-with-body --output http.txt -w "%{http_code}" ||: )
 if [ "${status}" == '000' ]; then
   echo "Failed to connect to {{ host }}"

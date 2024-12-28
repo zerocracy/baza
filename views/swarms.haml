@@ -26,6 +26,8 @@
     %col
     -# Head
     %col{ style: 'width: 8em;' }
+    -# Version
+    %col{ style: 'width: 6em;' }
     -# Secret
     %col{ style: 'width: 15em;' }
     -# Invoked
@@ -42,6 +44,8 @@
         Repository
       %th
         Head
+      %th
+        Version
       %th
         Secret
       %th
@@ -85,6 +89,12 @@
           = s.head[0..6].downcase
         %a.ico{ href: iri.cut('/swarms').append(s.id).append('reset'), title: "Reset the head SHA of the swarm ##{s.id}", onclick: "return confirm('Are you sure you want to reset the head SHA of the swarm ##{s.id}?')" }
           %i.fa-solid.fa-trash-arrow-up
+      %td.ff
+        - if s.version.nil?
+          %span.bad
+            = '???'
+        - else
+          = s.version
       %td.ff
         != secret(s.secret)
       %td

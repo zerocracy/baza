@@ -56,6 +56,7 @@ class Baza::Recipe
     files: to_files(script, account, region, host:))
     file_of(
       'recipe.sh',
+      'version' => Baza::VERSION,
       'script' => script.to_s,
       'host' => safe(host),
       'secret' => safe(secret),
