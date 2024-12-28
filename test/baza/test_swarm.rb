@@ -60,6 +60,15 @@ class Baza::SwarmTest < Baza::Test
     assert(s.why_not.include?('equals to the SHA of the head'), s.why_not)
   end
 
+  def test_no_release_when_previous_recently_failed
+    human = fake_human
+    s = human.swarms.add(fake_name.downcase, "zerocracy/#{fake_name}", 'master', '/')
+    s.head!(fake_sha)
+    r = s.releases.start('no tail', fake_name)
+    r.finish!(fake_sha, Baza::VERSION, 'failed!', 1, 42)
+    assert(s.why_not.include?('and then make another release attempt'), s.why_not)
+  end
+
   def test_no_release_when_no_head
     human = fake_human
     s = human.swarms.add(fake_name.downcase, "zerocracy/#{fake_name}", 'master', '/')
