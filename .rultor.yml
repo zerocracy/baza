@@ -30,7 +30,7 @@ assets:
   config.yml: yegor256/home#assets/zerocracy/baza.yml
 install: |-
   set -x
-  sudo .github/setup-postgres.sh
+  sudo "$(pwd)/.github/setup-postgres.sh"
   pdd -f /dev/null
   bundle install --no-color
   bundle install --no-color --gemfile=assets/lambda/Gemfile
