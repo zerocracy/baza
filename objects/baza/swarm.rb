@@ -141,7 +141,9 @@ class Baza::Swarm
     return "The swarm ##{@id} is disabled." unless enabled?
     return 'The account is out of funds.' unless swarms.human.account.balance.positive? || Baza::Features::TESTS
     if head == '0' * 40
-      return 'The swarm has just been created, we are waiting for the first webhook to arrive (did you configure it?).'
+      return \
+        'The swarm has just been created, we are waiting ' \
+        'for the first webhook to arrive (did you configure it?).'
     end
     last = releases.each.to_a.first
     return nil if last.nil?
