@@ -47,13 +47,20 @@ class Baza::SwarmTest < Baza::Test
     s.head!(fake_sha)
     assert_nil(s.why_not)
     s.releases.start('no tail', fake_name)
-    assert(!s.why_not.nil?)
+    assert(s.why_not.include?('not yet finished'), s.why_not)
   end
 
   def test_no_release_when_no_head
     human = fake_human('yegor256')
     s = human.swarms.add(fake_name.downcase, "zerocracy/#{fake_name}", 'master', '/')
     assert(s.why_not.include?('has just been created'), s.why_not)
+  end
+
+  def test_no_release_when_disabled_swarm
+    human = fake_human('yegor256')
+    s = human.swarms.add(fake_name.downcase, "zerocracy/#{fake_name}", 'master', '/')
+    s.enable!(false)
+    assert(s.why_not.include?('is disabled'), s.why_not)
   end
 
   def test_no_release_when_special_same_version
