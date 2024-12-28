@@ -99,7 +99,16 @@ class Minitest::Test
     # rubocop:disable Style/ClassVars
     @@fake_pgsql ||= Pgtk::Pool.new(
       Pgtk::Wire::Yaml.new(File.join(__dir__, '../target/pgsql-config.yml')),
-      log: fake_loog
+      log: Loog::Tee.new(
+        fake_loog,
+        Logger.new(
+          File.open(
+            File.join(__dir__, '../target/queries.sql'),
+            File::CREAT | File::WRONLY
+          ),
+          formatter: proc { |_severity, _time, _program, msg| "#{msg}\n" }
+        )
+      )
     ).start
     @@fake_pgsql.exec('SET client_min_messages TO WARNING;')
     @@fake_pgsql
@@ -230,7 +239,7 @@ class Minitest::Test
     loop do
       sleep 0.1
       break if started
-      raise 'Timeout' if Time.now - start > 30
+      raise 'Timeout' if Time.now - start > 15
     end
     begin
       yield

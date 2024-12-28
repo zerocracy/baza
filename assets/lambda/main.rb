@@ -27,7 +27,6 @@ require 'aws-sdk-core'
 require 'aws-sdk-s3'
 require 'aws-sdk-sqs'
 require 'backtrace'
-require 'base64'
 require 'elapsed'
 require 'English'
 require 'fileutils'
@@ -243,18 +242,15 @@ end
 # @param [Loog] loog The logging facility
 # @return [Array<String, Integer>] Stdout + exit code (zero means success)
 def one(id, pack, rec, loog)
-  cmd =
-    if File.exist?('/swarm/entry.sh')
-      ['/bin/bash', '/swarm/entry.sh', Shellwords.escape(id), Shellwords.escape(pack)]
-    elsif File.exist?('/swarm/entry.rb')
-      ['bundle', 'exec', 'ruby', '/swarm/entry.rb', Shellwords.escape(id), Shellwords.escape(pack)]
-    else
-      ['echo', "Cannot figure out how to start the swarm, try creating 'entry.sh' or 'entry.rb'"]
-    end.join(' ')
-  sec = 9 * 60
-  Timeout.timeout(sec) do
+  Timeout.timeout(9 * 60) do
     qbash(
-      cmd,
+      if File.exist?('/swarm/entry.sh')
+        "/bin/bash /swarm/entry.sh \"#{id}\" \"#{pack}\" 2>&1"
+      elsif File.exist?('/swarm/entry.rb')
+        "bundle exec ruby /swarm/entry.rb \"#{id}\" \"#{pack}\" 2>&1"
+      else
+        "echo 'Cannot figure out how to start the swarm, try creating \"entry.sh\" or \"entry.rb\"'"
+      end,
       both: true,
       log: loog,
       env: {
@@ -267,7 +263,6 @@ def one(id, pack, rec, loog)
     )
   end
 rescue Timeout::Error => e
-  loog.error("The command was stopped due to timeout of #{sec} seconds: #{cmd}")
   [Backtrace.new(e).to_s, 1]
 end
 

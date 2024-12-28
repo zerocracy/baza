@@ -57,6 +57,7 @@ gem 'net-scp', '~>4.0'
 gem 'net-ssh', '~>7.2'
 gem 'octokit', '~>9'
 gem 'os', '>0', require: false
+gem 'pgdexter', '0.5.4', require: false
 gem 'pgtk', '~>0'
 gem 'qbash', '~>0'
 gem 'rack', '~>3.1'

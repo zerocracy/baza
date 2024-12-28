@@ -1,7 +1,8 @@
 %p
-  Steps of job
+  Steps of
   != succeed ':' do
     %a{ href: iri.cut('/jobs').append(job.id) }<
+      job
       = "##{job.id}"
 
 %table
@@ -28,7 +29,7 @@
         Swarm
       %th
         Code
-      %th
+      %th.right
         Msec
       %th
         Version

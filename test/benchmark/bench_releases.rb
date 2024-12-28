@@ -32,31 +32,20 @@ require_relative '../../objects/baza'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class BenchSwarms < Minitest::Test
-  def test_swarms_retrieval
+class BenchReleases < Minitest::Test
+  def test_releases_retrieval
     human = fake_human
     total = 1000
+    swarm = human.swarms.add(fake_name.downcase, "zerocracy/#{fake_name}", 'master', '/')
     total.times do
-      swarm = human.swarms.add(fake_name.downcase, "zerocracy/#{fake_name}", 'master', '/')
-      (total / 100).times do
-        swarm.invocations.register(
-          SecureRandom.alphanumeric(total), # stdout
-          0, # exit code
-          555, # msec
-          nil, # job
-          '0.0.0' # swarm version
-        )
-      end
-      (total / 100).times do
-        swarm.releases.start(
-          SecureRandom.alphanumeric(total), # tail
-          fake_name # secret
-        )
-      end
+      swarm.releases.start(
+        SecureRandom.alphanumeric(total), # tail
+        fake_name # secret
+      )
     end
     Benchmark.bm do |b|
-      b.report('all') { human.swarms.each.to_a }
-      b.report('with offset') { human.swarms.each(offset: total / 2).to_a }
+      b.report('all') { swarm.releases.each.to_a }
+      b.report('with offset') { swarm.releases.each(offset: total / 2).to_a }
     end
   end
 end
