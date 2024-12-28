@@ -34,6 +34,6 @@ for c in initdb postgres pg_ctl; do
 done
 
 curl -L https://github.com/HypoPG/hypopg/archive/1.4.1.tar.gz | tar xz
-cd hypopg-1.4.1
+cd hypopg-1.4.1 || exit 1
 make
 make install
