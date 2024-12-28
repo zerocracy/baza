@@ -38,7 +38,7 @@ require_relative '../test__helper'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class Baza::RecipeTest < Minitest::Test
+class Baza::RecipeTest < Baza::Test
   def setup
     fake_pgsql.exec('TRUNCATE swarm CASCADE')
   end

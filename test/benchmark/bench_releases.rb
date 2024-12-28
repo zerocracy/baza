@@ -27,25 +27,18 @@ require 'benchmark'
 require 'securerandom'
 require_relative '../test__helper'
 require_relative '../../objects/baza'
+require_relative 'upload_data'
 
 # Test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class BenchReleases < Minitest::Test
+class BenchReleases < Baza::BenchTest
   def test_releases_retrieval
-    human = fake_human
-    total = 1000
-    swarm = human.swarms.add(fake_name.downcase, "zerocracy/#{fake_name}", 'master', '/')
-    total.times do
-      swarm.releases.start(
-        SecureRandom.alphanumeric(total), # tail
-        fake_name # secret
-      )
-    end
-    Benchmark.bm do |b|
+    swarm = @bench_human.swarms.each.to_a.first
+    Benchmark.bm(30) do |b|
       b.report('all') { swarm.releases.each.to_a }
-      b.report('with offset') { swarm.releases.each(offset: total / 2).to_a }
+      b.report('with offset') { swarm.releases.each(offset: @bench_total / 2).to_a }
     end
   end
 end

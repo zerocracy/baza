@@ -33,7 +33,7 @@ require_relative '../test__helper'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class MainTest < Minitest::Test
+class MainTest < Baza::Test
   def test_one_record
     WebMock.disable_net_connect!
     Dir.mktmpdir do |home|

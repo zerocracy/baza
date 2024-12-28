@@ -31,7 +31,7 @@ require_relative '../test__helper'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class PopTest < Minitest::Test
+class PopTest < Baza::Test
   def test_runs_pop_entry_script
     fake_pgsql.exec('TRUNCATE job CASCADE')
     job = fake_job

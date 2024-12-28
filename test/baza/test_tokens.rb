@@ -30,7 +30,7 @@ require_relative '../../objects/baza'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class Baza::TokensTest < Minitest::Test
+class Baza::TokensTest < Baza::Test
   def test_emptiness_checks
     tokens = fake_human.tokens
     assert(tokens.empty?)

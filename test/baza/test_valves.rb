@@ -31,7 +31,7 @@ require_relative '../../objects/baza/humans'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class Baza::ValvesTest < Minitest::Test
+class Baza::ValvesTest < Baza::Test
   def test_simple_scenario
     human = fake_human
     valves = human.valves

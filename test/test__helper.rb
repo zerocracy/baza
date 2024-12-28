@@ -41,6 +41,7 @@ require 'pgtk/pool'
 require 'rack/test'
 require 'retries'
 require 'securerandom'
+require 'sinatra'
 require 'tago'
 require 'timeout'
 require 'yaml'
@@ -58,12 +59,13 @@ module Rack
   end
 end
 
-class Minitest::Test
+# An extension of the default "Test" class from Minitest framework.
+class Baza::Test < Minitest::Test
   include Rack::Test::Methods
   include Capybara::DSL
 
+  # Run it before every test method.
   def setup
-    require 'sinatra'
     Capybara.app = Sinatra::Application.new
     page.driver.header 'User-Agent', 'Capybara'
   end

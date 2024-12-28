@@ -32,7 +32,7 @@ require_relative '../../objects/baza/factbases'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class Baza::JobsTest < Minitest::Test
+class Baza::JobsTest < Baza::Test
   def test_all_fields
     human = fake_human
     token = human.tokens.add(fake_name)

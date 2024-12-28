@@ -33,7 +33,7 @@ require_relative '../../objects/baza/factbases'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class Baza::FactbasesTest < Minitest::Test
+class Baza::FactbasesTest < Baza::Test
   def test_fake_usage
     fbs = Baza::Factbases.new('', '')
     Dir.mktmpdir do |dir|

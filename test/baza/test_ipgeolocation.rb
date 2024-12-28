@@ -32,7 +32,7 @@ require_relative '../../objects/baza/ipgeolocation'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class Baza::IpGeolocationTest < Minitest::Test
+class Baza::IpGeolocationTest < Baza::Test
   def test_create_client
     client = Baza::IpGeolocation.new(token: 'token', connection: Faraday)
     assert_instance_of(Baza::IpGeolocation, client)

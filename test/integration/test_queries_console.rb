@@ -24,7 +24,7 @@
 
 require_relative '../test__helper'
 
-class Baza::QueriesConsoleTest < Minitest::Test
+class Baza::QueriesConsoleTest < Baza::Test
   def app
     Sinatra::Application
   end

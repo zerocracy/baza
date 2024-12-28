@@ -32,7 +32,7 @@ require_relative '../../objects/baza/errors'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class Baza::ErrorsTest < Minitest::Test
+class Baza::ErrorsTest < Baza::Test
   def test_counting
     Tempfile.open do |f|
       fb = Factbase.new

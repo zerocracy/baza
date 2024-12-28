@@ -30,7 +30,7 @@ require_relative '../test__helper'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2024 Yegor Bugayenko
 # License:: MIT
-class TestAlterations < Minitest::Test
+class TestAlterations < Baza::Test
   def test_simple_entry
     Dir.mktmpdir do |home|
       fb = Factbase.new

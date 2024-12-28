@@ -30,7 +30,7 @@ require_relative '../../objects/baza'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class Baza::AccountTest < Minitest::Test
+class Baza::AccountTest < Baza::Test
   def test_simple_receipt
     human = fake_human
     acc = human.account

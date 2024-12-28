@@ -32,7 +32,7 @@ require_relative '../../objects/baza/factbases'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class Baza::ResultTest < Minitest::Test
+class Baza::ResultTest < Baza::Test
   def test_keeps_data
     job = fake_job
     Tempfile.open do |f|

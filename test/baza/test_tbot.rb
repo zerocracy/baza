@@ -34,7 +34,7 @@ require_relative '../../objects/baza/humans'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class Baza::TbotTest < Minitest::Test
+class Baza::TbotTest < Baza::Test
   def test_null_notify
     tbot = Baza::Tbot.new(fake_pgsql, '')
     humans = Baza::Humans.new(fake_pgsql)

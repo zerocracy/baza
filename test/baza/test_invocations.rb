@@ -30,7 +30,7 @@ require_relative '../../objects/baza'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class Baza::InvocationsTest < Minitest::Test
+class Baza::InvocationsTest < Baza::Test
   def test_simple_scenario
     human = fake_human
     swarms = human.swarms

@@ -30,7 +30,7 @@ require_relative '../../objects/baza'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class Baza::TokenTest < Minitest::Test
+class Baza::TokenTest < Baza::Test
   def test_generates_token_text
     tokens = fake_human.tokens
     token = tokens.add(fake_name)

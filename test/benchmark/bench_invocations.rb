@@ -27,28 +27,18 @@ require 'benchmark'
 require 'securerandom'
 require_relative '../test__helper'
 require_relative '../../objects/baza'
+require_relative 'upload_data'
 
 # Test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class BenchInvocations < Minitest::Test
+class BenchInvocations < Baza::BenchTest
   def test_invocations_retrieval
-    human = fake_human
-    swarm = human.swarms.add(fake_name.downcase, "zerocracy/#{fake_name}", 'master', '/')
-    total = 1000
-    total.times do
-      swarm.invocations.register(
-        SecureRandom.alphanumeric(total), # stdout
-        0, # exit code
-        11, # msec
-        nil, # job
-        '0.0.0' # swarm version
-      )
-    end
-    Benchmark.bm do |b|
+    swarm = @bench_human.swarms.each.to_a.first
+    Benchmark.bm(30) do |b|
       b.report('all') { swarm.invocations.each.to_a }
-      b.report('with offset') { swarm.invocations.each(offset: total / 2).to_a }
+      b.report('with offset') { swarm.invocations.each(offset: @bench_total / 2).to_a }
     end
   end
 end

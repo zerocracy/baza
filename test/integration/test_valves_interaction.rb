@@ -24,7 +24,7 @@
 
 require_relative '../test__helper'
 
-class Baza::ValvesInteractionTest < Minitest::Test
+class Baza::ValvesInteractionTest < Baza::Test
   def app
     Sinatra::Application
   end

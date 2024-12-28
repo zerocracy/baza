@@ -27,7 +27,7 @@ require_relative '../test__helper'
 require_relative '../../baza'
 require_relative '../../objects/baza/trails'
 
-class Baza::FrontTrailsTest < Minitest::Test
+class Baza::FrontTrailsTest < Baza::Test
   def app
     Sinatra::Application
   end

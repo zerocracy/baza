@@ -35,7 +35,7 @@ require_relative '../../objects/baza/trails'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class Baza::PipelineTest < Minitest::Test
+class Baza::PipelineTest < Baza::Test
   def test_simple_processing
     finish_all_jobs
     loog = Loog::Buffer.new

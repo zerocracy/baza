@@ -31,7 +31,7 @@ require_relative '../../objects/baza/factbases'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class Baza::DurablesTest < Minitest::Test
+class Baza::DurablesTest < Baza::Test
   def test_simple_scenario
     fbs = Baza::Factbases.new('', '')
     job = fake_job

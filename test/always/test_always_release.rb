@@ -27,7 +27,7 @@ require 'webmock/minitest'
 require_relative '../test__helper'
 require_relative '../../baza'
 
-class Baza::AlwaysReleaseTest < Minitest::Test
+class Baza::AlwaysReleaseTest < Baza::Test
   def app
     Sinatra::Application
   end

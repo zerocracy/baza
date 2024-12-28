@@ -31,7 +31,7 @@ require 'net/ping'
 require_relative '../test__helper'
 require_relative '../../baza'
 
-class Baza::FrontBazaTest < Minitest::Test
+class Baza::FrontBazaTest < Baza::Test
   def app
     Sinatra::Application
   end

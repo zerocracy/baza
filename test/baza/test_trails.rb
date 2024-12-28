@@ -32,7 +32,7 @@ require_relative '../../objects/baza/trails'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class Baza::TrailsTest < Minitest::Test
+class Baza::TrailsTest < Baza::Test
   def test_simple_scenario
     trails = Baza::Trails.new(fake_pgsql)
     trails.add(fake_job, 'bar', 'foo', JSON.parse('{"hello": 42}'))

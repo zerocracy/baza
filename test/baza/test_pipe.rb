@@ -34,7 +34,7 @@ require_relative '../../objects/baza/zip'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class Baza::PipeTest < Minitest::Test
+class Baza::PipeTest < Baza::Test
   def test_simple_pop
     fake_pgsql.exec('TRUNCATE job CASCADE')
     fake_job

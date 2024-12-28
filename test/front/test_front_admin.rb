@@ -26,7 +26,7 @@ require 'minitest/autorun'
 require_relative '../test__helper'
 require_relative '../../baza'
 
-class Baza::FrontAdminTest < Minitest::Test
+class Baza::FrontAdminTest < Baza::Test
   def app
     Sinatra::Application
   end

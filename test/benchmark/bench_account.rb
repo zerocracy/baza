@@ -27,34 +27,25 @@ require 'benchmark'
 require 'securerandom'
 require_relative '../test__helper'
 require_relative '../../objects/baza'
+require_relative 'upload_data'
 
 # Test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class BenchAccount < Minitest::Test
+class BenchAccount < Baza::BenchTest
   def test_account_balance
-    human = fake_human
-    acc = human.account
-    total = 1000
-    total.times do
-      acc.top_up(42, SecureRandom.alphanumeric(100))
-    end
+    acc = @bench_human.account
     Benchmark.bm do |b|
       b.report('balance') { acc.balance }
     end
   end
 
   def test_account_each
-    human = fake_human
-    acc = human.account
-    total = 1000
-    total.times do
-      acc.top_up(42, 'nothing')
-    end
-    Benchmark.bm do |b|
+    acc = @bench_human.account
+    Benchmark.bm(30) do |b|
       b.report('all') { acc.each.to_a }
-      b.report('with offset') { acc.each(offset: total / 2).to_a }
+      b.report('with offset') { acc.each(offset: @bench_total / 2).to_a }
     end
   end
 end

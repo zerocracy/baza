@@ -31,7 +31,7 @@ require_relative '../../objects/baza/humans'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class Baza::ValveTest < Minitest::Test
+class Baza::ValveTest < Baza::Test
   def test_enter_valve_with_job
     human = fake_human
     job = human.jobs.get(

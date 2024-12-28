@@ -34,7 +34,7 @@ require_relative '../../objects/baza/verified'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class Baza::VerifiedTest < Minitest::Test
+class Baza::VerifiedTest < Baza::Test
   def app
     Sinatra::Application
   end

@@ -24,48 +24,31 @@
 
 require 'minitest/autorun'
 require 'benchmark'
-require 'securerandom'
 require_relative '../test__helper'
 require_relative '../../objects/baza'
-require_relative '../../objects/baza/humans'
 require_relative '../../objects/baza/factbases'
+require_relative 'upload_data'
 
 # Test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class BenchPipe < Minitest::Test
+class BenchPipe < Baza::BenchTest
   def test_pop
-    human = fake_human
-    token = human.tokens.add(fake_name)
-    total = 1000
-    total.times do
-      token.start(
-        fake_name, # job name
-        fake_name, # URI of the factbase file
-        1, # size of .fb file
-        0, # how many errors
-        'n/a', # user-agent
-        [], # metas
-        '192.168.1.1' # IP of sender
-      )
-    end
-    humans = fake_humans
+    humans = @bench_human.humans
     fbs = Baza::Factbases.new('', '', loog: fake_loog)
     pipe = Baza::Pipe.new(humans, fbs, Baza::Trails.new(fake_pgsql), loog: fake_loog)
-    Benchmark.bm do |b|
+    Benchmark.bm(30) do |b|
       b.report('just pop') do
-        total.times do
-          job = pipe.pop(fake_name)
-          job.finish!(
-            fake_name, # uri2
-            SecureRandom.alphanumeric(total), # stdout
-            0, # exit code
-            555, # msec
-            4444, # size
-            0 # count of errors
-          )
-        end
+        job = pipe.pop(fake_name)
+        job.finish!(
+          fake_name, # uri2
+          SecureRandom.alphanumeric(@bench_total), # stdout
+          0, # exit code
+          555, # msec
+          4444, # size
+          0 # count of errors
+        )
       end
     end
   end

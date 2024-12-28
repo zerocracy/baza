@@ -32,7 +32,7 @@ require_relative '../../objects/baza/zip'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class Baza::ZipTest < Minitest::Test
+class Baza::ZipTest < Baza::Test
   def test_packs_and_unpacks
     Dir.mktmpdir do |home|
       zip = File.join(home, 'foo.zip')

@@ -27,7 +27,7 @@ require_relative '../test__helper'
 require_relative '../../objects/baza'
 require_relative '../../baza'
 
-class Baza::FrontDurablesTest < Minitest::Test
+class Baza::FrontDurablesTest < Baza::Test
   def app
     Sinatra::Application
   end

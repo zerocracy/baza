@@ -24,7 +24,7 @@
 
 require_relative '../test__helper'
 
-class Baza::GiftInteractionTest < Minitest::Test
+class Baza::GiftInteractionTest < Baza::Test
   def app
     Sinatra::Application
   end

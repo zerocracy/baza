@@ -24,7 +24,7 @@
 
 require_relative '../test__helper'
 
-class Baza::TokensInteractionTest < Minitest::Test
+class Baza::TokensInteractionTest < Baza::Test
   def app
     Sinatra::Application
   end

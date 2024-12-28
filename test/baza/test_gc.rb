@@ -33,7 +33,7 @@ require_relative '../../objects/baza/factbases'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class Baza::GcTest < Minitest::Test
+class Baza::GcTest < Baza::Test
   def test_finds_too_old
     humans = Baza::Humans.new(fake_pgsql)
     humans.gc.ready_to_expire(0) do |j|

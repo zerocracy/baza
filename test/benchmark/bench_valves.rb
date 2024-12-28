@@ -27,25 +27,17 @@ require 'benchmark'
 require 'securerandom'
 require_relative '../test__helper'
 require_relative '../../objects/baza'
+require_relative 'upload_data'
 
 # Test.
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class BenchValves < Minitest::Test
+class BenchValves < Baza::BenchTest
   def test_valves_retrieval
-    human = fake_human
-    second = fake_human
-    total = 1000
-    jobs = (0..total / 10).map { fake_job }
-    total.times do
-      job = jobs.sample
-      human.valves.enter(job.name, fake_name, fake_name, job.id) { fake_name }
-      second.valves.enter(fake_name, fake_name, fake_name, nil) { fake_name }
-    end
-    Benchmark.bm do |b|
-      b.report('all') { human.valves.each.to_a }
-      b.report('with offset') { human.valves.each(offset: total / 2).to_a }
+    Benchmark.bm(30) do |b|
+      b.report('all') { @bench_human.valves.each.to_a }
+      b.report('with offset') { @bench_human.valves.each(offset: @bench_total / 2).to_a }
     end
   end
 end

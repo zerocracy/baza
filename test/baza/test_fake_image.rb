@@ -30,7 +30,7 @@ require_relative '../test__helper'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class Baza::FakeImageTest < Minitest::Test
+class Baza::FakeImageTest < Baza::Test
   def test_simple_container
     Dir.mktmpdir do |home|
       File.write(

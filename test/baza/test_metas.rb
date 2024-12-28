@@ -31,7 +31,7 @@ require_relative '../../objects/baza/metas'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class Baza::MetasTest < Minitest::Test
+class Baza::MetasTest < Baza::Test
   def test_maybe
     array = ['foo:234 где? :888', 'bar:']
     metas = Baza::Metas.new(array)

@@ -31,7 +31,7 @@ require_relative '../test__helper'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class ShiftTest < Minitest::Test
+class ShiftTest < Baza::Test
   def test_runs_shift_entry_script
     job = fake_job
     s = fake_human.swarms.add(fake_name, "#{fake_name}/#{fake_name}", 'master', '/')

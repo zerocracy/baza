@@ -31,7 +31,7 @@ require_relative '../../objects/baza/humans'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class Baza::HumansTest < Minitest::Test
+class Baza::HumansTest < Baza::Test
   def app
     Sinatra::Application
   end

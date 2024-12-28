@@ -32,7 +32,7 @@ require_relative '../test__helper'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class Baza::OpsTest < Minitest::Test
+class Baza::OpsTest < Baza::Test
   def test_release
     ec2 = Baza::EC2.new(
       'FAKEFAKEFAKEFAKEFAKE',

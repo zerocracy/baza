@@ -35,7 +35,7 @@ require_relative '../../objects/baza/humans'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class Baza::AlterationsTest < Minitest::Test
+class Baza::AlterationsTest < Baza::Test
   def test_simple_scenario
     human = fake_human
     alterations = human.alterations

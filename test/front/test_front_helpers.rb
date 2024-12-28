@@ -26,7 +26,7 @@ require 'minitest/autorun'
 require_relative '../test__helper'
 require_relative '../../baza'
 
-class Baza::FrontHelpersTest < Minitest::Test
+class Baza::FrontHelpersTest < Baza::Test
   include Baza::Helpers
 
   def app

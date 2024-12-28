@@ -24,7 +24,7 @@
 
 require_relative '../test__helper'
 
-class Baza::DashTest < Minitest::Test
+class Baza::DashTest < Baza::Test
   def app
     Sinatra::Application
   end

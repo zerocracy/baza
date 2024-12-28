@@ -33,7 +33,7 @@ require_relative '../../objects/baza/sqs'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class Baza::SQSTest < Minitest::Test
+class Baza::SQSTest < Baza::Test
   def test_fake_usage
     sqs = Baza::SQS.new('', '', '')
     sqs.push(42, 'hello')

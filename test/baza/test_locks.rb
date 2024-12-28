@@ -31,7 +31,7 @@ require_relative '../../objects/baza/locks'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class Baza::LocksTest < Minitest::Test
+class Baza::LocksTest < Baza::Test
   def test_simple_locking_scenario
     human = fake_human
     locks = human.locks

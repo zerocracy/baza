@@ -31,7 +31,7 @@ require_relative '../../objects/baza/humans'
 # Author:: Yegor Bugayenko (yegor256@gmail.com)
 # Copyright:: Copyright (c) 2009-2024 Yegor Bugayenko
 # License:: MIT
-class Baza::SecretsTest < Minitest::Test
+class Baza::SecretsTest < Baza::Test
   def test_simple_scenario
     human = Baza::Humans.new(fake_pgsql).ensure(fake_name)
     secrets = human.secrets
