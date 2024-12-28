@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # MIT License
 #
 # Copyright (c) 2009-2024 Zerocracy
@@ -19,30 +21,19 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
----
-name: rake
-'on':
-  push:
-    branches:
-      - master
-  pull_request:
-    branches:
-      - master
-jobs:
-  rake:
-    name: rake
-    strategy:
-      matrix:
-        os: [ubuntu-24.04]
-        ruby: [3.3]
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v4
-      - run: sudo .github/setup-postgres.sh
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: ${{ matrix.ruby }}
-      - run: bundle update
-      - run: bundle update --gemfile=swarms/alterations/Gemfile
-      - run: bundle update --gemfile=assets/lambda/Gemfile
-      - run: bundle exec rake
+
+apt-get update
+apt-get install -y libpq-dev postgresql-client postgresql
+
+dir=$(realpath "/usr/lib/postgresql"/*)
+version=$(basename "${dir}")
+apt-get install -y "postgresql-server-dev-${version}"
+
+for c in initdb postgres pg_ctl; do
+    ln -s "$(realpath "${dir}/bin/${c}")" "/bin/${c}"
+done
+
+curl -L https://github.com/HypoPG/hypopg/archive/1.4.1.tar.gz | tar xz
+cd hypopg-1.4.1
+make
+make install

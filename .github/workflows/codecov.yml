@@ -30,11 +30,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
-      - run: |
-          sudo apt-get update
-          sudo apt-get install -y libpq-dev postgresql-client postgresql
-          sudo ln -s "$(realpath /usr/lib/postgresql/*/bin/initdb)" /bin/initdb
-          sudo ln -s "$(realpath /usr/lib/postgresql/*/bin/postgres)" /bin/postgres
+      - run: sudo .github/setup-postgres.sh
       - uses: ruby/setup-ruby@v1
         with:
           ruby-version: 3.3
