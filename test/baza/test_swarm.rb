@@ -53,7 +53,6 @@ class Baza::SwarmTest < Baza::Test
   def test_no_release_when_too_soon
     human = fake_human
     s = human.swarms.add(fake_name.downcase, "zerocracy/#{fake_name}", 'master', '/')
-    sha = fake_sha
     s.head!(fake_sha)
     r = s.releases.start('no tail', fake_name)
     r.finish!(fake_sha, Baza::VERSION, 'tail', 0, 42)
@@ -65,7 +64,7 @@ class Baza::SwarmTest < Baza::Test
     s = human.swarms.add(fake_name.downcase, "zerocracy/#{fake_name}", 'master', '/')
     sha = fake_sha
     s.head!(sha)
-    r = s.releases.start('no tail', fake_name, created: Time.now - 100 * 60 * 60)
+    r = s.releases.start('no tail', fake_name)
     r.finish!(sha, Baza::VERSION, 'tail', 0, 42)
     assert(s.why_not.include?('equals to the SHA of the head'), s.why_not)
   end
@@ -75,7 +74,7 @@ class Baza::SwarmTest < Baza::Test
     s = human.swarms.add(fake_name.downcase, "zerocracy/#{fake_name}", 'master', '/')
     sha = fake_sha
     s.head!(sha)
-    r = s.releases.start('no tail', fake_name, created: Time.now - 100 * 60 * 60)
+    r = s.releases.start('no tail', fake_name)
     r.finish!(sha, '0.0.0', 'tail', 0, 42)
     assert(s.why_not.nil?, s.why_not)
   end
@@ -107,7 +106,7 @@ class Baza::SwarmTest < Baza::Test
     s = human.swarms.each.to_a.find { |e| e.name == 'pop' }
     s = human.swarms.add('pop', "zerocracy/#{fake_name}", 'master', '/') if s.nil?
     s.head!(fake_sha)
-    r = s.releases.start('no tail', fake_name, created: Time.now - 100 * 60 * 60)
+    r = s.releases.start('no tail', fake_name, created: Time.now - (100 * 60 * 60))
     r.finish!(fake_sha, Baza::VERSION, 'tail', 0, 42)
     assert(s.why_not.include?('the same as the version of Baza'), s.why_not)
   end
@@ -117,7 +116,7 @@ class Baza::SwarmTest < Baza::Test
     s = human.swarms.each.to_a.find { |e| e.name == 'pop' }
     s = human.swarms.add('pop', "zerocracy/#{fake_name}", 'master', '/') if s.nil?
     s.head!(fake_sha)
-    r = s.releases.start('no tail', fake_name, created: Time.now - 100 * 60 * 60)
+    r = s.releases.start('no tail', fake_name, created: Time.now - (100 * 60 * 60))
     r.finish!(fake_sha, '0.0.0', 'tail', 0, 42)
     assert(s.why_not.nil?, s.why_not)
   end
