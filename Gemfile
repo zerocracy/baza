@@ -27,11 +27,11 @@ ruby '~>3.2'
 
 gem 'always', '~>0'
 gem 'archive-zip', '~>0'
+gem 'aws_lambda_ric', '~>2'
 gem 'aws-sdk-core', '~>3.202'
 gem 'aws-sdk-ec2', '~>1.470'
 gem 'aws-sdk-s3', '~>1.159'
 gem 'aws-sdk-sqs', '~>1.80'
-gem 'aws_lambda_ric', '~>2'
 gem 'backtrace', '~>0'
 gem 'benchmark', '~>0'
 gem 'capybara', '~>3', require: false
