@@ -41,13 +41,19 @@ class Baza::SwarmTest < Baza::Test
     assert_equal('master', s.branch)
   end
 
-  def test_why_not
+  def test_no_release_when_another_running
     human = fake_human
     s = human.swarms.add(fake_name.downcase, "zerocracy/#{fake_name}", 'master', '/')
     s.head!(fake_sha)
     assert_nil(s.why_not)
     s.releases.start('no tail', fake_name)
     assert(!s.why_not.nil?)
+  end
+
+  def test_no_release_when_no_head
+    human = fake_human('yegor256')
+    s = human.swarms.add(fake_name.downcase, "zerocracy/#{fake_name}", 'master', '/')
+    assert(!s.why_not.nil?, s.why_not)
   end
 
   def test_no_release_when_special_same_version
