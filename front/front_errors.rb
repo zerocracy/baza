@@ -78,7 +78,7 @@ error do
 end
 
 def flash(uri, msg = '', alert: false, code: 302)
-  raise "Multi-line message is a mistake: #{msg.inspect}" if /[\r\n]/ =~ msg
+  raise "Multi-line message is a mistake: #{msg.inspect}" if msg =~ /[\r\n]/
   cookies[:flash_msg] = msg
   cookies[:flash_color] = alert ? 'darkred' : 'darkgreen'
   response.headers['X-Zerocracy-Requested'] = request.url
