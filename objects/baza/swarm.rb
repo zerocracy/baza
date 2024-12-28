@@ -166,6 +166,11 @@ class Baza::Swarm
         "we'll wait #{(last[:created] + pause).ago} " \
         'and only then will release again.'
     end
+    if %w[shift pop finish alternations].include?(name) && !version.nil? && version == Baza::VERSION
+      return \
+        "Recently released version #{version} is the same as the version of Baza, " \
+        'there is no point for a new release yet'
+    end
     nil
   end
 
