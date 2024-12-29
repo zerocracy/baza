@@ -33,6 +33,7 @@ gem 'aws-sdk-ec2', '~>1.470'
 gem 'aws-sdk-s3', '~>1.159'
 gem 'aws-sdk-sqs', '~>1.80'
 gem 'backtrace', '~>0'
+gem 'base64', '>=0.2.0'
 gem 'benchmark', '~>0'
 gem 'capybara', '~>3', require: false
 gem 'concurrent-ruby', '~>1.3'
