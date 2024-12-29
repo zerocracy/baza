@@ -136,7 +136,7 @@ class Baza::Job
       )
     elsif !exit.zero?
       jobs.human.notify(
-        "💔 The job [##{id}](//jobs/#{id}) has failed :(",
+        "💔 The job [##{id}](//jobs/#{id}) (`#{name}`) has failed :(",
         'This most probably means that there is an internal error on our server.',
         if @jobs.human.locks.locked?(name)
           'No further jobs will be processed until you "expire" this one on the server.'
