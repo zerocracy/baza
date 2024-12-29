@@ -540,6 +540,7 @@ DEPENDENCIES
   aws-sdk-sqs (~> 1.80)
   aws_lambda_ric (~> 2)
   backtrace (~> 0)
+  base64 (>= 0.2.0)
   benchmark (~> 0)
   capybara (~> 3)
   concurrent-ruby (~> 1.3)
