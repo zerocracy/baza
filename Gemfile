@@ -37,6 +37,7 @@ gem 'base64', '>=0.2.0'
 gem 'benchmark', '~>0'
 gem 'capybara', '~>3', require: false
 gem 'concurrent-ruby', '~>1.3'
+gem 'csv', '>=3.3.2'
 gem 'elapsed', '~>0'
 gem 'factbase', '~>0'
 gem 'faraday', '>=2'
