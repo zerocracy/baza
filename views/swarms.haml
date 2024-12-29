@@ -94,7 +94,8 @@
           %span.bad
             = '???'
         - else
-          = s.version
+          %span{ class: s.version == Baza::VERSION ? 'good' : 'bad' }
+            = s.version
       %td.ff
         != secret(s.secret)
       %td
