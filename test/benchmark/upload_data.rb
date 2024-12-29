@@ -38,7 +38,7 @@ class Baza::BenchTest < Baza::Test
     super
 
     @bench_human = fake_human('bench')
-    @bench_total = 1000
+    @bench_total = 100
     @bench_names = (0..@bench_total / 10).map { fake_name }
 
     acc = @bench_human.account
@@ -96,6 +96,7 @@ class Baza::BenchTest < Baza::Test
         4444, # size
         0 # count of errors
       )
+      swarm = @bench_human.swarms.each.to_a.first
       (@bench_total / 100).times do
         swarm.invocations.register(
           SecureRandom.alphanumeric(@bench_total), # stdout

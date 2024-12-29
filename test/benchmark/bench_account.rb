@@ -36,7 +36,7 @@ require_relative 'upload_data'
 class BenchAccount < Baza::BenchTest
   def test_account_balance
     acc = @bench_human.account
-    Benchmark.bm do |b|
+    Benchmark.bm(30) do |b|
       b.report('balance') { acc.balance }
     end
   end
