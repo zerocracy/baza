@@ -38,7 +38,7 @@ class Baza::BenchTest < Baza::Test
     super
 
     @bench_human = fake_human('bench')
-    @bench_total = 10
+    @bench_total = 1000
     @bench_names = (0..@bench_total / 10).map { fake_name }
 
     acc = @bench_human.account
