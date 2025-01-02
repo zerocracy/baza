@@ -175,7 +175,7 @@ class Baza::Humans
     rows.each do |row|
       human = get(row['human'].to_i)
       human.notify(
-        "🍏 We topped up your account by #{amount.zents}.",
+        "🍏 We topped up [your account](//account) by #{amount.zents}.",
         "Now, the balance is #{human.account.balance.zents}.",
         "We do this automatically every #{days} days, if your account doesn't",
         'have enough funds.'
