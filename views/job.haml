@@ -116,7 +116,7 @@
         - job.invocations.each do |i|
           %a{ href: iri.cut('/invocation').append(i) }<
             = "##{i}"
-        %a{ href: iri.cut('/steps').append(i) }
+        %a{ href: iri.cut('/steps').append(job.id) }
           steps...
 
   %p
