@@ -218,7 +218,7 @@ def with_zip(id, rec, hops, loog, &)
     File.binwrite(File.join(dir, 'stdout.txt'), stdout)
     unless code.zero?
       loog.warn(stdout)
-      loog.warn("FAILURE in main.rb (code=#{code}, lines=#{stdout.split("\n").count})")
+      loog.warn("FAILURE in main.rb (code is #{code}, in #{stdout.split("\n").count} lines)")
     end
     Archive::Zip.archive(zip, File.join(pack, '/.'))
     loog.info("Packed ZIP (#{File.size(zip)} bytes, #{Dir[File.join(pack, '**')].count} files)")
