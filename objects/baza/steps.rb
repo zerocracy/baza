@@ -47,7 +47,7 @@ class Baza::Steps
         'FROM invocation',
         'JOIN swarm ON swarm.id = invocation.swarm',
         'WHERE job = $1',
-        'ORDER BY invocation.id DESC',
+        'ORDER BY invocation.id ASC',
         "OFFSET #{offset.to_i}"
       ],
       [job.id]

@@ -109,6 +109,15 @@ class Baza::JobTest < Baza::Test
     assert_equal('k', job.secrets.first['key'])
   end
 
+  def test_job_steps
+    job = fake_job
+    s = fake_human.swarms.add(fake_name.downcase, "zerocracy/#{fake_name}", 'master', '/')
+    5.times do |i|
+      s.invocations.register("stdout #{i}", 0, 1, job, '0.0.0')
+    end
+    assert_equal('stdout 0', job.steps.each.to_a.first[:stdout])
+  end
+
   def test_valve
     human = fake_human
     token = human.tokens.add(fake_name)
