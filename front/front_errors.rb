@@ -64,13 +64,26 @@ error do
   else
     Sentry.capture_exception(e)
     bt = Backtrace.new(e).to_s
-    settings.tbot.notify(
-      settings.humans.ensure('yegor256'),
-      '🧨 I\'m sorry to tell you, but there is a crash on the server:',
-      "\n```\n#{bt.split("\n").take(8).map { |ln| ln.gsub('```', '...') }.join("\n")}\n```\n",
-      'You better pay attention to this as soon as possible',
-      'or [report](https://github.com/zerocracy/baza/issues) to the team.'
-    )
+    begin
+      lines = bt.split("\n")
+      loop do
+        break if lines.join.length < 3500 # maximum size of TG message is 4096
+        if lines.empty?
+          lines = ['Backtrace was too long, completely removed']
+          break
+        end
+        lines = lines[0..-2]
+      end
+      settings.tbot.notify(
+        settings.humans.ensure('yegor256'),
+        '🧨 I\'m sorry to tell you, but there is a crash on the server:',
+        "\n```\n#{lines.map { |ln| ln.gsub('```', '...') }.join("\n")}\n```\n",
+        'You better pay attention to this as soon as possible',
+        'or [report](https://github.com/zerocracy/baza/issues) to the team.'
+      )
+    rescue StandardError => e
+      # ignore it
+    end
     settings.loog.error("At #{request.url}:\n#{bt}")
     response.headers['X-Zerocracy-Failure'] = e.message.inspect.gsub(/^"(.*)"$/, '\1')
     haml(:error, layout: :empty, locals: { backtrace: bt.to_s })
