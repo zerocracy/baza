@@ -1,6 +1,6 @@
 # MIT License
 #
-# Copyright (c) 2009-2025 Zerocracy
+# Copyright (c) 2009-2024 Zerocracy
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -29,12 +29,10 @@ gem 'aws-sdk-core', '~>3.202'
 gem 'aws-sdk-s3', '~>1.159'
 gem 'aws-sdk-sqs', '~>1.80'
 gem 'backtrace', '>0'
-gem 'base64', '>=0.2.0'
-gem 'csv', '>=3.3.2'
 gem 'elapsed', '>0'
 gem 'iri', '>0'
 gem 'json', '>0'
-gem 'judges', '>=0.30.0'
+gem 'judges', '0.30.0'
 gem 'loog', '>0'
 gem 'nokogiri', '>0'
 gem 'qbash', '>=0.0.8'
