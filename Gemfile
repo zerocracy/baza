@@ -80,7 +80,7 @@ gem 'scss_lint', '~>0', require: false
 gem 'sentry-ruby', '~>5.18'
 gem 'simplecov', '~>0.22'
 gem 'simplecov-cobertura', '~>2.1'
-gem 'sinatra', '4.0.0'
+gem 'sinatra', '4.1.1'
 gem 'sinatra-contrib', '4.0.0'
 gem 'sprockets', '~>4'
 gem 'sys-cpu', '~>1.1'
